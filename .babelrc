@@ -1,0 +1,24 @@
+{
+  "presets": [["env", {"targets": {"node": "current"}}], "react", "flow"],
+  "plugins": [
+    "transform-decorators-legacy",
+    ["flow-runtime", {"annotate": false, "assert": false}],
+    "transform-runtime",
+    "transform-class-properties",
+    "transform-async-generator-functions",
+    "transform-object-rest-spread",
+    "dynamic-import-node"
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        ["istanbul", {
+          "exclude": [
+            "test/**/*.js",
+            "build/**/*.js"
+          ]
+        }]
+      ]
+    }
+  }
+}

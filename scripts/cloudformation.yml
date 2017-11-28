@@ -1,0 +1,305 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: 'Creates AWS Resources Needed to Run the Webapp'
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: 'pasonpower'
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: 'vpc-649a5e03'
+    Description: Select a VPC that allows instances access to the Internet.
+  DesiredCapacity:
+    Type: Number
+    Default: '1'
+    Description: Number of instances to launch in your ECS cluster.
+  MaxSize:
+    Type: Number
+    Default: '1'
+    Description: Maximum number of instances that can be launched in your ECS cluster.
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small, t2.medium, t2.large, m3.medium, m3.large,
+      m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge]
+    ConstraintDescription: Please choose a valid instance type.
+  DBUser:
+    NoEcho: 'true'
+    Description: The database admin account username
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric
+      characters.
+  DBPassword:
+    NoEcho: 'true'
+    Description: The database admin account password
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+  DynamoTablePrefix:
+    Description: Prefix for DynamoDataService Tables
+    Type: String
+  BattsimBaseUrl:
+    Description: Battsim URL
+    Type: String
+    Default: 'http://battsim.pasonpowerint.com/battsim'
+  RootUrlBattsim:
+    Description: Battsim root URL
+    Type: String
+    Default: 'http://app.pasonpowerint.com/'
+  BattsimComsSecurityGroup:
+    Description: Internal Security Group allowing Battsim Coms
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: 'sg-005e497d'
+  GoogleMapsApiKey:
+    NoEcho: 'true'
+    Description: The Google Maps API key
+    Type: String
+  GenabilityBaseUrl:
+    Description: Genability Base URL
+    Type: String
+    Default: 'https://api.genability.com/rest/public'
+  GenabilityAppId:
+    NoEcho: 'true'
+    Description: The Genability App ID
+    Type: String
+  GenabilityAppKey:
+    NoEcho: 'true'
+    Description: The Genability App key
+    Type: String
+  DeleteChannelReadThroughput:
+    Description: DynamoDB Request Limit for Reading in Dynamo Data Service
+    Type: Number
+    Default: '15'
+  DeleteChannelWriteThroughput:
+    Description: DynamoDB Request Limit for Writing in Dynamo Data Service
+    Type: Number
+    Default: '15'
+  DockerImageName:
+    Description: Webapp Docker Image Name
+    Type: String
+Mappings:
+  AWSRegionToAMI:
+    us-west-2:
+      AMIID: ami-a2ca61c2
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Security Group
+      VpcId: !Ref 'VpcId'
+  EcsSecurityGroupHTTPInbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '80'
+      ToPort: '80'
+      CidrIp: 0.0.0.0/0
+  EcsSecurityGroupSSHInbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref 'EcsSecurityGroup'
+      IpProtocol: tcp
+      FromPort: '22'
+      ToPort: '22'
+      CidrIp: 97.65.225.1/32
+  EcsSecurityGroupRedisInbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: 'sg-e774459e'
+      IpProtocol: tcp
+      FromPort: '6379'
+      ToPort: '6379'
+      SourceSecurityGroupId: !Ref 'EcsSecurityGroup'
+    DependsOn: EcsSecurityGroup
+
+  CloudwatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['-', [ECSLogGroup, !Ref 'AWS::StackName']]
+      RetentionInDays: 7
+  taskdefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join ['', [!Ref 'AWS::StackName', -webapp]]
+      ContainerDefinitions:
+      - Name: webapp
+        Cpu: '1'
+        Image: !Ref 'DockerImageName'
+        Memory: '448'
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref 'CloudwatchLogsGroup'
+            awslogs-region: !Ref 'AWS::Region'
+            awslogs-stream-prefix: !Ref 'AWS::StackName'
+        PortMappings:
+        - ContainerPort: 80
+          HostPort: 80
+        Environment:
+        - Name: PORT
+          Value: '80'
+        - Name: BACKEND_PORT
+          Value: '80'
+        - Name: REDIS_HOST
+          Value: battman-redis-staging.pasonpowerint.com
+        - Name: REDIS_PORT
+          Value: '6379'
+        - Name: DB_MIGRATE
+          Value: 'TRUE'
+        - Name: DB_HOST
+          Value: !Join ['', [!Ref 'AWS::StackName', 'db', '.', 'pasonpowerint.com']]
+        - Name: DB_USER
+          Value: !Ref 'DBUser'
+        - Name: DB_PASSWORD
+          Value: !Ref 'DBPassword'
+        - Name: DB_NAME
+          Value: !Join ['', [!Ref 'AWS::StackName', 'db']]
+        - Name: DYNAMO_TABLE_PREFIX
+          Value: !Ref 'DynamoTablePrefix'
+        - Name: DYNAMO_MIGRATE
+          Value: 'TRUE'
+        - Name: AWS_REGION
+          Value: us-west-2
+        - Name: GOOGLE_MAPS_API_KEY
+          Value: !Ref 'GoogleMapsApiKey'
+        - Name: BATTSIM_BASE_URL
+          Value: !Ref 'BattsimBaseUrl'
+        - Name: ROOT_URL_FOR_BATTSIM
+          Value: !Ref 'RootUrlBattsim'
+        - Name: GENABILITY_BASE_URL
+          Value: !Ref 'GenabilityBaseUrl'
+        - Name: GENABILITY_APP_ID
+          Value: !Ref 'GenabilityAppId'
+        - Name: GENABILITY_APP_KEY
+          Value: !Ref 'GenabilityAppKey'
+        - Name: DELETE_CHANNEL_READ_THROUGPUT
+          Value: !Ref 'DeleteChannelReadThroughput'
+        - Name: DELETE_CHANNEL_WRITE_THROUGPUT
+          Value: !Ref 'DeleteChannelWriteThroughput'
+  service:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref 'ECSCluster'
+      DesiredCount: '1'
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 0
+      TaskDefinition: !Ref 'taskdefinition'
+  ContainerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+      SecurityGroupIds:
+        - !Ref 'EcsSecurityGroup'
+        - !Ref 'BattsimComsSecurityGroup'
+      InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref 'EC2InstanceProfile'
+      KeyName: !Ref 'KeyName'
+      Tags:
+        -
+          Key: Name
+          Value: !Join ['-', ['ECSInstance', 'webapp', !Ref 'AWS::StackName']]
+        -
+          Key: usage
+          Value: webapp
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+      - PolicyName: ecs-service
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
+              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
+              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents']
+            Resource: '*'
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: ['battmanWebappECSInstanceRole']
+  WebappPublicDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 'Z1MV3UW3UAXPLK'
+      Comment: Webapp Name
+      Name: !Join ['', [!Ref 'AWS::StackName', '.', 'pasonpowerint.com']]
+      Type: A
+      TTL: '60'
+      ResourceRecords:
+      - !GetAtt ContainerInstance.PublicIp
+  WebappPrivateDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 'ZY3XQMXK0DJIT'
+      Comment: Webapp Name
+      Name: !Join ['', [!Ref 'AWS::StackName', '.', 'pasonpowerint.com']]
+      Type: A
+      TTL: '60'
+      ResourceRecords:
+      - !GetAtt ContainerInstance.PrivateIp
+  WebAppDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Join ['', [!Ref 'AWS::StackName', 'db']]
+      AllocatedStorage: '5'
+      BackupRetentionPeriod: '0'
+      DBInstanceClass: db.t2.micro
+      DBInstanceIdentifier: !Join ['-', ['webapp', !Ref 'AWS::StackName']]
+      Engine: MySQL
+      EngineVersion: 5.6.27
+      MasterUsername: !Ref 'DBUser'
+      MasterUserPassword: !Ref 'DBPassword'
+      DBParameterGroupName: 'default.mysql5.6'
+      VPCSecurityGroups: [!Ref 'DBInstanceSecurityGroup']
+  DBDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 'ZY3XQMXK0DJIT'
+      Comment: DB Name
+      Name: !Join ['', [!Ref 'AWS::StackName', 'db', '.', 'pasonpowerint.com']]
+      Type: CNAME
+      TTL: '60'
+      ResourceRecords:
+      - !GetAtt [WebAppDB, Endpoint.Address]
+  DBInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow MySQL access to client host
+      VpcId:
+        Ref: VpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3306'
+        ToPort: '3306'
+        CidrIp: 0.0.0.0/0
+Outputs:
+  ecsservice:
+    Value: !Ref 'service'
+  ecscluster:
+    Value: !Ref 'ECSCluster'
+  taskdef:
+    Value: !Ref 'taskdefinition'

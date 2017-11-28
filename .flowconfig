@@ -1,0 +1,24 @@
+[ignore]
+<PROJECT_ROOT>/node_modules/fbjs/.*
+<PROJECT_ROOT>/node_modules/react/.*
+<PROJECT_ROOT>/node_modules/.*/src/.*
+<PROJECT_ROOT>/node_modules/.*/test/.*
+<PROJECT_ROOT>/node_modules/jss/.*/.*\.js\.flow
+<PROJECT_ROOT>/node_modules/react-motion/.*/.*\.js\.flow
+<PROJECT_ROOT>/node_modules/child-process.async/.*
+
+[include]
+
+[libs]
+./flowlib/
+
+
+[options]
+module.system=haste
+module.name_mapper='.*\.css$' -> 'empty/object'
+module.name_mapper='.*\.s[ac]ss$' -> 'empty/object'
+module.name_mapper='.*\.less$' -> 'empty/object'
+esproposal.class_static_fields=enable
+esproposal.class_instance_fields=enable
+unsafe.enable_getters_and_setters=true
+

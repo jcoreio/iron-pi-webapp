@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 // @flow
 
+/* eslint-disable flowtype/require-return-type, flowtype/require-parameter-type */
+
 const glob = require('glob')
-const semver = require('semver')
 const Promake = require('promake')
+const path = require('path')
 const {execSync} = require('child_process')
 const {spawn} = require('child-process-async')
+const touch = require('touch')
 
 process.chdir(__dirname)
 const pathDelimiter = /^win/.test(process.platform) ? ';' : ':'
@@ -13,24 +16,21 @@ const npmBin = execSync(`npm bin`).toString('utf8').trim()
 process.env.PATH = process.env.PATH ? `${npmBin}${pathDelimiter}${process.env.PATH}` : npmBin
 
 const {TARGET} = process.env
-const build = TARGET ? `build-${TARGET}` : 'build'
-
-const requiredNodeVersion = require('./package.json').engines.node
-const nodeVersion = process.version.substring(1)
-if (!semver.satisfies(nodeVersion, requiredNodeVersion)) {
-  console.error(`Error: you must use node ${requiredNodeVersion} (your version: ${nodeVersion})`) // eslint-disable-line no-console
-  process.exit(1)
-}
+const build = path.resolve(TARGET ? `build-${TARGET}` : 'build')
 
 const promake = new Promake()
 const {rule, task, exec, cli} = promake
 const envRule = require('promake-env').envRule(rule)
 
-rule('node_modules', ['package.json', 'yarn.lock'], () => exec('yarn --ignore-scripts'))
+rule('node_modules', ['package.json', 'yarn.lock'], async () => {
+  await exec('yarn --ignore-scripts')
+  await touch('node_modules')
+})
 
-function env(...names /* : Array<string> */) /* : string */ {
+function env(...names /* : Array<string> */) /* : {[name: string]: string} */ {
   return {
     ...process.env,
+    BUILD_DIR: build,
     ...require('defaultenv')(names.map(name => `env/${name}.js`), {noExport: true}),
   }
 }
@@ -40,13 +40,13 @@ const srcServer = glob.sync('src/server/**/*.js')
 const buildServer = srcServer.map(file => file.replace(/^src/, build))
 const serverPrerequisites = [
   ...srcServer,
-  serverEnv,
   'node_modules',
+  serverEnv,
   '.babelrc',
   ...glob.sync('src/server/**/.babelrc')
 ]
 
-envRule(serverEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'])
+envRule(serverEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildServer, serverPrerequisites, () =>
   spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod'), stdio: 'inherit'})
 )
@@ -63,11 +63,11 @@ const universalPrerequisites = [
   ...glob.sync('src/universal/**/.babelrc')
 ]
 
-envRule(universalEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'])
+envRule(universalEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildUniversal, universalPrerequisites, () =>
   spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod'), stdio: 'inherit'})
 )
-task(`${build}/universal`, buildUniversal)
+task(`build:universal`, buildUniversal)
 
 task('build:server', [...buildServer, ...buildUniversal])
 
@@ -77,40 +77,52 @@ const buildClient = [`${build}/assets.json`]
 const clientPrerequisites = [
   ...srcUniversal,
   ...srcClient,
+  ...glob.sync('src/client/**/.babelrc'),
   clientEnv,
   'node_modules',
-  'webpack/webpack.config.prod.js'
+  'webpack/webpack.config.prod.js',
+  'webpack/defines.js'
 ]
 
-envRule(clientEnv, ['NODE_ENV', 'BABEL_ENV', 'CI', 'NO_UGLIFY', 'NO_HAPPYPACK'])
+envRule(
+  clientEnv,
+  [
+    'NODE_ENV', 'BABEL_ENV', 'CI', 'NO_UGLIFY', 'NO_HAPPYPACK', 'WEBPACK_DEVTOOL',
+    ...Object.keys(require('./webpack/defines')),
+  ],
+  {getEnv: async () => env('prod')}
+)
 rule(buildClient, clientPrerequisites, () =>
   spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod'), stdio: 'inherit'})
 )
-task(`${build}:client`, buildClient)
+task(`build:client`, buildClient)
 
 const dockerEnv = `${build}/.dockerEnv`
 const dockerPrerequisites = [
   ...buildServer,
   ...buildUniversal,
   ...buildClient,
+  'node_modules',
   dockerEnv,
   'Dockerfile',
   '.dockerignore',
 ]
-envRule(dockerEnv, ['NPM_TOKEN', 'NODE_ENV'])
+envRule(dockerEnv, ['NPM_TOKEN', 'NODE_ENV'], {getEnv: async () => env('prod')})
 const useSudo = Boolean(process.env.CI)
 task('build:docker', dockerPrerequisites, async () => {
-  const commitHash = await exec('git rev-parse HEAD').stdout.toString('utf8').trim()
+  const commitHash = (await exec('git rev-parse HEAD')).stdout.toString('utf8').trim()
+  const buildEnv = env('prod')
+  if (!buildEnv.NPM_TOKEN) throw new Error('missing process.env.NPM_TOKEN')
   await spawn(useSudo ? 'sudo' : 'docker', [
     ...(useSudo ? ['docker'] : []), 'build',
-    '--build-arg', `NPM_TOKEN=${process.env.NPM_TOKEN}`,
+    '--build-arg', `NPM_TOKEN=${buildEnv.NPM_TOKEN}`,
     '--build-arg', `BUILD_DIR=${build}`,
     '--build-arg', `TARGET=${TARGET || ''}`,
-    '-t', `pasonpower/webapp${TARGET ? '-' + TARGET : ''}`,
-    '-t', `pasonpower/webapp${TARGET ? '-' + TARGET : ''}:${commitHash}`,
+    '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}`,
+    '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}:${commitHash}`,
     '.'
   ], {
-    env: env('prod'),
+    env: buildEnv,
     stdio: 'inherit',
   })
 })
@@ -122,5 +134,27 @@ task('build', [
 ])
 
 task('clean', () => require('fs-extra').remove(build))
+
+task('dev:client', ['node_modules'], async () => {
+  process.env.BUILD_DIR = build
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  require('babel-register')
+  require('./scripts/devServer')
+  await new Promise(() => {})
+})
+
+task('dev:server', ['node_modules'], async () => {
+  process.env.BUILD_DIR = build
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  require('babel-register')
+  await require('./scripts/runServerWithHotRestarting')(path.resolve('src'))
+  await new Promise(() => {})
+})
+
+task('dc', () => spawn('docker-compose', [
+], {
+  env: env('local'),
+  stdio: 'inherit',
+}))
 
 cli()

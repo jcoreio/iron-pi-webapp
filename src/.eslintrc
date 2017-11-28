@@ -1,0 +1,7 @@
+{
+  "globals": {
+    "process": false,
+    "__CLIENT__": false,
+    "__SERVER__": false
+  }
+}

@@ -1,0 +1,15 @@
+build
+build-test
+coverage
+.env
+errorShots
+.happypack
+node_modules
+npm-debug.log
+.nyc_output
+tmp
+.idea
+*.swp
+yarn-error.log
+.node_modules-timestamp
+

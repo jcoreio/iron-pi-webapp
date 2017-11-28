@@ -1,0 +1,7 @@
+**
+!*.json
+!yarn.lock
+!build
+build/.*
+!static
+
