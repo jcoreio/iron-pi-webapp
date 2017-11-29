@@ -3,7 +3,6 @@
 import {createReducer, composeReducers} from 'mindfront-redux-utils'
 import {combineReducers} from 'mindfront-redux-utils-immutable'
 import {featuresReducer, featureStatesReducer, featureReducersReducer} from 'redux-features'
-import {routerReducer} from 'react-router-redux'
 import {enableBatching} from 'redux-batched-actions'
 
 import type {Reducer} from './types'
@@ -18,7 +17,6 @@ const reducer: Reducer = enableBatching(composeReducers(
   combineReducers({
     features: featuresReducer({createReducer}),
     featureStates: featureStatesReducer({createReducer}),
-    router: routerReducer,
     renderMode: renderModeReducer,
     form,
     error: errorReducer,

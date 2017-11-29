@@ -7,7 +7,7 @@ export type DbConnectionParams = {
   host: string,
   user: string,
   password: string,
-  database: string
+  database: string,
 }
 
 export const dbConnectionParams = (): DbConnectionParams => ({

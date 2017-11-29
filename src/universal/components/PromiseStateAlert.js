@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import * as React from 'react'
 import {Alert, Icon} from '@jcoreio/rubix'
 import Autocollapse from './Autocollapse'
 import Spinner from './Spinner'

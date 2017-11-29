@@ -9,7 +9,7 @@ import type {UserInit, User} from '../../universal/types/User'
 export type ServerUserInit = UserInit & {
   usernameLower: string,
   bcryptPassword: string,
-  roles: Array<string>
+  roles: Array<string>,
 }
 
 export type ServerUser = User & ServerUserInit & {

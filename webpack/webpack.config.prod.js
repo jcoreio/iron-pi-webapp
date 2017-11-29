@@ -8,14 +8,14 @@ const ProgressPlugin = require('webpack/lib/ProgressPlugin')
 const blessPlugin = require('bless-webpack-plugin')
 const ExtractTextPlugin = require("extract-text-webpack-plugin")
 const defines = require('./defines')
+const babelOptions = require('./babelOptions')
 
 const root = path.resolve(__dirname, '..')
 const srcDir = path.resolve(root, 'src')
 const clientInclude = [srcDir]
 
 const vendor = [
-  './sass/vendor.scss',
-  './sass/app.scss',
+  'babel-polyfill',
   'react',
   'react-dom',
 ]
@@ -55,9 +55,9 @@ const config = {
     new ExtractTextPlugin('[name].css'),
     blessPlugin({ imports: true, compress: true }),
     new HappyPack({
-      cache: false,
       loaders: [{
         path: 'babel-loader',
+        options: babelOptions,
       }],
       threads: 4,
     }),
@@ -80,7 +80,6 @@ const config = {
       },
       { test: /\.(eot|ttf|wav|mp3)$/, loader: 'file-loader' },
       {test: /\.css$/, use: ['style-loader', 'css-loader']},
-      {test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader']},
       {
         test: /\.s[ac]ss$/,
         use: ExtractTextPlugin.extract({

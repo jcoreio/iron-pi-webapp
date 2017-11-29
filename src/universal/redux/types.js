@@ -3,12 +3,9 @@
 import {fromJS} from 'immutable'
 import {Map} from 'immutable'
 import Record from './Record'
-import {routerReducer} from 'react-router-redux'
 import {reducer as formReducer} from 'redux-form/immutable'
 import {featuresReducer, featureStatesReducer} from 'redux-features'
 import type {Features, FeatureStates} from 'redux-features'
-import {initialPromiseState} from 'redux-track-promise'
-import type {PromiseState} from 'redux-track-promise'
 import type {ConnectionState} from './symmetry'
 import {initialConnectionState} from './symmetry'
 import {Error} from './error'
@@ -35,7 +32,6 @@ export type RenderMode = 'prerender' | 'client'
 const stateInit = {
   features: (featuresReducer()((undefined: any), {type: ''}): Features<State, Action>),
   featureStates: (featureStatesReducer()((undefined: any), {type: ''}): FeatureStates),
-  router: (routerReducer(undefined, {}): Object),
   renderMode: ('prerender': RenderMode),
   form: (formReducer(undefined, {}): Map<string, any>),
   error: new Error(),
@@ -50,7 +46,6 @@ export class State extends Record(stateInit) {
   featureStates: FeatureStates
   user: ?User
   auth: Auth
-  router: Object
   renderMode: RenderMode
   form: Map<string, any>
   error: Error
@@ -63,7 +58,6 @@ export type StateJSON = {
   featureStates: FeatureStates,
   user: ?UserJSON,
   auth: Auth,
-  router: Object,
   renderMode: RenderMode,
   form: Object,
   error: Object,
@@ -71,8 +65,7 @@ export type StateJSON = {
 }
 
 export function parseState({
-  user, auth, form,
-  ...fields,
+  user, auth, form, ...fields
 }: StateJSON): State {
   return new State({
     user: user ? parseUser(user) : null,

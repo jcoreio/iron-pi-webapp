@@ -5,7 +5,7 @@ import fs from 'fs'
 
 import promisify from 'es6-promisify'
 import Sequelize from 'sequelize'
-import mysql from 'mysql'
+import mysql from 'mysql2'
 import Umzug from 'umzug'
 
 import sequelize, {dbConnectionParams} from './index'

@@ -3,7 +3,7 @@
 export type UserProfile = {
   lname: string,
   fname?: string,
-  email?: string
+  email?: string,
 }
 
 export type UserInit = {
@@ -13,7 +13,7 @@ export type UserInit = {
 
 export type UserToCreate = UserInit & {
   password: string,
-  roles: Array<string>
+  roles: Array<string>,
 }
 
 export type User = UserInit & {

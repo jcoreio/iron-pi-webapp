@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import * as React from 'react'
 import {connect} from 'react-redux'
 import {Grid, Row, Col, Panel, PanelHeader, PanelContainer, PanelBody} from '@jcoreio/rubix'
 import injectSheet from 'react-jss'
@@ -28,15 +28,15 @@ const styles = {
 
 type SelectProps = {
   header: string,
-  message: string
+  message: string,
 }
 
 type Props = SelectProps & {
   classes: {
     root: string,
     header: string,
-    message: string
-  }
+    message: string,
+  },
 }
 
 
@@ -45,14 +45,14 @@ const ErrorView = ({classes, header, message}: Props): React.Element<any> => (
     <Row>
       <Col sm={6} smOffset={3} xs={10} xsOffset={1}>
         <PanelContainer>
-            <Panel className="text-center">
-                <PanelHeader className="bg-red fg-white">
-                  <h2 className={classes.header}>{header}</h2>
-                </PanelHeader>
-                <PanelBody>
-                    <h4 className={classes.message}>{message}</h4>
-                </PanelBody>
-            </Panel>
+          <Panel className="text-center">
+            <PanelHeader className="bg-red fg-white">
+              <h2 className={classes.header}>{header}</h2>
+            </PanelHeader>
+            <PanelBody>
+              <h4 className={classes.message}>{message}</h4>
+            </PanelBody>
+          </Panel>
         </PanelContainer>
       </Col>
     </Row>

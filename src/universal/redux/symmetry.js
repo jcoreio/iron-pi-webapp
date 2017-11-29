@@ -37,7 +37,7 @@ export type SetClosedAction = {
   payload: {
     nextRetryTime: ?number,
     retryTimeoutId: ?number,
-  }
+  },
 }
 
 export const setConnecting = (): SetConnectingAction => ({type: SET_CONNECTING})
@@ -79,7 +79,7 @@ export type CallAction = {
   payload: {
     methodName: string,
     args: Array<any>,
-  }
+  },
 }
 
 export type ReconnectAction = {type: string}
@@ -103,7 +103,7 @@ export type SubscribeAction = {
   payload: {
     publicationName: string,
     args: Array<any>,
-  }
+  },
 }
 
 export function subscribe(publicationName: string, ...args: Array<any>): SubscribeAction {

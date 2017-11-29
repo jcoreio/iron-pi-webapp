@@ -4,15 +4,15 @@ import type {User} from '../types/User'
 
 export type LoginToken = {
   expireAt: Date,
-  token: string
+  token: string,
 }
 
 export type PasswordLoginRequest = {
   username: string,
-  password: string
+  password: string,
 }
 
 export type LoginResponse = {
   token: LoginToken,
-  user: User
+  user: User,
 }

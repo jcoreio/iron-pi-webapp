@@ -1,13 +1,12 @@
 /* @flow */
 
 import { createStore, compose, applyMiddleware } from 'redux'
-import { routerMiddleware } from 'react-router-redux'
-import { browserHistory } from 'react-router'
+import {createMiddleware, composeMiddleware} from 'mindfront-redux-utils'
+import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-features'
+
 import reducer from '../../universal/redux/reducer'
 import type {Store, Middleware, State, Action} from '../../universal/redux/types'
 import type SymmetryClient from '../symmetry/SymmetryClient'
-import {createMiddleware, composeMiddleware} from 'mindfront-redux-utils'
-import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-features'
 import {symmetryMiddleware} from '../../universal/redux/symmetry'
 import symmetryReconnectMiddleware from '../symmetry/symmetryReconnectMiddleware'
 
@@ -17,7 +16,6 @@ type Options = {
 
 export default (initialState: State, {symmetry}: Options): Store => {
   const middlewares: Array<Middleware> = [
-    routerMiddleware(browserHistory),
     loadFeatureMiddleware({createMiddleware}),
     featureMiddlewaresMiddleware({composeMiddleware}),
     symmetryMiddleware(symmetry),

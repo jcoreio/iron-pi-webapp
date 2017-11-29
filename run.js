@@ -135,15 +135,20 @@ task('build', [
 
 task('clean', () => require('fs-extra').remove(build))
 
-task('dev:client', ['node_modules'], async () => {
-  process.env.BUILD_DIR = build
-  require('defaultenv')(['env/dev.js', 'env/local.js'])
-  require('babel-register')
-  require('./scripts/devServer')
-  await new Promise(() => {})
+const services = task('services', () => spawn('docker-compose', ['up', '-d', 'db', 'redis'], {
+  env: env('prod', 'local'), stdio: 'inherit'
+}))
+
+task('services:logs', () => spawn('docker-compose', ['logs', '-f'], {env: env('prod', 'local'), stdio: 'inherit'}))
+
+task('mysql', async () => {
+  const dcEnv = env('prod', 'local')
+  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${dcEnv.DB_PASSWORD}`], {
+    env: dcEnv, stdio: 'inherit'
+  })
 })
 
-task('dev:server', ['node_modules'], async () => {
+task('dev:backend', ['node_modules', services], async () => {
   process.env.BUILD_DIR = build
   require('defaultenv')(['env/dev.js', 'env/local.js'])
   require('babel-register')
@@ -151,10 +156,23 @@ task('dev:server', ['node_modules'], async () => {
   await new Promise(() => {})
 })
 
-task('dc', () => spawn('docker-compose', [
-], {
-  env: env('local'),
-  stdio: 'inherit',
-}))
+task('dev:webpack', ['node_modules'], async () => {
+  process.env.BUILD_DIR = build
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  require('babel-register')
+  require('./scripts/devServer')
+  await new Promise(() => {})
+})
+
+task('prod:webpack', ['node_modules'], () =>
+  spawn('webpack', ['--config', 'webpack/webpack.config.prod.js', '--watch', '--colors'], {
+    env: env('prod'), stdio: 'inherit'
+  })
+)
+
+task('repl', ['node_modules'], async () => {
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  await spawn('rc', [`/tmp/repl/${process.env.DB_NAME || ''}.sock`], {stdio: 'inherit'})
+})
 
 cli()

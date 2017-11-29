@@ -16,11 +16,10 @@ const TIME_BETWEEN_QUERIES = 10 // milliseconds
 
 type RemoteTimeResult = {
   offset: number,
-  latency: number
+  latency: number,
 }
 
 export default class BrowserClockConnection extends events.EventEmitter {
-
   _connManager: SymmetryClient;
   _remoteTimeResults: Array<RemoteTimeResult> = [];
   _clockOffset: ?number

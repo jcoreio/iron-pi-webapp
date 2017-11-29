@@ -21,19 +21,18 @@ const log = logger('SymmetryServer')
 type SymmetryServerOpts = {
   socket: Object,
   methods?: MethodsDef,
-  publications?: PublicationsDef
+  publications?: PublicationsDef,
 }
 
 type ServerEventSub = {
   id: string,
-  onStop: () => void
+  onStop: () => void,
 }
 
 /**
  * Server side connection handler for the Symmetry protocol, which is similar to
  */
 export default class SymmetryServer extends SymmetryConnBase {
-
   methods: ?MethodsDef;
   publications: ?PublicationsDef
   subscriptions: Map<string, ServerEventSub> = new Map();
@@ -131,13 +130,11 @@ export default class SymmetryServer extends SymmetryConnBase {
     }
 
     try {
-      requireNonEmptyString(id, 'id')
       let sub: ?ServerEventSub
       if (this.subscriptions.has(id)) {
         if (!resubscribe) throw Error(`a subscription already exists for id ${id}`)
         sub = this.subscriptions.get(id)
       }
-      requireNonEmptyString(publicationName, 'publicationName')
       let handler = this.publications ? this.publications[publicationName] : globalPublications[publicationName]
       if (!handler) throw Error(`no handler for publication ${publicationName}`)
 

@@ -1,8 +1,7 @@
 // @flow
 
-import './bypassWarnIfNotMemoizedInProd'
-import { render } from 'react-dom'
-import * as React from 'react';
+import { render, hydrate } from 'react-dom'
+import * as React from 'react'
 import { AppContainer } from 'react-hot-loader'
 import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
@@ -12,37 +11,30 @@ import {loginWithToken} from '../universal/auth/redux'
 import Symmetry from './symmetry'
 import addFeatures from '../universal/features/addFeatures'
 import {loadInitialFeatures} from 'redux-features'
-import {Alert} from '@jcoreio/rubix'
 import {reconnect, setOpen} from '../universal/redux/symmetry'
 import '../universal/components/initJss'
 
 async function bootstrap(): Promise<any> {
   function renderError(error: any) {
     render(
-      <Alert danger>
+      <div>
         {error}
-      </Alert>,
+      </div>,
       document.getElementById('root')
     )
   }
 
   const symmetry = Symmetry.client()
 
-  if (process.env.NODE_ENV !== 'production') {
-    window.Symmetry = symmetry
-    try {
-      window.Perf = require('react-addons-perf')
-    } catch (e) {
-      /* eslint-disable no-console */
-      console.warn("react-addons-perf not found")
-      /* eslint-enable no-console */
-    }
-  }
-
   // the state is serialized to plain JS for sending over the wire, so we have
-  // to convert it back to immutables here
+  // to convert it back hydrate immutables here
   const store = makeStore(parseState(window.__INITIAL_STATE__), {symmetry})
   addFeatures(store)
+
+  if (process.env.NODE_ENV !== 'production') {
+    window.Symmetry = symmetry
+    window.store = store
+  }
 
   // update symmetry connection state in redux once the initial connection succeeds
   symmetry.once('open', () => store.dispatch(setOpen()))
@@ -57,7 +49,7 @@ async function bootstrap(): Promise<any> {
   let reloads = 0
 
   function mount(Root: typeof Root, callback?: () => void) {
-    render(
+    hydrate(
       <AppContainer key={++reloads}>
         <Root store={store} symmetry={symmetry} />
       </AppContainer>,

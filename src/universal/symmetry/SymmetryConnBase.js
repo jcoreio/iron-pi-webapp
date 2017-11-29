@@ -22,7 +22,6 @@ export const CLOSING = 2
 export const CLOSED = 3
 
 export default class SymmetryConnBase extends EventEmitter {
-
   sock: Object;
 
   curPingId: number = 0;

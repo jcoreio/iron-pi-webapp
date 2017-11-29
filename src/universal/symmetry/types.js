@@ -3,10 +3,10 @@
 export type HistoricalSubDef = {
   channelIds: Array<string>,
   beginTime: number,
-  endTime?: ?number
+  endTime?: ?number,
 }
 
 export type SymmetryErr = {
   message: string,
-  code?: string
+  code?: string,
 }

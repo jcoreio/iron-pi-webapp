@@ -12,7 +12,6 @@ import sequelizeMigrate from './sequelize/migrate'
 import redisSubscriber from './redis/RedisSubscriber'
 import setupWebSocketHandler from './setupWebSocketHandler'
 // import publishCollections from './redis/publishCollections'
-import configureAWS from './util/configureAWS'
 import logger from '../universal/logger'
 import requireEnv from '../universal/util/requireEnv'
 
@@ -26,7 +25,6 @@ const log = logger('Server')
  * a testing context
  */
 export default class Server {
-
   _httpServer: ?Object;
   _running: boolean = false
   _replServer: ?REPLServer;
@@ -34,7 +32,6 @@ export default class Server {
   async start(): Promise<void> {
     if (this._running) return
 
-    configureAWS()
     redisSubscriber.start()
 
     if (process.env.REPLIFY) this._replServer = require('./repl')

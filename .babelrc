@@ -3,7 +3,6 @@
   "plugins": [
     "transform-decorators-legacy",
     ["flow-runtime", {"annotate": false, "assert": false}],
-    "transform-runtime",
     "transform-class-properties",
     "transform-async-generator-functions",
     "transform-object-rest-spread",

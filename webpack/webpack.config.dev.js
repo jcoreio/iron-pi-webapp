@@ -6,6 +6,8 @@ const HappyPack = require('happypack')
 const ProgressPlugin = require('webpack/lib/ProgressPlugin')
 const defines = require('./defines')
 
+const babelOptions = require('./babelOptions')
+
 const root = path.resolve(__dirname, '..')
 const srcDir = path.join(root, 'src')
 const clientInclude = [srcDir]
@@ -21,8 +23,6 @@ const config = {
   entry: [
     'babel-polyfill',
     'react-hot-loader/patch',
-    './sass/vendor.scss',
-    './sass/app.scss',
     './src/client/index.js',
     'webpack-hot-middleware/client',
   ],
@@ -45,9 +45,9 @@ const config = {
       loaders: [
         {
           path: 'babel-loader',
+          options: babelOptions,
         },
       ],
-      cache: !process.env.HAPPYPACK_DISABLE_CACHE,
       threads: 4,
     }),
   ],
@@ -68,12 +68,11 @@ const config = {
       },
       {test: /\.(eot|ttf|wav|mp3)$/, loader: 'file-loader'},
       {test: /\.css$/, use: ['style-loader', 'css-loader']},
-      {test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader']},
       {
         test: /\.s[ac]ss$/, use: [
-        {loader: 'style-loader'},
-        {loader: 'css-loader'},
-        {loader: 'sass-loader'},
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
+          {loader: 'sass-loader'},
         ]
       },
       {

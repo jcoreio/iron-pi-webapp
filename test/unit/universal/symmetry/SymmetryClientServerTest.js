@@ -45,7 +45,7 @@ class MockSock extends EventEmitter {
 
 type ClientServerTesterOpts = {
   methods?: MethodsDef,
-  publications?: PublicationsDef
+  publications?: PublicationsDef,
 }
 
 class ClientServerTester {

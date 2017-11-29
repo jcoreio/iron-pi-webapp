@@ -8,8 +8,6 @@ import {createMiddleware, composeMiddleware} from 'mindfront-redux-utils'
 import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-features'
 import {symmetryMiddleware} from '../../universal/redux/symmetry'
 import type {Symmetry} from '../../universal/redux/symmetry'
-import { routerMiddleware } from 'react-router-redux'
-import { createMemoryHistory } from 'react-router'
 
 type Options = {
   symmetry: Symmetry,
@@ -23,7 +21,6 @@ export default (initialState: State, {symmetry}: Options): Store => {
       loadFeatureMiddleware({createMiddleware}),
       featureMiddlewaresMiddleware({composeMiddleware}),
       symmetryMiddleware(symmetry),
-      routerMiddleware(createMemoryHistory())
     )
   )
 }

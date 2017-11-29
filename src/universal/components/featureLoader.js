@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import * as React from 'react'
 import {featureLoader as _featureLoader} from 'react-redux-features'
 import {Alert} from '@jcoreio/rubix'
 import type {Feature, FeatureState} from 'redux-features'

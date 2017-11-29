@@ -1,17 +1,16 @@
 // @flow
+// @flow-runtime assert
 
 /* eslint-disable no-case-declarations */
-
-import _ from 'lodash'
 
 import {SYM_SUB_EVENT, SYM_UNSUB, SYM_NOSUB, SYM_EVENT,
   SYM_METHOD, SYM_RESULT} from '../../universal/symmetry/SymmetryProto'
 
 import SubContext from '../../universal/symmetry/SubContext'
 import {fromSymErr} from '../../universal/symmetry/validate'
-import {requireNonEmptyString} from '../../universal/util/Check'
 import SymmetryConnBase, {OPEN} from '../../universal/symmetry/SymmetryConnBase'
-import emitted from '../../universal/util/emitted'
+import emitted from 'promisify-event'
+import type {NonEmptyString} from '../../universal/types/NonEmptyString'
 
 const CALL_TIMEOUT = 16000
 
@@ -96,11 +95,10 @@ export default class SymmetryClient extends SymmetryConnBase {
     }
   }
 
-  async call(method: string, ...args: Array<any>): Promise<any> {
+  async call(method: NonEmptyString, ...args: Array<any>): Promise<any> {
     if (this.sock.readyState !== OPEN) { // sort of ugly, this is only here so that tests can be more synchronous
       await this.waitUntilOpen(CALL_TIMEOUT)
     }
-    requireNonEmptyString(method, 'method')
     const id = (++this.curRequestId).toString()
     this._send(SYM_METHOD, { id, method, params: args })
     return new Promise((resolve: ResolveFunc, reject: RejectFunc) => {
@@ -108,9 +106,8 @@ export default class SymmetryClient extends SymmetryConnBase {
     })
   }
 
-  _handleMessage(message: Object) {
+  _handleMessage(message: {msg: NonEmptyString}) {
     const {msg} = message
-    if (!_.isString(msg) || !msg.length) throw new Error("got an invalid msg: " + msg)
     switch (msg) {
     case SYM_EVENT: {
       const {id, eventName, payload} = message
@@ -122,8 +119,7 @@ export default class SymmetryClient extends SymmetryConnBase {
       context.emit(eventName, ...payload)
     } break
     case SYM_RESULT: {
-      let { id, error, result } = message
-      requireNonEmptyString(id, "id")
+      let { id, error, result }: {id: NonEmptyString} = (message: any)
       let request = this.requests.get(id)
       if (!request) throw new Error("could not find the request for a method result message: " + id)
       this.requests.delete(id)

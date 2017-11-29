@@ -1,6 +1,6 @@
 {
   "extends": "../.babelrc",
   "plugins": [
-    ["@jcoreio/babel-plugin-transform-define", "./defines.js"]
+    ["babel-plugin-transform-define", "./defines.js"]
   ]
 }

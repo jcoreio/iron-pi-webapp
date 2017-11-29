@@ -1,5 +1,3 @@
-var path = require('path')
-
 exports.NODE_ENV = 'production'
 exports.BABEL_ENV = 'test'
 exports.WEBPACK_DEVTOOL = 'source-map'

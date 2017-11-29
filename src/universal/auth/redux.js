@@ -96,7 +96,7 @@ export type LoginWithPasswordAction = {
   payload: {
     username: string,
     password: string,
-  }
+  },
 }
 
 export function loginWithPassword(username: string, password: string): LoginWithPasswordAction {
@@ -153,7 +153,7 @@ export function logout(): LogoutAction {
 }
 
 export type LogoutSuccessAction = {
-  type: 'LOGOUT_SUCCESS'
+  type: 'LOGOUT_SUCCESS',
 }
 
 export function logoutSuccess(): LogoutSuccessAction {

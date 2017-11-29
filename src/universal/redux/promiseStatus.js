@@ -40,7 +40,7 @@ export type ResolveAction<Result> = {
   payload: {
     result: Result,
     message: ?string,
-  }
+  },
 }
 export type RejectAction = {
   type: string,
@@ -48,7 +48,7 @@ export type RejectAction = {
   payload: {
     error: Error,
     message: ?string,
-  }
+  },
 }
 
 export type PromiseStatusAction<Result> = ResetAction | SetPendingAction | ResolveAction<Result> | RejectAction
@@ -164,16 +164,16 @@ export function syncPromiseStatus<Result>(
 ): Promise<Result> {
   dispatch(actions.setPending())
   return (promise
-      .then((result: Result) => {
-        dispatch(actions.resolve(result))
-        if (resetDelay) setTimeout(() => dispatch(actions.reset()), resetDelay)
-        return result
-      })
-      .catch((error: Error) => {
-        dispatch(actions.reject(error))
-        if (resetDelay) setTimeout(() => dispatch(actions.reset()), resetDelay)
-        throw error
-      })
+    .then((result: Result) => {
+      dispatch(actions.resolve(result))
+      if (resetDelay) setTimeout(() => dispatch(actions.reset()), resetDelay)
+      return result
+    })
+    .catch((error: Error) => {
+      dispatch(actions.reject(error))
+      if (resetDelay) setTimeout(() => dispatch(actions.reset()), resetDelay)
+      throw error
+    })
   )
 }
 

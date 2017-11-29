@@ -1,37 +1,42 @@
 /* @flow */
 
-import * as React from 'react';
-import type {Store} from '../../universal/redux/types'
+import * as React from 'react'
 import {Provider} from 'react-redux'
-import {RouterContext} from 'react-router'
+import {StaticRouter} from 'react-router-dom'
 import {renderToString} from 'react-dom/server'
+import {SheetsRegistry, JssProvider} from 'react-jss'
+
+import App from '../../universal/components/App'
+import type {Store} from '../../universal/redux/types'
 import '../../universal/components/initJss'
-import {SheetsRegistry, SheetsRegistryProvider} from 'react-jss'
 
 type Props = {
   title: string,
   assets?: Object,
   store: Store,
-  renderProps: Object,
+  location: string,
+  routerContext: Object,
 }
 
-const environmentVars = ['GOOGLE_MAPS_API_KEY', 'GENABILITY_BASE_URL', 'GENABILITY_APP_ID', 'GENABILITY_APP_KEY']
+const environmentVars = []
 const environmentScript = `
 window.process = window.process || {}
 process.env = process.env || {}
 ${environmentVars.map(name => `process.env[${JSON.stringify(name)}] = ${JSON.stringify(process.env[name] || '')}`).join('\n')}
 `
 
-const Html = ({renderProps, title, assets, store}: Props): React.Element<any> => {
+const Html = ({routerContext, location, title, assets, store}: Props): React.Element<any> => {
   const {manifest, app, vendor} = assets || {}
   const initialState = `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState().set('features', {}))}`
   const sheets = new SheetsRegistry()
   const root = renderToString(
-    <SheetsRegistryProvider registry={sheets}>
+    <JssProvider registry={sheets}>
       <Provider store={store}>
-        <RouterContext {...renderProps} />
+        <StaticRouter context={routerContext} location={location}>
+          <App />
+        </StaticRouter>
       </Provider>
-    </SheetsRegistryProvider>
+    </JssProvider>
   )
 
   return (

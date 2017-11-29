@@ -33,7 +33,7 @@ class LoginForm extends React.Component<Props, void> {
               <h3 style={{margin: 0, padding: 25}}>Sign in to Pason Power</h3>
             </div>
             <div
-                style={{margin: 'auto', marginTop: 25, marginBottom: 25, padding: 25, paddingTop: 0, paddingBottom: 0}}
+              style={{margin: 'auto', marginTop: 25, marginBottom: 25, padding: 25, paddingTop: 0, paddingBottom: 0}}
             >
               <Form id="login-form" onSubmit={handleSubmit(onSubmit)}>
                 <FormGroup>

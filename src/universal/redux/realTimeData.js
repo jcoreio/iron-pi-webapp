@@ -21,7 +21,7 @@ export const SET_REAL_TIME_DATA = 'SET_REAL_TIME_DATA'
 
 export type SetRealTimeDataAction = {
   type: 'SET_REAL_TIME_DATA',
-  payload: RealTimeDataJSON
+  payload: RealTimeDataJSON,
 }
 
 export function setRealTimeData(data: RealTimeDataJSON): SetRealTimeDataAction {
