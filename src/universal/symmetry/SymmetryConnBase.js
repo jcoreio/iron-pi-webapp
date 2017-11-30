@@ -25,7 +25,7 @@ export default class SymmetryConnBase extends EventEmitter {
   sock: Object;
 
   curPingId: number = 0;
-  outstandingPingId: ?number;
+  outstandingPingId: ?NonEmptyString;
   _lastRxTime: ?number;
   heartbeatInterval: ?number;
   _heartbeatCheckTime: number = 0;
@@ -139,7 +139,7 @@ export default class SymmetryConnBase extends EventEmitter {
       if (rxElapsed > HEARTBEAT_TIMEOUT) {
         this._onHeartbeatTimeout()
       } else if (rxElapsed > HEARTBEAT_PING_TIME && !this.outstandingPingId) {
-        this.outstandingPingId = ++this.curPingId
+        this.outstandingPingId = String(++this.curPingId)
         this._send(SYM_PING, { id: this.outstandingPingId })
       }
     } else {
