@@ -1,17 +1,16 @@
 // @flow
 
 import {fromJS} from 'immutable'
-import {Map} from 'immutable'
-import Record from './Record'
+import {Map, Record} from 'immutable'
+import type {RecordOf} from 'immutable'
 import {reducer as formReducer} from 'redux-form/immutable'
 import {featuresReducer, featureStatesReducer} from 'redux-features'
 import type {Features, FeatureStates} from 'redux-features'
 import type {ConnectionState} from './symmetry'
 import {initialConnectionState} from './symmetry'
-import {Error} from './error'
 
-import {User, parseUser, Auth} from '../auth/redux'
-import type {UserJSON} from '../auth/redux'
+import {authInit} from '../auth/redux'
+import type {User, Auth} from '../auth/redux'
 
 import type {
   Store as _Store,
@@ -29,48 +28,43 @@ import type {
 // everything that can only be rendered on the client.
 export type RenderMode = 'prerender' | 'client'
 
-const stateInit = {
-  features: (featuresReducer()((undefined: any), {type: ''}): Features<State, Action>),
-  featureStates: (featureStatesReducer()((undefined: any), {type: ''}): FeatureStates),
-  renderMode: ('prerender': RenderMode),
-  form: (formReducer(undefined, {}): Map<string, any>),
-  error: new Error(),
-  user: (null: ?User),
-  auth: new Auth(),
-  connection: initialConnectionState,
-}
-export type StateFields = typeof stateInit
-
-export class State extends Record(stateInit) {
-  features: Features<State, Action>
-  featureStates: FeatureStates
-  user: ?User
-  auth: Auth
-  renderMode: RenderMode
-  form: Map<string, any>
-  error: Error
-  connection: ConnectionState
-}
-
-
-export type StateJSON = {
+export type StateFields = {
   features: Features<State, Action>,
   featureStates: FeatureStates,
-  user: ?UserJSON,
+  user: ?User,
+  auth: Auth,
+  renderMode: RenderMode,
+  form: Map<string, any>,
+  connection: ConnectionState,
+}
+const stateInit: StateFields = {
+  features: featuresReducer()((undefined: any), {type: ''}),
+  featureStates: featureStatesReducer()((undefined: any), {type: ''}),
+  renderMode: 'prerender',
+  form: formReducer(undefined, {}),
+  user: null,
+  auth: authInit,
+  connection: initialConnectionState,
+}
+
+export const StateRecord = Record(stateInit)
+export type State = RecordOf<StateFields>
+
+export type StateJSON = {
+  features: Features<StateRecord, Action>,
+  featureStates: FeatureStates,
+  user: ?User,
   auth: Auth,
   renderMode: RenderMode,
   form: Object,
-  error: Object,
   connection: ConnectionState,
 }
 
 export function parseState({
-  user, auth, form, ...fields
+  form, ...fields
 }: StateJSON): State {
-  return new State({
-    user: user ? parseUser(user) : null,
-    auth: new Auth(auth),
-    form: fromJS(form || {}),
+  return StateRecord({
+    form: (fromJS(form || {}): any),
     ...fields,
   })
 }
@@ -82,9 +76,9 @@ export type Action = $Shape<{
   meta: Object,
 }>
 
-export type Store = _Store<State, Action>
+export type Store = _Store<StateRecord, Action>
 export type Dispatch = _Dispatch<Action>
-export type Reducer = _Reducer<State, Action>
-export type Middleware = _Middleware<State, Action>
-export type MiddlewareAPI = _MiddlewareAPI<State, Action>
+export type Reducer = _Reducer<StateRecord, Action>
+export type Middleware = _Middleware<StateRecord, Action>
+export type MiddlewareAPI = _MiddlewareAPI<StateRecord, Action>
 

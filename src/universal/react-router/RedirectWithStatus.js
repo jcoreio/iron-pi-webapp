@@ -2,11 +2,11 @@
 
 import * as React from 'react'
 import {Route, Redirect} from 'react-router-dom'
-import type {LocationDescriptor} from 'react-router-dom'
+import type {LocationShape} from 'react-router-dom'
 
 type Props = {
-  from?: LocationDescriptor,
-  to: LocationDescriptor,
+  from?: string | LocationShape,
+  to: string | LocationShape,
   code?: number,
 }
 

@@ -29,13 +29,14 @@ type ServerEventSub = {
   onStop: () => void,
 }
 
+type SubRequestMessage = {id: NonEmptyString, publicationName: NonEmptyString, args: Array<any>, resubscribe?: boolean}
 /**
  * Server side connection handler for the Symmetry protocol, which is similar to
  */
 export default class SymmetryServer extends SymmetryConnBase {
   methods: ?MethodsDef;
   publications: ?PublicationsDef
-  subscriptions: Map<string, ServerEventSub> = new Map();
+  subscriptions: Map<NonEmptyString, ServerEventSub> = new Map();
 
   _user: ?ServerUser;
 
@@ -57,19 +58,19 @@ export default class SymmetryServer extends SymmetryConnBase {
     this._user = user
   }
 
-  _handleMessage(message: {msg: NonEmptyString}) {
+  _handleMessage(message: {msg: NonEmptyString, id?: NonEmptyString}) {
     const {msg} = message
     switch (msg) {
     case SYM_SUB_EVENT:
-      this._handleSubRequest(message)
+      this._handleSubRequest((message: any))
       break
     case SYM_UNSUB: {
-      const {id} = (message: {id: NonEmptyString})
+      const {id}: {id: NonEmptyString} = (message: any)
       const sub = this.subscriptions.get(id)
       if (sub) this._stopSub(sub)
     } break
     case SYM_METHOD: {
-      const {id, method, params} = (message: {id: NonEmptyString, method: NonEmptyString, params: Array<any>})
+      const {id, method, params}: {id: NonEmptyString, method: NonEmptyString, params: Array<any>} = (message: any)
       try {
         this._handleMethodCall(id, method, params || [])
       } catch (err) {
@@ -81,7 +82,7 @@ export default class SymmetryServer extends SymmetryConnBase {
     }
   }
 
-  _handleMethodCall(id: string, method: string, params: Array<any>) {
+  _handleMethodCall(id: NonEmptyString, method: string, params: Array<any>) {
     try {
       const handler = this.methods ? this.methods[method] : globalMethods[method]
       if (!handler) throw Error(`method not found: ${method}`)
@@ -107,7 +108,7 @@ export default class SymmetryServer extends SymmetryConnBase {
   // Subscription Handling
   //----------------------------------------------------------------------------
 
-  _handleSubRequest(message: {id: NonEmptyString, publicationName: NonEmptyString, args: Array<any>, resubscribe?: boolean}) {
+  _handleSubRequest(message: SubRequestMessage) {
     const {id, publicationName, args, resubscribe} = message
 
     let stopped = false
@@ -172,13 +173,13 @@ export default class SymmetryServer extends SymmetryConnBase {
     this.subscriptions.delete(sub.id)
   }
 
-  _sendMethodSuccess(id: string, result: any) {
+  _sendMethodSuccess(id: NonEmptyString, result: any) {
     const message: Object = { id }
     if (result !== undefined) message.result = result
     this._send(SYM_RESULT, message)
   }
 
-  _sendMethodFailure(id: string, err: any, opts: {silent?: boolean} = {}) {
+  _sendMethodFailure(id: NonEmptyString, err: any, opts: {silent?: boolean} = {}) {
     const silent = !!(opts.silent || (err && typeof err === 'object' && err.silent))
     if (!silent)
       console.error('error handling a method invocation: ', err.stack || err)

@@ -109,23 +109,21 @@ export default class SymmetryConnBase extends EventEmitter {
     }
   }
 
-  _handleMessage(message: Object) {
-    let { msg } = message
-    NonEmptyString.assert(msg)
+  _handleMessage(message: {msg: NonEmptyString, id?: NonEmptyString}) {
+    const { msg, id } = message
     switch (msg) {
     case SYM_PING:
       const msgOut = {}
-      if (_.has(message, 'id'))
-        msgOut.id = message.id
+      if (id != null) msgOut.id = id
       this._send(SYM_PONG, msgOut)
       break
     case SYM_PONG:
-      const { id } = message
-      if (id !== undefined && id === this.outstandingPingId)
+      if (id != null && id === this.outstandingPingId)
         this.outstandingPingId = null
       break
     case SYM_ERROR:
-      devConsole.error("Symmetry connection got an error message: " + message.error && message.error.message)
+      const {error}: {error: {message: string}} = (message: any)
+      devConsole.error("Symmetry connection got an error message: " + error.message)
       break
     default:
       throw new Error("unrecognized message type: " + msg)

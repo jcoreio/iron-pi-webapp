@@ -11,6 +11,7 @@ import {fromSymErr} from '../../universal/symmetry/validate'
 import SymmetryConnBase, {OPEN} from '../../universal/symmetry/SymmetryConnBase'
 import emitted from 'promisify-event'
 import type {NonEmptyString} from '../../universal/types/NonEmptyString'
+import type {SymmetryErr} from '../../universal/symmetry/types'
 
 const CALL_TIMEOUT = 16000
 
@@ -18,15 +19,15 @@ type ResolveFunc = (result: any) => void
 type RejectFunc = (error: Error) => void
 
 type Sub = {
-  id: string,
-  publicationName: string,
+  id: NonEmptyString,
+  publicationName: NonEmptyString,
   args: Array<any>,
   callback: ?Function,
   context: SubContext,
 }
 
 type RequestDef = {
-  method: string,
+  method: NonEmptyString,
   time: number,
   resolve: ResolveFunc,
   reject: RejectFunc,
@@ -42,8 +43,8 @@ type Options = {
  * Symmetry protocol client. Allows method calls and event subscriptions.
  */
 export default class SymmetryClient extends SymmetryConnBase {
-  subscriptions: Map<string, Sub> = new Map();
-  requests: Map<string, RequestDef> = new Map();
+  subscriptions: Map<NonEmptyString, Sub> = new Map();
+  requests: Map<NonEmptyString, RequestDef> = new Map();
   curSubId: number = 0;
   curRequestId: number = 0;
   useHeartbeat: boolean;
@@ -58,7 +59,7 @@ export default class SymmetryClient extends SymmetryConnBase {
    * @param listenerDefIn callback function, or object with onEvent(event) and onSubError(event) functions
    * @returns {string} subscription id
    */
-  subscribe(publicationName: string, ...args: Array<any>): SubContext {
+  subscribe(publicationName: NonEmptyString, ...args: Array<any>): SubContext {
     const lastArg: any = args.length ? args[args.length - 1] : undefined
     const callback: ?Function = lastArg instanceof Function ? lastArg : undefined
     const argsWithoutCallback: Array<any> = callback ? args.slice(0, args.length - 1) : args
@@ -89,7 +90,7 @@ export default class SymmetryClient extends SymmetryConnBase {
     })
   }
 
-  _stop(id: string) {
+  _stop(id: NonEmptyString) {
     if (this.subscriptions.delete(id) && !this.isShutDown()) {
       this._send(SYM_UNSUB, { id })
     }
@@ -106,11 +107,11 @@ export default class SymmetryClient extends SymmetryConnBase {
     })
   }
 
-  _handleMessage(message: {msg: NonEmptyString}) {
+  _handleMessage(message: {msg: NonEmptyString, id?: NonEmptyString}) {
     const {msg} = message
     switch (msg) {
     case SYM_EVENT: {
-      const {id, eventName, payload} = message
+      const {id, eventName, payload}: {id: NonEmptyString, eventName: NonEmptyString, payload: Array<any>} = (message: any)
       const sub = this.subscriptions.get(id)
       if (!sub) break
       const {callback, context} = sub || {}
@@ -119,14 +120,14 @@ export default class SymmetryClient extends SymmetryConnBase {
       context.emit(eventName, ...payload)
     } break
     case SYM_RESULT: {
-      let { id, error, result }: {id: NonEmptyString} = (message: any)
+      let { id, error, result }: {id: NonEmptyString, error: SymmetryErr, result: any} = (message: any)
       let request = this.requests.get(id)
       if (!request) throw new Error("could not find the request for a method result message: " + id)
       this.requests.delete(id)
       error ? request.reject(fromSymErr(error)) : request.resolve(result)
     } break
     case SYM_NOSUB: {
-      const { id, error } = message
+      const { id, error }: {id: NonEmptyString, error: SymmetryErr} = (message: any)
       const sub = this.subscriptions.get(id)
       if (!sub) break
       notifySubError(sub, fromSymErr(error))

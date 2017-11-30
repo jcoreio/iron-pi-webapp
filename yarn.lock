@@ -2193,8 +2193,8 @@ default-require-extensions@^1.0.0:
     strip-bom "^2.0.0"
 
 defaultenv@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npmjs.org/defaultenv/-/defaultenv-3.0.2.tgz#b71b001030aacd446b11fd6e9c77da4c7c8c8ff9"
+  version "3.0.3"
+  resolved "https://registry.npmjs.org/defaultenv/-/defaultenv-3.0.3.tgz#ad771026836c241408f3aeaa0c804a7c0868a05e"
   dependencies:
     dotenv "^4.0.0"
   optionalDependencies:
@@ -5458,6 +5458,12 @@ p-locate@^2.0.0:
   resolved "https://registry.npmjs.org/p-locate/-/p-locate-2.0.0.tgz#20a0103b222a70c8fd39cc2e580680f3dde5ec43"
   dependencies:
     p-limit "^1.1.0"
+
+p-timeout@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/p-timeout/-/p-timeout-2.0.1.tgz#d8dd1979595d2dc0139e1fe46b8b646cb3cdf038"
+  dependencies:
+    p-finally "^1.0.0"
 
 package-json@^4.0.0:
   version "4.0.1"

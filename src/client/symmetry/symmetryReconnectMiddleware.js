@@ -3,7 +3,7 @@
 import {createMiddleware} from 'mindfront-redux-utils'
 import type {Middleware, MiddlewareAPI, Dispatch, Action} from '../../universal/redux/types'
 import type SymmetryClient from './SymmetryClient'
-import timeout from '../../universal/util/timeout'
+import timeout from 'p-timeout'
 
 import {RECONNECT, reconnect, setConnecting, setOpen, setClosed} from '../../universal/redux/symmetry'
 import {loginWithToken} from '../../universal/auth/redux'

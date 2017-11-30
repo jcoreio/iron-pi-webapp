@@ -10,7 +10,7 @@ import makeStore from '../redux/makeStore'
 import Html from './Html'
 import type {Store} from '../../universal/redux/types'
 import addFeatures from '../../universal/features/addFeatures'
-import {State} from '../../universal/redux/types'
+import {StateRecord} from '../../universal/redux/types'
 
 const rootDir = path.resolve(__dirname, '..', '..')
 
@@ -33,7 +33,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
 
     // first create a context for <ServerRouter>, it's where we keep the
     // results of rendering for the second pass if necessary
-    const store: Store = makeStore(new State(), {symmetry})
+    const store: Store = makeStore(StateRecord(), {symmetry})
     addFeatures(store)
 
     const routerContext: {status?: number, url?: string} = {}

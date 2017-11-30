@@ -6,12 +6,11 @@ import {featuresReducer, featureStatesReducer, featureReducersReducer} from 'red
 import {enableBatching} from 'redux-batched-actions'
 
 import type {Reducer} from './types'
-import {State} from './types'
+import {StateRecord} from './types'
 import {renderModeReducer} from './renderMode'
 import {reducer as form} from 'redux-form/immutable'
 import {userReducer, authReducer} from '../auth/redux'
 import {connectionStateReducer} from './symmetry'
-import {errorReducer} from './error'
 
 const reducer: Reducer = enableBatching(composeReducers(
   combineReducers({
@@ -19,11 +18,10 @@ const reducer: Reducer = enableBatching(composeReducers(
     featureStates: featureStatesReducer({createReducer}),
     renderMode: renderModeReducer,
     form,
-    error: errorReducer,
     auth: (authReducer: any),
     user: (userReducer: any),
     connection: connectionStateReducer,
-  }, init => new State(init)),
+  }, init => new StateRecord(init)),
   featureReducersReducer({composeReducers})
 ))
 

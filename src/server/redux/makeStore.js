@@ -2,7 +2,7 @@
 
 import {createStore, applyMiddleware} from 'redux'
 import reducer from '../../universal/redux/reducer'
-import {State} from '../../universal/redux/types'
+import type {State} from '../../universal/redux/types'
 import type {Store} from '../../universal/redux/types'
 import {createMiddleware, composeMiddleware} from 'mindfront-redux-utils'
 import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-features'

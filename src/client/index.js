@@ -15,12 +15,15 @@ import {reconnect, setOpen} from '../universal/redux/symmetry'
 import '../universal/components/initJss'
 
 async function bootstrap(): Promise<any> {
+  const rootElement = document.getElementById('root')
+  if (!rootElement) throw new Error("Can't find #root element")
+
   function renderError(error: any) {
     render(
       <div>
         {error}
       </div>,
-      document.getElementById('root')
+      rootElement
     )
   }
 
@@ -53,7 +56,7 @@ async function bootstrap(): Promise<any> {
       <AppContainer key={++reloads}>
         <Root store={store} symmetry={symmetry} />
       </AppContainer>,
-      document.getElementById('root'),
+      rootElement,
       // $FlowFixMe
       callback,
     )

@@ -9,14 +9,14 @@ import Spinner from './Spinner'
 type Options = {
   featureId: string,
   featureName: string,
-  getComponent: (feature: Feature<any, any>) => any,
+  getComponent: (feature: Feature<any, any>) => React.ComponentType<any>,
 }
 
 /**
  * A wrapper for featureLoader that provides rubix-styled alerts when the feature is loading
  * or failed to load.
  */
-export default function featureLoader<P: Object>(options: Options): (props: P) => React.Element<any> {
+export default function featureLoader<P: Object>(options: Options): React.ComponentType<P> {
   const {
     featureId,
     featureName,
@@ -24,7 +24,7 @@ export default function featureLoader<P: Object>(options: Options): (props: P) =
   } = options
 
   const FeatureComponentOrStatus = (
-    {featureState, feature, props}: {featureState: FeatureState, feature: ?Feature<any, any>, props: Object}
+    {featureState, feature, props}: {featureState: FeatureState, feature: ?Feature<any, any>, props: P}
   ): React.Element<any> => {
     const Comp = getComponent && feature ? getComponent(feature) : null
 
