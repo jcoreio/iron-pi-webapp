@@ -150,7 +150,7 @@ task('services:logs', () => spawn('docker-compose', ['logs', '-f'], {env: env('p
 
 task('mysql', async () => {
   const dcEnv = env('prod', 'local')
-  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${dcEnv.DB_PASSWORD}`], {
+  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${dcEnv.DB_PASSWORD}`, `-D${dcEnv.DB_NAME}`], {
     env: dcEnv, stdio: 'inherit'
   })
 })
