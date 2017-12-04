@@ -1,6 +1,8 @@
 #!/usr/bin/env babel-node
 /* @flow */
 
+console.log(process.env.NODE_ENV)
+
 import Server from './Server'
 import logger from '../universal/logger'
 

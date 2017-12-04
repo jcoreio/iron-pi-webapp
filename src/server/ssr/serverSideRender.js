@@ -54,7 +54,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
       })
       res.end()
     } else {
-      res.write('<!DOCTYPE html>')
+      res.write('<!DOCTYPE html>\n')
       res.write(html)
       res.end()
     }

@@ -7,10 +7,10 @@ const ProgressPlugin = require('webpack/lib/ProgressPlugin')
 const defines = require('./defines')
 
 const babelOptions = require('./babelOptions')
+const babelInclude = require('./babelInclude')
 
 const root = path.resolve(__dirname, '..')
 const srcDir = path.join(root, 'src')
-const clientInclude = [srcDir]
 
 const {BACKEND_PORT, PORT, BUILD_DIR} = process.env
 if (!BACKEND_PORT) throw new Error('missing process.env.BACKEND_PORT')
@@ -44,7 +44,7 @@ const config = {
     new HappyPack({
       loaders: [
         {
-          path: 'babel-loader',
+          loader: 'babel-loader',
           options: babelOptions,
         },
       ],
@@ -83,7 +83,7 @@ const config = {
       {
         test: /\.js$/,
         loader: process.env.NO_HAPPYPACK ? 'babel-loader' : 'happypack/loader',
-        include: clientInclude,
+        include: babelInclude,
       },
     ],
   },

@@ -2,7 +2,7 @@ module.exports = {
   "babelrc": false,
   "presets": [
     ["env", {
-      "targets": {"browsers": "> 5%", "uglify": true}, "loose": true, "modules": false, "forceAllTransforms": true
+      "targets": {"browsers": "> 5%", "uglify": true}, "loose": true, "modules": false,
     }],
     "react", "flow"
   ],

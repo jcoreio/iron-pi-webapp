@@ -1,18 +1,15 @@
-// @flow
-
 const path = require('path')
 const webpack = require('webpack')
 const AssetsPlugin = require('assets-webpack-plugin')
 const HappyPack = require('happypack')
 const ProgressPlugin = require('webpack/lib/ProgressPlugin')
-const blessPlugin = require('bless-webpack-plugin')
+// const blessPlugin = require('bless-webpack-plugin')
 const ExtractTextPlugin = require("extract-text-webpack-plugin")
 const defines = require('./defines')
 const babelOptions = require('./babelOptions')
+const babelInclude = require('./babelInclude')
 
 const root = path.resolve(__dirname, '..')
-const srcDir = path.resolve(root, 'src')
-const clientInclude = [srcDir]
 
 const vendor = [
   'babel-polyfill',
@@ -53,10 +50,11 @@ const config = {
     }),
     new webpack.IgnorePlugin(/\/server\//),
     new ExtractTextPlugin('[name].css'),
-    blessPlugin({ imports: true, compress: true }),
+    // bless plugin is freezing webpack at the optimizing chunk assets stage!
+    // blessPlugin({ imports: true, compress: true }),
     new HappyPack({
       loaders: [{
-        path: 'babel-loader',
+        loader: 'babel-loader',
         options: babelOptions,
       }],
       threads: 4,
@@ -101,7 +99,7 @@ const config = {
       {
         test: /\.js$/,
         loader: process.env.NO_HAPPYPACK ? 'babel-loader' : 'happypack/loader',
-        include: clientInclude,
+        include: babelInclude,
       },
     ],
   },
