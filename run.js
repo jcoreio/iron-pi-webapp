@@ -171,11 +171,11 @@ task('dev:client', ['node_modules'], async () => {
   await new Promise(() => {})
 })
 
-task('prod:server', ['node_modules', services], async () => {
+task('prod:server', ['node_modules', task('build:server'), services], async () => {
   process.env.BUILD_DIR = build
   require('defaultenv')(['env/prod.js', 'env/local.js'])
-  spawn('babel', ['--watch', 'src/server', '--out-dir', `${build}/server`], {stdio: 'inherit'})
-  spawn('babel', ['--watch', 'src/universal', '--out-dir', `${build}/universal`], {stdio: 'inherit'})
+  spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`], {stdio: 'inherit'})
+  spawn('babel', ['--skip-initial-build', '--watch', 'src/universal', '--out-dir', `${build}/universal`], {stdio: 'inherit'})
   require('babel-register')
   await require('./scripts/runServerWithHotRestarting')(build)
   await new Promise(() => {})
