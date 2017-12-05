@@ -4,9 +4,8 @@ import path from 'path'
 import express from 'express'
 
 import type {$Request, $Response} from 'express'
-// $FlowFixMe
-import type {REPLServer} from 'repl'
 
+import sequelize from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 
 import redisSubscriber from './redis/RedisSubscriber'
@@ -27,14 +26,11 @@ const log = logger('Server')
 export default class Server {
   _httpServer: ?Object;
   _running: boolean = false
-  _replServer: ?REPLServer;
 
   async start(): Promise<void> {
     if (this._running) return
 
     redisSubscriber.start()
-
-    if (process.env.REPLIFY) this._replServer = require('./repl')
 
     const forceMigrate = 'production' !== process.env.NODE_ENV
     if (forceMigrate || process.env.DB_MIGRATE)
@@ -70,6 +66,10 @@ export default class Server {
     const port = parseInt(requireEnv('BACKEND_PORT'))
     const httpServer = this._httpServer = app.listen(port)
     setupWebSocketHandler(httpServer)
+
+    global.sequelize = sequelize
+    Object.assign(global, sequelize.models)
+
     log.info(`App is listening on http://0.0.0.0:${port}`)
     this._running = true
   }
@@ -77,13 +77,14 @@ export default class Server {
   async stop(): Promise<void> {
     if (!this._running) return
     this._running = false
+
+    delete global.sequelize
+    for (let model in sequelize.models) delete global[model]
+
     redisSubscriber.end(true)
     const httpServer = this._httpServer
     if (httpServer) httpServer.close()
     this._httpServer = undefined
-    const replServer = this._replServer
-    if (replServer) replServer.close()
-    this._replServer = undefined
   }
 }
 

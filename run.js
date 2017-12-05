@@ -225,9 +225,4 @@ task('lint', 'node_modules', () => spawn('eslint', lintFiles, {stdio: 'inherit'}
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles], {stdio: 'inherit'}))
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed'], {stdio: 'inherit'}))
 
-task('repl', ['node_modules'], async () => {
-  require('defaultenv')(['env/dev.js', 'env/local.js'])
-  await spawn('rc', [`/tmp/repl/${requireEnv('DB_NAME')}.sock`], {stdio: 'inherit'})
-})
-
 cli()

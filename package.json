@@ -1,30 +1,9 @@
 {
-  "name": "@pasonpower/webapp",
+  "name": "@jcoreio/iron-pi-webapp",
   "engines": {
     "node": ">=8.0.0"
   },
   "scripts": {
-    "dc": "docker-compose -f scripts/pason-webapp-dbs/docker-compose.yml",
-    "db:start": "docker-compose -f scripts/pason-webapp-dbs/docker-compose.yml up",
-    "db:logs": "docker-compose -f scripts/pason-webapp-dbs/docker-compose.yml logs",
-    "db:migrate": "defaultenv env/local.js babel-node src/server/dbMigrate.js",
-    "db:dynamoMigrate": "defaultenv env/local.js babel-node src/server/dynamoMigrate.js",
-    "start": "defaultenv env/dev.js env/local.js -- babel-node scripts/start.js",
-    "start:server": "defaultenv env/dev.js env/local.js -- babel-node scripts/startServer.js",
-    "start:client": "defaultenv env/dev.js env/local.js -- babel-node scripts/devServer.js",
-    "debug": "defaultenv env/dev.js env/local.js -- babel-node --inspect scripts/start.js",
-    "debug:server": "defaultenv env/dev.js env/local.js -- babel-node --inspect scripts/startServer.js",
-    "debug-brk": "defaultenv env/dev.js env/local.js -- babel-node --inspect --debug-brk scripts/start.js",
-    "debug-brk:server": "defaultenv env/dev.js env/local.js -- babel-node --inspect --debug-brk scripts/startServer.js",
-    "build": "defaultenv env/prod.js babel-node scripts/build.js",
-    "build:server": "defaultenv env/prod.js babel-node scripts/build-server.js",
-    "make": "defaultenv env/prod.js make",
-    "build:client": "defaultenv env/prod.js babel-node scripts/build-client.js",
-    "build:docker": "defaultenv env/prod.js babel-node scripts/build-docker.js",
-    "built": "defaultenv env/prod.js env/local.js -- node build/server/index.js",
-    "prod": "defaultenv env/prod.js env/local.js -- babel-node scripts/prod.js",
-    "prod:debug": "defaultenv env/prod.js env/local.js -- babel-node --debug scripts/prod.js",
-    "prod:debug-brk": "defaultenv env/prod.js env/local.js -- babel-node --debug-brk scripts/prod.js",
     "test": "defaultenv env/test.js env/local.js -- nyc --reporter=lcov --reporter=text mocha $npm_package_config_mocha",
     "test:integration": "defaultenv env/test.js env/local.js -- mocha $npm_package_config_mocha_integration",
     "test:integration:devServer": "defaultenv env/dev.js env/test.js env/local.js -- babel-node scripts/start.js",
@@ -36,17 +15,7 @@
     "test:unit:debug": "defaultenv env/test.js env/local.js -- mocha $npm_package_config_mocha_unit --inspect --debug-brk",
     "test:unit:watch": "defaultenv env/test.js env/local.js -- mocha --watch $npm_package_config_mocha_unit",
     "coverage:unit": "defaultenv env/test.js env/local.js -- nyc --reporter=lcov --reporter=text mocha $npm_package_config_mocha_unit",
-    "flow": "flow",
-    "flow:watch": "flow-watch --watch flowlib/ --watch flow-typed --watch scripts/ --watch src/ --watch test/ --watch webpack/ --watch .flowconfig",
-    "lint": "eslint *.js env src scripts test util webpack",
-    "lint:fix": "eslint --fix *.js env src scripts test util webpack",
-    "lint:watch": "esw -w --changed --cache *.js env src scripts test util webpack",
-    "open:coverage": "open coverage/lcov-report/index.html",
-    "dynamo-data-sim": "defaultenv env/local.js babel-node src/server/dynamo/DynamoDataSim.js",
-    "downsample-old-data": "defaultenv env/local.js babel-node src/server/dynamo/OldDataDownsampler.js",
-    "storybook": "defaultenv env/dev.js env/local.js -- start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "blah": ""
+    "open:coverage": "open coverage/lcov-report/index.html"
   },
   "config": {
     "mocha": "--compilers js:babel-core/register -r jsdom-global/register ./test/unit/**/*.js ./test/server-integration/index.js ./test/integration/index.js",
@@ -114,7 +83,7 @@
   "main": "index.js",
   "author": "Andy Edwards <jedwards@fastmail.com>",
   "license": "UNLICENSED",
-  "description": "pasonpower webapp",
+  "description": "iron pi webapp",
   "devDependencies": {
     "@jedwards1211/eslint-config": "^1.0.0",
     "@jedwards1211/eslint-config-flow": "^1.0.0",
@@ -201,12 +170,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pasonpower/webapp.git"
+    "url": "git+https://github.com/jcoreio/iron-pi-webapp.git"
   },
   "bugs": {
-    "url": "https://github.com/pasonpower/webapp/issues"
+    "url": "https://github.com/jcoreio/iron-pi-webapp/issues"
   },
-  "homepage": "https://github.com/pasonpower/webapp#readme",
+  "homepage": "https://github.com/jcoreio/iron-pi-webapp#readme",
   "pre-commit": [
     "lint",
     "flow"
