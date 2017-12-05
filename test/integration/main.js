@@ -4,7 +4,6 @@ import spawnAsync from 'crater-util/lib/spawnAsync'
 import {childPrinted} from 'async-child-process'
 import kill from 'crater-util/lib/kill'
 import {findAPortNotInUse} from 'portscanner'
-import {clearNonAdminUsers, clearCollection} from '../server-integration/util/clearCollection'
 import superagent from 'superagent'
 
 const root = path.resolve(__dirname, '..', '..')
@@ -43,18 +42,10 @@ describe('webapp integration tests', function () {
   })
 
   beforeEach(async function () {
-    await Promise.all([
-      clearNonAdminUsers(),
-      clearCollection('userTokens'),
-      clearCollection('userGroups'),
-    ])
+    // TODO: clear tables
   })
 
   require('./basicTests')
-  require('./userAuth')
-  require('./UsersView')
-  require('./UserGroups')
-  require('./plannedSites/CreatePlannedSite')
 })
 
 

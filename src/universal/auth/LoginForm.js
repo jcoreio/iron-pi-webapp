@@ -30,7 +30,7 @@ class LoginForm extends React.Component<Props, void> {
         <Panel>
           <PanelBody style={{padding: 0}}>
             <div className="text-center bg-darkblue fg-white">
-              <h3 style={{margin: 0, padding: 25}}>Sign in to Pason Power</h3>
+              <h3 style={{margin: 0, padding: 25}}>Sign in to Iron Pi</h3>
             </div>
             <div
               style={{margin: 'auto', marginTop: 25, marginBottom: 25, padding: 25, paddingTop: 0, paddingBottom: 0}}

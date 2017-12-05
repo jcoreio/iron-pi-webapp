@@ -9,6 +9,8 @@ const path = require('path')
 const {execSync} = require('child_process')
 const {spawn} = require('child-process-async')
 const touch = require('touch')
+const fs = require('fs-extra')
+const requireEnv = require('./src/universal/util/requireEnv')
 
 process.chdir(__dirname)
 const pathDelimiter = /^win/.test(process.platform) ? ';' : ':'
@@ -17,6 +19,7 @@ process.env.PATH = process.env.PATH ? `${npmBin}${pathDelimiter}${process.env.PA
 
 const {TARGET} = process.env
 const build = path.resolve(TARGET ? `build-${TARGET}` : 'build')
+process.env.BUILD_DIR = build
 
 const promake = new Promake()
 const {rule, task, exec, cli} = promake
@@ -27,10 +30,9 @@ rule('node_modules', ['package.json', 'yarn.lock'], async () => {
   await touch('node_modules')
 })
 
-function env(...names /* : Array<string> */) /* : {[name: string]: string} */ {
+function env(...names /* : Array<string> */) /* : {[name: string]: ?string} */ {
   return {
     ...process.env,
-    BUILD_DIR: build,
     ...require('defaultenv')(names.map(name => `env/${name}.js`), {noExport: true}),
   }
 }
@@ -43,13 +45,15 @@ const serverPrerequisites = [
   'node_modules',
   serverEnv,
   '.babelrc',
+  'defines.js',
   ...glob.sync('src/server/**/.babelrc')
 ]
 
 envRule(serverEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
-rule(buildServer, serverPrerequisites, () =>
-  spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod'), stdio: 'inherit'})
-)
+rule(buildServer, serverPrerequisites, async () => {
+  await fs.remove(`${build}/server`)
+  await spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod'), stdio: 'inherit'})
+})
 task(`${build}/server`, buildServer)
 
 const universalEnv = `${build}/.universalEnv`
@@ -60,13 +64,15 @@ const universalPrerequisites = [
   universalEnv,
   'node_modules',
   '.babelrc',
+  'defines.js',
   ...glob.sync('src/universal/**/.babelrc')
 ]
 
 envRule(universalEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
-rule(buildUniversal, universalPrerequisites, () =>
-  spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod'), stdio: 'inherit'})
-)
+rule(buildUniversal, universalPrerequisites, async () => {
+  await fs.remove(`${build}/universal`)
+  await spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod'), stdio: 'inherit'})
+})
 task(`build:universal`, buildUniversal)
 
 task('build:server', [...buildServer, ...buildUniversal])
@@ -80,8 +86,7 @@ const clientPrerequisites = [
   ...glob.sync('src/client/**/.babelrc'),
   clientEnv,
   'node_modules',
-  'webpack/webpack.config.prod.js',
-  'webpack/defines.js'
+  ...glob.sync('webpack/**/*.js'),
 ]
 
 envRule(
@@ -92,9 +97,10 @@ envRule(
   ],
   {getEnv: async () => env('prod')}
 )
-rule(buildClient, clientPrerequisites, () =>
-  spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod'), stdio: 'inherit'})
-)
+rule(buildClient, clientPrerequisites, async () => {
+  await fs.remove(`${build}/assets`)
+  await spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod'), stdio: 'inherit'})
+})
 task(`build:client`, buildClient)
 
 const dockerEnv = `${build}/.dockerEnv`
@@ -111,18 +117,18 @@ envRule(dockerEnv, ['NPM_TOKEN', 'NODE_ENV'], {getEnv: async () => env('prod')})
 const useSudo = Boolean(process.env.CI)
 task('build:docker', dockerPrerequisites, async () => {
   const commitHash = (await exec('git rev-parse HEAD')).stdout.toString('utf8').trim()
-  const buildEnv = env('prod')
-  if (!buildEnv.NPM_TOKEN) throw new Error('missing process.env.NPM_TOKEN')
+  const dockerEnv = env('prod')
+  const NPM_TOKEN = await require('./scripts/getNpmToken')(dockerEnv)
   await spawn(useSudo ? 'sudo' : 'docker', [
     ...(useSudo ? ['docker'] : []), 'build',
-    '--build-arg', `NPM_TOKEN=${buildEnv.NPM_TOKEN}`,
-    '--build-arg', `BUILD_DIR=${build}`,
+    '--build-arg', `NPM_TOKEN=${NPM_TOKEN}`,
+    '--build-arg', `BUILD_DIR=${path.relative(__dirname, build)}`,
     '--build-arg', `TARGET=${TARGET || ''}`,
     '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}`,
     '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}:${commitHash}`,
     '.'
   ], {
-    env: buildEnv,
+    env: dockerEnv,
     stdio: 'inherit',
   })
 })
@@ -134,29 +140,39 @@ task('build', [
 ])
 
 task('built', 'build', async () => {
-  process.env.BUILD_DIR = build
   require('defaultenv')(['env/prod.js', 'env/local.js'])
+  // $FlowFixMe
   await require(`${build}/server/index.js`).start()
   await new Promise(() => {})
 })
 
-task('clean', () => require('fs-extra').remove(build))
+task('clean', () => fs.remove(build))
 
 const services = task('services', () => spawn('docker-compose', ['up', '-d', 'db', 'redis'], {
   env: env('prod', 'local'), stdio: 'inherit'
 }))
 
-task('services:logs', () => spawn('docker-compose', ['logs', '-f'], {env: env('prod', 'local'), stdio: 'inherit'}))
+task('services:logs', () =>
+  spawn('docker-compose', ['logs', '-f'], {env: env('prod', 'local'), stdio: 'inherit'})
+)
+
+task('docker', [services], () =>
+  spawn('docker-compose', ['up', 'app'], {stdio: 'inherit', env: env('prod', 'local')})
+)
+task('dc', ({args}) => spawn('docker-compose', args, {env: env('prod', 'local'), stdio: 'inherit'}))
+
+task('docker:stop', () => spawn('docker-compose', ['stop'], {stdio: 'inherit', env: env('prod', 'local')}))
 
 task('mysql', async () => {
   const dcEnv = env('prod', 'local')
-  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${dcEnv.DB_PASSWORD}`, `-D${dcEnv.DB_NAME}`], {
+  const DB_PASSWORD = requireEnv('DB_PASSWORD', dcEnv)
+  const DB_NAME = requireEnv('DB_NAME', dcEnv)
+  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${DB_PASSWORD}`, `-D${DB_NAME}`], {
     env: dcEnv, stdio: 'inherit'
   })
 })
 
 task('dev:server', ['node_modules', services], async () => {
-  process.env.BUILD_DIR = build
   require('defaultenv')(['env/dev.js', 'env/local.js'])
   require('babel-register')
   await require('./scripts/runServerWithHotRestarting')(path.resolve('src'))
@@ -164,7 +180,6 @@ task('dev:server', ['node_modules', services], async () => {
 })
 
 task('dev:client', ['node_modules'], async () => {
-  process.env.BUILD_DIR = build
   require('defaultenv')(['env/dev.js', 'env/local.js'])
   require('babel-register')
   require('./scripts/devServer')
@@ -172,7 +187,6 @@ task('dev:client', ['node_modules'], async () => {
 })
 
 task('prod:server', ['node_modules', task('build:server'), services], async () => {
-  process.env.BUILD_DIR = build
   require('defaultenv')(['env/prod.js', 'env/local.js'])
   spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`], {stdio: 'inherit'})
   spawn('babel', ['--skip-initial-build', '--watch', 'src/universal', '--out-dir', `${build}/universal`], {stdio: 'inherit'})
@@ -187,9 +201,33 @@ task('prod:client', ['node_modules'], () =>
   })
 )
 
+task('flow', 'node_modules', () => spawn('flow', {stdio: 'inherit'}))
+
+task('flow:watch', 'node_modules', () =>
+  spawn('flow-watch', [
+    '--watch', '.flowconfig',
+    '--watch', 'flowlib/',
+    '--watch', 'src/',
+    '--watch', 'test/',
+    '--watch', 'webpack/',
+    '--watch', 'run',
+    '--watch', 'run.js',
+    '--watch', 'defines.js',
+  ], {stdio: 'inherit'})
+)
+
+// "lint": "eslint *.js src jcore-core scripts test util webpack",
+const lintFiles = [
+  'run', 'run.js', 'defines.js', 'src', 'scripts', 'test', 'webpack',
+]
+
+task('lint', 'node_modules', () => spawn('eslint', lintFiles, {stdio: 'inherit'}))
+task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles], {stdio: 'inherit'}))
+task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed'], {stdio: 'inherit'}))
+
 task('repl', ['node_modules'], async () => {
   require('defaultenv')(['env/dev.js', 'env/local.js'])
-  await spawn('rc', [`/tmp/repl/${process.env.DB_NAME || ''}.sock`], {stdio: 'inherit'})
+  await spawn('rc', [`/tmp/repl/${requireEnv('DB_NAME')}.sock`], {stdio: 'inherit'})
 })
 
 cli()

@@ -13,18 +13,15 @@ services:
   app:
     image: jcoreio/iron-pi-webapp
     ports:
-      - "3000:80"
+      - "${PORT}:80"
     environment:
-      - ROOT_URL=http://localhost:3000
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_NAME=pasonpower
-      - DB_PASSWORD=password
-      - DB_MIGRATE=true
-      - LOG_GROUP_NAME=battmanDataConsumerProdShart
-      - AWS_REGION=us-west-2
+      - ROOT_URL=${ROOT_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db
       - redis

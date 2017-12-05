@@ -38,8 +38,10 @@ module.exports = replServer
 
 /* eslint-disable no-console */
 
-console.log("*** to connect to REPL:")
+console.log("*** to connect to REPL, run:")
+console.log("***   ./run repl")
+console.log("*** OR:")
 console.log("*** make sure you have repl-client installed (npm i -g repl-client)")
 console.log("*** then run:")
-console.log(`*** > rc /tmp/repl/${DB_NAME}.sock`)
+console.log(`***   rc /tmp/repl/${DB_NAME}.sock`)
 
