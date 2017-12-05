@@ -9,6 +9,7 @@ const path = require('path')
 const {execSync} = require('child_process')
 const touch = require('touch')
 const fs = require('fs-extra')
+const chalk = require('chalk')
 const requireEnv = require('./src/universal/util/requireEnv')
 
 process.chdir(__dirname)
@@ -23,6 +24,11 @@ process.env.BUILD_DIR = build
 const promake = new Promake()
 const {rule, task, exec, spawn, cli} = promake
 const envRule = require('promake-env').envRule(rule)
+
+function remove(path /* : string */) /* : Promise<void> */ {
+  console.error(chalk.gray('$'), chalk.gray('rm'), chalk.gray('-rf'), chalk.gray(path)) // eslint-disable-line no-console
+  return fs.remove(path)
+}
 
 rule('node_modules', ['package.json', 'yarn.lock'], async () => {
   await exec('yarn --ignore-scripts')
@@ -50,7 +56,7 @@ const serverPrerequisites = [
 
 envRule(serverEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildServer, serverPrerequisites, async () => {
-  await fs.remove(`${build}/server`)
+  await remove(`${build}/server`)
   await spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod')})
 })
 
@@ -68,7 +74,7 @@ const universalPrerequisites = [
 
 envRule(universalEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildUniversal, universalPrerequisites, async () => {
-  await fs.remove(`${build}/universal`)
+  await remove(`${build}/universal`)
   await spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod')})
 })
 task(`build:universal`, buildUniversal)
@@ -96,7 +102,7 @@ envRule(
   {getEnv: async () => env('prod')}
 )
 rule(buildClient, clientPrerequisites, async () => {
-  await fs.remove(`${build}/assets`)
+  await remove(`${build}/assets`)
   await spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod')})
 })
 task(`build:client`, buildClient)
@@ -141,7 +147,7 @@ task('built', 'build', async () => {
   await new Promise(() => {})
 })
 
-task('clean', () => fs.remove(build))
+task('clean', () => remove(build))
 
 const services = task('services', () =>
   spawn('docker-compose', ['up', '-d', 'db', 'redis'], {env: env('prod', 'local')})
