@@ -146,7 +146,7 @@
     "phantomjs-prebuilt": "^2.1.14",
     "portscanner": "^2.1.1",
     "pre-commit": "^1.2.2",
-    "promake": "^1.4.0",
+    "promake": "^1.5.0",
     "promake-env": "^1.1.2",
     "raw-loader": "^0.5.1",
     "react-addons-perf": "^15.4.2",

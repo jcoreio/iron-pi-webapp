@@ -5962,9 +5962,9 @@ promake-env@^1.1.2:
   dependencies:
     es6-promisify "^5.0.0"
 
-promake@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/promake/-/promake-1.4.0.tgz#a4703af3bd2b0b9498f0e17d500a9723a324503f"
+promake@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/promake/-/promake-1.5.0.tgz#3cb27347ee8d6fe2a253fabbee1f3e5612955c5a"
   dependencies:
     chalk "^2.3.0"
     child-process-async "^1.0.1"

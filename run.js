@@ -7,7 +7,6 @@ const glob = require('glob')
 const Promake = require('promake')
 const path = require('path')
 const {execSync} = require('child_process')
-const {spawn} = require('child-process-async')
 const touch = require('touch')
 const fs = require('fs-extra')
 const requireEnv = require('./src/universal/util/requireEnv')
@@ -22,7 +21,7 @@ const build = path.resolve(TARGET ? `build-${TARGET}` : 'build')
 process.env.BUILD_DIR = build
 
 const promake = new Promake()
-const {rule, task, exec, cli} = promake
+const {rule, task, exec, spawn, cli} = promake
 const envRule = require('promake-env').envRule(rule)
 
 rule('node_modules', ['package.json', 'yarn.lock'], async () => {
@@ -52,9 +51,8 @@ const serverPrerequisites = [
 envRule(serverEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildServer, serverPrerequisites, async () => {
   await fs.remove(`${build}/server`)
-  await spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod'), stdio: 'inherit'})
+  await spawn('babel', ['src/server', '--out-dir', `${build}/server`], {env: env('prod')})
 })
-task(`${build}/server`, buildServer)
 
 const universalEnv = `${build}/.universalEnv`
 const srcUniversal = glob.sync('src/universal/**/*.js')
@@ -71,7 +69,7 @@ const universalPrerequisites = [
 envRule(universalEnv, ['NODE_ENV', 'BABEL_ENV', 'CI'], {getEnv: async () => env('prod')})
 rule(buildUniversal, universalPrerequisites, async () => {
   await fs.remove(`${build}/universal`)
-  await spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod'), stdio: 'inherit'})
+  await spawn(`babel`, ['src/universal', '--out-dir', `${build}/universal`], {env: env('prod')})
 })
 task(`build:universal`, buildUniversal)
 
@@ -99,7 +97,7 @@ envRule(
 )
 rule(buildClient, clientPrerequisites, async () => {
   await fs.remove(`${build}/assets`)
-  await spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod'), stdio: 'inherit'})
+  await spawn(`webpack`, ['--config', 'webpack/webpack.config.prod.js', '--colors'], {env: env('prod')})
 })
 task(`build:client`, buildClient)
 
@@ -127,10 +125,7 @@ task('build:docker', dockerPrerequisites, async () => {
     '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}`,
     '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}:${commitHash}`,
     '.'
-  ], {
-    env: dockerEnv,
-    stdio: 'inherit',
-  })
+  ], {env: dockerEnv})
 })
 
 task('build', [
@@ -148,28 +143,26 @@ task('built', 'build', async () => {
 
 task('clean', () => fs.remove(build))
 
-const services = task('services', () => spawn('docker-compose', ['up', '-d', 'db', 'redis'], {
-  env: env('prod', 'local'), stdio: 'inherit'
-}))
+const services = task('services', () =>
+  spawn('docker-compose', ['up', '-d', 'db', 'redis'], {env: env('prod', 'local')})
+)
 
 task('services:logs', () =>
-  spawn('docker-compose', ['logs', '-f'], {env: env('prod', 'local'), stdio: 'inherit'})
+  spawn('docker-compose', ['logs', '-f'], {env: env('prod', 'local')})
 )
 
 task('docker', [services], () =>
-  spawn('docker-compose', ['up', 'app'], {stdio: 'inherit', env: env('prod', 'local')})
+  spawn('docker-compose', ['up', 'app'], {env: env('prod', 'local')})
 )
-task('dc', ({args}) => spawn('docker-compose', args, {env: env('prod', 'local'), stdio: 'inherit'}))
+task('dc', ({args}) => spawn('docker-compose', args, {env: env('prod', 'local')}))
 
-task('docker:stop', () => spawn('docker-compose', ['stop'], {stdio: 'inherit', env: env('prod', 'local')}))
+task('docker:stop', () => spawn('docker-compose', ['stop'], {env: env('prod', 'local')}))
 
 task('mysql', async () => {
   const dcEnv = env('prod', 'local')
   const DB_PASSWORD = requireEnv('DB_PASSWORD', dcEnv)
   const DB_NAME = requireEnv('DB_NAME', dcEnv)
-  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${DB_PASSWORD}`, `-D${DB_NAME}`], {
-    env: dcEnv, stdio: 'inherit'
-  })
+  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${DB_PASSWORD}`, `-D${DB_NAME}`], {env: dcEnv})
 })
 
 task('dev:server', ['node_modules', services], async () => {
@@ -188,20 +181,18 @@ task('dev:client', ['node_modules'], async () => {
 
 task('prod:server', ['node_modules', task('build:server'), services], async () => {
   require('defaultenv')(['env/prod.js', 'env/local.js'])
-  spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`], {stdio: 'inherit'})
-  spawn('babel', ['--skip-initial-build', '--watch', 'src/universal', '--out-dir', `${build}/universal`], {stdio: 'inherit'})
+  spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`])
+  spawn('babel', ['--skip-initial-build', '--watch', 'src/universal', '--out-dir', `${build}/universal`])
   require('babel-register')
   await require('./scripts/runServerWithHotRestarting')(build)
   await new Promise(() => {})
 })
 
 task('prod:client', ['node_modules'], () =>
-  spawn('webpack', ['--config', 'webpack/webpack.config.prod.js', '--watch', '--colors'], {
-    env: env('prod'), stdio: 'inherit'
-  })
+  spawn('webpack', ['--config', 'webpack/webpack.config.prod.js', '--watch', '--colors'], {env: env('prod')})
 )
 
-task('flow', 'node_modules', () => spawn('flow', {stdio: 'inherit'}))
+task('flow', 'node_modules', () => spawn('flow'))
 
 task('flow:watch', 'node_modules', () =>
   spawn('flow-watch', [
@@ -213,7 +204,7 @@ task('flow:watch', 'node_modules', () =>
     '--watch', 'run',
     '--watch', 'run.js',
     '--watch', 'defines.js',
-  ], {stdio: 'inherit'})
+  ])
 )
 
 // "lint": "eslint *.js src jcore-core scripts test util webpack",
@@ -221,8 +212,8 @@ const lintFiles = [
   'run', 'run.js', 'defines.js', 'src', 'scripts', 'test', 'webpack',
 ]
 
-task('lint', 'node_modules', () => spawn('eslint', lintFiles, {stdio: 'inherit'}))
-task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles], {stdio: 'inherit'}))
-task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed'], {stdio: 'inherit'}))
+task('lint', 'node_modules', () => spawn('eslint', lintFiles))
+task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles]))
+task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed']))
 
 cli()
