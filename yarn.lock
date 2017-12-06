@@ -6144,8 +6144,8 @@ promise@^7.1.1:
     asap "~2.0.3"
 
 promisify-child-process@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/promisify-child-process/-/promisify-child-process-1.0.0.tgz#6a006ac1d3e756766a40c654e9cdbace8863f5dd"
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/promisify-child-process/-/promisify-child-process-1.0.1.tgz#468a045eb3169107036bba19f036db168675c23f"
 
 promisify-event@^1.0.0:
   version "1.0.0"

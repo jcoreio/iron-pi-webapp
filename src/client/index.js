@@ -1,5 +1,6 @@
 // @flow
 
+// $FlowFixMe
 import { render, hydrate } from 'react-dom'
 import * as React from 'react'
 import { AppContainer } from 'react-hot-loader'
