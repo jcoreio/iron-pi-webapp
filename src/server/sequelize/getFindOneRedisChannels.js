@@ -28,10 +28,9 @@ export default function getFindOneRedisChannels<TAttributes, TInstance: Model<TA
     for (let _include of includes) {
       const include: IncludeOptions<TAttributes, TInstance> = _include instanceof Model ? {model: _include} : (_include: any)
 
-      const association = include.association || model.getAssociation(include.model, include.as)
+      const association = include.association || (include.model && model.getAssociationForAlias(include.model, include.as))
 
       if (!association) continue
-      const {associationType} = association
 
       const allTargetEvents = `collection/${association.target.tableName}/*`
       const specificTargetEvent = new RegExp(`collection/${association.target.tableName}/\\d+`)
