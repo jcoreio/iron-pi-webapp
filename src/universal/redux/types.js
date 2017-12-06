@@ -51,7 +51,7 @@ export const StateRecord = Record(stateInit)
 export type State = RecordOf<StateFields>
 
 export type StateJSON = {
-  features: Features<StateRecord, Action>,
+  features: Features<State, Action>,
   featureStates: FeatureStates,
   user: ?User,
   auth: Auth,
