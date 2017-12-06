@@ -3,6 +3,10 @@
   "engines": {
     "node": ">=8.0.0"
   },
+  "scripts": {
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "precommit": "./run flow lint"
+  },
   "nyc": {
     "include": [
       "src/**/*.js"
@@ -63,6 +67,8 @@
   "license": "UNLICENSED",
   "description": "iron pi webapp",
   "devDependencies": {
+    "@commitlint/cli": "^5.2.3",
+    "@commitlint/config-conventional": "^5.2.3",
     "@jedwards1211/eslint-config": "^1.0.0",
     "@jedwards1211/eslint-config-flow": "^1.0.0",
     "@jedwards1211/eslint-config-react": "^3.0.0",
@@ -93,7 +99,6 @@
     "chai-as-promised": "^7.1.1",
     "chai-datetime": "^1.5.0",
     "chalk": "^2.3.0",
-    "child-process-async": "^1.0.1",
     "chokidar": "^1.6.1",
     "coveralls": "^3.0.0",
     "css-loader": "^0.28.1",
@@ -113,6 +118,7 @@
     "glob": "^7.1.2",
     "happypack": "^4.0.0",
     "http-proxy": "^1.16.2",
+    "husky": "^0.14.3",
     "istanbul": "^0.4.5",
     "jsdom": "^11.5.1",
     "jsdom-global": "^3.0.2",
@@ -126,9 +132,9 @@
     "opn": "^5.1.0",
     "phantomjs-prebuilt": "^2.1.14",
     "portscanner": "^2.1.1",
-    "pre-commit": "^1.2.2",
-    "promake": "^1.5.0",
+    "promake": "^1.5.1",
     "promake-env": "^1.1.4",
+    "promisify-child-process": "^1.0.0",
     "raw-loader": "^0.5.1",
     "react-addons-perf": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
