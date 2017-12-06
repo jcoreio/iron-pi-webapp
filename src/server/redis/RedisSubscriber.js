@@ -11,7 +11,11 @@ let _redisClient: ?RedisClient
 let _redisSubscriber: ?RedisSubscriber<Object>
 
 export function start() {
-  _redisClient = createClient(parseInt(requireEnv('REDIS_PORT')), requireEnv('REDIS_HOST'))
+  _redisClient = createClient({
+    host: requireEnv('REDIS_HOST'),
+    port: parseInt(requireEnv('REDIS_PORT')),
+    db: parseInt(requireEnv('REDIS_DB')),
+  })
   _redisSubscriber = new RedisSubscriber(_redisClient, {parseMessage: JSON.parse})
 }
 

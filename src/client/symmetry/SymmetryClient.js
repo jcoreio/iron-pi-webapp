@@ -120,7 +120,7 @@ export default class SymmetryClient extends SymmetryConnBase {
       context.emit(eventName, ...payload)
     } break
     case SYM_RESULT: {
-      let { id, error, result }: {id: NonEmptyString, error: SymmetryErr, result: any} = (message: any)
+      let { id, error, result }: {id: NonEmptyString, error?: SymmetryErr, result: any} = (message: any)
       let request = this.requests.get(id)
       if (!request) throw new Error("could not find the request for a method result message: " + id)
       this.requests.delete(id)

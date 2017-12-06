@@ -76,9 +76,9 @@ export type Action = $Shape<{
   meta: Object,
 }>
 
-export type Store = _Store<StateRecord, Action>
+export type Store = _Store<State, Action>
 export type Dispatch = _Dispatch<Action>
-export type Reducer = _Reducer<StateRecord, Action>
-export type Middleware = _Middleware<StateRecord, Action>
-export type MiddlewareAPI = _MiddlewareAPI<StateRecord, Action>
+export type Reducer = _Reducer<State, Action>
+export type Middleware = _Middleware<State, Action>
+export type MiddlewareAPI = _MiddlewareAPI<State, Action>
 

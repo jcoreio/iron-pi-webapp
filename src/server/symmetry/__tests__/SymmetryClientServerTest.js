@@ -5,13 +5,13 @@ import {describe, it} from 'mocha'
 
 import EventEmitter from 'events'
 
-import SymmetryClient from '../../../../src/client/symmetry/SymmetryClient'
-import Symmetry from '../../../../src/server/symmetry'
-import SymmetryServerConn from '../../../../src/server/symmetry/SymmetryServer'
-import { SYM_SUB_EVENT, SYM_UNSUB, SYM_EVENT, SYM_METHOD, SYM_RESULT} from '../../../../src/universal/symmetry/SymmetryProto'
+import SymmetryClient from '../../../client/symmetry/SymmetryClient'
+import Symmetry from '../index'
+import SymmetryServerConn from '../SymmetryServer'
+import { SYM_SUB_EVENT, SYM_UNSUB, SYM_EVENT, SYM_METHOD, SYM_RESULT} from '../../../universal/symmetry/SymmetryProto'
 
-import type EventSubContext from '../../../../src/universal/symmetry/SubContext'
-import type {MethodsDef, PublicationsDef, SubContext, MethodContext} from '../../../../src/server/symmetry/types'
+import type EventSubContext from '../../../universal/symmetry/SubContext'
+import type {MethodsDef, PublicationsDef, SubContext, MethodContext} from '../types'
 
 class MockSock extends EventEmitter {
   sent: Array<string> = [];

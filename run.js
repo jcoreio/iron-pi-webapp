@@ -22,8 +22,21 @@ const build = path.resolve(TARGET ? `build-${TARGET}` : 'build')
 process.env.BUILD_DIR = build
 
 const promake = new Promake()
-const {rule, task, exec, spawn, cli} = promake
+const {rule, task, exec, cli} = promake
 const envRule = require('promake-env').envRule(rule)
+
+function spawn(command, args, options) {
+  if (!Array.isArray(args)) {
+    options = args
+    args = []
+  }
+  if (!args) args = []
+  if (!options) options = {}
+  return promake.spawn(command, args, {
+    stdio: 'inherit',
+    ...options,
+  })
+}
 
 function remove(path /* : string */) /* : Promise<void> */ {
   console.error(chalk.gray('$'), chalk.gray('rm'), chalk.gray('-rf'), chalk.gray(path)) // eslint-disable-line no-console
@@ -97,7 +110,7 @@ envRule(
   clientEnv,
   [
     'NODE_ENV', 'BABEL_ENV', 'CI', 'NO_UGLIFY', 'NO_HAPPYPACK', 'WEBPACK_DEVTOOL',
-    ...Object.keys(require('./webpack/defines')),
+    'LOG_REDUX_ACTIONS',
   ],
   {getEnv: async () => env('prod')}
 )
@@ -185,6 +198,8 @@ task('dev:client', ['node_modules'], async () => {
   await new Promise(() => {})
 })
 
+task('env:test', ['node_modules'], () => require('defaultenv')(['env/test.js']))
+
 task('prod:server', ['node_modules', task('build:server'), services], async () => {
   require('defaultenv')(['env/prod.js', 'env/local.js'])
   spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`])
@@ -221,5 +236,50 @@ const lintFiles = [
 task('lint', 'node_modules', () => spawn('eslint', lintFiles))
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles]))
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed']))
+
+function testRecipe(options /* : {
+  unit?: boolean,
+  integration?: boolean,
+  coverage?: boolean,
+  watch?: boolean,
+} */) /* : (rule: {args: Array<string>}) => Promise<void> */ {
+  const {unit, integration, coverage, watch} = options
+  const args = [
+    '-r', 'babel-core/register',
+  ]
+  if (unit) args.push(
+    '-r', 'jsdom-global/register',
+    './src/**/__tests__/**/*.js',
+    './test/unit/**/*.js',
+  )
+  if (integration) args.push(
+    './test/integration/index.js'
+  )
+  if (watch) args.push('--watch')
+  let command = 'mocha'
+  if (coverage) {
+    args.unshift('--reporter=lcov', '--reporter=text', command)
+    command = 'nyc'
+  }
+
+  return rule => spawn(command, [...args, ...rule.args], {
+    env: env('test', 'local'),
+    stdio: 'inherit'
+  })
+}
+
+for (let coverage of [false, true]) {
+  const prefix = coverage ? 'coverage' : 'test'
+  for (let watch of coverage ? [false] : [false, true]) {
+    const suffix = watch ? ':watch' : ''
+    task(`${prefix}${suffix}`, ['node_modules'], testRecipe({unit: true, integration: true, coverage, watch}))
+    task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
+    task(`${prefix}:integration${suffix}`, ['node_modules'], testRecipe({integration: true, coverage, watch}))
+  }
+}
+
+task('open:coverage', () => {
+  require('opn')('coverage/lcov-report/index.html')
+})
 
 cli()

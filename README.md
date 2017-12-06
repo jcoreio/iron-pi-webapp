@@ -80,3 +80,46 @@ etc.
 
 Open `chrome://inspect` in Google Chrome, and click the link for your node VM to open the console.
 
+## Testing
+
+There are currently two categories of tests:
+
+#### Unit tests
+These are standalone and are located in either:
+* `src/**/__tests__/*.js`
+* `test/unit/**/*.js`
+
+#### Integration tests
+These require the webapp to be running in test mode.  You
+can launch the webapp in test mode by running the `env:test` task before
+the task(s) that launch the webapp:
+```
+./run env:test dev:server
+./run env:test dev:client
+./run env:test prod:server
+./run env:test prod:client
+```
+
+### Running Tests
+To run both categories at once, run `./run test`.
+
+To run only a single
+category, run `./run test:unit` or `./run test:integration`.
+
+#### Watch mode
+Add `:watch` at the end of a task to run in watch mode:
+```
+./run test:watch
+./run test:unit:watch
+./run test:integration:watch
+```
+
+#### Code coverage mode
+You can run the test with `nyc` code coverage by replacing `test` with
+`coverage` (`:watch` isn't available in this mode):
+```
+./run coverage
+./run coverage:unit
+./run coverage:integration
+```
+

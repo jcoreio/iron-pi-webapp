@@ -54,6 +54,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
       })
       res.end()
     } else {
+      res.status(routerContext.status || 200)
       res.write('<!DOCTYPE html>\n')
       res.write(html)
       res.end()

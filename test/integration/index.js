@@ -1,11 +1,9 @@
 /* global browser */
 
 import * as webdriverio from 'webdriverio'
-import mkdirp from 'mkdirp'
 import path from 'path'
 import mergeClientCoverage from './util/mergeClientCoverage'
-import fs from 'fs'
-import promisify from 'es6-promisify'
+import fs from 'fs-extra'
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -37,15 +35,15 @@ describe('selenium tests', function () {
   afterEach(async function () {
     const {state, title} = this.currentTest
     if (state === 'failed') {
-      await mkdirp(errorShots)
+      await fs.mkdirs(errorShots)
       const screenshotFile = path.join(errorShots, `ERROR_phantomjs_${title.replace(/[^a-z0-9 ]/ig, '_')}_${new Date().toISOString()}.png`)
       await browser.saveScreenshot(screenshotFile)
       console.log('Saved screenshot to', screenshotFile) // eslint-disable-line no-console
 
-      await mkdirp(errorShots)
+      await fs.mkdirs(errorShots)
       const logFile = path.join(errorShots, `ERROR_phantomjs_${title.replace(/[^a-z0-9 ]/ig, '_')}_${new Date().toISOString()}.log`)
       const logs = (await browser.log('browser')).value
-      await promisify(fs.writeFile)(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
+      await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
     }
 
     await mergeClientCoverage()
