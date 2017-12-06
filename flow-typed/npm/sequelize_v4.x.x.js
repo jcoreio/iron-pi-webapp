@@ -1,5 +1,5 @@
-// flow-typed signature: 1f6e562811e580d192c214934fd175db
-// flow-typed version: 44f034bed6/sequelize_v4.x.x/flow_>=v0.42.x
+// flow-typed signature: 3e40e39700524f097d6d4a688ef72c3e
+// flow-typed version: ad20092247/sequelize_v4.x.x/flow_>=v0.42.x
 
 // @flow
 
@@ -3893,6 +3893,9 @@ declare module "sequelize" {
       TargetAttributes, TargetInitAttributes, Target,
       ThroughAttributes, Through
     >,
+
+    static getAssociations<Target: Model<any>>(model: Class<Target>): Array<Association<this, Target>>;
+    static getAssociationForAlias<Target: Model<any>>(model: Class<Target>, alias: ?string): ?Association<this, Target>;
 
     static associations: {[name: string]: Association<this, any>},
     static tableName: string,

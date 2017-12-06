@@ -4,11 +4,11 @@ import redis from 'redis'
 
 import requireEnv from '../../universal/util/requireEnv'
 
-import type Redis from 'redis'
+import type {RedisClient} from 'redis'
 // import type {CollectionEventEmitter} from '../sequelize/CollectionAdapter'
 // import type {CollectionEvent} from '../types/CollectionEvent'
 
-let _redis: ?Redis
+let _redis: ?RedisClient
 
 const _publishedCollections: Set<CollectionEventEmitter> = new Set()
 
