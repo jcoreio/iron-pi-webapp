@@ -4945,7 +4945,7 @@ moment-timezone@^0.5.4:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@^2.13.0:
+"moment@>= 2.9.0", moment@^2.13.0, moment@^2.19.3:
   version "2.19.3"
   resolved "https://registry.npmjs.org/moment/-/moment-2.19.3.tgz#bdb99d270d6d7fda78cc0fbace855e27fe7da69f"
 

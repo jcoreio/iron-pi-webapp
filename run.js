@@ -278,6 +278,25 @@ for (let coverage of [false, true]) {
   }
 }
 
+task('migration:create', async rule => {
+  let [name] = rule.args
+  if (!name) {
+    process.stderr.write(`Usage:
+./run migration:create -- <migration name>
+
+`)
+    process.exit(0)
+  }
+  if (!/\.js$/.test(name)) name += '.js'
+  const timestamp = require('moment')().format('YYYYMMDDHHmmss')
+  const destFile = `src/server/sequelize/migrations/${timestamp}-${name}`
+  await fs.copy(
+    'src/server/sequelize/migrationStub.js',
+    destFile
+  )
+  console.error(`Created ${destFile}`) // eslint-disable-line no-console
+})
+
 task('open:coverage', () => {
   require('opn')('coverage/lcov-report/index.html')
 })
