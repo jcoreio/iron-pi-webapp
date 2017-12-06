@@ -9,13 +9,8 @@ import sequelize from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 
 import redisSubscriber from './redis/RedisSubscriber'
-import setupWebSocketHandler from './setupWebSocketHandler'
-// import publishCollections from './redis/publishCollections'
 import logger from '../universal/logger'
 import requireEnv from '../universal/util/requireEnv'
-
-import './methods'
-import './publications'
 
 const log = logger('Server')
 
@@ -51,21 +46,13 @@ export default class Server {
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
-    // istanbul ignore next
-    if (process.env.BABEL_ENV === 'test') {
-      app.use('/__test__', require('./express/test'))
-    } else {
-      app.get('/__test__/*', (req: $Request, res: $Response) => res.status(404).send('no!'))
-    }
-
     // server-side rendering
     app.get('*', (req: $Request, res: $Response) => {
       require('./ssr/serverSideRender').default(req, res)
     })
 
     const port = parseInt(requireEnv('BACKEND_PORT'))
-    const httpServer = this._httpServer = app.listen(port)
-    setupWebSocketHandler(httpServer)
+    this._httpServer = app.listen(port)
 
     global.sequelize = sequelize
     Object.assign(global, sequelize.models)

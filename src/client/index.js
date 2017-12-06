@@ -8,11 +8,8 @@ import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
 import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
-import {loginWithToken} from '../universal/auth/redux'
-import Symmetry from './symmetry'
 import addFeatures from '../universal/features/addFeatures'
 import {loadInitialFeatures} from 'redux-features'
-import {reconnect, setOpen} from '../universal/redux/symmetry'
 import '../universal/components/initJss'
 
 async function bootstrap(): Promise<any> {
@@ -28,26 +25,13 @@ async function bootstrap(): Promise<any> {
     )
   }
 
-  const symmetry = Symmetry.client()
-
   // the state is serialized to plain JS for sending over the wire, so we have
   // to convert it back hydrate immutables here
-  const store = makeStore(parseState(window.__INITIAL_STATE__), {symmetry})
+  const store = makeStore(parseState(window.__INITIAL_STATE__))
   addFeatures(store)
 
   if (process.env.NODE_ENV !== 'production') {
-    window.Symmetry = symmetry
     window.store = store
-  }
-
-  // update symmetry connection state in redux once the initial connection succeeds
-  symmetry.once('open', () => store.dispatch(setOpen()))
-  // automatically reconnect when the symmetry connection fails
-  symmetry.on('close', onConnectionFailed)
-  symmetry.on('heartbeatTimeout', onConnectionFailed)
-  function onConnectionFailed() {
-    const {status} = store.getState().connection
-    if (status === 'OPEN') store.dispatch(reconnect())
   }
 
   let reloads = 0
@@ -55,7 +39,7 @@ async function bootstrap(): Promise<any> {
   function mount(Root: typeof Root, callback?: () => void) {
     hydrate(
       <AppContainer key={++reloads}>
-        <Root store={store} symmetry={symmetry} />
+        <Root store={store} />
       </AppContainer>,
       rootElement,
       // $FlowFixMe
@@ -85,9 +69,6 @@ async function bootstrap(): Promise<any> {
       if (ssStyles && ssStyles.parentNode) ssStyles.parentNode.removeChild(ssStyles)
       // render anything that we couldn't on the server
       store.dispatch(setRenderMode('client'))
-      // automatically log back in if the user has an auth in local storage
-      const authToken = localStorage.getItem('authToken')
-      if (authToken) store.dispatch(loginWithToken(authToken))
     }
   )
 }

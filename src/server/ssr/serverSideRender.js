@@ -22,18 +22,9 @@ if (process.env.NODE_ENV === 'production') {
 
 const serverSideRender = async (req: $Request, res: $Response): Promise<void> => {
   try {
-    const symmetry = {
-      subscribe(): any {
-        // this is a stub for now.  Later we can use this to fetch data before responding.
-      },
-      async call(): Promise<void> {
-        // this is a stub for now.  Later we can use this to fetch data before responding.
-      },
-    }
-
     // first create a context for <ServerRouter>, it's where we keep the
     // results of rendering for the second pass if necessary
-    const store: Store = makeStore(StateRecord(), {symmetry})
+    const store: Store = makeStore(StateRecord())
     addFeatures(store)
 
     const routerContext: {status?: number, url?: string} = {}

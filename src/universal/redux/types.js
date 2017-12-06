@@ -6,11 +6,6 @@ import type {RecordOf} from 'immutable'
 import {reducer as formReducer} from 'redux-form/immutable'
 import {featuresReducer, featureStatesReducer} from 'redux-features'
 import type {Features, FeatureStates} from 'redux-features'
-import type {ConnectionState} from './symmetry'
-import {initialConnectionState} from './symmetry'
-
-import {authInit} from '../auth/redux'
-import type {User, Auth} from '../auth/redux'
 
 import type {
   Store as _Store,
@@ -31,20 +26,14 @@ export type RenderMode = 'prerender' | 'client'
 export type StateFields = {
   features: Features<State, Action>,
   featureStates: FeatureStates,
-  user: ?User,
-  auth: Auth,
   renderMode: RenderMode,
   form: Map<string, any>,
-  connection: ConnectionState,
 }
 const stateInit: StateFields = {
   features: featuresReducer()((undefined: any), {type: ''}),
   featureStates: featureStatesReducer()((undefined: any), {type: ''}),
   renderMode: 'prerender',
   form: formReducer(undefined, {}),
-  user: null,
-  auth: authInit,
-  connection: initialConnectionState,
 }
 
 export const StateRecord = Record(stateInit)
@@ -53,11 +42,8 @@ export type State = RecordOf<StateFields>
 export type StateJSON = {
   features: Features<State, Action>,
   featureStates: FeatureStates,
-  user: ?User,
-  auth: Auth,
   renderMode: RenderMode,
   form: Object,
-  connection: ConnectionState,
 }
 
 export function parseState({

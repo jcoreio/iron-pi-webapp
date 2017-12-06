@@ -6,20 +6,11 @@ import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-feature
 
 import reducer from '../../universal/redux/reducer'
 import type {Store, Middleware, State, Action} from '../../universal/redux/types'
-import type SymmetryClient from '../symmetry/SymmetryClient'
-import {symmetryMiddleware} from '../../universal/redux/symmetry'
-import symmetryReconnectMiddleware from '../symmetry/symmetryReconnectMiddleware'
 
-type Options = {
-  symmetry: SymmetryClient,
-}
-
-export default (initialState: State, {symmetry}: Options): Store => {
+export default (initialState: State): Store => {
   const middlewares: Array<Middleware> = [
     loadFeatureMiddleware({createMiddleware}),
     featureMiddlewaresMiddleware({composeMiddleware}),
-    symmetryMiddleware(symmetry),
-    symmetryReconnectMiddleware(symmetry),
   ]
 
   // istanbul ignore next
