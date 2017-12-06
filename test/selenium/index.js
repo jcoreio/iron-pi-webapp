@@ -4,6 +4,8 @@ import * as webdriverio from 'webdriverio'
 import path from 'path'
 import mergeClientCoverage from './util/mergeClientCoverage'
 import fs from 'fs-extra'
+import requireEnv from '../../src/universal/util/requireEnv'
+import superagent from './util/superagent'
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -18,11 +20,18 @@ describe('selenium tests', function () {
           browserName: 'chrome',
         },
         logLevel: process.env.WDIO_LOG_LEVEL || 'silent',
+        baseUrl: requireEnv('ROOT_URL'),
       })
       await browser.init()
     } catch (error) {
       if (error.seleniumStack) throw new Error(error.seleniumStack.message)
       throw error
+    }
+
+    try {
+      await superagent.get('/')
+    } catch (error) {
+      throw new Error(`Can't connect to webapp: ${error.message}`)
     }
   })
   beforeEach(function () {
@@ -49,7 +58,7 @@ describe('selenium tests', function () {
     await mergeClientCoverage()
   })
 
-  require('./main')
+  require('./basicTests')
 })
 
 

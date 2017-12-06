@@ -239,11 +239,11 @@ task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--ch
 
 function testRecipe(options /* : {
   unit?: boolean,
-  integration?: boolean,
+  selenium?: boolean,
   coverage?: boolean,
   watch?: boolean,
 } */) /* : (rule: {args: Array<string>}) => Promise<void> */ {
-  const {unit, integration, coverage, watch} = options
+  const {unit, selenium, coverage, watch} = options
   const args = [
     '-r', 'babel-core/register',
   ]
@@ -252,8 +252,8 @@ function testRecipe(options /* : {
     './src/**/__tests__/**/*.js',
     './test/unit/**/*.js',
   )
-  if (integration) args.push(
-    './test/integration/index.js'
+  if (selenium) args.push(
+    './test/selenium/index.js'
   )
   if (watch) args.push('--watch')
   let command = 'mocha'
@@ -272,9 +272,9 @@ for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
     const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules'], testRecipe({unit: true, integration: true, coverage, watch}))
+    task(`${prefix}${suffix}`, ['node_modules'], testRecipe({unit: true, selenium: true, coverage, watch}))
     task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
-    task(`${prefix}:integration${suffix}`, ['node_modules'], testRecipe({integration: true, coverage, watch}))
+    task(`${prefix}:selenium${suffix}`, ['node_modules'], testRecipe({selenium: true, coverage, watch}))
   }
 }
 

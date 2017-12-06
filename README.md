@@ -82,17 +82,35 @@ Open `chrome://inspect` in Google Chrome, and click the link for your node VM to
 
 ## Testing
 
-There are currently two categories of tests:
+To run all tests, run:
+```
+./run test
+```
+
+Or you may run individual categories of tests:
 
 #### Unit tests
+```
+./run test:unit
+```
+
 These are standalone and are located in either:
 * `src/**/__tests__/*.js`
 * `test/unit/**/*.js`
 
-#### Integration tests
-These require the webapp to be running in test mode.  You
-can launch the webapp in test mode by running the `env:test` task before
-the task(s) that launch the webapp:
+#### Selenium tests
+```
+./run test:selenium
+```
+
+These test against a running webapp.  The `ROOT_URL` environment
+variable controls the server to test against.  The default is in
+`env/test.js`.
+
+#### Running webapp in test mode
+To get full code coverage, the client and server must be running in test
+mode.   You can launch the webapp in test mode by running the `env:test`
+task before the task(s) that launch the webapp:
 ```
 ./run env:test dev:server
 ./run env:test dev:client
@@ -100,18 +118,14 @@ the task(s) that launch the webapp:
 ./run env:test prod:client
 ```
 
-### Running Tests
-To run both categories at once, run `./run test`.
-
-To run only a single
-category, run `./run test:unit` or `./run test:integration`.
+`env:test` also defaults to different databases.
 
 #### Watch mode
 Add `:watch` at the end of a task to run in watch mode:
 ```
 ./run test:watch
 ./run test:unit:watch
-./run test:integration:watch
+./run test:selenium:watch
 ```
 
 #### Code coverage mode
@@ -120,6 +134,9 @@ You can run the test with `nyc` code coverage by replacing `test` with
 ```
 ./run coverage
 ./run coverage:unit
-./run coverage:integration
+./run coverage:selenium
 ```
+
+To get full coverage, the client and server must be running in [test
+mode](#running-webapp-in-test-mode).
 
