@@ -1,4 +1,36 @@
-# iron-pi-webapp
+# webapp-base
+
+This is our base webapp skeleton.  It uses:
+
+* Runtime
+    * [Node 8](https://nodejs.org/)
+    * [Express](https://expressjs.com/) - server request routing
+    * [React](https://reactjs.org/) - view rendering
+    * [React Router](https://reacttraining.com/react-router/)
+    * [JSS](http://cssinjs.org/) - CSS styling
+    * [Redux](https://redux.js.org/) - state management
+    * [Immutable.js](https://facebook.github.io/immutable-js/) - state models
+    * [`redux-features`](https://github.com/jcoreio/redux-features)
+    * [Sequelize](http://docs.sequelizejs.com/) - ORM
+    * [flow-runtime](https://codemix.github.io/flow-runtime/) - runtime type validation
+* Services
+    * [Postgres](https://www.postgresql.org/)
+    * [Redis](https://redis.io/)
+    * [Docker](https://www.docker.com/)
+* Build tools
+    * [Yarn](https://yarnpkg.com/)
+    * [Promake](https://github.com/jcoreio/promake)
+    * [Babel](https://babeljs.io/)
+    * [Webpack](https://webpack.js.org/)
+* Code quality tools
+    * [Flow](https://flow.org/) - type checking
+    * [Eslint](https://eslint.org/) - code style
+* Test tools
+    * [Mocha](https://mochajs.org/) - test definition
+    * [Chai](http://chaijs.com/) - assertions
+    * [Istanbul](https://istanbul.js.org/) - code coverage
+    * [Enzyme](http://airbnb.io/enzyme/) - React unit testing
+    * [Webdriver.io](http://webdriver.io/) - selenium testing
 
 ## Setup
 

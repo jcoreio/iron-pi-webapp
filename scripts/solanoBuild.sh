@@ -2,7 +2,7 @@
 # Script to push to the Amazon ECR Docker registry. Adapted from Solano's example
 # project: https://github.com/solanolabs/ci_memes-ecr/blob/master/scripts/solano-deploy.sh
 
-PROJECT_NAME="pasonpower/webapp"
+PROJECT_NAME="jcoreio/webapp-base"
 CLUSTER_NAME="battmanWebappStaging"
 
 set -eo pipefail # Exit on error
@@ -12,31 +12,17 @@ BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
 IMAGE_NAME="${PROJECT_NAME}:${COMMIT_HASH}"
 
-sudo npm install -gf yarn@^0.28.0
+sudo npm install -gf yarn
 
 echo "registry=https://registry.npmjs.org/" > .npmrc
-echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
 echo 'registry "https://registry.npmjs.org"' > .yarnrc
 
 yarn --version
 yarn --ignore-scripts
 npm rebuild
 
-# Install Docker Compose if it is not already installed
-# if [ ! -f "/usr/local/bin/docker-compose" ]; then
-#   sudo bash -c "curl -L https://github.com/docker/compose/releases/download/1.5.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
-#   sudo chmod +x /usr/local/bin/docker-compose
-# fi
-
-# sudo docker-compose -f scripts/pason-webapp-dbs/docker-compose.yml up -d
-# npm run db:migrate
-# npm run db:dynamoMigrate
-# npm run test:solano
-# sudo docker-compose -f scripts/pason-webapp-dbs/docker-compose.yml down
-
-npm run test:unit
-
-npm run build:docker
+./run clean test:unit build:docker
 
 # Install the latest AWS CLI. The pre-installed version doesn't have the ecr commands we need.
 if [[ ! -f "${HOME}/bin/aws" ]]; then
@@ -48,12 +34,6 @@ fi
 # Set aws lib path
 if [ -d "${HOME}/lib/python2.7/site-packages" ]; then
   export PYTHONPATH="${HOME}/lib/python2.7/site-packages"
-fi
-
-# Install jq if it is not already installed
-if [[ ! -f "$HOME/bin/jq" ]]; then
-  wget -O $HOME/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-  chmod +x $HOME/bin/jq # $HOME/bin is in $PATH
 fi
 
 FQ_COMMIT_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}"

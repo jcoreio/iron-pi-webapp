@@ -6,13 +6,15 @@
 /* eslint-disable flowtype/require-return-type, flowtype/require-parameter-type */
 
 const glob = require('glob')
-const Promake = require('promake')
 const path = require('path')
 const {execSync} = require('child_process')
 const touch = require('touch')
 const fs = require('fs-extra')
 const chalk = require('chalk')
 const requireEnv = require('./src/universal/util/requireEnv')
+const promake = require('./scripts/promake')
+const getCommitHash = require('./scripts/getCommitHash')
+const getDockerTags = require('./scripts/getDockerTags')
 
 process.chdir(__dirname)
 const pathDelimiter = /^win/.test(process.platform) ? ';' : ':'
@@ -23,22 +25,7 @@ const {TARGET} = process.env
 const build = path.resolve(TARGET ? `build-${TARGET}` : 'build')
 process.env.BUILD_DIR = build
 
-const promake = new Promake()
-const {rule, task, exec, cli} = promake
-const envRule = require('promake-env').envRule(rule)
-
-function spawn(command, args, options) {
-  if (!Array.isArray(args)) {
-    options = args
-    args = []
-  }
-  if (!args) args = []
-  if (!options) options = {}
-  return promake.spawn(command, args, {
-    stdio: 'inherit',
-    ...options,
-  })
-}
+const {rule, task, exec, spawn, envRule, cli} = promake
 
 function remove(path /* : string */) /* : Promise<void> */ {
   console.error(chalk.gray('$'), chalk.gray('rm'), chalk.gray('-rf'), chalk.gray(path)) // eslint-disable-line no-console
@@ -135,7 +122,9 @@ const dockerPrerequisites = [
 envRule(dockerEnv, ['NPM_TOKEN', 'NODE_ENV'], {getEnv: async () => env('prod')})
 const useSudo = Boolean(process.env.CI)
 task('build:docker', dockerPrerequisites, async () => {
-  const commitHash = (await exec('git rev-parse HEAD')).stdout.toString('utf8').trim()
+  const dockerTags = await getDockerTags()
+  const tagArgs = []
+  for (let key in dockerTags) tagArgs.push('-t', dockerTags[key])
   const dockerEnv = env('prod')
   const NPM_TOKEN = await require('./scripts/getNpmToken')(dockerEnv)
   await spawn(useSudo ? 'sudo' : 'docker', [
@@ -143,8 +132,7 @@ task('build:docker', dockerPrerequisites, async () => {
     '--build-arg', `NPM_TOKEN=${NPM_TOKEN}`,
     '--build-arg', `BUILD_DIR=${path.relative(__dirname, build)}`,
     '--build-arg', `TARGET=${TARGET || ''}`,
-    '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}`,
-    '-t', `jcoreio/iron-pi-webapp${TARGET ? '-' + TARGET : ''}:${commitHash}`,
+    ...tagArgs,
     '.'
   ], {env: dockerEnv})
 }).description('build docker container')
@@ -313,5 +301,11 @@ task('migration:create', async rule => {
 task('open:coverage', () => {
   require('opn')('coverage/lcov-report/index.html')
 }).description('open test coverage output')
+
+task('push:staging', async () => {
+  const commitHash = await getCommitHash()
+  await exec(`git branch -f staging ${commitHash}`)
+  await exec('git push -f origin staging')
+}).description('push current git branch to remote staging branch')
 
 cli()
