@@ -218,6 +218,7 @@ task('flow:watch', 'node_modules', () =>
     '--watch', '.flowconfig',
     '--watch', 'flowlib/',
     '--watch', 'src/',
+    '--watch', 'scripts/',
     '--watch', 'test/',
     '--watch', 'webpack/',
     '--watch', 'run',
@@ -307,5 +308,7 @@ task('push:staging', async () => {
   await exec(`git branch -f staging ${commitHash}`)
   await exec('git push -f origin staging')
 }).description('push current git branch to remote staging branch')
+
+task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
 
 cli()

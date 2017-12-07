@@ -32,6 +32,16 @@ This is our base webapp skeleton.  It uses:
     * [Enzyme](http://airbnb.io/enzyme/) - React unit testing
     * [Webdriver.io](http://webdriver.io/) - selenium testing
 
+## Cloning this project
+
+Run the following:
+```js
+git clone https://github.com/jcoreio/webapp-base yourproject
+cd yourproject
+yarn
+./run bootstrap
+```
+
 ## Setup
 
 * Install [node.js](https://nodejs.org/en/) version 8.  You may want to use [nvm](https://github.com/creationix/nvm) or

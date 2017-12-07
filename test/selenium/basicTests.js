@@ -10,7 +10,7 @@ chai.use(asPromised)
 describe('basic tests', () => {
   it('serves page with correct title', async function () {
     await navigateTo('/')
-    expect(await browser.getTitle()).to.equal('Iron Pi')
+    expect(await browser.getTitle()).to.equal('<<APP_TITLE>>')
   })
   it('serves 404 for favicon', () => expect(superagent.get('/favicon.png')).to.be.rejectedWith(Error))
   it('serves 404 for invalid route', () => expect(superagent.get('/blah')).to.be.rejectedWith(Error))

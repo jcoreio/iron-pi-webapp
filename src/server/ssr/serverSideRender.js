@@ -31,7 +31,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
 
     const html = renderToString(
       <Html
-        title="Iron Pi"
+        title="<<APP_TITLE>>"
         assets={assets}
         store={store}
         location={req.url}
