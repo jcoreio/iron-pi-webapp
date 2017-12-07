@@ -2,7 +2,7 @@
 # Script to push to the Amazon ECR Docker registry. Adapted from Solano's example
 # project: https://github.com/solanolabs/ci_memes-ecr/blob/master/scripts/solano-deploy.sh
 
-PROJECT_NAME="jcoreio/webapp-base"
+PROJECT_NAME="jcoreio/webapp-apollo"
 CLUSTER_NAME="battmanWebappStaging"
 
 set -eo pipefail # Exit on error

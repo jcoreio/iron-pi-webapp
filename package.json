@@ -1,5 +1,5 @@
 {
-  "name": "@jcoreio/webapp-base",
+  "name": "@jcoreio/webapp-apollo",
   "engines": {
     "node": ">=8.0.0"
   },
@@ -65,7 +65,7 @@
   "main": "index.js",
   "author": "Andy Edwards <jedwards@fastmail.com>",
   "license": "UNLICENSED",
-  "description": "iron pi webapp",
+  "description": "Our apollo webapp skeleton",
   "devDependencies": {
     "@commitlint/cli": "^5.2.3",
     "@commitlint/config-conventional": "^5.2.3",
@@ -152,12 +152,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jcoreio/webapp-base.git"
+    "url": "git+https://github.com/jcoreio/webapp-apollo.git"
   },
   "bugs": {
-    "url": "https://github.com/jcoreio/webapp-base/issues"
+    "url": "https://github.com/jcoreio/webapp-apollo/issues"
   },
-  "homepage": "https://github.com/jcoreio/webapp-base#readme",
+  "homepage": "https://github.com/jcoreio/webapp-apollo#readme",
   "pre-commit": [
     "lint",
     "flow"

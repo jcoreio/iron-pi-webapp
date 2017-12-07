@@ -1,4 +1,4 @@
-# webapp-base
+# webapp-apollo
 
 This is our base webapp skeleton.  It uses:
 
@@ -36,7 +36,7 @@ This is our base webapp skeleton.  It uses:
 
 Run the following:
 ```js
-git clone https://github.com/jcoreio/webapp-base yourproject
+git clone https://github.com/jcoreio/webapp-apollo yourproject
 cd yourproject
 yarn
 ./run bootstrap
