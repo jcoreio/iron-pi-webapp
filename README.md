@@ -1,6 +1,6 @@
 # webapp-apollo
 
-This is our base webapp skeleton.  It uses:
+This is our apollo webapp skeleton.  It uses:
 
 * Runtime
     * [Node 8](https://nodejs.org/)
@@ -13,6 +13,8 @@ This is our base webapp skeleton.  It uses:
     * [`redux-features`](https://github.com/jcoreio/redux-features)
     * [Sequelize](http://docs.sequelizejs.com/) - ORM
     * [flow-runtime](https://codemix.github.io/flow-runtime/) - runtime type validation
+    * [GraphQL](http://graphql.org/) - API query language
+    * [Apollo](https://www.apollographql.com) - data transport middleware
 * Services
     * [Postgres](https://www.postgresql.org/)
     * [Redis](https://redis.io/)
