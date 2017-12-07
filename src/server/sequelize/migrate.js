@@ -5,7 +5,7 @@ import fs from 'fs'
 
 import promisify from 'es6-promisify'
 import Sequelize from 'sequelize'
-import mysql from 'mysql2'
+import {Client} from 'pg'
 import Umzug from 'umzug'
 
 import sequelize, {dbConnectionParams} from './index'
@@ -19,17 +19,16 @@ export default async function migrate(): Promise<void> {
   log.info('Starting database migration...')
 
   const {host, user, password, database} = dbConnectionParams()
-  const conn = mysql.createConnection({
-    host,
-    user,
-    password,
-    database: '', // Use an empty database name when creating the database
-    connectTimeout: parseInt(process.env.DB_CONNECT_TIMEOUT) || undefined,
-    ssl: process.env.DB_SSL || undefined,
-  })
-  const query = promisify((sql, cb) => conn.query(sql, cb))
-  log.info('Creating database...')
-  await query(`CREATE DATABASE IF NOT EXISTS ${database}`)
+  const client = new Client({host, user, password, database: user})
+  await client.connect()
+
+  const {rowCount: databaseExists} = await client.query(
+    `SELECT 1 FROM pg_database WHERE datname = $1::text`, [database]
+  )
+  if (!databaseExists) {
+    log.info('Creating database...')
+    await client.query(`CREATE DATABASE ${database}`)
+  }
 
   try {
     const umzug = new Umzug({

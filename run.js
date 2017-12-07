@@ -177,11 +177,16 @@ task('dc', ({args}) => spawn('docker-compose', args, {env: env('prod', 'local')}
 
 task('docker:stop', () => spawn('docker-compose', ['stop'], {env: env('prod', 'local')}))
 
-task('mysql', async () => {
+task('db:console', async () => {
   const dcEnv = env('prod', 'local')
-  const DB_PASSWORD = requireEnv('DB_PASSWORD', dcEnv)
   const DB_NAME = requireEnv('DB_NAME', dcEnv)
-  await spawn('docker-compose', ['exec', 'db', 'mysql', `-p${DB_PASSWORD}`, `-D${DB_NAME}`], {env: dcEnv})
+  const DB_USER = requireEnv('DB_USER', dcEnv)
+  const DB_PASSWORD = requireEnv('DB_PASSWORD', dcEnv)
+  await spawn('docker-compose', [
+    'exec', 'db',
+    'env', `PGPASSWORD=${DB_PASSWORD}`,
+    'psql', '-h', 'db', '-U', DB_USER, '-d', DB_NAME, '-w'
+  ], {env: dcEnv})
 })
 
 task('dev:server', ['node_modules', services], async () => {

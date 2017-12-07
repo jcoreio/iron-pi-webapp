@@ -21,7 +21,7 @@ const {host, user, password, database} = dbConnectionParams()
 
 const sequelize = new Sequelize(database, user, password, {
   host,
-  dialect: 'mysql'
+  dialect: 'postgres'
 })
 
 export default sequelize

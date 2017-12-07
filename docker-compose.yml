@@ -1,11 +1,11 @@
 version: "2"
 services:
   db:
-    image: mysql:5.6
+    image: postgres:10
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
-      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+      - POSTGRES_PASSWORD=$DB_PASSWORD
   redis:
     image: redis:3.2
     ports:

@@ -12,7 +12,7 @@ module.exports = {
     password: devEnv.DB_PASSWORD,
     database: devEnv.DB_NAME,
     host: devEnv.DB_HOST,
-    dialect: 'mysql',
+    dialect: 'postgres',
   },
 }
 
