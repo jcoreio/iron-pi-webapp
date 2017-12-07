@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // @flow
 
+'use strict'
+
 var semver = require('semver')
 
 var requiredNodeVersion = require('./package.json').engines.node

@@ -18,6 +18,15 @@ npm i -g yarn
 yarn
 ```
 
+## Build script
+
+All build and launch scripts in this project are implemented with
+[Promake](https://github.com/jcoreio/promake) in the `run` file.  To see
+a list of available tasks, run it without arguments:
+```
+./run
+```
+
 ## Running Dev mode
 
 Run the backend in one console:
