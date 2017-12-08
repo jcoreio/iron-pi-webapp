@@ -2,6 +2,10 @@
 
 import path from 'path'
 import express from 'express'
+import bodyParser from 'body-parser'
+import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
+import graphqlSchema from '../universal/graphql/schema'
+import graphqlRoot from './graphql/resolver'
 
 import type {$Request, $Response} from 'express'
 
@@ -44,6 +48,14 @@ export default class Server {
       }
     })
 
+    app.use('/graphql', bodyParser.json(), graphqlExpress({
+      schema: graphqlSchema,
+      rootValue: graphqlRoot,
+      context: {
+        sequelize,
+      },
+    }))
+    app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql'}))
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 

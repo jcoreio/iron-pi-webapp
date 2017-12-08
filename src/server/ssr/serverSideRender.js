@@ -6,6 +6,12 @@ import path from 'path'
 import type {$Request, $Response} from 'express'
 import {renderToString} from 'react-dom/server'
 
+import { ApolloClient } from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { getDataFromTree } from 'react-apollo'
+import { SchemaLink } from 'apollo-link-schema'
+import schema from '../../universal/graphql/schema'
+
 import makeStore from '../redux/makeStore'
 import Html from './Html'
 import type {Store} from '../../universal/redux/types'
@@ -27,17 +33,32 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
     const store: Store = makeStore(StateRecord())
     addFeatures(store)
 
+    const headers: Object = {}
+    const cookie = req.header('Cookie')
+    if (cookie) headers.cookie = cookie
+
+    const apolloClient = new ApolloClient({
+      ssrMode: true,
+      link: new SchemaLink({schema}),
+      cache: new InMemoryCache(),
+    })
+
     const routerContext: {status?: number, url?: string} = {}
 
-    const html = renderToString(
+    const app = (
       <Html
         title="<<APP_TITLE>>"
         assets={assets}
         store={store}
+        apolloClient={apolloClient}
         location={req.url}
         routerContext={routerContext}
       />
     )
+
+    await getDataFromTree(app)
+
+    const html = renderToString(React.cloneElement(app, {extractApolloState: true}))
 
     if (routerContext.url) {
       res.writeHead(routerContext.status || 302, {

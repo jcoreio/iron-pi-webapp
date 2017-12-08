@@ -5,6 +5,8 @@ import {Provider} from 'react-redux'
 import {StaticRouter} from 'react-router-dom'
 import {renderToString} from 'react-dom/server'
 import {SheetsRegistry, JssProvider} from 'react-jss'
+import type {ApolloClient} from 'apollo-client'
+import { ApolloProvider } from 'react-apollo'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
@@ -14,6 +16,8 @@ type Props = {
   title: string,
   assets?: Object,
   store: Store,
+  apolloClient: ApolloClient,
+  extractApolloState?: boolean,
   location: string,
   routerContext: Object,
 }
@@ -25,19 +29,25 @@ process.env = process.env || {}
 ${environmentVars.map(name => `process.env[${JSON.stringify(name)}] = ${JSON.stringify(process.env[name] || '')}`).join('\n')}
 `
 
-const Html = ({routerContext, location, title, assets, store}: Props): React.Element<any> => {
+const Html = ({routerContext, location, title, assets, store, apolloClient, extractApolloState}: Props): React.Element<any> => {
   const {manifest, app, vendor} = assets || {}
   const initialState = `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState().set('features', {}))}`
   const sheets = new SheetsRegistry()
   const root = renderToString(
     <JssProvider registry={sheets}>
-      <Provider store={store}>
-        <StaticRouter context={routerContext} location={location}>
-          <App />
-        </StaticRouter>
-      </Provider>
+      <ApolloProvider client={apolloClient}>
+        <Provider store={store}>
+          <StaticRouter context={routerContext} location={location}>
+            <App />
+          </StaticRouter>
+        </Provider>
+      </ApolloProvider>
     </JssProvider>
   )
+
+  const apolloState = extractApolloState
+    ? `window.__APOLLO_STATE__=${JSON.stringify(apolloClient.extract()).replace(/</g, '\\u003c')}`
+    : null
 
   return (
     <html className="default">
@@ -55,6 +65,7 @@ const Html = ({routerContext, location, title, assets, store}: Props): React.Ele
       <body>
         <script dangerouslySetInnerHTML={{__html: environmentScript}} />
         <script dangerouslySetInnerHTML={{__html: initialState}} />
+        {apolloState && <script dangerouslySetInnerHTML={{__html: apolloState}} />}
         <div id="root" dangerouslySetInnerHTML={{__html: root}} />
         {manifest && <script dangerouslySetInnerHTML={{__html: manifest.text}} />}
         {vendor && <script src={vendor.js} />}
