@@ -4,6 +4,7 @@ import * as React from 'react'
 import {Route, Link, Switch} from 'react-router-dom'
 import NotFound from './NotFound'
 import Hello from './Hello'
+import ChannelView from './ChannelView'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -19,6 +20,7 @@ const App = (): React.Element<any> => {
       <Route path="/" exact component={Home} />
       <Route path="/about" exact component={About} />
       <Route path="/hello" exact component={Hello} />
+      <Route path="/channel" exact component={ChannelView} />
       <Route path="*" component={NotFound} />
     </Switch>
   )
