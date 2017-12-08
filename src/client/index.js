@@ -4,12 +4,14 @@
 import { render, hydrate } from 'react-dom'
 import * as React from 'react'
 import { AppContainer } from 'react-hot-loader'
+import promisify from 'es6-promisify'
+import {loadInitialFeatures} from 'redux-features'
+
 import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
 import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
-import {loadInitialFeatures} from 'redux-features'
 import '../universal/components/initJss'
 import apollo from './apollo/client'
 
@@ -34,11 +36,12 @@ async function bootstrap(): Promise<any> {
   if (process.env.NODE_ENV !== 'production') {
     window.store = store
     window.apollo = apollo
+    window.gql = require('graphql-tag').default
   }
 
   let reloads = 0
 
-  function mount(Root: typeof Root, callback?: () => void) {
+  const mount = promisify((Root: typeof Root, callback?: () => void) => {
     hydrate(
       <AppContainer key={++reloads}>
         <Root store={store} />
@@ -47,8 +50,7 @@ async function bootstrap(): Promise<any> {
       // $FlowFixMe
       callback,
     )
-  }
-
+  })
 
   // Hot Module Replacement API
   if (module.hot instanceof Object) {
@@ -63,16 +65,14 @@ async function bootstrap(): Promise<any> {
     renderError(`Failed to load some features: ${error.stack}`)
   }
 
-  mount(
-    Root,
-    () => {
-      // We don't need the static css any more once we have launched our application.
-      const ssStyles = document.getElementById('server-side-styles')
-      if (ssStyles && ssStyles.parentNode) ssStyles.parentNode.removeChild(ssStyles)
-      // render anything that we couldn't on the server
-      store.dispatch(setRenderMode('client'))
-    }
-  )
+  await mount(Root)
+
+  // We don't need the static css any more once we have launched our application.
+  const ssStyles = document.getElementById('server-side-styles')
+  if (ssStyles && ssStyles.parentNode) ssStyles.parentNode.removeChild(ssStyles)
+  // render anything that we couldn't on the server
+  store.dispatch(setRenderMode('client'))
 }
-bootstrap()
+
+bootstrap().catch(console.error) // eslint-disable-line no-console
 

@@ -8,6 +8,6 @@ export default new ApolloClient({
   // By default, this client will send queries to the
   //  `/graphql` endpoint on the same host
   link: new HttpLink(),
-  cache: new InMemoryCache().restore(window.__APOLLO_STATE__)
+  cache: new InMemoryCache().restore(window.__APOLLO_STATE__),
 })
 
