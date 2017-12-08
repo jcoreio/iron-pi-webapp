@@ -11,6 +11,7 @@ import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
 import {loadInitialFeatures} from 'redux-features'
 import '../universal/components/initJss'
+import apollo from './apollo/client'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -32,6 +33,7 @@ async function bootstrap(): Promise<any> {
 
   if (process.env.NODE_ENV !== 'production') {
     window.store = store
+    window.apollo = apollo
   }
 
   let reloads = 0
