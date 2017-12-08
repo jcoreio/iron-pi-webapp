@@ -10,7 +10,7 @@ import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { getDataFromTree } from 'react-apollo'
 import { SchemaLink } from 'apollo-link-schema'
-import schema from '../../universal/graphql/schema'
+import schema from '../graphql/schema'
 
 import makeStore from '../redux/makeStore'
 import Html from './Html'

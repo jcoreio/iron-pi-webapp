@@ -4,8 +4,7 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
-import graphqlSchema from '../universal/graphql/schema'
-import graphqlRoot from './graphql/resolver'
+import graphqlSchema from './graphql/schema'
 
 import type {$Request, $Response} from 'express'
 
@@ -50,7 +49,6 @@ export default class Server {
 
     app.use('/graphql', bodyParser.json(), graphqlExpress({
       schema: graphqlSchema,
-      rootValue: graphqlRoot,
       context: {
         sequelize,
       },
@@ -67,6 +65,7 @@ export default class Server {
     const port = parseInt(requireEnv('BACKEND_PORT'))
     this._httpServer = app.listen(port)
 
+    global.graphqlSchema = graphqlSchema
     global.sequelize = sequelize
     Object.assign(global, sequelize.models)
 
@@ -78,6 +77,7 @@ export default class Server {
     if (!this._running) return
     this._running = false
 
+    delete global.graphqlSchema
     delete global.sequelize
     for (let model in sequelize.models) delete global[model]
 

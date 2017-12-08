@@ -1370,7 +1370,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.4.1, bluebird@^3.4.6, bluebird@^3.5.1:
+bluebird@^3.4.0, bluebird@^3.4.1, bluebird@^3.4.6, bluebird@^3.5.1:
   version "3.5.1"
   resolved "https://registry.npmjs.org/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
@@ -2258,6 +2258,19 @@ dashdash@^1.12.0:
   resolved "https://registry.npmjs.org/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
   dependencies:
     assert-plus "^1.0.0"
+
+dataloader-sequelize@^1.5.0:
+  version "1.5.4"
+  resolved "https://registry.npmjs.org/dataloader-sequelize/-/dataloader-sequelize-1.5.4.tgz#15bd573365b64b075da686434ae8a9c74699db00"
+  dependencies:
+    dataloader "^1.2.0"
+    lodash "^4.15.0"
+    lru-cache "^4.0.1"
+    shimmer "^1.1.0"
+
+dataloader@^1.2.0:
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/dataloader/-/dataloader-1.3.0.tgz#6fec5be4b30a712e4afd30b86b4334566b97673b"
 
 date-now@^0.1.4:
   version "0.1.4"
@@ -3497,6 +3510,19 @@ graphql-extensions@^0.0.x:
     core-js "^2.5.1"
     source-map-support "^0.5.0"
 
+graphql-relay@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.npmjs.org/graphql-relay/-/graphql-relay-0.5.4.tgz#58050cfe16118595f82ab3aabfc974546ce755a8"
+
+graphql-sequelize@^5.6.0:
+  version "5.6.0"
+  resolved "https://registry.npmjs.org/graphql-sequelize/-/graphql-sequelize-5.6.0.tgz#3223b599d8595229fb22faab214a87e5fdf12fb9"
+  dependencies:
+    bluebird "^3.4.0"
+    dataloader-sequelize "^1.5.0"
+    invariant "2.2.1"
+    lodash "^4.0.0"
+
 graphql-subscriptions@^0.5.5:
   version "0.5.5"
   resolved "https://registry.npmjs.org/graphql-subscriptions/-/graphql-subscriptions-0.5.5.tgz#f8ad3e094a23128d5065725f9b60020d3293999d"
@@ -3889,6 +3915,12 @@ inquirer@^4.0.1:
 interpret@^1.0.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/interpret/-/interpret-1.1.0.tgz#7ed1b1410c6a0e0f78cf95d3b8440c63f78b8614"
+
+invariant@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.npmjs.org/invariant/-/invariant-2.2.1.tgz#b097010547668c7e337028ebe816ebe36c8a8d54"
+  dependencies:
+    loose-envify "^1.0.0"
 
 invariant@^2.0.0, invariant@^2.2.0, invariant@^2.2.1, invariant@^2.2.2:
   version "2.2.2"
