@@ -49,11 +49,6 @@ export default async function migrate(): Promise<void> {
       await sequelize.sync()
       for (let migration of migrationFiles) await storage.logMigration(migration)
     } else {
-      // we made a mistake in not using an initial migration in the past.
-      const initialMigration = migrationFiles[0]
-      if (migrations.indexOf(initialMigration) < 0) {
-        await storage.logMigration(initialMigration)
-      }
       await umzug.up()
     }
 
