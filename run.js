@@ -299,6 +299,13 @@ task('migration:create', async rule => {
   console.error(`Created ${destFile}`) // eslint-disable-line no-console
 }).description('create an empty database migration')
 
+task('db:migrate:undo', async rule => require('./scripts/undoMigrations')(rule))
+task('db:migrate', async () => {
+  require('defaultenv')(['env/local.js'])
+  require('babel-register')
+  await require('./src/server/sequelize/migrate').default()
+})
+
 task('open:coverage', () => {
   require('opn')('coverage/lcov-report/index.html')
 }).description('open test coverage output')

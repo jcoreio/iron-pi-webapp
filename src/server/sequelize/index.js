@@ -25,3 +25,4 @@ const sequelize = new Sequelize(database, user, password, {
 })
 
 export default sequelize
+

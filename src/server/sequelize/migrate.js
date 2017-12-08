@@ -15,6 +15,19 @@ const log = logger('sequelize:migrate')
 
 const migrationsDir = path.resolve(__dirname, 'migrations')
 
+export const umzug = new Umzug({
+  logging: log.info.bind(log),
+  storage: 'sequelize',
+  storageOptions: {
+    sequelize
+  },
+  migrations: {
+    params: [sequelize.getQueryInterface(), Sequelize],
+    path: migrationsDir,
+  }
+})
+const storage = umzug.storage
+
 export default async function migrate(): Promise<void> {
   log.info('Starting database migration...')
 
@@ -31,18 +44,6 @@ export default async function migrate(): Promise<void> {
   }
 
   try {
-    const umzug = new Umzug({
-      logging: log.info.bind(log),
-      storage: 'sequelize',
-      storageOptions: {
-        sequelize
-      },
-      migrations: {
-        params: [sequelize.getQueryInterface(), Sequelize],
-        path: migrationsDir,
-      }
-    })
-    const storage = umzug.storage
     const migrations = await storage.executed()
     const migrationFiles = (await promisify(fs.readdir)(migrationsDir)).sort()
     if (!migrations.length) {
