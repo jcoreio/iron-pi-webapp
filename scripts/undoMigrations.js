@@ -8,7 +8,7 @@ async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<a
 
   require('defaultenv')(['env/local.js'])
   require('babel-register')
-  const {umzug} = require('../src/server/sequelize/migrate')
+  const umzug = require('../src/server/sequelize/umzug')
 
   if (!migrationsToUndo.length) {
     migrationsToUndo = (await inquirer.prompt([

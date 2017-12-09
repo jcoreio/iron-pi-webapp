@@ -6,8 +6,17 @@ import {debounce} from 'lodash'
 // $FlowFixMe
 import _module from 'module'
 
-function runServerWithHotRestarting(srcDir: string): Promise<void> {
+type Options = {
+  srcDir: string,
+  main?: string,
+  migrationsDir?: string,
+}
+
+function runServerWithHotRestarting(options: Options): Promise<void> {
+  const {srcDir} = options
   const serverDir = path.join(srcDir, 'server')
+  const main = options.main || path.resolve(serverDir, 'index.js')
+  const migrationsDir = options.migrationsDir || path.resolve(serverDir, 'sequelize', 'migrations')
 
   // Do "hot-reloading" of express stuff on the server
   // Throw away cached modules and re-require next time
@@ -19,7 +28,7 @@ function runServerWithHotRestarting(srcDir: string): Promise<void> {
 
   const serverSideRender = path.join(serverDir, 'ssr/serverSideRender.js')
   const moduleRequiresRestart: {[id: string]: boolean} = {
-    [path.join(serverDir, 'index.js')]: true,
+    [main]: true,
     [serverSideRender]: false,
   }
 
@@ -41,8 +50,12 @@ function runServerWithHotRestarting(srcDir: string): Promise<void> {
   const clearCacheSoon = debounce(clearCache, 1000)
 
   // $FlowFixMe
-  let server = require(serverDir)
-  server.start()
+  let server = require(main)
+  try {
+    server.start()
+  } catch (error) {
+    console.error(error.stack)
+  }
 
   const restartSoon = debounce(async () => {
     try {
@@ -59,6 +72,15 @@ function runServerWithHotRestarting(srcDir: string): Promise<void> {
   return new Promise((resolve: () => void) => {
     watcher.on('ready', () => {
       watcher.on('all', async (type: any, file: string) => {
+        if (path.dirname(file) === migrationsDir) {
+          console.log(`${path.relative(serverDir, file)} changed, undoing...`) // eslint-disable-line no-console
+          try {
+            const umzug = require('../src/server/sequelize/umzug')
+            await umzug.down({migrations: [path.basename(file)]})
+          } catch (error) {
+            console.error(error.stack)
+          }
+        }
         if (moduleRequiresRestart[file]) {
           console.log(`${path.relative(srcDir, file)} changed, restarting...`) // eslint-disable-line no-console
           restartSoon()

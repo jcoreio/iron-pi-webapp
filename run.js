@@ -184,7 +184,9 @@ task('db:console', async () => {
 task('dev:server', ['node_modules', services], async () => {
   require('defaultenv')(['env/dev.js', 'env/local.js'])
   require('babel-register')
-  await require('./scripts/runServerWithHotRestarting')(path.resolve('src'))
+  await require('./scripts/runServerWithHotRestarting')({
+    srcDir: path.resolve('src'),
+  })
   await new Promise(() => {})
 }).description('launch backend in dev mode')
 
@@ -203,7 +205,9 @@ task('prod:server', ['node_modules', task('build:server'), services], async () =
   spawn('babel', ['--skip-initial-build', '--watch', 'src/server', '--out-dir', `${build}/server`])
   spawn('babel', ['--skip-initial-build', '--watch', 'src/universal', '--out-dir', `${build}/universal`])
   require('babel-register')
-  await require('./scripts/runServerWithHotRestarting')(build)
+  await require('./scripts/runServerWithHotRestarting')({
+    srcDir: build,
+  })
   await new Promise(() => {})
 }).description('launch backend in prod mode')
 
@@ -299,12 +303,18 @@ task('migration:create', async rule => {
   console.error(`Created ${destFile}`) // eslint-disable-line no-console
 }).description('create an empty database migration')
 
+task('db:drop', async () => {
+  require('defaultenv')(['env/local.js'])
+  require('babel-register')
+  await require('./scripts/dropDatabase').default()
+}).description('drop database')
 task('db:migrate:undo', async rule => require('./scripts/undoMigrations')(rule))
+  .description('undo database migrations')
 task('db:migrate', async () => {
   require('defaultenv')(['env/local.js'])
   require('babel-register')
   await require('./src/server/sequelize/migrate').default()
-})
+}).description('run database migrations')
 
 task('open:coverage', () => {
   require('opn')('coverage/lcov-report/index.html')
@@ -317,5 +327,6 @@ task('push:staging', async () => {
 }).description('push current git branch to remote staging branch')
 
 task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
+  .description('set up initial project after cloning from skeleton')
 
 cli()
