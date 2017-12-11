@@ -3,7 +3,7 @@
 import * as graphql from 'graphql'
 
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
-import Channels from '../../models/Channels'
+import Channels from '../../models/Channel'
 
 const channelType = new graphql.GraphQLObjectType({
   name: 'Channel',
