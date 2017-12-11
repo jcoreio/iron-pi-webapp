@@ -1,9 +1,11 @@
 // @flow
 
 import Sequelize from 'sequelize'
+import type {Model} from 'sequelize'
 import sequelize from '../sequelize'
+import type {Channel as ChannelFields, ChannelMode} from '../../universal/types/Channel'
 
-const Channels = sequelize.define('Channels', {
+const Channel: Class<Model<ChannelFields>> = sequelize.define('Channel', {
   id: {
     type: Sequelize.INTEGER,
     allowNull: false,
@@ -30,9 +32,9 @@ const Channels = sequelize.define('Channels', {
     },
   },
   mode: {
-    type: Sequelize.ENUM('ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'),
+    type: Sequelize.ENUM(...(['ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']: Array<ChannelMode>)),
     allowNull: false,
-    defaultValue: 'DISABLED',
+    defaultValue: ('DISABLED': ChannelMode),
   },
   config: {
     type: Sequelize.JSON,
@@ -41,5 +43,5 @@ const Channels = sequelize.define('Channels', {
   },
 })
 
-export default Channels
+export default Channel
 
