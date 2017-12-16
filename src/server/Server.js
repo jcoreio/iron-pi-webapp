@@ -15,7 +15,7 @@ import './sequelize/loadModels'
 
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
-import requireEnv from '../universal/util/requireEnv'
+import requireEnv from '@jcoreio/require-env'
 
 const log = logger('Server')
 

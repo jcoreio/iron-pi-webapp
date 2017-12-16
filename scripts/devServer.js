@@ -1,7 +1,7 @@
 // @flow
 
 const express = require('express')
-const requireEnv = require("../src/universal/util/requireEnv")
+const requireEnv = require('@jcoreio/require-env')
 
 const webpackConfig = require('../webpack/webpack.config.dev')
 

@@ -1,7 +1,7 @@
 /* global browser */
 
 import mergeClientCoverage from "./mergeClientCoverage"
-import requireEnv from '../../../src/universal/util/requireEnv'
+import requireEnv from '@jcoreio/require-env'
 
 function resolve(url) {
   if (url[0] === '/') return requireEnv('ROOT_URL') + url
