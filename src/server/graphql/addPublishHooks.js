@@ -1,7 +1,6 @@
 // @flow
 
 import sequelize from '../sequelize'
-import '../sequelize/loadModels'
 import publishSequelize from './publishSequelize'
 
 const {models} = sequelize

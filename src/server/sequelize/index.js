@@ -3,6 +3,9 @@
 import Sequelize from 'sequelize'
 import requireEnv from '@jcoreio/require-env'
 
+import glob from 'glob'
+import path from 'path'
+
 export type DbConnectionParams = {
   host: string,
   user: string,
@@ -26,3 +29,14 @@ const sequelize = new Sequelize(database, user, password, {
 
 export default sequelize
 
+const files = glob.sync(path.join(__dirname, '..', 'models', '*.js'))
+files.forEach((file: string) => {
+  // $FlowFixMe
+  const model = require(file).default
+  if (model && model.initAttributes) model.initAttributes({sequelize})
+})
+files.forEach((file: string) => {
+  // $FlowFixMe
+  const model = require(file).default
+  if (model && model.initAssociations) model.initAssociations()
+})

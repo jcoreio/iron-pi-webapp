@@ -12,7 +12,6 @@ import type {$Request, $Response} from 'express'
 
 import sequelize from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
-import './sequelize/loadModels'
 import './graphql/addPublishHooks'
 import pubsub from './graphql/pubsub'
 
