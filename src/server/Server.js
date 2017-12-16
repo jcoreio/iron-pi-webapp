@@ -4,6 +4,8 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
+import {execute, subscribe} from 'graphql'
+import {SubscriptionServer} from 'subscriptions-transport-ws'
 import graphqlSchema from './graphql/schema'
 
 import type {$Request, $Response} from 'express'
@@ -11,6 +13,8 @@ import type {$Request, $Response} from 'express'
 import sequelize from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 import './sequelize/loadModels'
+import './graphql/addPublishHooks'
+import pubsub from './graphql/pubsub'
 
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
@@ -47,13 +51,13 @@ export default class Server {
       }
     })
 
-    app.use('/graphql', bodyParser.json(), graphqlExpress({
+    const GRAPHQL_PATH = '/graphql'
+    app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress({
       schema: graphqlSchema,
-      context: {
-        sequelize,
-      },
+      context: {sequelize},
     }))
-    app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql'}))
+
+    app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
@@ -63,10 +67,15 @@ export default class Server {
     })
 
     const port = parseInt(requireEnv('BACKEND_PORT'))
-    this._httpServer = app.listen(port)
+    const httpServer = this._httpServer = app.listen(port)
+    SubscriptionServer.create(
+      {schema: graphqlSchema, execute, subscribe},
+      {server: httpServer, path: GRAPHQL_PATH},
+    )
 
     global.graphqlSchema = graphqlSchema
     global.sequelize = sequelize
+    global.pubsub = pubsub
     Object.assign(global, sequelize.models)
 
     log.info(`App is listening on http://0.0.0.0:${port}`)
@@ -79,6 +88,7 @@ export default class Server {
 
     delete global.graphqlSchema
     delete global.sequelize
+    delete global.pubsub
     for (let model in sequelize.models) delete global[model]
 
     redisSubscriber.end(true)

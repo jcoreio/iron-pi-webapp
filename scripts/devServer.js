@@ -23,7 +23,9 @@ app.all('*', (req: Object, res: Object): any => proxy.web(req, res, { target }))
 
 const server = app.listen(webpackConfig.devServer.port)
 
-server.on('upgrade', (req: Object, socket: any, head: any): any => proxy.ws(req, socket, head, { target }))
+server.on('upgrade', (req: Object, socket: any, head: any): any => {
+  proxy.ws(req, socket, head, { target })
+})
 
 console.log(`Dev server is listening on http://0.0.0.0:${webpackConfig.devServer.port}`)
 
