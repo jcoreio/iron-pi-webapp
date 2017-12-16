@@ -7,7 +7,6 @@ import type {$Request, $Response} from 'express'
 
 import sequelize from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
-import './sequelize/loadModels'
 
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
