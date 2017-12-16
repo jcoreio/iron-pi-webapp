@@ -1,31 +1,13 @@
 // @flow
 
-import path from 'path'
-import fs from 'fs'
-
-import promisify from 'es6-promisify'
-import Sequelize from 'sequelize'
 import {Client} from 'pg'
-import Umzug from 'umzug'
+import umzug from './umzug'
 
 import sequelize, {dbConnectionParams} from './index'
 import logger from '../../universal/logger'
 
 const log = logger('sequelize:migrate')
 
-const migrationsDir = path.resolve(__dirname, 'migrations')
-
-export const umzug = new Umzug({
-  logging: log.info.bind(log),
-  storage: 'sequelize',
-  storageOptions: {
-    sequelize
-  },
-  migrations: {
-    params: [sequelize.getQueryInterface(), Sequelize],
-    path: migrationsDir,
-  }
-})
 const storage = umzug.storage
 
 export default async function migrate(): Promise<void> {
@@ -44,11 +26,10 @@ export default async function migrate(): Promise<void> {
   }
 
   try {
-    const migrations = await storage.executed()
-    const migrationFiles = (await promisify(fs.readdir)(migrationsDir)).sort()
-    if (!migrations.length) {
+    const executed = await umzug.executed()
+    if (!executed.length) {
       await sequelize.sync()
-      for (let migration of migrationFiles) await storage.logMigration(migration)
+      for (let migration of await umzug.pending()) await storage.logMigration(migration.file)
     } else {
       await umzug.up()
     }
