@@ -2,7 +2,7 @@
 
 import {createClient} from 'redis'
 import type {RedisClient} from 'redis'
-import requireEnv from '../../universal/util/requireEnv'
+import requireEnv from '@jcoreio/require-env'
 import RedisSubscriber from '@jcoreio/redis-subscriber'
 
 export type {RedisSubscriber}

@@ -1,7 +1,7 @@
 // @flow
 
 import Sequelize from 'sequelize'
-import requireEnv from '../../universal/util/requireEnv'
+import requireEnv from '@jcoreio/require-env'
 
 export type DbConnectionParams = {
   host: string,

@@ -4,7 +4,7 @@ import * as webdriverio from 'webdriverio'
 import path from 'path'
 import mergeClientCoverage from './util/mergeClientCoverage'
 import fs from 'fs-extra'
-import requireEnv from '../../src/universal/util/requireEnv'
+import requireEnv from '@jcoreio/require-env'
 import superagent from './util/superagent'
 
 const root = path.resolve(__dirname, '..', '..')
