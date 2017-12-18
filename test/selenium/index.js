@@ -6,6 +6,7 @@ import mergeClientCoverage from './util/mergeClientCoverage'
 import fs from 'fs-extra'
 import superagent from './util/superagent'
 import resolveUrl from './util/resolveUrl'
+import poll from '@jcoreio/poll'
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -31,7 +32,7 @@ describe('selenium tests', function () {
 
   before(async function () {
     try {
-      await superagent.get('/')
+      await poll(() => superagent.get('/'), 1000).timeout(15000)
     } catch (error) {
       throw new Error(`Can't connect to webapp: ${error.message}`)
     }
