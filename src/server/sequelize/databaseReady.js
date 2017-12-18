@@ -15,7 +15,7 @@ export default function databaseReady(options: {timeout?: number} = {}): Promise
   return poll(
     promisify((context, cb) => {
       const client = new Client({host, user, password, database: user})
-      client.on('error', () => {})
+      client.on('error', cb)
       client.connect(cb)
     }),
     1000
