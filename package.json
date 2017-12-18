@@ -16,6 +16,7 @@
     "instrument": false
   },
   "dependencies": {
+    "@jcoreio/poll": "^1.0.0",
     "@jcoreio/redis-subscriber": "^1.0.5",
     "@jcoreio/require-env": "^1.0.0",
     "babel-polyfill": "^6.26.0",

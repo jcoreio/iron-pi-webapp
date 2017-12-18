@@ -88,6 +88,10 @@
     resolve-global "^0.1.0"
     semver "^5.3.0"
 
+"@jcoreio/poll@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@jcoreio/poll/-/poll-1.0.0.tgz#63d871a63848e2ea8b0714352c0955437c37454f"
+
 "@jcoreio/redis-subscriber@^1.0.5":
   version "1.0.6"
   resolved "https://registry.npmjs.org/@jcoreio/redis-subscriber/-/redis-subscriber-1.0.6.tgz#75725f29c2f74a056a2467b7a11374934936e786"
