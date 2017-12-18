@@ -10,6 +10,32 @@ services:
     image: redis:3.2
     ports:
       - 6379:6379
+  selenium:
+    image: selenium/hub:3.8.1-bohrium
+    ports:
+      - 4444:4444
+  chrome:
+    image: selenium/node-chrome:3.8.1-bohrium
+    volumes:
+      - /dev/shm:/dev/shm
+    environment:
+      HUB_PORT_4444_TCP_ADDR: 'hub'
+      HUB_PORT_4444_TCP_PORT: 4444
+      NODE_MAX_INSTANCES: 3
+      NODE_MAX_SESSION: 3
+    links:
+      - selenium:hub
+  firefox:
+    image: selenium/node-firefox:3.8.1-bohrium
+    environment:
+      HUB_PORT_4444_TCP_ADDR: 'hub'
+      HUB_PORT_4444_TCP_PORT: 4444
+      NODE_MAX_INSTANCES: 3
+      NODE_MAX_SESSION: 3
+    volumes:
+      - /dev/shm:/dev/shm
+    links:
+      - selenium:hub
   app:
     image: jcoreio/webapp-base
     ports:
