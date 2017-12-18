@@ -9,7 +9,7 @@ async function mergeClientCoverage() {
 
   if (browserCoverage) {
     const collector = new Collector()
-    collector.add(global.__coverage__)
+    if (global.__coverage__) collector.add(global.__coverage__)
     collector.add(browserCoverage)
     global.__coverage__ = collector.getFinalCoverage()
   }

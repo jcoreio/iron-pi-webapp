@@ -10,8 +10,10 @@ import graphqlRoot from './graphql/resolver'
 import type {$Request, $Response} from 'express'
 
 import sequelize from './sequelize'
+import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 
+import redisReady from './redis/redisReady'
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -28,6 +30,11 @@ export default class Server {
 
   async start(): Promise<void> {
     if (this._running) return
+
+    await Promise.all([
+      databaseReady(),
+      redisReady(),
+    ])
 
     redisSubscriber.start()
 
