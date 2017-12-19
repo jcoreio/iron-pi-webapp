@@ -12,4 +12,4 @@ tmp
 *.swp
 yarn-error.log
 .node_modules-timestamp
-
+.eslintcache
