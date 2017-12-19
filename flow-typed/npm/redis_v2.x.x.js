@@ -1,5 +1,5 @@
-// flow-typed signature: d27fba210e762f66cebd5a68968bb6cc
-// flow-typed version: de2713c09e/redis_v2.x.x/flow_>=v0.34.x
+// flow-typed signature: 67464b1a6483a8a85830d8041d60a76a
+// flow-typed version: 96ec3f2b3a/redis_v2.x.x/flow_>=v0.34.x
 
 /* This module definition is by no means complete. A lot of methods of the RedisClient class are missing */
 declare module "redis" {
@@ -24,6 +24,7 @@ declare module "redis" {
     get: (key: string) => any;
     set: (key: string, value: any) => void;
     del: (...keys: Array<string>) => void;
+    rpoplpush: (source: string, destination: string) => string | void;
     publish: (topic: string, value: any) => void;
     subscribe: (topic: string) => void;
     unsubscribe: (topic: string) => void;
@@ -57,10 +58,7 @@ declare module "redis" {
       cursor2: number
     ) => Promise<Array<string>> | Promise<void>;
     hsetAsync: (topic: string, key: string, value: string) => Promise<number>;
-    hgetAsync: (
-      topic: string,
-      key: string
-    ) => Promise<string> | Promise<void>;
+    hgetAsync: (topic: string, key: string) => Promise<string> | Promise<void>;
     hgetallAsync: (
       topic: string,
       key: string
@@ -69,6 +67,10 @@ declare module "redis" {
     getAsync: (key: string) => Promise<any>;
     setAsync: (key: string, value: any) => Promise<void>;
     delAsync: (...keys: Array<string>) => Promise<void>;
+    rpoplpushAsync: (
+      source: string,
+      destination: string
+    ) => Promise<string> | Promise<void>;
     publishAsync: (topic: string, value: any) => Promise<void>;
     subscribeAsync: (topic: string) => Promise<void>;
     unsubscribeAsync: (topic: string) => Promise<void>;
@@ -84,7 +86,7 @@ declare module "redis" {
     port?: number,
     path?: string,
     url?: string,
-    parser?: 'javascript' | 'hiredis',
+    parser?: "javascript" | "hiredis",
     string_numbers?: boolean,
     return_buffers?: boolean,
     detect_buffers?: boolean,
@@ -97,24 +99,31 @@ declare module "redis" {
     retry_unfulfilled_commands?: boolean,
     password?: string,
     db?: number,
-    family?: 'IPv4' | 'IPv6',
+    family?: "IPv4" | "IPv6",
     disable_resubscribing?: boolean,
-    rename_commands?: {[name: string]: string},
+    rename_commands?: { [name: string]: string },
     tls?: Object,
     prefix?: string,
-    retry_strategy?: (options: {attempt: number, total_retry_time: number, error: Error, times_connected: number}) => any,
-  }
+    retry_strategy?: (options: {
+      attempt: number,
+      total_retry_time: number,
+      error: Error,
+      times_connected: number
+    }) => any
+  };
 
-  declare type CreateClient = (
-    ((port: number, host?: string, options?: CreateOptions) => RedisClient) &
+  declare type CreateClient = ((
+    port: number,
+    host?: string,
+    options?: CreateOptions
+  ) => RedisClient) &
     ((port: number, options?: CreateOptions) => RedisClient) &
     ((socketOrUrl: string, options?: CreateOptions) => RedisClient) &
-    ((options?: CreateOptions) => RedisClient)
-  )
+    ((options?: CreateOptions) => RedisClient);
 
   declare module.exports: {
     RedisClient: typeof RedisClient,
     RedisClientPromisified: typeof RedisClientPromisified,
-    createClient: CreateClient,
+    createClient: CreateClient
   };
 }
