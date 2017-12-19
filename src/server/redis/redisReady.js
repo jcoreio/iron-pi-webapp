@@ -5,7 +5,7 @@ import {createClient} from 'redis'
 import requireEnv from '@jcoreio/require-env'
 import poll from '@jcoreio/poll'
 
-export default function redisReady(options: {timeout?: number} = {}): Promise<void> {
+export default function redisReady(options: {timeout?: number} = {}): Promise<any> {
   const timeout = options.timeout || 15000
 
   console.error('Waiting for redis to be ready...') // eslint-disable-line no-console

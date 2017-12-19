@@ -236,9 +236,11 @@ const lintFiles = [
   'run', 'run.js', 'defines.js', 'src', 'scripts', 'test', 'webpack',
 ]
 
-task('lint', 'node_modules', () => spawn('eslint', lintFiles)).description('check files with eslint')
-task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles])).description('fix eslint errors automatically')
-task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed'])).description('run eslint in watch mode')
+rule('.eslintcache', 'node_modules', () => spawn('eslint', [...lintFiles, '--cache'])).description('check files with eslint')
+
+task('lint', '.eslintcache')
+task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles, '--cache'])).description('fix eslint errors automatically')
+task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed', '--cache'])).description('run eslint in watch mode')
 
 const testServices = task('test:services', () =>
   spawn('docker-compose', ['up', '-d', 'selenium', 'chrome', 'firefox'], {env: env('prod', 'local')})
