@@ -1,4 +1,4 @@
-// flow-typed signature: 2bfbbe6b2363ed57d6a7b3cbf03fd6cf
+// flow-typed signature: fecdf649b6a6151201fb548b2ed3e32a
 // flow-typed version: <<STUB>>/mindfront-redux-utils-immutable_v^1.3.0/flow_v0.59.0
 
 /**
@@ -22,6 +22,134 @@ declare module 'mindfront-redux-utils-immutable' {
  * require those files directly. Feel free to delete any files that aren't
  * needed.
  */
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config-flow_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-cli_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-core_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-eslint_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-istanbul_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-transform-runtime_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-es2015_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-flow_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-stage-1_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-register_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-runtime_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/chai_v3.5.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/chai-immutable_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/copy_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/coveralls_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint-plugin-flowtype_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint-watch_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/flow-bin_v0.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/flow-watch_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/istanbul_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.foreach_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.mapvalues_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.reduce_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.size_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/mindfront-redux-utils_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/mocha_v3.1.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/nyc_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/pre-commit_vx.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/rimraf_v2.x.x' {
+  declare module.exports: any;
+}
+
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/semantic-release_vx.x.x' {
+  declare module.exports: any;
+}
+
 declare module 'mindfront-redux-utils-immutable/lib/combineReducers' {
   declare module.exports: any;
 }
@@ -47,6 +175,102 @@ declare module 'mindfront-redux-utils-immutable/src/subpathReducer' {
 }
 
 // Filename aliases
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config-flow_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/@jedwards1211/eslint-config-flow_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-cli_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-cli_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-core_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-core_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-eslint_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-eslint_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-istanbul_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-istanbul_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-transform-runtime_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-plugin-transform-runtime_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-es2015_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-es2015_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-flow_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-flow_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-stage-1_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-preset-stage-1_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-register_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-register_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/babel-runtime_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/babel-runtime_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/chai_v3.5.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/chai_v3.5.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/chai-immutable_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/chai-immutable_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/copy_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/copy_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/coveralls_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/coveralls_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/eslint_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint-plugin-flowtype_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/eslint-plugin-flowtype_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/eslint-watch_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/eslint-watch_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/flow-bin_v0.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/flow-bin_v0.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/flow-watch_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/flow-watch_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/istanbul_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/istanbul_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.foreach_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/lodash.foreach_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.mapvalues_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/lodash.mapvalues_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.reduce_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/lodash.reduce_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/lodash.size_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/lodash.size_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/mindfront-redux-utils_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/mindfront-redux-utils_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/mocha_v3.1.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/mocha_v3.1.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/nyc_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/nyc_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/pre-commit_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/pre-commit_vx.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/rimraf_v2.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/rimraf_v2.x.x'>;
+}
+declare module 'mindfront-redux-utils-immutable/flow-typed/npm/semantic-release_vx.x.x.js' {
+  declare module.exports: $Exports<'mindfront-redux-utils-immutable/flow-typed/npm/semantic-release_vx.x.x'>;
+}
 declare module 'mindfront-redux-utils-immutable/lib/combineReducers.js' {
   declare module.exports: $Exports<'mindfront-redux-utils-immutable/lib/combineReducers'>;
 }
