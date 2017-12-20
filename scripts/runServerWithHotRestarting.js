@@ -5,6 +5,7 @@ import chokidar from 'chokidar'
 import {debounce} from 'lodash'
 // $FlowFixMe
 import _module from 'module'
+import watchMigrations from 'umzug-beobachten'
 
 type Options = {
   srcDir: string,
@@ -69,17 +70,13 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
     }
   }, 1000)
 
+  watchMigrations(require(path.join(serverDir, 'sequelize/umzug')))
+
   return new Promise((resolve: () => void) => {
     watcher.on('ready', () => {
       watcher.on('all', async (type: any, file: string) => {
         if (path.dirname(file) === migrationsDir) {
-          console.log(`${path.relative(serverDir, file)} changed, undoing...`) // eslint-disable-line no-console
-          try {
-            const umzug = require('../src/server/sequelize/umzug')
-            await umzug.down({migrations: [path.basename(file)]})
-          } catch (error) {
-            console.error(error.stack)
-          }
+          return
         }
         if (moduleRequiresRestart[file]) {
           console.log(`${path.relative(srcDir, file)} changed, restarting...`) // eslint-disable-line no-console

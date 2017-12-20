@@ -5363,6 +5363,10 @@ p-locate@^2.0.0:
   dependencies:
     p-limit "^1.1.0"
 
+p-queue@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/p-queue/-/p-queue-2.3.0.tgz#65d55e71bc1500fc413122da98ae457ff8a7c038"
+
 p-timeout@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/p-timeout/-/p-timeout-2.0.1.tgz#d8dd1979595d2dc0139e1fe46b8b646cb3cdf038"
@@ -5937,7 +5941,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-promisify-child-process@^1.0.0:
+promisify-child-process@^1.0.0, promisify-child-process@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/promisify-child-process/-/promisify-child-process-1.0.1.tgz#468a045eb3169107036bba19f036db168675c23f"
 
@@ -7504,6 +7508,16 @@ uglifyjs-webpack-plugin@^0.4.6:
 uid-number@^0.0.6:
   version "0.0.6"
   resolved "https://registry.npmjs.org/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
+
+umzug-beobachten@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/umzug-beobachten/-/umzug-beobachten-1.0.0.tgz#81d5fe34a17b2bf0bcd96bab4ecb6ba77bcf6402"
+  dependencies:
+    chalk "^2.3.0"
+    chokidar "^1.7.0"
+    es6-promisify "^5.0.0"
+    p-queue "^2.3.0"
+    promisify-child-process "^1.0.1"
 
 umzug@^2.1.0:
   version "2.1.0"
