@@ -13,7 +13,7 @@ import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
 import '../universal/components/initJss'
-import apollo from './apollo/client'
+import apollo, {cache} from './apollo/client'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -35,7 +35,9 @@ async function bootstrap(): Promise<any> {
 
   if (process.env.NODE_ENV !== 'production') {
     window.store = store
+    window.dispatch = store.dispatch
     window.apollo = apollo
+    window.cache = cache
     window.gql = require('graphql-tag').default
   }
 
