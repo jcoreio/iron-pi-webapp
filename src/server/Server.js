@@ -4,7 +4,7 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
-import graphqlSchema from '../universal/graphql/schema'
+import graphqlSchema from './graphql/schema'
 import graphqlRoot from './graphql/resolver'
 
 import type {$Request, $Response} from 'express'
@@ -33,6 +33,7 @@ export default class Server {
     Sequelize,
     sequelize,
     umzug,
+    graphqlSchema,
     ...sequelize.models,
   }
 
