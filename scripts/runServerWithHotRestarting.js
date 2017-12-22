@@ -70,6 +70,7 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
     }
   }, 1000)
 
+  // $FlowFixMe
   watchMigrations(require(path.join(serverDir, 'sequelize/umzug')))
 
   return new Promise((resolve: () => void) => {
