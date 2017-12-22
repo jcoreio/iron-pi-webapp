@@ -2,6 +2,7 @@
 
 import {Client} from 'pg'
 import umzug from './umzug'
+import promisify from 'es6-promisify'
 
 import sequelize, {dbConnectionParams} from './index'
 import logger from '../../universal/logger'
@@ -15,7 +16,7 @@ export default async function migrate(): Promise<void> {
 
   const {host, user, password, database} = dbConnectionParams()
   const client = new Client({host, user, password, database: user})
-  await client.connect()
+  await promisify(cb => client.connect(cb))()
 
   const {rowCount: databaseExists} = await client.query(
     `SELECT 1 FROM pg_database WHERE datname = $1::text`, [database]

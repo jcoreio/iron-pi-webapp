@@ -40,3 +40,4 @@ files.forEach((file: string) => {
   const model = require(file).default
   if (model && model.initAssociations) model.initAssociations()
 })
+

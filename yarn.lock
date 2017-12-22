@@ -88,6 +88,10 @@
     resolve-global "^0.1.0"
     semver "^5.3.0"
 
+"@jcoreio/poll@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@jcoreio/poll/-/poll-1.0.0.tgz#63d871a63848e2ea8b0714352c0955437c37454f"
+
 "@jcoreio/redis-subscriber@^1.0.5":
   version "1.0.6"
   resolved "https://registry.npmjs.org/@jcoreio/redis-subscriber/-/redis-subscriber-1.0.6.tgz#75725f29c2f74a056a2467b7a11374934936e786"
@@ -5121,7 +5125,7 @@ moment-timezone@^0.5.4:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@^2.13.0, moment@^2.19.3:
+"moment@>= 2.9.0", moment@^2.13.0:
   version "2.19.4"
   resolved "https://registry.npmjs.org/moment/-/moment-2.19.4.tgz#17e5e2c6ead8819c8ecfad83a0acccb312e94682"
 
@@ -5555,6 +5559,10 @@ p-locate@^2.0.0:
   resolved "https://registry.npmjs.org/p-locate/-/p-locate-2.0.0.tgz#20a0103b222a70c8fd39cc2e580680f3dde5ec43"
   dependencies:
     p-limit "^1.1.0"
+
+p-queue@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/p-queue/-/p-queue-2.3.0.tgz#65d55e71bc1500fc413122da98ae457ff8a7c038"
 
 p-timeout@^2.0.1:
   version "2.0.1"
@@ -6130,7 +6138,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-promisify-child-process@^1.0.0:
+promisify-child-process@^1.0.0, promisify-child-process@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/promisify-child-process/-/promisify-child-process-1.0.1.tgz#468a045eb3169107036bba19f036db168675c23f"
 
@@ -7726,6 +7734,16 @@ uid-number@^0.0.6:
 ultron@~1.1.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz#9fe1536a10a664a65266a1e3ccf85fd36302bc9c"
+
+umzug-beobachten@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/umzug-beobachten/-/umzug-beobachten-1.0.0.tgz#81d5fe34a17b2bf0bcd96bab4ecb6ba77bcf6402"
+  dependencies:
+    chalk "^2.3.0"
+    chokidar "^1.7.0"
+    es6-promisify "^5.0.0"
+    p-queue "^2.3.0"
+    promisify-child-process "^1.0.1"
 
 umzug@^2.1.0:
   version "2.1.0"

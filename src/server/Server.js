@@ -10,11 +10,15 @@ import graphqlSchema from './graphql/schema'
 
 import type {$Request, $Response} from 'express'
 
+import Sequelize from 'sequelize'
 import sequelize from './sequelize'
+import umzug from './sequelize/umzug'
+import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import './graphql/addPublishHooks'
 import pubsub from './graphql/pubsub'
 
+import redisReady from './redis/redisReady'
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -28,9 +32,22 @@ const log = logger('Server')
 export default class Server {
   _httpServer: ?Object;
   _running: boolean = false
+  _devGlobals: Object = {
+    Sequelize,
+    sequelize,
+    umzug,
+    graphqlSchema,
+    pubsub,
+    ...sequelize.models,
+  }
 
   async start(): Promise<void> {
     if (this._running) return
+
+    await Promise.all([
+      databaseReady(),
+      redisReady(),
+    ])
 
     redisSubscriber.start()
 
@@ -72,10 +89,9 @@ export default class Server {
       {server: httpServer, path: GRAPHQL_PATH},
     )
 
-    global.graphqlSchema = graphqlSchema
-    global.sequelize = sequelize
-    global.pubsub = pubsub
-    Object.assign(global, sequelize.models)
+    if (process.env.NODE_ENV !== 'production') {
+      Object.assign(global, this._devGlobals)
+    }
 
     log.info(`App is listening on http://0.0.0.0:${port}`)
     this._running = true
@@ -85,10 +101,9 @@ export default class Server {
     if (!this._running) return
     this._running = false
 
-    delete global.graphqlSchema
-    delete global.sequelize
-    delete global.pubsub
-    for (let model in sequelize.models) delete global[model]
+    if (process.env.NODE_ENV !== 'production') {
+      for (let key in this._devGlobals) delete global[key]
+    }
 
     redisSubscriber.end(true)
     const httpServer = this._httpServer

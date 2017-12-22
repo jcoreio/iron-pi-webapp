@@ -1,4 +1,4 @@
-// flow-typed signature: e421aa0d42cdaae5279270e6de66e111
+// flow-typed signature: 7f3eeb858cbf1bd00474aaad014dd12a
 // flow-typed version: <<STUB>>/@commitlint/cli_v^5.2.3/flow_v0.59.0
 
 /**
@@ -47,6 +47,10 @@ declare module '@commitlint/cli/fixtures/parser-preset/commitlint.config' {
 }
 
 declare module '@commitlint/cli/fixtures/parser-preset/parser-preset' {
+  declare module.exports: any;
+}
+
+declare module '@commitlint/cli/fixtures/signoff/commitlint.config' {
   declare module.exports: any;
 }
 
@@ -99,6 +103,9 @@ declare module '@commitlint/cli/fixtures/parser-preset/commitlint.config.js' {
 }
 declare module '@commitlint/cli/fixtures/parser-preset/parser-preset.js' {
   declare module.exports: $Exports<'@commitlint/cli/fixtures/parser-preset/parser-preset'>;
+}
+declare module '@commitlint/cli/fixtures/signoff/commitlint.config.js' {
+  declare module.exports: $Exports<'@commitlint/cli/fixtures/signoff/commitlint.config'>;
 }
 declare module '@commitlint/cli/fixtures/simple/commitlint.config.js' {
   declare module.exports: $Exports<'@commitlint/cli/fixtures/simple/commitlint.config'>;

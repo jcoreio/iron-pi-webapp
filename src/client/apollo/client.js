@@ -20,6 +20,8 @@ const wsLink = new WebSocketLink({
   }
 })
 
+export const cache = new InMemoryCache().restore(window.__APOLLO_STATE__)
+
 export default new ApolloClient({
   // By default, this client will send queries to the
   //  `/graphql` endpoint on the same host
@@ -32,6 +34,6 @@ export default new ApolloClient({
     wsLink,
     httpLink,
   ),
-  cache: new InMemoryCache().restore(window.__APOLLO_STATE__),
+  cache,
 })
 

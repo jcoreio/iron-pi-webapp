@@ -1,16 +1,11 @@
 /* global browser */
 
 import mergeClientCoverage from "./mergeClientCoverage"
-import requireEnv from '@jcoreio/require-env'
-
-function resolve(url) {
-  if (url[0] === '/') return requireEnv('ROOT_URL') + url
-  return url
-}
+import resolveUrl from './resolveUrl'
 
 export default async function navigateTo(url) {
   const current = await browser.getUrl()
-  if (current && resolve(current) !== resolve(url)) await mergeClientCoverage()
+  if (current && resolveUrl(current) !== resolveUrl(url)) await mergeClientCoverage()
   await browser.url(url)
 }
 
