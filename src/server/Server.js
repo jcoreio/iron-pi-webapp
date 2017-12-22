@@ -5,7 +5,9 @@ import express from 'express'
 
 import type {$Request, $Response} from 'express'
 
+import Sequelize from 'sequelize'
 import sequelize from './sequelize'
+import umzug from './sequelize/umzug'
 import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 
@@ -23,6 +25,12 @@ const log = logger('Server')
 export default class Server {
   _httpServer: ?Object;
   _running: boolean = false
+  _devGlobals: Object = {
+    Sequelize,
+    sequelize,
+    umzug,
+    ...sequelize.models,
+  }
 
   async start(): Promise<void> {
     if (this._running) return
@@ -61,8 +69,9 @@ export default class Server {
     const port = parseInt(requireEnv('BACKEND_PORT'))
     this._httpServer = app.listen(port)
 
-    global.sequelize = sequelize
-    Object.assign(global, sequelize.models)
+    if (process.env.NODE_ENV !== 'production') {
+      Object.assign(global, this._devGlobals)
+    }
 
     log.info(`App is listening on http://0.0.0.0:${port}`)
     this._running = true
@@ -72,8 +81,9 @@ export default class Server {
     if (!this._running) return
     this._running = false
 
-    delete global.sequelize
-    for (let model in sequelize.models) delete global[model]
+    if (process.env.NODE_ENV !== 'production') {
+      for (let key in this._devGlobals) delete global[key]
+    }
 
     redisSubscriber.end(true)
     const httpServer = this._httpServer
