@@ -59,6 +59,7 @@ async function bootstrap(rule /* : {args: Array<string>} */) /* : Promise<any> *
   console.error('Renaming git remotes...')
   if (!dryRun) {
     await exec(`git remote rename origin skeleton`).catch(() => {})
+    await exec(`git config branch.master.remote origin`).catch(() => {})
     await exec(`git remote add origin ${gitRepo}`).catch(() => {})
   }
 
