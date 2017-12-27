@@ -7,7 +7,7 @@ import navigateTo from "./util/navigateTo"
 module.exports = () => describe('basic tests', () => {
   it('serves page with correct title', async function () {
     await navigateTo('/')
-    expect(await browser.getTitle()).to.equal('<<APP_TITLE>>')
+    expect(await browser.getTitle()).to.equal('Iron Pi')
   })
   it('serves 404 for favicon', async () => {
     let error

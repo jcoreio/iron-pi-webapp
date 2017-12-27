@@ -91,7 +91,7 @@ async function bootstrap(rule /* : {args: Array<string>} */) /* : Promise<any> *
       .replace(new RegExp(`${originalOrg}/${originalProject}`, 'g'), `${organization}/${project}`)
       .replace(new RegExp(`${originalProject}`, 'g'), project)
       .replace(new RegExp(`${snakeCase(originalProject)}`, 'g'), snakeCase(project))
-      .replace(/<<APP_TITLE>>/g, appTitle)
+      .replace(/Iron Pi/g, appTitle)
     if (after !== before) {
       console.error(`Updating ${file}...`)
       if (dryRun) console.error(after)

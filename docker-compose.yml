@@ -37,7 +37,7 @@ services:
     links:
       - selenium:hub
   app:
-    image: jcoreio/webapp-apollo
+    image: jcoreio/iron-pi-webapp
     ports:
       - "${PORT}:80"
     environment:

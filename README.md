@@ -1,4 +1,4 @@
-# webapp-apollo
+# iron-pi-webapp
 
 This is our apollo webapp skeleton.  It uses:
 
@@ -38,7 +38,7 @@ This is our apollo webapp skeleton.  It uses:
 
 Run the following:
 ```js
-git clone https://github.com/jcoreio/webapp-apollo yourproject
+git clone https://github.com/jcoreio/iron-pi-webapp yourproject
 cd yourproject
 yarn
 ./run bootstrap

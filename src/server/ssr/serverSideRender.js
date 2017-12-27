@@ -47,7 +47,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
 
     const app = (
       <Html
-        title="<<APP_TITLE>>"
+        title="Iron Pi"
         assets={assets}
         store={store}
         apolloClient={apolloClient}
