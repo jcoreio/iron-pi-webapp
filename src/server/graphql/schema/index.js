@@ -63,7 +63,7 @@ const subscription = new graphql.GraphQLObjectType({
     // delete this once you've added real subscription fields.
     hello: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
-      async * subscribe() {
+      async * subscribe(): AsyncIterator<string> {
         yield 'hello'
       }
     }
