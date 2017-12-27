@@ -1,6 +1,6 @@
 # iron-pi-webapp
 
-This is our apollo webapp skeleton.  It uses:
+This is our new webapp that runs on the Iron Pi.  It uses:
 
 * Runtime
     * [Node 8](https://nodejs.org/)
