@@ -17,8 +17,8 @@ const App = (): React.Element<any> => {
   return (
     <Switch>
       <Route path="/" exact component={Home} />
-      <Route path="/about" exact component={About} />
       <Route path="/hello" exact component={Hello} />
+      <Route path="/about" exact component={About} />
       <Route path="*" component={NotFound} />
     </Switch>
   )

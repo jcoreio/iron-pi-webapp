@@ -4,8 +4,9 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
+import {execute, subscribe} from 'graphql'
+import {SubscriptionServer} from 'subscriptions-transport-ws'
 import graphqlSchema from './graphql/schema'
-import graphqlRoot from './graphql/resolver'
 
 import type {$Request, $Response} from 'express'
 
@@ -14,6 +15,7 @@ import sequelize from './sequelize'
 import umzug from './sequelize/umzug'
 import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
+import pubsub from './graphql/pubsub'
 
 import redisReady from './redis/redisReady'
 import redisSubscriber from './redis/RedisSubscriber'
@@ -34,6 +36,7 @@ export default class Server {
     sequelize,
     umzug,
     graphqlSchema,
+    pubsub,
     ...sequelize.models,
   }
 
@@ -63,14 +66,13 @@ export default class Server {
       }
     })
 
-    app.use('/graphql', bodyParser.json(), graphqlExpress({
+    const GRAPHQL_PATH = '/graphql'
+    app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress({
       schema: graphqlSchema,
-      rootValue: graphqlRoot,
-      context: {
-        sequelize,
-      },
+      context: {sequelize},
     }))
-    app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql'}))
+
+    app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
@@ -80,7 +82,11 @@ export default class Server {
     })
 
     const port = parseInt(requireEnv('BACKEND_PORT'))
-    this._httpServer = app.listen(port)
+    const httpServer = this._httpServer = app.listen(port)
+    SubscriptionServer.create(
+      {schema: graphqlSchema, execute, subscribe},
+      {server: httpServer, path: GRAPHQL_PATH},
+    )
 
     if (process.env.NODE_ENV !== 'production') {
       Object.assign(global, this._devGlobals)
