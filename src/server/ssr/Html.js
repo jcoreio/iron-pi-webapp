@@ -4,13 +4,19 @@ import * as React from 'react'
 import {Provider} from 'react-redux'
 import {StaticRouter} from 'react-router-dom'
 import {renderToString} from 'react-dom/server'
+
+import jss from 'jss'
+import configureJss from '../../universal/jss/configureJss'
+configureJss(jss)
+
 import {SheetsRegistry, JssProvider} from 'react-jss'
 import type {ApolloClient} from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
+import {MuiThemeProvider, createGenerateClassName} from 'material-ui/styles'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
-import '../../universal/components/initJss'
+import theme from '../../universal/material-ui/theme'
 
 type Props = {
   title: string,
@@ -20,6 +26,7 @@ type Props = {
   extractApolloState?: boolean,
   location: string,
   routerContext: Object,
+  sheets: SheetsRegistry,
 }
 
 const environmentVars = []
@@ -29,19 +36,29 @@ process.env = process.env || {}
 ${environmentVars.map(name => `process.env[${JSON.stringify(name)}] = ${JSON.stringify(process.env[name] || '')}`).join('\n')}
 `
 
-const Html = ({routerContext, location, title, assets, store, apolloClient, extractApolloState}: Props): React.Element<any> => {
+const staticCss = `
+body {
+  font-family: Helvetica;
+  font-weight: 400;
+}
+`
+
+const Html = ({
+  routerContext, location, title, assets, store, apolloClient, extractApolloState, sheets,
+}: Props): React.Element<any> => {
   const {manifest, app, vendor} = assets || {}
   const initialState = `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState().set('features', {}))}`
-  const sheets = new SheetsRegistry()
   const root = renderToString(
-    <JssProvider registry={sheets}>
-      <ApolloProvider client={apolloClient}>
-        <Provider store={store}>
-          <StaticRouter context={routerContext} location={location}>
-            <App />
-          </StaticRouter>
-        </Provider>
-      </ApolloProvider>
+    <JssProvider registry={sheets} jss={jss} generateClassName={createGenerateClassName()}>
+      <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
+        <ApolloProvider client={apolloClient}>
+          <Provider store={store}>
+            <StaticRouter context={routerContext} location={location}>
+              <App />
+            </StaticRouter>
+          </Provider>
+        </ApolloProvider>
+      </MuiThemeProvider>
     </JssProvider>
   )
 
@@ -57,8 +74,9 @@ const Html = ({routerContext, location, title, assets, store, apolloClient, extr
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>{title}</title>
-        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500" rel="stylesheet" />
         {vendor && vendor.css && <link rel="stylesheet" type="text/css" href={vendor.css} />}
+        <style type="text/css">{staticCss}</style>
         <style type="text/css" id="server-side-styles">
           {sheets.toString()}
         </style>

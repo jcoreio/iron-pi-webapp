@@ -7,13 +7,17 @@ import { AppContainer } from 'react-hot-loader'
 import promisify from 'es6-promisify'
 import {loadInitialFeatures} from 'redux-features'
 
+import jss from 'jss'
+import configureJss from '../universal/jss/configureJss'
+configureJss(jss)
+
 import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
 import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
-import '../universal/components/initJss'
 import apollo, {cache} from './apollo/client'
+import theme from '../universal/material-ui/theme'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -39,6 +43,8 @@ async function bootstrap(): Promise<any> {
     window.apollo = apollo
     window.cache = cache
     window.gql = require('graphql-tag').default
+    window.theme = theme
+    window.jss = jss
   }
 
   let reloads = 0

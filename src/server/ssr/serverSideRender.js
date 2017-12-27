@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import type {$Request, $Response} from 'express'
 import {renderToString} from 'react-dom/server'
+import {SheetsRegistry} from 'react-jss'
 
 import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
@@ -53,6 +54,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
         apolloClient={apolloClient}
         location={req.url}
         routerContext={routerContext}
+        sheets={new SheetsRegistry()}
       />
     )
 
