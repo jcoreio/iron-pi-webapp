@@ -27,7 +27,7 @@ const styles = theme => ({
     fontFamily: 'Rubik',
     fontWeight: 300,
   },
-  drawerCloseButton: {
+  closeButton: {
     float: 'right',
     marginRight: -hPadding,
   },
@@ -67,11 +67,11 @@ class Sidebar extends React.Component<Props> {
   render(): ?React.Node {
     const {open, onClose, classes} = this.props
     return (
-      <Drawer open={open} type="persistent" anchor="left" classes={{paper: classes.drawerPaper}}>
+      <Drawer id="sidebar" open={open} type="persistent" anchor="left" classes={{paper: classes.drawerPaper}}>
         <div className={classes.drawerHeader}>
           <h1 className={classes.jcoreHeader}>
             <Link to="/">jcore.io</Link>
-            <IconButton color="inherit" onClick={onClose} className={classes.drawerCloseButton}>
+            <IconButton id="closeSidebarButton" color="inherit" onClick={onClose} className={classes.closeButton}>
               <ChevronLeftIcon />
             </IconButton>
           </h1>

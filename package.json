@@ -31,6 +31,7 @@
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
+    "delay": "^2.0.0",
     "dotenv": "^4.0.0",
     "es6-error": "^4.0.1",
     "es6-promisify": "^5.0.0",

@@ -16,7 +16,7 @@ const seleniumConfigs = [
     desiredCapabilities: {
       browserName: 'chrome',
       chromeOptions: {
-        args: ['--headless', '--disable-gpu', '--window-size=1280,800'],
+        args: ['--headless', '--disable-gpu'],
       },
     },
   },
@@ -49,6 +49,10 @@ describe('selenium tests', function () {
             baseUrl: resolveUrl('/'),
           })
           await browser.init()
+          await browser.setViewportSize({
+            width: 1200,
+            height: 800,
+          })
         } catch (error) {
           if (error.seleniumStack) throw new Error(error.seleniumStack.message)
           throw error
@@ -79,6 +83,7 @@ describe('selenium tests', function () {
       })
 
       require('./basicTests')()
+      require('./SidebarTests')()
     })
   })
 })

@@ -27,11 +27,12 @@ class Navbar extends React.Component<Props> {
   render(): ?React.Node {
     const {classes, onToggleSidebar} = this.props
     return (
-      <div className={classes.root}>
+      <div id="navbar" className={classes.root}>
         <AppBar position="static" color="default">
           <Toolbar>
             <IconButton
-              aria-label="open drawer"
+              id="toggleSidebarButton"
+              aria-label="toggle sidebar"
               onClick={onToggleSidebar}
               className={classes.menuButton}
             >

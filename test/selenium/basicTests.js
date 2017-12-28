@@ -3,6 +3,7 @@
 import {expect} from 'chai'
 import superagent from './util/superagent'
 import navigateTo from "./util/navigateTo"
+import delay from 'delay'
 
 module.exports = () => describe('basic tests', () => {
   it('serves page with correct title', async function () {
@@ -30,9 +31,11 @@ module.exports = () => describe('basic tests', () => {
     expect(error.status).to.equal(404)
   })
   it('handles links', async () => {
+    browser.timeouts('implicit', 1000)
     await navigateTo('/about')
-    expect(await browser.getText('h1')).to.equal('About')
+    expect(await browser.getText('#body h1')).to.equal('About')
     await browser.click('=Home')
-    expect(await browser.getText('h1')).to.equal('Home')
+    await delay(300)
+    expect(await browser.getText('#body h1')).to.equal('Home')
   })
 })

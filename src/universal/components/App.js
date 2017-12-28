@@ -76,7 +76,7 @@ class App extends React.Component<Props> {
         <Sidebar open={sidebarOpen} onClose={this.handleSidebarClose} />
         <div className={classes.appContent} style={{left: isWide && sidebarOpen ? drawerWidth : 0}}>
           <Navbar onToggleSidebar={this.handleToggleSidebar} />
-          <div className={classes.appBody}>
+          <div className={classes.appBody} id="body">
             <Switch component={Fader}>
               <Route path="/" exact component={Home} />
               <Route path="/hello" exact component={Hello} />
