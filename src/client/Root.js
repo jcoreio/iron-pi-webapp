@@ -8,6 +8,7 @@ import App from '../universal/components/App'
 import type {Store} from '../universal/redux/types'
 import apolloClient from './apollo/client'
 import {JssProvider} from 'react-jss'
+import jss from 'jss'
 import {MuiThemeProvider} from 'material-ui/styles'
 import theme from '../universal/material-ui/theme'
 
@@ -19,7 +20,7 @@ export default class Root extends React.Component<Props, void> {
   render(): React.Node {
     const {store} = this.props
     return (
-      <JssProvider>
+      <JssProvider jss={jss}>
         <MuiThemeProvider theme={theme}>
           <ApolloProvider client={apolloClient}>
             <Provider store={store}>
