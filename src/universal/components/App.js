@@ -6,11 +6,13 @@ import Switch from 'react-router-transition-switch'
 import Fader from 'react-fader'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
+import injectSheet from 'react-jss'
+import {compose} from 'redux'
+
 import NotFound from './NotFound'
 import Hello from './Hello'
 import Navbar from './Navbar'
 import Sidebar, {drawerWidth} from './Sidebar'
-import {withStyles} from 'material-ui/styles'
 import type {Dispatch} from '../redux/types'
 import {setSidebarOpen} from '../redux/sidebar'
 import selectSidebarOpen from '../selectors/selectSidebarOpen'
@@ -36,6 +38,7 @@ const styles = {
   appContent: {
     position: 'absolute',
     top: 0,
+    left: ({isWide, sidebarOpen}) => isWide && sidebarOpen ? drawerWidth : 0,
     right: 0,
     bottom: 0,
     transition: 'left ease 250ms',
@@ -70,11 +73,11 @@ class App extends React.Component<Props> {
   handleSidebarClose = () => this.props.dispatch(setSidebarOpen(false))
 
   render(): ?React.Node {
-    const {sidebarOpen, isWide, classes} = this.props
+    const {sidebarOpen, classes} = this.props
     return (
       <div className={classes.appFrame}>
         <Sidebar open={sidebarOpen} onClose={this.handleSidebarClose} />
-        <div className={classes.appContent} style={{left: isWide && sidebarOpen ? drawerWidth : 0}}>
+        <div className={classes.appContent}>
           <Navbar onToggleSidebar={this.handleToggleSidebar} />
           <div className={classes.appBody} id="body">
             <Switch component={Fader}>
@@ -95,5 +98,10 @@ const mapStateToProps = createStructuredSelector({
   isWide: selectIsWide,
 })
 
-export default withRouter(connect(mapStateToProps)(withStyles(styles)(App)))
+export default compose(
+  withRouter,
+  connect(mapStateToProps),
+  injectSheet(styles)
+)(App)
+
 

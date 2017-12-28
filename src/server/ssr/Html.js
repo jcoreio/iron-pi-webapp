@@ -12,7 +12,7 @@ configureJss(jss)
 import {SheetsRegistry, JssProvider} from 'react-jss'
 import type {ApolloClient} from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
-import {MuiThemeProvider, createGenerateClassName} from 'material-ui/styles'
+import {MuiThemeProvider} from 'material-ui/styles'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
@@ -49,7 +49,7 @@ const Html = ({
   const {manifest, app, vendor} = assets || {}
   const initialState = `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState().set('features', {}))}`
   const root = renderToString(
-    <JssProvider registry={sheets} jss={jss} generateClassName={createGenerateClassName()}>
+    <JssProvider registry={sheets} jss={jss}>
       <MuiThemeProvider theme={theme} sheetsManager={new Map()}>
         <ApolloProvider client={apolloClient}>
           <Provider store={store}>
