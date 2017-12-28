@@ -1,12 +1,15 @@
 // @flow
 
 import * as React from 'react'
-import Drawer from 'material-ui/Drawer'
+import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
+import Drawer from 'material-ui/Drawer'
+import IconButton from 'material-ui/IconButton'
+import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
 
 const hPadding = 22
 const vPadding = 10
-const drawerWidth = 240
+export const drawerWidth = 240
 
 const styles = theme => ({
   drawerPaper: {
@@ -24,24 +27,35 @@ const styles = theme => ({
     fontFamily: 'Rubik',
     fontWeight: 300,
   },
+  drawerCloseButton: {
+    float: 'right',
+    marginRight: -hPadding,
+  },
   jcoreHeader: {
     color: theme.jcorePrimaryColor,
     fontSize: 32,
     lineHeight: '38px',
     fontWeight: 300,
     margin: 0,
+    '& a': {
+      '&, &:hover, &:active, &:visited, &:focus': {
+        color: theme.jcorePrimaryColor,
+        textDecoration: 'none',
+      }
+    },
   },
   ironPiHeader: {
     fontSize: 22,
     lineHeight: '27px',
     fontWeight: 300,
     margin: 0,
-  }
+  },
 })
 
 export type Props = {
   open: boolean,
   classes: Object,
+  onClose?: () => any,
 }
 
 class Sidebar extends React.Component<Props> {
@@ -51,11 +65,16 @@ class Sidebar extends React.Component<Props> {
     open: false,
   }
   render(): ?React.Node {
-    const {open, classes} = this.props
+    const {open, onClose, classes} = this.props
     return (
       <Drawer open={open} type="persistent" anchor="left" classes={{paper: classes.drawerPaper}}>
         <div className={classes.drawerHeader}>
-          <h1 className={classes.jcoreHeader}>jcore.io</h1>
+          <h1 className={classes.jcoreHeader}>
+            <Link to="/">jcore.io</Link>
+            <IconButton color="inherit" onClick={onClose} className={classes.drawerCloseButton}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </h1>
           <h2 className={classes.ironPiHeader}>IRON PI</h2>
         </div>
       </Drawer>

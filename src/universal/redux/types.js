@@ -15,6 +15,11 @@ import type {
   MiddlewareAPI as _MiddlewareAPI,
 } from 'redux'
 
+import type {SidebarState} from './sidebar'
+import {sidebarReducer} from './sidebar'
+import type {WindowSize} from './windowSize'
+import {windowSizeReducer} from './windowSize'
+
 // Some things can be rendered on the client but not the server.
 // But the client must initially render the same thing the server did,
 // or React will warn that there was a checksum error.
@@ -28,12 +33,16 @@ export type StateFields = {
   featureStates: FeatureStates,
   renderMode: RenderMode,
   form: Map<string, any>,
+  sidebar: SidebarState,
+  windowSize: WindowSize,
 }
 const stateInit: StateFields = {
   features: featuresReducer()((undefined: any), {type: ''}),
   featureStates: featureStatesReducer()((undefined: any), {type: ''}),
   renderMode: 'prerender',
   form: formReducer(undefined, {}),
+  sidebar: sidebarReducer(undefined, {}),
+  windowSize: windowSizeReducer(undefined, {}),
 }
 
 export const StateRecord = Record(stateInit)
@@ -44,6 +53,8 @@ export type StateJSON = {
   featureStates: FeatureStates,
   renderMode: RenderMode,
   form: Object,
+  sidebar: SidebarState,
+  windowSize: WindowSize,
 }
 
 export function parseState({

@@ -7,7 +7,7 @@ import {ApolloProvider} from 'react-apollo'
 import App from '../universal/components/App'
 import type {Store} from '../universal/redux/types'
 import apolloClient from './apollo/client'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import {MuiThemeProvider} from 'material-ui/styles'
 import theme from '../universal/material-ui/theme'
 
 type Props = {
