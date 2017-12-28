@@ -13,6 +13,7 @@ import Collapse from 'material-ui/transitions/Collapse'
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
 import PlayArrowIcon from 'material-ui-icons/PlayArrow'
 import type {ChannelMode} from '../types/Channel'
+import type {SectionName} from '../redux/sidebar'
 
 const hPadding = 22
 const vPadding = 10
@@ -75,16 +76,20 @@ export type Props = {
     channels: Array<Channel>,
   },
   onClose?: () => any,
+  onSectionExpandedChange: (section: SectionName, expanded: boolean) => any,
 }
 
 class Sidebar extends React.Component<Props> {
   static defaultProps: {
     open: boolean,
+    onSectionExpandedChange: (section: SectionName, expanded: boolean) => any,
   } = {
     open: false,
+    onSectionExpandedChange: () => {},
   }
+
   render(): ?React.Node {
-    const {open, onClose, classes, localIO} = this.props
+    const {open, onClose, onSectionExpandedChange, classes, localIO} = this.props
     return (
       <Drawer id="sidebar" open={open} type="persistent" anchor="left" classes={{paper: classes.drawerPaper}}>
         <div className={classes.sidebarHeader}>
@@ -99,7 +104,11 @@ class Sidebar extends React.Component<Props> {
         <List className={classes.sidebarBody}>
           <SidebarSectionHeader title="Status" />
           {localIO &&
-            <SidebarSection title="Local I/O" expanded={localIO.expanded}>
+            <SidebarSection
+              title="Local I/O"
+              expanded={localIO.expanded}
+              onHeaderClick={() => onSectionExpandedChange('localIO', !localIO.expanded)}
+            >
               {localIO.channels.map((channel: Channel) =>
                 <ChannelStatus channel={channel} key={channel.id} />
               )}
@@ -139,11 +148,12 @@ export type SidebarSectionHeaderProps = {
   classes: {[name: $Keys<typeof sidebarSectionHeaderStyles>]: string},
   title: React.Node,
   expanded?: boolean,
+  onClick?: (event: MouseEvent) => any,
 }
 
 const SidebarSectionHeader = injectSheet(sidebarSectionHeaderStyles)(
-  ({title, classes, expanded}: SidebarSectionHeaderProps) => (
-    <ListItem button className={classes.root}>
+  ({title, classes, expanded, onClick}: SidebarSectionHeaderProps) => (
+    <ListItem button className={classes.root} onClick={onClick}>
       <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
         <PlayArrowIcon className={classes.expandIcon} />
       </ListItemIcon>
@@ -156,12 +166,13 @@ export type SidebarSectionProps = {
   expanded?: boolean,
   title: React.Node,
   children?: React.Node,
+  onHeaderClick?: (event: MouseEvent) => any,
 }
 
 const SidebarSection = (
-  ({title, children, expanded}: SidebarSectionProps): React.Node => (
+  ({title, children, expanded, onHeaderClick}: SidebarSectionProps): React.Node => (
     <React.Fragment>
-      <SidebarSectionHeader title={title} expanded={expanded} />
+      <SidebarSectionHeader title={title} expanded={expanded} onClick={onHeaderClick} />
       <Collapse component="li" in={expanded} timeout="auto" unmountOnExit>
         <List disablePadding>
           {children}

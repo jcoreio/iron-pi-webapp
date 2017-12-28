@@ -4,15 +4,16 @@ import * as React from 'react'
 import {withRouter} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createSelector, createStructuredSelector} from 'reselect'
-import {compose} from 'redux'
+import {compose, bindActionCreators} from 'redux'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
 
 import Sidebar from './Sidebar'
-import type {Dispatch, State} from '../redux/types'
-import {setSidebarOpen} from '../redux/sidebar'
+import type {Action, Dispatch, State} from '../redux/types'
+import {setSidebarOpen, setSectionExpanded} from '../redux/sidebar'
 import selectSidebarOpen from '../selectors/selectSidebarOpen'
 import type {ChannelMode} from '../types/Channel'
+import type {SectionName} from '../redux/sidebar'
 
 type Channel = {
   id: number,
@@ -37,17 +38,24 @@ type PropsFromState = {
 
 type PropsFromDispatch = {
   dispatch: Dispatch,
+  setSidebarOpen: (open: boolean) => Action,
+  setSectionExpanded: (section: SectionName, expanded: boolean) => Action,
 }
 
 type Props = PropsFromState & PropsFromDispatch & PropsFromApollo
 
 class SidebarContainer extends React.Component<Props> {
-  handleSidebarClose = () => this.props.dispatch(setSidebarOpen(false))
+  handleSidebarClose = () => this.props.setSidebarOpen(false)
 
   render(): ?React.Node {
-    const {open, localIO} = this.props
+    const {open, localIO, setSectionExpanded} = this.props
     return (
-      <Sidebar open={open} onClose={this.handleSidebarClose} localIO={localIO} />
+      <Sidebar
+        open={open}
+        onClose={this.handleSidebarClose}
+        onSectionExpandedChange={setSectionExpanded}
+        localIO={localIO}
+      />
     )
   }
 }
@@ -55,16 +63,22 @@ class SidebarContainer extends React.Component<Props> {
 const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState = createStructuredSelector({
   open: selectSidebarOpen,
   localIO: createSelector(
+    (state: State) => state.sidebar.expandedSections.get('localIO', true),
     (state, {data: {Channels}}): ?Array<Channel> => Channels,
-    (Channels: ?Array<Channel>) => {
+    (expanded: boolean, Channels: ?Array<Channel>) => {
       if (!Channels) return null
       return {
-        expanded: true,
+        expanded,
         channels: Channels,
       }
     }
   ),
 })
+
+const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
+  setSidebarOpen,
+  setSectionExpanded,
+}, dispatch)
 
 const query = gql(`{
   Channels {
@@ -77,7 +91,7 @@ const query = gql(`{
 export default compose(
   graphql(query),
   withRouter,
-  connect(mapStateToProps),
+  connect(mapStateToProps, mapDispatchToProps),
 )(SidebarContainer)
 
 

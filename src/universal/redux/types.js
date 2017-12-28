@@ -15,8 +15,8 @@ import type {
   MiddlewareAPI as _MiddlewareAPI,
 } from 'redux'
 
-import type {SidebarState} from './sidebar'
-import {sidebarReducer} from './sidebar'
+import type {SidebarState, SidebarStateJSON} from './sidebar'
+import {parseSidebarState, sidebarReducer} from './sidebar'
 import type {WindowSize} from './windowSize'
 import {windowSizeReducer} from './windowSize'
 
@@ -53,15 +53,16 @@ export type StateJSON = {
   featureStates: FeatureStates,
   renderMode: RenderMode,
   form: Object,
-  sidebar: SidebarState,
+  sidebar: SidebarStateJSON,
   windowSize: WindowSize,
 }
 
 export function parseState({
-  form, ...fields
+  form, sidebar, ...fields
 }: StateJSON): State {
   return StateRecord({
     form: (fromJS(form || {}): any),
+    sidebar: parseSidebarState(sidebar),
     ...fields,
   })
 }
