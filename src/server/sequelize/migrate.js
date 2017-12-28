@@ -3,9 +3,11 @@
 import {Client} from 'pg'
 import umzug from './umzug'
 import promisify from 'es6-promisify'
+import {range} from 'lodash'
 
 import sequelize, {dbConnectionParams} from './index'
 import logger from '../../universal/logger'
+import Channel from '../models/Channel'
 
 const log = logger('sequelize:migrate')
 
@@ -39,6 +41,14 @@ export default async function migrate(): Promise<void> {
   } catch (error) {
     console.error(error.stack) // eslint-disable-line no-console
     throw error
+  }
+
+  if (!(await Channel.findOne())) {
+    await Channel.bulkCreate(range(8).map(id => ({
+      id,
+      channelId: `channel${id}`,
+      name: `Channel ${id}`,
+    })))
   }
 }
 
