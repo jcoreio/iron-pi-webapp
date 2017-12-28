@@ -8,18 +8,15 @@ import {connect} from 'react-redux'
 import {createSelector, createStructuredSelector} from 'reselect'
 import injectSheet from 'react-jss'
 import {compose} from 'redux'
-import gql from 'graphql-tag'
-import {graphql} from 'react-apollo'
 
 import NotFound from './NotFound'
 import Hello from './Hello'
-import Navbar from './Navbar'
-import Sidebar, {drawerWidth} from './Sidebar'
+import {drawerWidth} from './Sidebar'
+import NavbarContainer from './NavbarContainer'
+import SidebarContainer from './SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
-import {setSidebarOpen} from '../redux/sidebar'
 import selectSidebarOpen from '../selectors/selectSidebarOpen'
 import selectIsWide from '../selectors/selectIsWide'
-import type {ChannelMode} from '../types/Channel'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -41,7 +38,7 @@ const styles = {
   appContent: {
     position: 'absolute',
     top: 0,
-    left: ({isWide, sidebarOpen}) => isWide && sidebarOpen ? drawerWidth : 0,
+    left: props => props.pushBodyOver ? drawerWidth : 0,
     right: 0,
     bottom: 0,
     transition: 'left ease 250ms',
@@ -51,54 +48,28 @@ const styles = {
   },
 }
 
-type Classes = {[name: $Keys<typeof styles>]: string}
-
 type PropsFromJss = {
-  classes: Classes,
-}
-
-type Channel = {
-  id: number,
-  name: string,
-  mode: ChannelMode,
-}
-
-type PropsFromApollo = {
-  data: {
-    Channels: ?Array<Channel>,
-    loading: boolean,
-  },
+  classes: {[name: $Keys<typeof styles>]: string},
 }
 
 type PropsFromState = {
-  sidebarOpen: boolean,
-  isWide: boolean,
-  localIO?: {
-    expanded?: boolean,
-    channels: Array<Channel>,
-  },
+  pushBodyOver: boolean,
 }
 
 type PropsFromDispatch = {
   dispatch: Dispatch,
 }
 
-type Props = PropsFromJss & PropsFromState & PropsFromDispatch & PropsFromApollo
+type Props = PropsFromJss & PropsFromState & PropsFromDispatch
 
 class App extends React.Component<Props> {
-  handleToggleSidebar = () => {
-    const {dispatch, sidebarOpen} = this.props
-    dispatch(setSidebarOpen(!sidebarOpen))
-  }
-  handleSidebarClose = () => this.props.dispatch(setSidebarOpen(false))
-
   render(): ?React.Node {
-    const {sidebarOpen, localIO, classes} = this.props
+    const {classes} = this.props
     return (
       <div className={classes.appFrame}>
-        <Sidebar open={sidebarOpen} onClose={this.handleSidebarClose} localIO={localIO} />
+        <SidebarContainer />
         <div className={classes.appContent}>
-          <Navbar onToggleSidebar={this.handleToggleSidebar} />
+          <NavbarContainer />
           <div className={classes.appBody} id="body">
             <Switch component={Fader}>
               <Route path="/" exact component={Home} />
@@ -113,31 +84,15 @@ class App extends React.Component<Props> {
   }
 }
 
-const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState = createStructuredSelector({
-  sidebarOpen: selectSidebarOpen,
-  isWide: selectIsWide,
-  localIO: createSelector(
-    (state, {data: {Channels}}): ?Array<Channel> => Channels,
-    (Channels: ?Array<Channel>) => {
-      if (!Channels) return null
-      return {
-        expanded: true,
-        channels: Channels,
-      }
-    }
+const mapStateToProps: (state: State) => PropsFromState = createStructuredSelector({
+  pushBodyOver: createSelector(
+    selectSidebarOpen,
+    selectIsWide,
+    (sidebarOpen: boolean, isWide: boolean) => sidebarOpen && isWide
   ),
 })
 
-const query = gql(`{
-  Channels {
-    id
-    name 
-    mode
-  }  
-}`)
-
 export default compose(
-  graphql(query),
   withRouter,
   connect(mapStateToProps),
   injectSheet(styles)
