@@ -4493,6 +4493,12 @@ jss-extend@^6.0.1:
     is-observable "^0.2.0"
     warning "^3.0.0"
 
+jss-extend@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.npmjs.org/jss-extend/-/jss-extend-6.1.0.tgz#85f3d39944018e8f44b322c14fa316068aa7bb0b"
+  dependencies:
+    warning "^3.0.0"
+
 jss-global@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/jss-global/-/jss-global-3.0.0.tgz#e19e5c91ab2b96353c227e30aa2cbd938cdaafa2"
