@@ -177,8 +177,8 @@ export type SidebarSectionHeaderProps = {
 }
 
 const SidebarSectionHeader = injectSheet(sidebarSectionHeaderStyles)(
-  ({title, classes, expanded, onClick}: SidebarSectionHeaderProps) => (
-    <ListItem button className={classes.root} onClick={onClick}>
+  ({title, classes, expanded, ...props}: SidebarSectionHeaderProps) => (
+    <ListItem {...props} button className={classes.root} data-test-title={title}>
       <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
         <PlayArrowIcon
           className={classNames(classes.expandIcon, {
@@ -203,7 +203,7 @@ const SidebarSection = (
     <React.Fragment>
       <SidebarSectionHeader title={title} expanded={expanded} onClick={onHeaderClick} />
       <Collapse component="li" in={expanded} timeout="auto" unmountOnExit>
-        <List disablePadding>
+        <List disablePadding data-test-title={title}>
           {children}
         </List>
       </Collapse>
@@ -226,8 +226,8 @@ export type SidebarItemProps = {
 }
 
 const SidebarItem = injectSheet(sidebarItemStyles)(
-  ({classes, children}: SidebarItemProps): React.Node => (
-    <ListItem button className={classes.root}>
+  ({classes, children, ...props}: SidebarItemProps): React.Node => (
+    <ListItem {...props} button className={classes.root}>
       {children}
     </ListItem>
   )
@@ -249,8 +249,9 @@ export type SidebarItemTextProps = {
 }
 
 const SidebarItemText = injectSheet(sidebarItemTextStyles)(
-  ({classes, className, primary, secondary}: SidebarItemTextProps): React.Node => (
+  ({classes, className, primary, secondary, ...props}: SidebarItemTextProps): React.Node => (
     <ListItemText
+      {...props}
       className={classNames(classes.root, className)}
       disableTypography
       primary={primary}
@@ -275,8 +276,8 @@ export type ChannelStatusProps = {
 const ChannelStatus = withStyles(channelStatusStyles)(
   ({channel, classes}: ChannelStatusProps): React.Node => (
     <SidebarItem>
-      <SidebarItemText className={classes.id} primary={String(channel.id)} />
-      <SidebarItemText disableTypography primary={channel.name} />
+      <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.id)} />
+      <SidebarItemText data-test-name="name" disableTypography primary={channel.name} />
     </SidebarItem>
   )
 )

@@ -2,8 +2,10 @@
 
 import {describe, it, beforeEach} from 'mocha'
 import {expect} from 'chai'
-import navigateTo from "./util/navigateTo"
 import delay from 'delay'
+
+import navigateTo from "./util/navigateTo"
+import graphql from './util/graphql'
 import theme from '../../src/universal/theme'
 
 const WIDE = theme.sidebar.autoOpenBreakpoint()
@@ -105,12 +107,45 @@ module.exports = () => describe('Sidebar', function () {
       expect(await browser.getText('#sidebar h2')).to.equal('IRON PI')
     })
 
-    // it("shows a status item", async function () {
-    //   expect(await browser.isVisible('#sidebar li=STATUS')).to.be.true
-    // })
-    //
-    // it("shows a Local I/O item", async function () {
-    //   expect(await browser.isVisible('#sidebar li=LOCAL I/O')).to.be.true
-    // })
+    it("shows a status item", async function () {
+      expect(await browser.isVisible('#sidebar li[data-test-title="Status"]')).to.be.true
+    })
+
+    it("shows a Local I/O item", async function () {
+      browser.timeouts('implicit', 500)
+      await browser.waitForVisible('#sidebar li[data-test-title="Local I/O"]', 10000)
+    })
+
+    it('Local I/O item is collapsible', async function () {
+      browser.timeouts('implicit', 500)
+      await browser.waitForVisible('#sidebar li[data-test-title="Local I/O"]', 10000)
+      await browser.waitForVisible('#sidebar ul[data-test-title="Local I/O"]', 10000)
+
+      await browser.click('#sidebar li[data-test-title="Local I/O"]')
+      await delay(300)
+      expect(await browser.isVisible('#sidebar ul[data-test-title="Local I/O"]')).to.be.false
+
+      await browser.click('#sidebar li[data-test-title="Local I/O"]')
+      await delay(300)
+      expect(await browser.isVisible('#sidebar ul[data-test-title="Local I/O"]')).to.be.true
+    })
+
+    it("shows Local I/O Channels", async function () {
+      const query = `{
+  Channels {
+    id
+    name
+  }      
+}`
+      const {data: {Channels}} = await graphql({query, variables: null, operationName: null})
+
+      await browser.waitForVisible('#sidebar ul[data-test-title="Local I/O"]', 10000)
+
+      const displayedChannelIds = await browser.getText('#sidebar ul[data-test-title="Local I/O"] > li [data-test-name="id"]')
+      const displayedChannelNames = await browser.getText('#sidebar ul[data-test-title="Local I/O"] > li [data-test-name="name"]')
+
+      expect(displayedChannelIds).to.deep.equal(Channels.map(({id}) => String(id)))
+      expect(displayedChannelNames).to.deep.equal(Channels.map(({name}) => name))
+    })
   })
 })

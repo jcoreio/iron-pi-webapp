@@ -11,7 +11,6 @@ import {withStyles} from 'material-ui/styles'
 import {compose} from 'redux'
 
 import NotFound from './NotFound'
-import Hello from './Hello'
 import NavbarContainer from './NavbarContainer'
 import SidebarContainer from './SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
@@ -91,7 +90,6 @@ class App extends React.Component<Props> {
           <div className={classes.body} id="body">
             <Switch component={Fader}>
               <Route path="/" exact component={Home} />
-              <Route path="/hello" exact component={Hello} />
               <Route path="/about" exact component={About} />
               <Route path="*" component={NotFound} />
             </Switch>
