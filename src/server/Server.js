@@ -17,8 +17,6 @@ import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import pubsub from './graphql/pubsub'
 
-import redisReady from './redis/redisReady'
-import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 
@@ -45,10 +43,7 @@ export default class Server {
 
     await Promise.all([
       databaseReady(),
-      redisReady(),
     ])
-
-    redisSubscriber.start()
 
     const forceMigrate = 'production' !== process.env.NODE_ENV
     if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate()
@@ -114,7 +109,6 @@ export default class Server {
       for (let key in this._devGlobals) delete global[key]
     }
 
-    redisSubscriber.end(true)
     const httpServer = this._httpServer
     if (httpServer) httpServer.close()
     this._httpServer = undefined

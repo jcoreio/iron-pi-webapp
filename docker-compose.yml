@@ -6,10 +6,6 @@ services:
       - 5432:5432
     environment:
       - POSTGRES_PASSWORD=$DB_PASSWORD
-  redis:
-    image: redis:3.2
-    ports:
-      - 6379:6379
   selenium:
     image: selenium/hub:3.8.1-bohrium
     ports:
@@ -42,14 +38,10 @@ services:
       - "${PORT}:80"
     environment:
       - ROOT_URL=${ROOT_URL}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_DB=${REDIS_DB}
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
       - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db
-      - redis
 

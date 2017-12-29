@@ -17,7 +17,6 @@ This is our new webapp that runs on the Iron Pi.  It uses:
     * [Apollo](https://www.apollographql.com) - data transport middleware
 * Services
     * [Postgres](https://www.postgresql.org/)
-    * [Redis](https://redis.io/)
     * [Docker](https://www.docker.com/)
 * Build tools
     * [Yarn](https://yarnpkg.com/)

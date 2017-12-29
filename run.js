@@ -153,7 +153,7 @@ task('built', 'build', async () => {
 task('clean', () => remove(build)).description('remove build output')
 
 const services = task('services', () =>
-  spawn('docker-compose', ['up', '-d', 'db', 'redis'], {env: env('prod', 'local')})
+  spawn('docker-compose', ['up', '-d', 'db'], {env: env('prod', 'local')})
 ).description('start docker services')
 
 task('services:logs', () =>
