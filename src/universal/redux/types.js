@@ -17,8 +17,6 @@ import type {
 
 import type {SidebarState, SidebarStateJSON} from './sidebar'
 import {parseSidebarState, sidebarReducer} from './sidebar'
-import type {WindowSize} from './windowSize'
-import {windowSizeReducer} from './windowSize'
 
 // Some things can be rendered on the client but not the server.
 // But the client must initially render the same thing the server did,
@@ -34,7 +32,6 @@ export type StateFields = {
   renderMode: RenderMode,
   form: Map<string, any>,
   sidebar: SidebarState,
-  windowSize: WindowSize,
 }
 const stateInit: StateFields = {
   features: featuresReducer()((undefined: any), {type: ''}),
@@ -42,7 +39,6 @@ const stateInit: StateFields = {
   renderMode: 'prerender',
   form: formReducer(undefined, {}),
   sidebar: sidebarReducer(undefined, {}),
-  windowSize: windowSizeReducer(undefined, {}),
 }
 
 export const StateRecord = Record(stateInit)
@@ -54,7 +50,6 @@ export type StateJSON = {
   renderMode: RenderMode,
   form: Object,
   sidebar: SidebarStateJSON,
-  windowSize: WindowSize,
 }
 
 export function parseState({

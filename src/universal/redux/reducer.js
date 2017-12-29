@@ -10,7 +10,6 @@ import {StateRecord} from './types'
 import {renderModeReducer} from './renderMode'
 import {reducer as form} from 'redux-form/immutable'
 import {sidebarReducer} from './sidebar'
-import {windowSizeReducer} from './windowSize'
 
 const reducer: Reducer = enableBatching(composeReducers(
   combineReducers({
@@ -19,7 +18,6 @@ const reducer: Reducer = enableBatching(composeReducers(
     renderMode: renderModeReducer,
     form,
     sidebar: sidebarReducer,
-    windowSize: windowSizeReducer,
   }, init => new StateRecord(init)),
   featureReducersReducer({composeReducers})
 ))

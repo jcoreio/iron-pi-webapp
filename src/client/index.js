@@ -6,7 +6,6 @@ import * as React from 'react'
 import { AppContainer } from 'react-hot-loader'
 import promisify from 'es6-promisify'
 import {loadInitialFeatures} from 'redux-features'
-import {throttle} from 'lodash'
 
 import jss from 'jss'
 import configureJss from '../universal/jss/configureJss'
@@ -19,7 +18,6 @@ import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
 import apollo, {cache} from './apollo/client'
 import theme from '../universal/theme'
-import {setWindowSize} from '../universal/redux/windowSize'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -82,16 +80,6 @@ async function bootstrap(): Promise<any> {
   if (ssStyles && ssStyles.parentNode) ssStyles.parentNode.removeChild(ssStyles)
   // render anything that we couldn't on the server
   store.dispatch(setRenderMode('client'))
-
-  const updateWindowSize = throttle(() => store.dispatch(setWindowSize({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  })), 250)
-
-  updateWindowSize()
-  updateWindowSize.flush()
-
-  window.addEventListener('resize', updateWindowSize, true)
 }
 
 bootstrap().catch(console.error) // eslint-disable-line no-console
