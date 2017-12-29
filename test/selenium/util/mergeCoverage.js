@@ -1,4 +1,3 @@
-/* global browser */
 import {Collector} from 'istanbul'
 
 // istanbul ignore next
