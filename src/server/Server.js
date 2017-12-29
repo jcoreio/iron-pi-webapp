@@ -16,7 +16,7 @@ import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import graphqlSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
-import {getChannelValue, getChannelValues, setChannelValues, getChannelValuesArray} from './localio/ChannelValues'
+import {getChannelState, getChannelStates, setChannelStates, getChannelStatesArray} from './localio/ChannelStates'
 
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -36,10 +36,10 @@ export default class Server {
     umzug,
     graphqlSchema,
     pubsub,
-    getChannelValue,
-    getChannelValues,
-    setChannelValues,
-    getChannelValuesArray,
+    getChannelState,
+    getChannelStates,
+    setChannelStates,
+    getChannelStatesArray,
     ...sequelize.models,
   }
 

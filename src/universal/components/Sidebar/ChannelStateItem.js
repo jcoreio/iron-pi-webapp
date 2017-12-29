@@ -17,7 +17,7 @@ export type Channel = {
   },
 }
 
-const channelStatusStyles = {
+const channelStateStyles = {
   id: {
     extend: sidebarItemTextStyles.root,
     marginRight: 8,
@@ -25,13 +25,13 @@ const channelStatusStyles = {
   },
 }
 
-export type ChannelStatusProps = {
+export type ChannelStateProps = {
   channel: Channel,
   classes: Object,
 }
 
-const ChannelStatusItem = withStyles(channelStatusStyles)(
-  ({channel, classes}: ChannelStatusProps): React.Node => (
+const ChannelStateItem = withStyles(channelStateStyles)(
+  ({channel, classes}: ChannelStateProps): React.Node => (
     <SidebarItem>
       <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.id)} />
       <SidebarItemText data-test-name="name" disableTypography primary={channel.name} />
@@ -39,5 +39,5 @@ const ChannelStatusItem = withStyles(channelStatusStyles)(
   )
 )
 
-export default ChannelStatusItem
+export default ChannelStateItem
 

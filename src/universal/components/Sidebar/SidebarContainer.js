@@ -87,9 +87,9 @@ const query = gql(`{
     id
     name 
     mode
-    value {
+    state {
       id
-      current
+      value
     }
   }  
 }`)

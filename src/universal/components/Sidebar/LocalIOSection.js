@@ -4,8 +4,8 @@ import * as React from 'react'
 import type {SectionName} from '../../redux/sidebar'
 
 import SidebarSection from './SidebarSection'
-import ChannelStatusItem from './ChannelStatusItem'
-import type {Channel} from './ChannelStatusItem'
+import ChannelStateItem from './ChannelStateItem'
+import type {Channel} from './ChannelStateItem'
 
 export type Props = {
   expanded?: boolean,
@@ -20,7 +20,7 @@ const LocalIOSection = ({expanded, channels, onSectionExpandedChange}: Props): R
     onHeaderClick={() => onSectionExpandedChange('localIO', !expanded)}
   >
     {channels.map((channel: Channel) =>
-      <ChannelStatusItem channel={channel} key={channel.id} />
+      <ChannelStateItem channel={channel} key={channel.id} />
     )}
   </SidebarSection>
 )

@@ -12,7 +12,7 @@ import type {SectionName} from '../../redux/sidebar'
 
 import SidebarSectionHeader from './SidebarSectionHeader'
 import LocalIOSection from './LocalIOSection'
-import type {Channel} from './ChannelStatusItem'
+import type {Channel} from './ChannelStateItem'
 
 const styles = ({jcorePrimaryColor, sidebar, zIndex}) => ({
   sidebar: {

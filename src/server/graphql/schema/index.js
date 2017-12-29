@@ -10,8 +10,8 @@ const {models} = sequelize
 
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
 import Channel from '../../models/Channel'
-import type {ChannelValue} from '../../../universal/types/Channel'
-import {getChannelValue, getChannelValuesArray} from '../../localio/ChannelValues'
+import type {ChannelState} from '../../../universal/types/Channel'
+import {getChannelState, getChannelStatesArray} from '../../localio/ChannelStates'
 
 const args = mapValues(models, model => defaultArgs(model))
 
@@ -22,14 +22,15 @@ function getArgs(model: Class<Model<any>>): Object {
 function getType(model: Class<Model<any>>): Object {
   return types[model.name]
 }
-const ChannelValueType = new graphql.GraphQLObjectType({
-  name: 'ChannelValue',
+const ChannelStateType = new graphql.GraphQLObjectType({
+  name: 'ChannelState',
+  description: 'the realtime state of a channel',
   fields: {
     id: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
       description: 'the numeric id (primary key) of the channel',
     },
-    current: {
+    value: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLFloat),
       description: 'the current value of the channel',
     },
@@ -38,11 +39,11 @@ const ChannelValueType = new graphql.GraphQLObjectType({
 
 const extraFields = {
   [Channel.name]: {
-    value: {
-      type: ChannelValueType,
-      description: 'the value of this channel',
-      resolve(source: Channel): ?ChannelValue {
-        return getChannelValue(source.id)
+    state: {
+      type: ChannelStateType,
+      description: 'the state of this channel',
+      resolve(source: Channel): ?ChannelState {
+        return getChannelState(source.id)
       },
     },
   },
@@ -58,11 +59,11 @@ const types = mapValues(models, (model: Class<Model<any>>) => new graphql.GraphQ
 }))
 
 const queryFields = {
-  ChannelValues: {
-    type: new graphql.GraphQLList(ChannelValueType),
-    description: 'gets all channel values',
-    resolve(): Array<ChannelValue> {
-      return getChannelValuesArray()
+  ChannelStates: {
+    type: new graphql.GraphQLList(ChannelStateType),
+    description: 'gets all channel states',
+    resolve(): Array<ChannelState> {
+      return getChannelStatesArray()
     }
   },
 }
