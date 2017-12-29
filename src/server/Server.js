@@ -6,16 +6,17 @@ import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
 import {execute, subscribe} from 'graphql'
 import {SubscriptionServer} from 'subscriptions-transport-ws'
-import graphqlSchema from './graphql/schema'
+import Sequelize from 'sequelize'
 
 import type {$Request, $Response} from 'express'
 
-import Sequelize from 'sequelize'
 import sequelize from './sequelize'
 import umzug from './sequelize/umzug'
 import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
+import graphqlSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
+import {getChannelValue, getChannelValues, setChannelValues, getChannelValuesArray} from './localio/ChannelValues'
 
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -35,6 +36,10 @@ export default class Server {
     umzug,
     graphqlSchema,
     pubsub,
+    getChannelValue,
+    getChannelValues,
+    setChannelValues,
+    getChannelValuesArray,
     ...sequelize.models,
   }
 

@@ -9,6 +9,9 @@ import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 const {models} = sequelize
 
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
+import Channel from '../../models/Channel'
+import type {ChannelValue} from '../../../universal/types/Channel'
+import {getChannelValue, getChannelValuesArray} from '../../localio/ChannelValues'
 
 const args = mapValues(models, model => defaultArgs(model))
 
@@ -19,21 +22,49 @@ function getArgs(model: Class<Model<any>>): Object {
 function getType(model: Class<Model<any>>): Object {
   return types[model.name]
 }
+const ChannelValueType = new graphql.GraphQLObjectType({
+  name: 'ChannelValue',
+  fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+      description: 'the numeric id (primary key) of the channel',
+    },
+    current: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLFloat),
+      description: 'the current value of the channel',
+    },
+  },
+})
+
+const extraFields = {
+  [Channel.name]: {
+    value: {
+      type: ChannelValueType,
+      description: 'the value of this channel',
+      resolve(source: Channel): ?ChannelValue {
+        return getChannelValue(source.id)
+      },
+    },
+  },
+}
 
 const types = mapValues(models, (model: Class<Model<any>>) => new graphql.GraphQLObjectType({
   name: model.name,
   fields: () => ({
     ...attributeFields(model),
     ...associationFields(model, {getType, getArgs}),
+    ...extraFields[model.name] || {},
   })
 }))
 
 const queryFields = {
-  // delete this once you've added real query fields.
-  hello: {
-    type: new graphql.GraphQLNonNull(graphql.GraphQLString),
-    resolve: () => "world",
-  }
+  ChannelValues: {
+    type: new graphql.GraphQLList(ChannelValueType),
+    description: 'gets all channel values',
+    resolve(): Array<ChannelValue> {
+      return getChannelValuesArray()
+    }
+  },
 }
 for (let name in types) {
   const model = models[name]
