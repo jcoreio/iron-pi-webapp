@@ -9,6 +9,7 @@ import resolveUrl from './util/resolveUrl'
 import poll from '@jcoreio/poll'
 import promisify from 'es6-promisify'
 import glob from 'glob'
+import mergeCoverage from './util/mergeCoverage'
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -37,6 +38,15 @@ describe('selenium tests', function () {
       await poll(() => superagent.get('/'), 1000).timeout(15000)
     } catch (error) {
       throw new Error(`Can't connect to webapp: ${error.message}`)
+    }
+  })
+
+  after(async function () {
+    try {
+      const {body: serverCoverage} = await superagent.get('/__coverage__').accept('json')
+      if (serverCoverage) mergeCoverage(serverCoverage)
+    } catch (error) {
+      console.error("Couldn't get server coverage:", error.message) // eslint-disable-line no-console
     }
   })
 
