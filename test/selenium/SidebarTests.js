@@ -76,7 +76,7 @@ module.exports = () => describe('Sidebar', function () {
     expect(await browser.getLocation('body #body', 'x')).to.equal(theme.sidebar.width)
   })
 
-  it("overlaps content when viewport is narrow", async function () {
+  it("pushes over content when viewport is narrow", async function () {
     await browser.setViewportSize({
       width: WIDE - 1,
       height: 800,
