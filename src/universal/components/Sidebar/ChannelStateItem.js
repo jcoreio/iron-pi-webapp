@@ -2,39 +2,55 @@
 
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles/index'
-import {sidebarItemTextStyles} from './SidebarItemText'
+import {ListItemSecondaryAction} from 'material-ui/List'
 
+import {sidebarItemTextStyles} from './SidebarItemText'
 import SidebarItem from './SidebarItem'
 import SidebarItemText from './SidebarItemText'
-import type {ChannelMode} from '../../types/Channel'
+import type {ChannelMode, ChannelState} from '../../types/Channel'
+
+import ChannelStateIcon from './ChannelStateIcon'
 
 export type Channel = {
   id: number,
   name: string,
   mode: ChannelMode,
-  value?: {
-    current: number,
-  },
+  state?: ChannelState,
 }
 
-const channelStateStyles = {
+const channelStateStyles = theme => ({
   id: {
     extend: sidebarItemTextStyles.root,
-    marginRight: 8,
+    marginRight: theme.spacing.unit,
     flex: '0 1 26px',
   },
-}
+  name: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  secondaryAction: {
+    marginTop: -theme.spacing.unit,
+    marginRight: theme.spacing.unit * 3,
+  },
+})
+
+type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type Classes = $Call<ExtractClasses, typeof channelStateStyles>
 
 export type ChannelStateProps = {
   channel: Channel,
-  classes: Object,
+  classes: Classes,
 }
 
-const ChannelStateItem = withStyles(channelStateStyles)(
+const ChannelStateItem = withStyles(channelStateStyles, {withTheme: true})(
   ({channel, classes}: ChannelStateProps): React.Node => (
     <SidebarItem>
       <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.id)} />
       <SidebarItemText data-test-name="name" disableTypography primary={channel.name} />
+      <ListItemSecondaryAction className={classes.secondaryAction}>
+        <ChannelStateIcon channel={channel} />
+      </ListItemSecondaryAction>
     </SidebarItem>
   )
 )

@@ -1,24 +1,28 @@
 // @flow
 
 import * as React from 'react'
-import injectSheet from 'react-jss'
 import { ListItem } from 'material-ui/List'
+import { withStyles } from 'material-ui/styles'
 
-const sidebarItemStyles = {
+const sidebarItemStyles = theme => ({
   root: {
     paddingLeft: 37,
     height: 30,
     paddingTop: 0,
     paddingBottom: 0,
+    paddingRight: theme.spacing.unit * 6,
   },
-}
+})
+
+type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type Classes = $Call<ExtractClasses, typeof sidebarItemStyles>
 
 export type SidebarItemProps = {
-  classes: {[name: $Keys<typeof sidebarItemStyles>]: string},
+  classes: Classes,
   children: React.Node,
 }
 
-const SidebarItem = injectSheet(sidebarItemStyles)(
+const SidebarItem = withStyles(sidebarItemStyles, {withTheme: true})(
   ({classes, children, ...props}: SidebarItemProps): React.Node => (
     <ListItem {...props} button className={classes.root}>
       {children}
