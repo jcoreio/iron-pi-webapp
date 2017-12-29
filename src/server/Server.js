@@ -61,6 +61,16 @@ export default class Server {
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
+    app.get('/__coverage__', (req: $Request, res: $Response) => {
+      if (!req.accepts('application/json')) {
+        res.status(500).end()
+        return
+      }
+      const {__coverage__} = global
+      if (__coverage__) res.json(__coverage__)
+      else res.status(404).end()
+    })
+
     // server-side rendering
     app.get('*', (req: $Request, res: $Response) => {
       require('./ssr/serverSideRender').default(req, res)
