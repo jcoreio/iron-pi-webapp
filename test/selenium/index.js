@@ -7,6 +7,8 @@ import fs from 'fs-extra'
 import superagent from './util/superagent'
 import resolveUrl from './util/resolveUrl'
 import poll from '@jcoreio/poll'
+import promisify from 'es6-promisify'
+import glob from 'glob'
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -16,7 +18,7 @@ const seleniumConfigs = [
     desiredCapabilities: {
       browserName: 'chrome',
       chromeOptions: {
-        args: ['--headless', '--disable-gpu', '--window-size=1280,800'],
+        args: ['--headless', '--disable-gpu'],
       },
     },
   },
@@ -49,6 +51,10 @@ describe('selenium tests', function () {
             baseUrl: resolveUrl('/'),
           })
           await browser.init()
+          await browser.setViewportSize({
+            width: 1200,
+            height: 800,
+          })
         } catch (error) {
           if (error.seleniumStack) throw new Error(error.seleniumStack.message)
           throw error
@@ -63,16 +69,24 @@ describe('selenium tests', function () {
 
       afterEach(async function () {
         const {state, title} = this.currentTest
+        const filePrefix = path.join(errorShots, `ERROR_${browserName}_${title.replace(/[^a-z0-9 ]/ig, '_')}`)
         if (state === 'failed') {
           await fs.mkdirs(errorShots)
-          const screenshotFile = path.join(errorShots, `ERROR_${browserName}_${title.replace(/[^a-z0-9 ]/ig, '_')}_${new Date().toISOString()}.png`)
+          const screenshotFile = `${filePrefix}_${new Date().toISOString()}.png`
           await browser.saveScreenshot(screenshotFile)
           console.log('Saved screenshot to', screenshotFile) // eslint-disable-line no-console
 
           await fs.mkdirs(errorShots)
-          const logFile = path.join(errorShots, `ERROR_${browserName}_${title.replace(/[^a-z0-9 ]/ig, '_')}_${new Date().toISOString()}.log`)
-          const logs = (await browser.log('browser')).value
-          await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
+          const logFile = `${filePrefix}_${new Date().toISOString()}.log`
+          try {
+            const logs = (await browser.log('browser')).value
+            await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
+          } catch (error) {
+            console.error(error.stack) // eslint-disable-line no-console
+          }
+        } else {
+          const files = await promisify(glob)(filePrefix + '*')
+          files.forEach(file => fs.remove(file)) // no need to wait for promise
         }
 
         await mergeClientCoverage()
