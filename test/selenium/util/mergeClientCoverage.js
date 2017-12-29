@@ -1,5 +1,5 @@
 /* global browser */
-import {Collector} from 'istanbul'
+import mergeCoverage from './mergeCoverage'
 
 // istanbul ignore next
 async function mergeClientCoverage() {
@@ -7,12 +7,7 @@ async function mergeClientCoverage() {
   const browserCoverage = (await browser.execute(() => window.__coverage__)).value
   /* eslint-enable no-undef */
 
-  if (browserCoverage) {
-    const collector = new Collector()
-    if (global.__coverage__) collector.add(global.__coverage__)
-    collector.add(browserCoverage)
-    global.__coverage__ = collector.getFinalCoverage()
-  }
+  if (browserCoverage) mergeCoverage(browserCoverage)
 }
 
 export default mergeClientCoverage
