@@ -43,10 +43,7 @@ export default class Server {
     redisSubscriber.start()
 
     const forceMigrate = 'production' !== process.env.NODE_ENV
-    if (forceMigrate || process.env.DB_MIGRATE)
-      await sequelizeMigrate()
-
-    // publishCollections(publishedCollections)
+    if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate()
 
     const app = express()
 
@@ -61,6 +58,7 @@ export default class Server {
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
+    // istanbul ignore next
     app.get('/__coverage__', (req: $Request, res: $Response) => {
       if (!req.accepts('application/json')) {
         res.status(500).end()
@@ -79,6 +77,7 @@ export default class Server {
     const port = parseInt(requireEnv('BACKEND_PORT'))
     this._httpServer = app.listen(port)
 
+    // istanbul ignore next
     if (process.env.NODE_ENV !== 'production') {
       Object.assign(global, this._devGlobals)
     }
@@ -87,6 +86,7 @@ export default class Server {
     this._running = true
   }
 
+  // istanbul ignore next
   async stop(): Promise<void> {
     if (!this._running) return
     this._running = false
