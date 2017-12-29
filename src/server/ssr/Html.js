@@ -16,7 +16,7 @@ import {MuiThemeProvider} from 'material-ui/styles'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
-import theme from '../../universal/material-ui/theme'
+import theme from '../../universal/theme'
 
 type Props = {
   title: string,

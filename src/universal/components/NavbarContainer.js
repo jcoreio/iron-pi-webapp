@@ -5,11 +5,15 @@ import {withRouter} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
 import {compose} from 'redux'
+import {withTheme} from 'material-ui/styles'
 
 import Navbar from './Navbar'
 import type {Dispatch, State} from '../redux/types'
 import {setSidebarOpen} from '../redux/sidebar'
-import selectSidebarOpen from '../selectors/selectSidebarOpen'
+
+type PropsFromTheme = {
+  theme: Object,
+}
 
 type PropsFromState = {
   sidebarOpen: boolean,
@@ -19,14 +23,17 @@ type PropsFromDispatch = {
   dispatch: Dispatch,
 }
 
-type Props = PropsFromState & PropsFromDispatch
+type Props = PropsFromTheme & PropsFromState & PropsFromDispatch
 
 class App extends React.Component<Props> {
   handleToggleSidebar = () => {
-    const {dispatch, sidebarOpen} = this.props
+    if (typeof window === 'undefined') return
+    /* global window */
+    const {dispatch, theme} = this.props
+    let {sidebarOpen} = this.props
+    if (sidebarOpen == null) sidebarOpen = theme.sidebar.isAutoOpen(window.innerWidth)
     dispatch(setSidebarOpen(!sidebarOpen))
   }
-  handleSidebarClose = () => this.props.dispatch(setSidebarOpen(false))
 
   render(): ?React.Node {
     return (
@@ -36,11 +43,12 @@ class App extends React.Component<Props> {
 }
 
 const mapStateToProps: (state: State) => PropsFromState = createStructuredSelector({
-  sidebarOpen: selectSidebarOpen,
+  sidebarOpen: (state: State) => state.sidebar.open,
 })
 
 export default compose(
   withRouter,
+  withTheme(),
   connect(mapStateToProps),
 )(App)
 

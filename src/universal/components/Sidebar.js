@@ -5,33 +5,46 @@ import classNames from 'classnames'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
 import injectSheet from 'react-jss'
-import Drawer from 'material-ui/Drawer'
 import IconButton from 'material-ui/IconButton'
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
 import Collapse from 'material-ui/transitions/Collapse'
+
 
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
 import PlayArrowIcon from 'material-ui-icons/PlayArrow'
 import type {ChannelMode} from '../types/Channel'
 import type {SectionName} from '../redux/sidebar'
 
-const hPadding = 22
-const vPadding = 10
-export const drawerWidth = 240
-
-const styles = theme => ({
-  drawerPaper: {
-    position: 'relative',
-    backgroundColor: theme.sidebarBackgroundColor,
-    color: theme.sidebarForegroundColor,
-    height: '100%',
-    width: drawerWidth,
+const styles = ({jcorePrimaryColor, sidebar, zIndex}) => ({
+  sidebar: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: sidebar.width,
+    backgroundColor: sidebar.backgroundColor,
+    color: sidebar.foregroundColor,
+    transition: sidebar.transition,
+    zIndex: zIndex.navDrawer,
+  },
+  sidebarOpen: {
+    left: 0,
+  },
+  sidebarClosed: {
+    left: -sidebar.width,
+  },
+  sidebarAuto: {
+    [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {
+      left: -sidebar.width,
+    },
+    [`@media (min-width: ${sidebar.autoOpenBreakpoint()}px)`]: {
+      left: 0,
+    },
   },
   sidebarHeader: {
     borderBottomWidth: 3,
     borderBottomStyle: 'solid',
-    borderBottomColor: theme.jcorePrimaryColor,
-    padding: `${vPadding}px ${hPadding}px`,
+    borderBottomColor: jcorePrimaryColor,
+    padding: `${sidebar.padding.vertical}px ${sidebar.padding.horizontal}px`,
     fontFamily: 'Rubik',
     fontWeight: 300,
   },
@@ -39,17 +52,17 @@ const styles = theme => ({
   },
   closeButton: {
     float: 'right',
-    marginRight: -hPadding,
+    marginRight: -sidebar.padding.horizontal,
   },
   jcoreHeader: {
-    color: theme.jcorePrimaryColor,
+    color: jcorePrimaryColor,
     fontSize: 32,
     lineHeight: '38px',
     fontWeight: 300,
     margin: 0,
     '& a': {
       '&, &:hover, &:active, &:visited, &:focus': {
-        color: theme.jcorePrimaryColor,
+        color: jcorePrimaryColor,
         textDecoration: 'none',
       }
     },
@@ -69,7 +82,7 @@ type Channel = {
 }
 
 export type Props = {
-  open: boolean,
+  open: ?boolean,
   classes: Object,
   localIO?: {
     expanded?: boolean,
@@ -91,7 +104,16 @@ class Sidebar extends React.Component<Props> {
   render(): ?React.Node {
     const {open, onClose, onSectionExpandedChange, classes, localIO} = this.props
     return (
-      <Drawer id="sidebar" open={open} type="persistent" anchor="left" classes={{paper: classes.drawerPaper}}>
+      <div
+        id="sidebar"
+        type="persistent"
+        anchor="left"
+        className={classNames(classes.sidebar, {
+          [classes.sidebarOpen]: open,
+          [classes.sidebarClosed]: open === false,
+          [classes.sidebarAuto]: open == null,
+        })}
+      >
         <div className={classes.sidebarHeader}>
           <h1 className={classes.jcoreHeader}>
             <Link to="/">jcore.io</Link>
@@ -115,7 +137,7 @@ class Sidebar extends React.Component<Props> {
             </SidebarSection>
           }
         </List>
-      </Drawer>
+      </div>
     )
   }
 }
@@ -140,7 +162,10 @@ const sidebarSectionHeaderStyles = {
     marginLeft: -4,
     marginRight: 5,
     transition: 'transform ease 200ms',
-    transform: props => `rotate(${props.expanded ? 90 : 0}deg)`,
+    transform: 'rotate(0deg)',
+  },
+  expandIconOpen: {
+    transform: 'rotate(90deg)',
   },
 }
 
@@ -155,7 +180,11 @@ const SidebarSectionHeader = injectSheet(sidebarSectionHeaderStyles)(
   ({title, classes, expanded, onClick}: SidebarSectionHeaderProps) => (
     <ListItem button className={classes.root} onClick={onClick}>
       <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
-        <PlayArrowIcon className={classes.expandIcon} />
+        <PlayArrowIcon
+          className={classNames(classes.expandIcon, {
+            [classes.expandIconOpen]: expanded,
+          })}
+        />
       </ListItemIcon>
       <ListItemText className={classes.title} disableTypography primary={title} />
     </ListItem>

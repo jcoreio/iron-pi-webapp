@@ -11,7 +11,6 @@ import {graphql} from 'react-apollo'
 import Sidebar from './Sidebar'
 import type {Action, Dispatch, State} from '../redux/types'
 import {setSidebarOpen, setSectionExpanded} from '../redux/sidebar'
-import selectSidebarOpen from '../selectors/selectSidebarOpen'
 import type {ChannelMode} from '../types/Channel'
 import type {SectionName} from '../redux/sidebar'
 
@@ -29,7 +28,7 @@ type PropsFromApollo = {
 }
 
 type PropsFromState = {
-  open: boolean,
+  open: ?boolean,
   localIO?: {
     expanded?: boolean,
     channels: Array<Channel>,
@@ -61,7 +60,7 @@ class SidebarContainer extends React.Component<Props> {
 }
 
 const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState = createStructuredSelector({
-  open: selectSidebarOpen,
+  open: (state: State) => state.sidebar.open,
   localIO: createSelector(
     (state: State) => state.sidebar.expandedSections.get('localIO', true),
     (state, {data: {Channels}}): ?Array<Channel> => Channels,

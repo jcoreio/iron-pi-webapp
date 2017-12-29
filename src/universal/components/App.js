@@ -1,22 +1,20 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {Route, Link, withRouter} from 'react-router-dom'
 import Switch from 'react-router-transition-switch'
 import Fader from 'react-fader'
 import {connect} from 'react-redux'
-import {createSelector, createStructuredSelector} from 'reselect'
-import injectSheet from 'react-jss'
+import {createStructuredSelector} from 'reselect'
+import {withStyles} from 'material-ui/styles'
 import {compose} from 'redux'
 
 import NotFound from './NotFound'
 import Hello from './Hello'
-import {drawerWidth} from './Sidebar'
 import NavbarContainer from './NavbarContainer'
 import SidebarContainer from './SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
-import selectSidebarOpen from '../selectors/selectSidebarOpen'
-import selectIsWide from '../selectors/selectIsWide'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -26,8 +24,8 @@ const About = () => (
   </div>
 )
 
-const styles = {
-  appFrame: {
+const styles = ({sidebar}) => ({
+  frame: {
     position: 'fixed',
     display: 'flex',
     top: 0,
@@ -35,25 +33,40 @@ const styles = {
     right: 0,
     bottom: 0,
   },
-  appContent: {
+  content: {
     position: 'absolute',
     top: 0,
-    left: props => props.pushBodyOver ? drawerWidth : 0,
+    left: 0,
     right: 0,
     bottom: 0,
-    transition: 'left ease 250ms',
+    transition: sidebar.transition,
   },
-  appBody: {
+  contentOpen: {
+    left: sidebar.width,
+    [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {
+      right: 'initial',
+      width: '100%',
+    },
+  },
+  contentAuto: {
+    [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {
+      left: 0,
+    },
+    [`@media (min-width: ${sidebar.autoOpenBreakpoint()}px)`]: {
+      left: sidebar.width,
+    },
+  },
+  body: {
     padding: '0 20px',
   },
-}
+})
 
 type PropsFromJss = {
-  classes: {[name: $Keys<typeof styles>]: string},
+  classes: Object,
 }
 
 type PropsFromState = {
-  pushBodyOver: boolean,
+  sidebarOpen: ?boolean,
 }
 
 type PropsFromDispatch = {
@@ -64,13 +77,18 @@ type Props = PropsFromJss & PropsFromState & PropsFromDispatch
 
 class App extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes} = this.props
+    const {classes, sidebarOpen} = this.props
     return (
-      <div className={classes.appFrame}>
+      <div className={classes.frame}>
         <SidebarContainer />
-        <div className={classes.appContent}>
+        <div
+          className={classNames(classes.content, {
+            [classes.contentOpen]: sidebarOpen,
+            [classes.contentAuto]: sidebarOpen == null,
+          })}
+        >
           <NavbarContainer />
-          <div className={classes.appBody} id="body">
+          <div className={classes.body} id="body">
             <Switch component={Fader}>
               <Route path="/" exact component={Home} />
               <Route path="/hello" exact component={Hello} />
@@ -85,17 +103,13 @@ class App extends React.Component<Props> {
 }
 
 const mapStateToProps: (state: State) => PropsFromState = createStructuredSelector({
-  pushBodyOver: createSelector(
-    selectSidebarOpen,
-    selectIsWide,
-    (sidebarOpen: boolean, isWide: boolean) => sidebarOpen && isWide
-  ),
+  sidebarOpen: (state: State) => state.sidebar.open,
 })
 
 export default compose(
   withRouter,
-  connect(mapStateToProps),
-  injectSheet(styles)
+  withStyles(styles, {withTheme: true}),
+  connect(mapStateToProps)
 )(App)
 
 

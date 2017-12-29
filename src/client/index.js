@@ -18,7 +18,7 @@ import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
 import apollo, {cache} from './apollo/client'
-import theme from '../universal/material-ui/theme'
+import theme from '../universal/theme'
 import {setWindowSize} from '../universal/redux/windowSize'
 
 async function bootstrap(): Promise<any> {
