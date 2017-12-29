@@ -258,6 +258,7 @@ function testRecipe(options /* : {
   ]
   if (unit) args.push(
     '-r', 'jsdom-global/register',
+    '-r', './test/unit/configureEnzyme',
     './src/**/__tests__/**/*.js',
     './test/unit/**/*.js',
   )
