@@ -9,15 +9,18 @@ import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
 
 import Sidebar from './Sidebar'
-import type {Action, Dispatch, State} from '../redux/types'
-import {setSidebarOpen, setSectionExpanded} from '../redux/sidebar'
-import type {ChannelMode} from '../types/Channel'
-import type {SectionName} from '../redux/sidebar'
+import type {Action, Dispatch, State} from '../../redux/types'
+import {setSidebarOpen, setSectionExpanded} from '../../redux/sidebar'
+import type {ChannelMode} from '../../types/Channel'
+import type {SectionName} from '../../redux/sidebar'
 
 type Channel = {
   id: number,
   name: string,
   mode: ChannelMode,
+  value?: {
+    current: number,
+  },
 }
 
 type PropsFromApollo = {
@@ -84,6 +87,10 @@ const query = gql(`{
     id
     name 
     mode
+    value {
+      id
+      current
+    }
   }  
 }`)
 

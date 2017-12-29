@@ -12,7 +12,7 @@ import {compose} from 'redux'
 
 import NotFound from './NotFound'
 import NavbarContainer from './NavbarContainer'
-import SidebarContainer from './SidebarContainer'
+import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
 
 const Home = () => <h1>Home</h1>
