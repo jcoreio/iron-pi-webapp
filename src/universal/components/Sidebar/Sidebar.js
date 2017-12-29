@@ -74,10 +74,12 @@ const styles = ({jcorePrimaryColor, sidebar, zIndex}) => ({
   },
 })
 
+type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {
   open: ?boolean,
-  classes: Object,
+  classes: Classes,
   localIO?: {
     expanded?: boolean,
     channels: Array<Channel>,

@@ -60,8 +60,11 @@ const styles = ({sidebar}) => ({
   },
 })
 
+type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type Classes = $Call<ExtractClasses, typeof styles>
+
 type PropsFromJss = {
-  classes: Object,
+  classes: Classes,
 }
 
 type PropsFromState = {

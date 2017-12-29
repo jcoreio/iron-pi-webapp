@@ -19,7 +19,7 @@ const styles = {
 }
 
 export type Props = {
-  classes: Object,
+  classes: {[name: $Keys<typeof styles>]: string},
   onToggleSidebar?: () => any,
 }
 

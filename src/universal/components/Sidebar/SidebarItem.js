@@ -14,7 +14,7 @@ const sidebarItemStyles = {
 }
 
 export type SidebarItemProps = {
-  classes: Object,
+  classes: {[name: $Keys<typeof sidebarItemStyles>]: string},
   children: React.Node,
 }
 
