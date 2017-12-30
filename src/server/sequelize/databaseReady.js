@@ -1,7 +1,8 @@
 // @flow
 import {Client} from 'pg'
-import promisify from 'es6-promisify'
 import poll from '@jcoreio/poll'
+import emitted from 'promisify-event'
+import promisify from 'es6-promisify'
 
 import {dbConnectionParams} from './index'
 
@@ -13,11 +14,18 @@ export default function databaseReady(options: {timeout?: number} = {}): Promise
   console.error('Waiting for database to be ready...') // eslint-disable-line no-console
 
   return poll(
-    promisify((context: any, cb: (error?: Error) => void) => {
+    async (): Promise<void> => {
       const client = new Client({host, user, password, database: user})
-      client.on('error', cb)
-      client.connect(cb)
-    }),
+      try {
+        await Promise.race([
+          emitted(client, 'error'),
+          promisify(cb => client.connect(cb))(),
+        ])
+      } finally {
+        client.end()
+      }
+    },
     1000
   ).timeout(timeout)
 }
+
