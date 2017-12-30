@@ -12,6 +12,7 @@ import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
 import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
 import {getChannelState, getChannelStatesArray} from '../../localio/ChannelStates'
+import pubsub from '../pubsub'
 
 const args = mapValues(models, model => defaultArgs(model))
 
@@ -92,13 +93,12 @@ const query = new graphql.GraphQLObjectType({
 const subscription = new graphql.GraphQLObjectType({
   name: 'Subscription',
   fields: {
-    // delete this once you've added real subscription fields.
-    hello: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
-      async * subscribe(): AsyncIterator<string> {
-        yield 'hello'
+    ChannelStates: {
+      type: new graphql.GraphQLNonNull(ChannelStateType),
+      subscribe(): AsyncIterator<ChannelState> {
+        return pubsub.asyncIterator('ChannelStates')
       }
-    }
+    },
   }
 })
 

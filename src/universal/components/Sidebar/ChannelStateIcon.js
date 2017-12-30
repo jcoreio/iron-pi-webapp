@@ -3,7 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
-import type {ChannelMode, ChannelState} from '../../types/Channel'
+import type {ChannelMode} from '../../types/Channel'
 
 const styles = theme => ({
   root: {

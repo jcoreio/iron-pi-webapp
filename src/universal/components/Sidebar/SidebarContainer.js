@@ -14,13 +14,16 @@ import {setSidebarOpen, setSectionExpanded} from '../../redux/sidebar'
 import type {ChannelMode} from '../../types/Channel'
 import type {SectionName} from '../../redux/sidebar'
 
+type ChannelState = {
+  id?: number,
+  value: number,
+}
+
 type Channel = {
   id: number,
   name: string,
   mode: ChannelMode,
-  value?: {
-    current: number,
-  },
+  state?: ChannelState,
 }
 
 type PropsFromApollo = {
@@ -28,6 +31,7 @@ type PropsFromApollo = {
     Channels: ?Array<Channel>,
     loading: boolean,
   },
+  subscribeToChannelStates: () => any,
 }
 
 type PropsFromState = {
@@ -49,6 +53,10 @@ type Props = PropsFromState & PropsFromDispatch & PropsFromApollo
 class SidebarContainer extends React.Component<Props> {
   handleSidebarClose = () => this.props.setSidebarOpen(false)
 
+  componentDidMount() {
+    this.props.subscribeToChannelStates()
+  }
+
   render(): ?React.Node {
     const {open, localIO, setSectionExpanded} = this.props
     return (
@@ -66,7 +74,7 @@ const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState 
   open: (state: State) => state.sidebar.open,
   localIO: createSelector(
     (state: State) => state.sidebar.expandedSections.get('localIO', true),
-    (state, {data: {Channels}}): ?Array<Channel> => Channels,
+    (state, {data: {Channels}}: PropsFromApollo): ?Array<Channel> => Channels,
     (expanded: boolean, Channels: ?Array<Channel>) => {
       if (!Channels) return null
       return {
@@ -94,8 +102,47 @@ const query = gql(`{
   }  
 }`)
 
+const channelStatesSubscription = gql(`
+  subscription ChannelStates {
+    ChannelStates {
+      id
+      value
+    }
+  }  
+`)
+
 export default compose(
-  graphql(query),
+  graphql(query, {
+    name: 'data',
+    props: props => ({
+      ...props,
+      subscribeToChannelStates: () => {
+        return props.data.subscribeToMore({
+          document: channelStatesSubscription,
+          updateQuery: (prev: {Channels: Array<Channel>}, update: {subscriptionData: {data: ?{ChannelStates: ChannelState}, errors?: Array<Error>}}) => {
+            const {subscriptionData: {data, errors}} = update
+            if (errors) {
+              errors.forEach(error => console.error(error.message)) // eslint-disable-line no-console
+              return prev
+            }
+            if (!data) return prev
+            const {ChannelStates: newState} = data
+            if (!newState.id) return prev
+            const Channels = [...prev.Channels]
+            const index = Channels.findIndex(channel => channel.id === newState.id)
+            if (index >= 0) Channels[index] = {
+              ...Channels[index],
+              state: newState,
+            }
+            return {
+              ...prev,
+              Channels,
+            }
+          },
+        })
+      }
+    }),
+  }),
   withRouter,
   connect(mapStateToProps, mapDispatchToProps),
 )(SidebarContainer)

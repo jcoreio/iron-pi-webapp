@@ -28,7 +28,7 @@ export function setChannelStates(...values: Array<ChannelState>) {
   channelStates = channelStates.withMutations(
     (channelStates: ChannelStates) => values.forEach((entry: ChannelState) => {
       if (isEqual(channelStates.get(entry.id), entry)) return
-      pubsub.publish('ChannelStates', entry)
+      pubsub.publish('ChannelStates', {ChannelStates: entry})
       channelStates.set(entry.id, entry)
     })
   )
