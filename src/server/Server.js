@@ -42,6 +42,11 @@ export default class Server {
     getChannelStatesArray,
     ...sequelize.models,
   }
+  _port: number
+
+  constructor(options?: {port?: number} = {}) {
+    this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
+  }
 
   async start(): Promise<void> {
     if (this._running) return
@@ -89,7 +94,7 @@ export default class Server {
       require('./ssr/serverSideRender').default(req, res)
     })
 
-    const port = parseInt(requireEnv('BACKEND_PORT'))
+    const port = this._port
     const httpServer = this._httpServer = app.listen(port)
     SubscriptionServer.create(
       {schema: graphqlSchema, execute, subscribe},
