@@ -6,4 +6,5 @@ exports.DB_NAME = 'iron_pi_webapp_test'
 exports.DB_PASSWORD = 'password'
 exports.PORT = '4000'
 exports.ROOT_URL = `http://localhost:${process.env.PORT || exports.PORT}`
+exports.INTEGRATION_SERVER_PORT = '5986'
 

@@ -1,5 +1,7 @@
 import {createMuiTheme} from 'material-ui/styles'
 
+export type Theme = Object // TODO
+
 const theme = createMuiTheme({
   jcorePrimaryColor: '#fdb109',
   sidebar: {

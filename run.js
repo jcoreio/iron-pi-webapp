@@ -242,30 +242,41 @@ task('lint', '.eslintcache')
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles, '--cache'])).description('fix eslint errors automatically')
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed', '--cache'])).description('run eslint in watch mode')
 
-const testServices = task('test:services', () =>
+const seleniumServices = task('test:selenium:services', () =>
   spawn('docker-compose', ['up', '-d', 'selenium', 'chrome', 'firefox'], {env: env('prod', 'local')})
-).description('start docker services for tests')
+).description('start docker services for selenium tests')
 
 function testRecipe(options /* : {
   unit?: boolean,
   selenium?: boolean,
+  integration?: boolean,
   coverage?: boolean,
   watch?: boolean,
 } */) /* : (rule: {args: Array<string>}) => Promise<void> */ {
-  const {unit, selenium, coverage, watch} = options
+  const {unit, selenium, integration, coverage, watch} = options
   const args = [
     '-r', 'babel-core/register',
+    '-r', './test/configureChai',
   ]
-  if (unit) args.push(
+  if (unit || integration) args.push(
     '-r', 'jsdom-global/register',
-    '-r', './test/unit/configureEnzyme',
+    '-r', './test/configureEnzyme',
+  )
+  if (watch) args.push('./test/clearConsole.js')
+
+  if (unit) args.push(
     './src/**/__tests__/**/*.js',
     './test/unit/**/*.js',
   )
   if (selenium) args.push(
     './test/selenium/index.js'
   )
+  if (integration) args.push(
+    './test/integration/index.js',
+    './test/integration/**/*.js'
+  )
   if (watch) args.push('--watch')
+
   let command = 'mocha'
   if (coverage) {
     args.unshift('--reporter=lcov', '--reporter=text', command)
@@ -282,11 +293,13 @@ for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
     const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules', testServices], testRecipe({unit: true, selenium: true, coverage, watch}))
+    task(`${prefix}${suffix}`, ['node_modules', seleniumServices, services], testRecipe({unit: true, selenium: true, integration: true, coverage, watch}))
       .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
     task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
+      .description(`run integration tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
+    task(`${prefix}:integration${suffix}`, ['node_modules', services], testRecipe({integration: true, coverage, watch}))
       .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:selenium${suffix}`, ['node_modules', testServices], testRecipe({selenium: true, coverage, watch}))
+    task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServices], testRecipe({selenium: true, coverage, watch}))
       .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
   }
 }
