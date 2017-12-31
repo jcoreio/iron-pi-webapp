@@ -6,8 +6,13 @@
  */
 
 import migrate from './sequelize/migrate'
+import createSequelize from './sequelize'
+import createUmzug from './sequelize/umzug'
 
-migrate()
+const sequelize = createSequelize()
+const umzug = createUmzug({sequelize})
+
+migrate({sequelize, umzug})
   .then(() => process.exit(0))
   .catch((error: Error) => {
     console.error(error.stack) // eslint-disable-line no-console

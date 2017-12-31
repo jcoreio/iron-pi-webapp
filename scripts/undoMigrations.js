@@ -8,7 +8,8 @@ async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<a
 
   require('defaultenv')(['env/local.js'])
   require('babel-register')
-  const umzug = require('../src/server/sequelize/umzug')
+  const sequelize = require('../src/server/sequelize').default()
+  const umzug = require('../src/server/sequelize/umzug').default({sequelize})
 
   if (!migrationsToUndo.length) {
     migrationsToUndo = (await inquirer.prompt([
@@ -16,7 +17,7 @@ async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<a
         message: 'Select migrations to undo',
         type: 'checkbox',
         name: 'migrationsToUndo',
-        choices: await umzug.storage.executed()
+        choices: (await umzug.executed()).map(migration => migration.name)
       }
     ])).migrationsToUndo
   }

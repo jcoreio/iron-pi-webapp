@@ -4,7 +4,7 @@ import {describe, beforeEach, it} from 'mocha'
 import {expect} from 'chai'
 import * as React from 'react'
 import {mount} from 'enzyme'
-import delay from 'delay'
+import poll from '@jcoreio/poll'
 
 import IntegrationContainer from './IntegrationContainer'
 import SidebarContainer from '../../src/universal/components/Sidebar/SidebarContainer'
@@ -52,37 +52,40 @@ describe('Sidebar', () => {
           <SidebarContainer />
         </IntegrationContainer>
       )
-      await delay(300)
+      await poll(
+        () => {
+          const stateItems = comp.update().find(ChannelStateItem)
 
-      comp.update()
-      const stateItems = comp.find(ChannelStateItem)
-      expect(stateItems.at(0).prop('channel')).to.containSubset({
-        id: 0,
-        name: 'Channel 0',
-        mode: 'ANALOG_INPUT',
-        state: {
-          id: 0,
-          value: 2.3,
+          expect(stateItems.at(0).prop('channel')).to.containSubset({
+            id: 0,
+            name: 'Channel 0',
+            mode: 'ANALOG_INPUT',
+            state: {
+              id: 0,
+              value: 2.3,
+            },
+          })
+          expect(stateItems.at(1).prop('channel')).to.containSubset({
+            id: 1,
+            name: 'Channel 1',
+            mode: 'DIGITAL_INPUT',
+            state: {
+              id: 1,
+              value: 1,
+            },
+          })
+          expect(stateItems.at(2).prop('channel')).to.containSubset({
+            id: 2,
+            name: 'Channel 2',
+            mode: 'DIGITAL_OUTPUT',
+            state: {
+              id: 2,
+              value: 1,
+            },
+          })
         },
-      })
-      expect(stateItems.at(1).prop('channel')).to.containSubset({
-        id: 1,
-        name: 'Channel 1',
-        mode: 'DIGITAL_INPUT',
-        state: {
-          id: 1,
-          value: 1,
-        },
-      })
-      expect(stateItems.at(2).prop('channel')).to.containSubset({
-        id: 2,
-        name: 'Channel 2',
-        mode: 'DIGITAL_OUTPUT',
-        state: {
-          id: 2,
-          value: 1,
-        },
-      })
+        50
+      )
     })
 
     it('receives ChannelState updates', async function (): Promise<void> {
@@ -91,63 +94,65 @@ describe('Sidebar', () => {
           <SidebarContainer />
         </IntegrationContainer>
       )
-      await delay(300)
-
-      let stateItems
-
       setChannelStates(
         {id: 0, value: 2.5},
         {id: 1, value: 0},
       )
-      await delay(300)
-      comp.update()
-      stateItems = comp.find(ChannelStateItem)
+      await poll(
+        () => {
+          const stateItems = comp.update().find(ChannelStateItem)
 
-      expect(stateItems.at(0).prop('channel')).to.containSubset({
-        state: {
-          id: 0,
-          value: 2.5,
+          expect(stateItems.at(0).prop('channel')).to.containSubset({
+            state: {
+              id: 0,
+              value: 2.5,
+            },
+          })
+          expect(stateItems.at(1).prop('channel')).to.containSubset({
+            state: {
+              id: 1,
+              value: 0,
+            },
+          })
+          expect(stateItems.at(2).prop('channel')).to.containSubset({
+            state: {
+              id: 2,
+              value: 1,
+            },
+          })
         },
-      })
-      expect(stateItems.at(1).prop('channel')).to.containSubset({
-        state: {
-          id: 1,
-          value: 0,
-        },
-      })
-      expect(stateItems.at(2).prop('channel')).to.containSubset({
-        state: {
-          id: 2,
-          value: 1,
-        },
-      })
+        50
+      )
 
       setChannelStates(
         {id: 1, value: 1},
         {id: 2, value: 0}
       )
-      await delay(300)
-      comp.update()
-      stateItems = comp.find(ChannelStateItem)
+      await poll(
+        () => {
+          const stateItems = comp.update().find(ChannelStateItem)
 
-      expect(stateItems.at(0).prop('channel')).to.containSubset({
-        state: {
-          id: 0,
-          value: 2.5,
+          expect(stateItems.at(0).prop('channel')).to.containSubset({
+            state: {
+              id: 0,
+              value: 2.5,
+            },
+          })
+          expect(stateItems.at(1).prop('channel')).to.containSubset({
+            state: {
+              id: 1,
+              value: 1,
+            },
+          })
+          expect(stateItems.at(2).prop('channel')).to.containSubset({
+            state: {
+              id: 2,
+              value: 0,
+            },
+          })
         },
-      })
-      expect(stateItems.at(1).prop('channel')).to.containSubset({
-        state: {
-          id: 1,
-          value: 1,
-        },
-      })
-      expect(stateItems.at(2).prop('channel')).to.containSubset({
-        state: {
-          id: 2,
-          value: 0,
-        },
-      })
+        50
+      )
     })
   })
 })

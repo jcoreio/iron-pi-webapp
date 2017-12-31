@@ -264,17 +264,9 @@ function testRecipe(options /* : {
   )
   if (watch) args.push('./test/clearConsole.js')
 
-  if (unit) args.push(
-    './src/**/__tests__/**/*.js',
-    './test/unit/**/*.js',
-  )
-  if (selenium) args.push(
-    './test/selenium/index.js'
-  )
-  if (integration) args.push(
-    './test/integration/index.js',
-    './test/integration/**/*.js'
-  )
+  if (unit) args.push('./src/**/__tests__/**/*.js')
+  if (integration) args.push('./test/integration/index.js')
+  if (selenium) args.push('./test/selenium/index.js')
   if (watch) args.push('--watch')
 
   let command = 'mocha'
@@ -333,7 +325,10 @@ task('db:migrate:undo', async rule => require('./scripts/undoMigrations')(rule))
 task('db:migrate', async () => {
   require('defaultenv')(['env/local.js'])
   require('babel-register')
-  await require('./src/server/sequelize/migrate').default()
+  const sequelize = require('./src/server/sequelize').default()
+  const umzug = require('./src/server/sequelize/umzug').default({sequelize})
+  await require('./src/server/sequelize/migrate').default({sequelize, umzug})
+  await sequelize.close()
 }).description('run database migrations')
 
 task('open:coverage', () => {

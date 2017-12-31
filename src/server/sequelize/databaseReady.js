@@ -4,12 +4,12 @@ import poll from '@jcoreio/poll'
 import emitted from 'promisify-event'
 import promisify from 'es6-promisify'
 
-import {dbConnectionParams} from './index'
+import {defaultDbConnectionParams} from './index'
 
 export default function databaseReady(options: {timeout?: number} = {}): Promise<any> {
   const timeout = options.timeout || 15000
 
-  const {host, user, password} = dbConnectionParams()
+  const {host, user, password} = defaultDbConnectionParams()
 
   console.error('Waiting for database to be ready...') // eslint-disable-line no-console
 

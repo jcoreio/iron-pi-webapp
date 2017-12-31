@@ -1,22 +1,28 @@
 // @flow
 
 import {Client} from 'pg'
-import umzug from './umzug'
+import type Sequelize from 'sequelize'
+import type Umzug from 'umzug'
 import promisify from 'es6-promisify'
 import {range} from 'lodash'
 
-import sequelize, {dbConnectionParams} from './index'
 import logger from '../../universal/logger'
 import Channel from '../models/Channel'
 
 const log = logger('sequelize:migrate')
 
-const storage = umzug.storage
+type Options = {
+  sequelize: Sequelize,
+  umzug: Umzug,
+}
 
-export default async function migrate(): Promise<void> {
+export default async function migrate(options: Options): Promise<void> {
   log.info('Starting database migration...')
 
-  const {host, user, password, database} = dbConnectionParams()
+  const {sequelize, umzug} = options
+  const {host, username: user, password, database} = sequelize.config
+  const {storage} = umzug
+
   const client = new Client({host, user, password, database: user})
 
   try {
@@ -56,4 +62,3 @@ export default async function migrate(): Promise<void> {
     })))
   }
 }
-
