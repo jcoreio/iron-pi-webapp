@@ -141,8 +141,8 @@ module.exports = () => describe('Sidebar', function () {
 
       await browser.waitForVisible('#sidebar ul[data-test-title="Local I/O"]', 10000)
 
-      const displayedChannelIds = await browser.getText('#sidebar ul[data-test-title="Local I/O"] > li [data-test-name="id"]')
-      const displayedChannelNames = await browser.getText('#sidebar ul[data-test-title="Local I/O"] > li [data-test-name="name"]')
+      const displayedChannelIds = await browser.getText('#sidebar ul[data-test-title="Local I/O"] li [data-test-name="id"]')
+      const displayedChannelNames = await browser.getText('#sidebar ul[data-test-title="Local I/O"] li [data-test-name="name"]')
 
       expect(displayedChannelIds).to.deep.equal(Channels.map(({id}) => String(id)))
       expect(displayedChannelNames).to.deep.equal(Channels.map(({name}) => name))
