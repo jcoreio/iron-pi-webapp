@@ -15,13 +15,14 @@ import {StateRecord} from '../../universal/redux/types'
 const rootDir = path.resolve(__dirname, '..', '..')
 
 let assets
-if (process.env.NODE_ENV === 'production') {
-  assets = JSON.parse(fs.readFileSync(path.join(rootDir, 'assets.json'), 'utf8'))
-  assets.manifest.text = fs.readFileSync(path.join(rootDir, assets.manifest.js), 'utf-8')
-}
 
 const serverSideRender = async (req: $Request, res: $Response): Promise<void> => {
   try {
+    if (process.env.NODE_ENV === 'production' && !assets) {
+      assets = JSON.parse(fs.readFileSync(path.join(rootDir, 'assets.json'), 'utf8'))
+      assets.manifest.text = fs.readFileSync(path.join(rootDir, assets.manifest.js), 'utf-8')
+    }
+
     // first create a context for <ServerRouter>, it's where we keep the
     // results of rendering for the second pass if necessary
     const store: Store = makeStore(StateRecord())
