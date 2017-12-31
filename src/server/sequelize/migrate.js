@@ -20,6 +20,7 @@ export default async function migrate(options: Options): Promise<void> {
   log.info('Starting database migration...')
 
   const {sequelize, umzug} = options
+  // $FlowFixMe
   const {host, username: user, password, database} = sequelize.config
   const {storage} = umzug
 
