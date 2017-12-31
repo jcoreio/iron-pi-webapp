@@ -26,15 +26,14 @@ describe('Sidebar', () => {
       client = apollo.client
       close = apollo.close
 
-      await Channel.destroy({truncate: true})
-      await Channel.bulkCreate([
+      await Promise.all([
         'ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'
-      ].map((mode: ChannelMode, id: number) => ({
-        id,
-        channelId: `channel${id}`,
+      ].map((mode: ChannelMode, id: number) => Channel.update({
+        channelId: `Channel ${id}`,
         name: `Channel ${id}`,
         mode,
-      })))
+      }, {where: {id}})))
+
       setChannelStates(
         {id: 0, value: 2.3},
         {id: 1, value: 1},
