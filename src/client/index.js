@@ -37,6 +37,7 @@ async function bootstrap(): Promise<any> {
   const store = makeStore(parseState(window.__INITIAL_STATE__))
   addFeatures(store)
 
+  // istanbul ignore next
   if (process.env.NODE_ENV !== 'production') {
     window.store = store
     window.dispatch = store.dispatch
@@ -61,6 +62,7 @@ async function bootstrap(): Promise<any> {
   })
 
   // Hot Module Replacement API
+  // istanbul ignore next
   if (module.hot instanceof Object) {
     module.hot.accept('./Root', () => {
       mount(require('./Root').default)
