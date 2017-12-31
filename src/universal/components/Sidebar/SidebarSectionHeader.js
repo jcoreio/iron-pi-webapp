@@ -6,8 +6,9 @@ import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
 import { withStyles } from 'material-ui/styles'
 
 import PlayArrowIcon from 'material-ui-icons/PlayArrow'
+import type {Theme} from '../../theme'
 
-const sidebarSectionHeaderStyles = theme => ({
+const sidebarSectionHeaderStyles = (theme: Theme) => ({
   root: {
     height: 38,
     paddingTop: 0,
@@ -33,7 +34,7 @@ const sidebarSectionHeaderStyles = theme => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof sidebarSectionHeaderStyles>
 
 export type SidebarSectionHeaderProps = {

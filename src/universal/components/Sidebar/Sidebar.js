@@ -13,8 +13,9 @@ import type {SectionName} from '../../redux/sidebar'
 import SidebarSectionHeader from './SidebarSectionHeader'
 import LocalIOSection from './LocalIOSection'
 import type {Channel} from './ChannelStateItem'
+import type {Theme} from '../../theme'
 
-const styles = ({jcorePrimaryColor, sidebar, zIndex}) => ({
+const styles = ({jcorePrimaryColor, sidebar, zIndex}: Theme) => ({
   sidebar: {
     position: 'absolute',
     top: 0,
@@ -74,7 +75,7 @@ const styles = ({jcorePrimaryColor, sidebar, zIndex}) => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {

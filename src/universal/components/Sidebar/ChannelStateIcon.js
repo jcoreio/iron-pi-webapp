@@ -4,8 +4,9 @@ import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import type {ChannelMode} from '../../types/Channel'
+import type {Theme} from '../../theme'
 
-const styles = theme => ({
+const styles = (theme: Theme) => ({
   root: {
     display: 'inline-block',
     width: theme.spacing.unit * 2,
@@ -32,7 +33,7 @@ const styles = theme => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Channel = {

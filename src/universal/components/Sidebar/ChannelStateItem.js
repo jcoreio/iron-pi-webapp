@@ -10,6 +10,7 @@ import SidebarItemText from './SidebarItemText'
 import type {ChannelMode, ChannelState} from '../../types/Channel'
 
 import ChannelStateIcon from './ChannelStateIcon'
+import type {Theme} from '../../theme'
 
 export type Channel = {
   id: number,
@@ -18,7 +19,7 @@ export type Channel = {
   state?: ChannelState,
 }
 
-const channelStateStyles = theme => ({
+const channelStateStyles = (theme: Theme) => ({
   id: {
     extend: sidebarItemTextStyles.root,
     marginRight: theme.spacing.unit,
@@ -35,7 +36,7 @@ const channelStateStyles = theme => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof channelStateStyles>
 
 export type ChannelStateProps = {

@@ -10,9 +10,10 @@ import {withTheme} from 'material-ui/styles'
 import Navbar from './Navbar'
 import type {Dispatch, State} from '../redux/types'
 import {setSidebarOpen} from '../redux/sidebar'
+import type {Theme} from '../theme'
 
 type PropsFromTheme = {
-  theme: Object,
+  theme: Theme,
 }
 
 type PropsFromState = {

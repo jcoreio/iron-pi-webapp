@@ -3,8 +3,9 @@
 import * as React from 'react'
 import { ListItem } from 'material-ui/List'
 import { withStyles } from 'material-ui/styles'
+import type {Theme} from '../../theme'
 
-const sidebarItemStyles = theme => ({
+const sidebarItemStyles = (theme: Theme) => ({
   root: {
     paddingLeft: 37,
     height: 30,
@@ -14,7 +15,7 @@ const sidebarItemStyles = theme => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof sidebarItemStyles>
 
 export type SidebarItemProps = {

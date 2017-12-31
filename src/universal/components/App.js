@@ -14,6 +14,7 @@ import NotFound from './NotFound'
 import NavbarContainer from './NavbarContainer'
 import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
+import type {Theme} from '../theme'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -23,7 +24,7 @@ const About = () => (
   </div>
 )
 
-const styles = ({sidebar}) => ({
+const styles = ({sidebar}: Theme) => ({
   frame: {
     position: 'fixed',
     display: 'flex',
@@ -60,7 +61,7 @@ const styles = ({sidebar}) => ({
   },
 })
 
-type ExtractClasses = <T: Object>(styles: (theme: any) => T) => {[name: $Keys<T>]: string}
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
 type PropsFromJss = {
