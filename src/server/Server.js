@@ -17,12 +17,15 @@ import createUmzug from './sequelize/umzug'
 import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
+import type {Context} from './graphql/schema'
 import pubsub from './graphql/pubsub'
 import {getChannelState, getChannelStates, setChannelStates} from './localio/ChannelStates'
 
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
+import login from './express/login'
+import authorize from './express/authorize'
 
 const log = logger('Server')
 
@@ -83,10 +86,20 @@ export default class Server {
         }
       })
 
+      app.post('/login', bodyParser.json(), login)
+
       const GRAPHQL_PATH = '/graphql'
-      app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress({
-        schema: graphqlSchema,
-        context: {sequelize},
+      app.use(GRAPHQL_PATH, authorize)
+      app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress((req: $Request) => {
+        const {user} = (req: Object)
+        const context: Context = {
+          user,
+          sequelize,
+        }
+        return {
+          schema: graphqlSchema,
+          context,
+        }
       }))
 
       app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))

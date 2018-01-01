@@ -2,4 +2,4 @@ exports.DB_HOST = 'localhost'
 exports.DB_USER = 'postgres'
 exports.DB_NAME = 'iron_pi_webapp'
 exports.DB_PASSWORD = 'password'
-
+exports.JWT_SECRET = ';3<mPvM4{n~8)W6d^TFhtHR&KxFU[5SN'

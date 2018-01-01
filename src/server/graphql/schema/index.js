@@ -10,13 +10,19 @@ import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
 import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
+import User from '../../models/User'
 
 type Options = {
   sequelize: Sequelize,
 }
 
+export type Context = {
+  user: ?User,
+  sequelize: Sequelize,
+}
+
 export default function createSchema({sequelize}: Options): graphql.GraphQLSchema {
-  const {models} = sequelize
+  const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
 
@@ -64,8 +70,21 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
     })
   }))
 
-  const queryFields = {}
+  const queryFields = {
+    currentUser: {
+      type: types[User.name],
+      resolve: (obj: any, args: any, context: Context) => {
+        if (context.user) return context.user.get({plain: true, raw: true})
+        return null
+      },
+    }
+  }
+
   for (let name in types) {
+    switch (name) {
+    case User.name:
+      continue
+    }
     const model = models[name]
     const type = types[name]
     const {options}: { options: { name: { singular: string, plural: string } } } = (model: any)
