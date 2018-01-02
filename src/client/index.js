@@ -7,10 +7,6 @@ import { AppContainer } from 'react-hot-loader'
 import promisify from 'es6-promisify'
 import {loadInitialFeatures} from 'redux-features'
 
-import jss from 'jss'
-import configureJss from '../universal/jss/configureJss'
-configureJss(jss)
-
 import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
 import Root from './Root'
@@ -45,7 +41,6 @@ async function bootstrap(): Promise<any> {
     window.cache = cache
     window.gql = require('graphql-tag').default
     window.theme = theme
-    window.jss = jss
   }
 
   let reloads = 0

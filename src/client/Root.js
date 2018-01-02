@@ -8,9 +8,11 @@ import App from '../universal/components/App'
 import type {Store} from '../universal/redux/types'
 import apolloClient from './apollo/client'
 import {JssProvider} from 'react-jss'
-import jss from 'jss'
 import {MuiThemeProvider} from 'material-ui/styles'
 import theme from '../universal/theme'
+import createJss from '../universal/jss/createJss'
+
+const jss = createJss()
 
 type Props = {
   store: Store,

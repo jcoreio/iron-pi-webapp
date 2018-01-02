@@ -5,10 +5,6 @@ import {Provider} from 'react-redux'
 import {StaticRouter} from 'react-router-dom'
 import {renderToString} from 'react-dom/server'
 
-import jss from 'jss'
-import configureJss from '../../universal/jss/configureJss'
-configureJss(jss)
-
 import {SheetsRegistry, JssProvider} from 'react-jss'
 import type {ApolloClient} from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
@@ -17,6 +13,9 @@ import {MuiThemeProvider} from 'material-ui/styles'
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
 import theme from '../../universal/theme'
+import createJss from '../../universal/jss/createJss'
+
+const jss = createJss()
 
 type Props = {
   title: string,

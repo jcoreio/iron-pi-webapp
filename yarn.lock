@@ -4554,6 +4554,10 @@ jss-expand@^5.0.0:
   dependencies:
     is-observable "^0.2.0"
 
+jss-expand@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/jss-expand/-/jss-expand-5.1.0.tgz#b1ad74ec18631f34f65a2124fcfceb6400610e3d"
+
 jss-extend@^6.0.1:
   version "6.0.1"
   resolved "https://registry.npmjs.org/jss-extend/-/jss-extend-6.0.1.tgz#e53430bc92a42e50d036883ccfecfbc4e1199147"
