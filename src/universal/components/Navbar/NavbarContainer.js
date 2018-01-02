@@ -13,6 +13,7 @@ import Navbar from './Navbar'
 import type {Dispatch, State} from '../../redux/types'
 import {setSidebarOpen} from '../../redux/sidebar'
 import type {Theme} from '../../theme/index'
+import logout from '../../../client/auth/logout'
 
 type PropsFromTheme = {
   theme: Theme,
@@ -38,7 +39,7 @@ type PropsFromDispatch = {
 
 type Props = PropsFromTheme & PropsFromApollo & PropsFromState & PropsFromDispatch
 
-class App extends React.Component<Props> {
+class NavbarContainer extends React.Component<Props> {
   handleToggleSidebar = () => {
     if (typeof window === 'undefined') return
     /* global window */
@@ -48,10 +49,18 @@ class App extends React.Component<Props> {
     dispatch(setSidebarOpen(!sidebarOpen))
   }
 
+  handleLogOutClick = () => {
+    logout()
+  }
+
   render(): ?React.Node {
     const {loggedIn} = this.props
     return (
-      <Navbar onToggleSidebar={this.handleToggleSidebar} loggedIn={loggedIn} />
+      <Navbar
+        onToggleSidebar={this.handleToggleSidebar}
+        loggedIn={loggedIn}
+        onLogOutClick={this.handleLogOutClick}
+      />
     )
   }
 }
@@ -72,6 +81,6 @@ export default compose(
   withTheme(),
   graphql(query),
   connect(mapStateToProps),
-)(App)
+)(NavbarContainer)
 
 

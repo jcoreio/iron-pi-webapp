@@ -13,8 +13,9 @@ import {compose} from 'redux'
 import NotFound from './NotFound'
 import NavbarContainer from './Navbar/NavbarContainer'
 import SidebarContainer from './Sidebar/SidebarContainer'
-import type {Dispatch, State} from '../redux/types'
+import type {Dispatch, RenderMode, State} from '../redux/types'
 import type {Theme} from '../theme'
+import LoginDialogContainer from './Login/LoginDialogContainer'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -74,6 +75,7 @@ type PropsFromJss = {
 
 type PropsFromState = {
   sidebarOpen: ?boolean,
+  renderMode: RenderMode,
 }
 
 type PropsFromDispatch = {
@@ -84,7 +86,7 @@ type Props = PropsFromJss & PropsFromState & PropsFromDispatch
 
 class App extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes, sidebarOpen} = this.props
+    const {classes, sidebarOpen, renderMode} = this.props
     return (
       <div className={classes.frame}>
         <SidebarContainer />
@@ -95,6 +97,7 @@ class App extends React.Component<Props> {
           })}
         >
           <NavbarContainer />
+          {renderMode === 'client' && <LoginDialogContainer />}
           <div className={classes.body} id="body">
             <Switch component={Fader}>
               <Route path="/" exact component={Home} />
@@ -110,6 +113,7 @@ class App extends React.Component<Props> {
 
 const mapStateToProps: (state: State) => PropsFromState = createStructuredSelector({
   sidebarOpen: (state: State) => state.sidebar.open,
+  renderMode: (state: State) => state.renderMode,
 })
 
 export default compose(

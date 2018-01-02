@@ -29,6 +29,7 @@ export type Props = {
   classes: {[name: $Keys<typeof styles>]: string},
   onToggleSidebar?: () => any,
   loggedIn?: boolean,
+  onLogOutClick?: (event: MouseEvent) => any,
 }
 
 export type State = {
@@ -45,8 +46,14 @@ class Navbar extends React.Component<Props, State> {
   handleCloseUserMenu = () => {
     this.setState({userMenuAnchorEl: null})
   }
+  handleLogOutClick = (event: MouseEvent) => {
+    this.setState({userMenuAnchorEl: null}, () => {
+      const {onLogOutClick} = this.props
+      if (onLogOutClick) onLogOutClick(event)
+    })
+  }
   render(): ?React.Node {
-    const {classes, onToggleSidebar, loggedIn} = this.props
+    const {classes, onToggleSidebar, loggedIn, onLogOutClick} = this.props
     const {userMenuAnchorEl} = this.state
     return (
       <div id="navbar" className={classes.root}>
@@ -63,33 +70,36 @@ class Navbar extends React.Component<Props, State> {
             <Typography type="title" color="inherit" className={classes.title}>
               Title
             </Typography>
-            <IconButton
-              id="openUserMenuButton"
-              aria-label="open user menu"
-              aria-owns={userMenuAnchorEl != null ? "userMenu" : null}
-              aria-haspopup="true"
-              onClick={this.handleOpenUserMenu}
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              id="userMenu"
-              anchorEl={userMenuAnchorEl}
-              open={userMenuAnchorEl != null}
-              onClose={this.handleCloseUserMenu}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              {!loggedIn && <MenuItem>Log in</MenuItem>}
-              {loggedIn && <MenuItem>Log out</MenuItem>}
-            </Menu>
+            {loggedIn &&
+              <IconButton
+                id="openUserMenuButton"
+                aria-label="open user menu"
+                aria-owns={userMenuAnchorEl != null ? "userMenu" : null}
+                aria-haspopup="true"
+                onClick={this.handleOpenUserMenu}
+              >
+                <AccountCircle />
+              </IconButton>
+            }
+            {loggedIn &&
+              <Menu
+                id="userMenu"
+                anchorEl={userMenuAnchorEl}
+                open={userMenuAnchorEl != null}
+                onClose={this.handleCloseUserMenu}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem onClick={this.handleLogOutClick}>Log out</MenuItem>
+              </Menu>
+            }
           </Toolbar>
         </AppBar>
       </div>

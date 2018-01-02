@@ -6899,6 +6899,10 @@ redux-features@^3.0.0:
     lodash.mapvalues "^4.6.0"
     reselect "^3.0.0"
 
+redux-form-material-ui@^5.0.0-beta.2:
+  version "5.0.0-beta.2"
+  resolved "https://registry.npmjs.org/redux-form-material-ui/-/redux-form-material-ui-5.0.0-beta.2.tgz#4a9186d0a6216fbb5871b07156fb0e7f591fb3e8"
+
 redux-form@^7.2.0:
   version "7.2.0"
   resolved "https://registry.npmjs.org/redux-form/-/redux-form-7.2.0.tgz#4465d9bc863e40b1704695d672bea75fcf81db04"
