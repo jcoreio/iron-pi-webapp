@@ -11,7 +11,7 @@ import {withStyles} from 'material-ui/styles'
 import {compose} from 'redux'
 
 import NotFound from './NotFound'
-import NavbarContainer from './NavbarContainer'
+import NavbarContainer from './Navbar/NavbarContainer'
 import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, State} from '../redux/types'
 import type {Theme} from '../theme'
