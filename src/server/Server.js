@@ -3,7 +3,7 @@
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
-import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
+import {graphiqlExpress} from 'apollo-server-express'
 import {execute, subscribe, GraphQLSchema} from 'graphql'
 import {SubscriptionServer} from 'subscriptions-transport-ws'
 import Sequelize from 'sequelize'
@@ -17,7 +17,6 @@ import createUmzug from './sequelize/umzug'
 import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
-import type {Context} from './graphql/schema'
 import pubsub from './graphql/pubsub'
 import {getChannelState, getChannelStates, setChannelStates} from './localio/ChannelStates'
 
@@ -26,6 +25,7 @@ import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
 import login from './express/login'
 import authorize from './express/authorize'
+import handleGraphql from './express/graphql'
 
 const log = logger('Server')
 
@@ -90,17 +90,7 @@ export default class Server {
 
       const GRAPHQL_PATH = '/graphql'
       app.use(GRAPHQL_PATH, authorize)
-      app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress((req: $Request) => {
-        const {userId} = (req: Object)
-        const context: Context = {
-          userId,
-          sequelize,
-        }
-        return {
-          schema: graphqlSchema,
-          context,
-        }
-      }))
+      app.use(GRAPHQL_PATH, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
 
       app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))
       app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))

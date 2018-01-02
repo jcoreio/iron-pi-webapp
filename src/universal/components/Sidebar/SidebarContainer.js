@@ -114,6 +114,9 @@ const channelStatesSubscription = gql(`
 export default compose(
   graphql(query, {
     name: 'data',
+    options: {
+      errorPolicy: 'all',
+    },
     props: props => ({
       ...props,
       subscribeToChannelStates: () => {

@@ -58,6 +58,7 @@ declare module 'react-apollo' {
   declare export type DefaultChildProps<P, R> = ChildProps<P, R>
 
   declare export interface MutationOpts {
+    error?: ApolloError,
     variables?: Object,
     optimisticResponse?: Object,
     updateQueries?: MutationQueryReducersMap<*>,
@@ -65,12 +66,15 @@ declare module 'react-apollo' {
     update?: MutationUpdaterFn<*>,
   }
 
+  declare export type ErrorPolicy = 'none' | 'ignore' | 'all'
+
   declare export interface QueryOpts {
     ssr?: boolean,
     variables?: Object,
     fetchPolicy?: FetchPolicy,
     pollInterval?: number,
     skip?: boolean,
+    errorPolicy?: ErrorPolicy,
   }
 
   declare export interface QueryProps {
@@ -92,14 +96,14 @@ declare module 'react-apollo' {
     mutate: MutationFunc<TResult>,
   }
 
-  declare export type OptionDescription<P> = (props: P) => QueryOpts | MutationOpts
+  declare export type OptionDescription<P> = QueryOpts | MutationOpts | ((props: P) => QueryOpts | MutationOpts)
 
   declare export type NamedProps<P, R> = P & {
     ownProps: R,
   }
 
   declare export interface OperationOption<TProps: {}, TResult: {}> {
-    options?: OptionDescription<TProps>,
+    +options?: OptionDescription<TProps>,
     props?: (props: OptionProps<TProps, TResult>) => any,
     +skip?: boolean | ((props: any) => boolean),
     name?: string,

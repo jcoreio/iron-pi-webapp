@@ -84,6 +84,12 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
     }
   }
 
+  function requireUserId<F: Object>(findOptions: F, args: any, context: Context): F {
+    const {userId} = context
+    if (!userId) throw new graphql.GraphQLError("You must be logged in to access the requested data")
+    return findOptions
+  }
+
   for (let name in types) {
     switch (name) {
     case User.name:
@@ -96,12 +102,12 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
     queryFields[options.name.singular] = {
       type,
       args: args[name],
-      resolve: resolver(model),
+      resolve: resolver(model, {before: requireUserId}),
     }
     queryFields[options.name.plural] = {
       type: new graphql.GraphQLList(type),
       args: args[name],
-      resolve: resolver(model),
+      resolve: resolver(model, {before: requireUserId}),
     }
   }
 
