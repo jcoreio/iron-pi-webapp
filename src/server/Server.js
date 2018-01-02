@@ -91,9 +91,9 @@ export default class Server {
       const GRAPHQL_PATH = '/graphql'
       app.use(GRAPHQL_PATH, authorize)
       app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress((req: $Request) => {
-        const {user} = (req: Object)
+        const {userId} = (req: Object)
         const context: Context = {
-          user,
+          userId,
           sequelize,
         }
         return {

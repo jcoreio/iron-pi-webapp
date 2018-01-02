@@ -17,7 +17,7 @@ type Options = {
 }
 
 export type Context = {
-  user: ?User,
+  userId: ?number,
   sequelize: Sequelize,
 }
 
@@ -73,8 +73,12 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
   const queryFields = {
     currentUser: {
       type: types[User.name],
-      resolve: (obj: any, args: any, context: Context) => {
-        if (context.user) return context.user.get({plain: true, raw: true})
+      resolve: async (obj: any, args: any, context: Context): Promise<any> => {
+        const {userId: id} = context
+        if (id) {
+          const user = await User.findOne({where: {id}})
+          if (user) return user.get({plain: true, raw: true})
+        }
         return null
       },
     }
