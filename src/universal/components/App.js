@@ -37,16 +37,20 @@ const styles = ({sidebar}: Theme) => ({
     position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
     bottom: 0,
-    transition: sidebar.transition,
+    transition: {
+      ...sidebar.transition,
+      property: 'left',
+    },
+    [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {
+      width: '100%',
+    },
+    [`@media (min-width: ${sidebar.autoOpenBreakpoint()}px)`]: {
+      right: 0,
+    },
   },
   contentOpen: {
     left: sidebar.width,
-    [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {
-      right: 'initial',
-      width: '100%',
-    },
   },
   contentAuto: {
     [`@media (max-width: ${sidebar.autoOpenBreakpoint() - 1}px)`]: {

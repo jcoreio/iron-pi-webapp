@@ -32,7 +32,11 @@ export type Theme = {
       vertical: number,
       horizontal: number,
     },
-    transition: string,
+    transition: {
+      timingFunction: string,
+      duration: string,
+    },
+    transitionDuration: string,
     backgroundColor: string,
     foregroundColor: string,
     autoOpenBreakpoint: () => number,
@@ -80,6 +84,7 @@ export type Theme = {
   },
 }
 
+
 const theme: Theme = createMuiTheme({
   jcorePrimaryColor: '#fdb109',
   sidebar: {
@@ -88,7 +93,10 @@ const theme: Theme = createMuiTheme({
       horizontal: 22,
       vertical: 10,
     },
-    transition: 'left ease 250ms',
+    transition: {
+      duration: '250ms',
+      timingFunction: 'ease',
+    },
     backgroundColor: '#333e47',
     foregroundColor: '#d3d3d3',
     autoOpenBreakpoint: (): number => theme.breakpoints.values.md,

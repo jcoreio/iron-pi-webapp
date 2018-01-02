@@ -23,7 +23,10 @@ const styles = ({jcorePrimaryColor, sidebar, zIndex}: Theme) => ({
     width: sidebar.width,
     backgroundColor: sidebar.backgroundColor,
     color: sidebar.foregroundColor,
-    transition: sidebar.transition,
+    transition: {
+      ...sidebar.transition,
+      property: 'left',
+    },
     zIndex: zIndex.navDrawer,
   },
   sidebarOpen: {
