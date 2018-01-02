@@ -8,24 +8,16 @@ const styles = {
     from: {transform: 'rotate(0deg)'},
     to: {transform: 'rotate(360deg)'},
   },
-  '@keyframes spinner-wobbling': {
-    from: {width: '0.4em'},
-    '50%': {width: '1.2em'},
-    to: {width: '0.4em'},
-  },
   spinner: {
     animation: [
-      'spinner-rotation linear infinite 0.79s',
-      'spinner-wobbling ease infinite 0.37s',
+      'spinner-rotation linear infinite 1s',
     ],
     display: 'inline-block',
     width: '1.2em',
     height: '1.2em',
-    borderRadius: '50%',
-    border: '0.2em solid',
-    borderBottom: '0.2em solid',
     lineHeight: '1em',
     verticalAlign: 'middle',
+    marginBottom: '0.25em',
   },
   holder: {
     display: 'inline-block',
@@ -34,27 +26,31 @@ const styles = {
     textAlign: 'center',
     verticalAlign: 'middle',
   },
+  path: {
+    fill: 'none',
+    opacity: 0.5,
+    strokeWidth: 10,
+    stroke: 'currentColor',
+    strokeLinecap: 'round',
+  },
 }
 
 export type Props = {
-  classes: {
-    spinner: string,
-    holder: string,
-  },
+  classes: {[name: $Keys<typeof styles>]: string},
   sheet: Object,
 }
 
-/**
- * My own impression of what a cool spinner looks like, because I'm just another JS hipster I guess
- */
 const Spinner = ({
-  sheet, // eslint-disable-line no-unused-vars
-  classes: {spinner, holder}, ...props
+  classes, ...props
 }: Props) => (
-  <div {...props} className={holder}>
-    <div className={spinner} />
+  <div {...props} className={classes.holder}>
+    <svg className={classes.spinner} viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+      <path
+        d="M 50,5 A 45,45 0 0,1 81.82,81.82"
+        className={classes.path}
+      />
+    </svg>
   </div>
 )
 
 export default injectSheet(styles)(Spinner)
-
