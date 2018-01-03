@@ -117,6 +117,7 @@ describe('selenium tests', function () {
       })
 
       require('./basicTests')()
+      require('./AuthTests')()
       require('./SidebarTests')()
     })
   })

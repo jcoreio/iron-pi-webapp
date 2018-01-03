@@ -48,6 +48,7 @@ class LoginForm extends React.Component<Props> {
           message={<span><ErrorIcon /> {error}</span>}
         />
         <Field
+          data-test-name="password"
           name="password"
           type="password"
           label="Password"

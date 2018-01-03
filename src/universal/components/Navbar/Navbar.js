@@ -97,7 +97,7 @@ class Navbar extends React.Component<Props, State> {
                   horizontal: 'right',
                 }}
               >
-                <MenuItem onClick={this.handleLogOutClick}>Log out</MenuItem>
+                <MenuItem id="logOutMenuItem" onClick={this.handleLogOutClick}>Log out</MenuItem>
               </Menu>
             }
           </Toolbar>
