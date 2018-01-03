@@ -344,4 +344,35 @@ task('push:staging', async () => {
 task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
   .description('set up initial project after cloning from skeleton')
 
+const seleniumConfigs = [
+  {
+    desiredCapabilities: {
+      browserName: 'chrome',
+      chromeOptions: {
+        args: ['--headless', '--disable-gpu'],
+      },
+    },
+  },
+  {
+    desiredCapabilities: {
+      browserName: 'firefox',
+    },
+  },
+]
+
+seleniumConfigs.forEach(config => {
+  const {desiredCapabilities: {browserName}} = config
+  task(`wdio:repl:${browserName}`, ['node_modules', seleniumServices], async rule => {
+    require('defaultenv')(['env/local.js', 'env/dev.js'])
+    require('babel-register')
+    const resolveUrl = require('./test/selenium/util/resolveUrl')
+    await require('./scripts/wdioRepl')({
+      ...config,
+      logLevel: process.env.WDIO_LOG_LEVEL || 'silent',
+      baseUrl: resolveUrl(rule.args[0] || process.env.ROOT_URL),
+    })
+    await new Promise(() => {})
+  }).description(`launch webdriver.io repl for ${browserName}`)
+})
+
 cli()
