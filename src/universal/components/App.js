@@ -16,6 +16,8 @@ import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, RenderMode, State} from '../redux/types'
 import type {Theme} from '../theme'
 import LoginDialogContainer from './Login/LoginDialogContainer'
+import ChannelFormContainer from '../features/ChannelForm/ChannelFormContainer'
+import {channelForm} from '../react-router/routePaths'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -36,6 +38,7 @@ const styles = ({spacing, sidebar, palette: {background}}: Theme) => ({
   },
   content: {
     position: 'absolute',
+    backgroundColor: background.contentFrame,
     top: 0,
     left: 0,
     bottom: 0,
@@ -114,6 +117,11 @@ class App extends React.Component<Props> {
             <Switch render={({children}) => <Fader>{children}</Fader>}>
               <Route path="/" exact component={Home} />
               <Route path="/about" exact component={About} />
+              <Route
+                path={channelForm((':id': any))}
+                exact
+                render={({match: {params: {id}}}) => <ChannelFormContainer channelId={parseInt(id)} />}
+              />
               <Route path="*" component={NotFound} />
             </Switch>
           </div>

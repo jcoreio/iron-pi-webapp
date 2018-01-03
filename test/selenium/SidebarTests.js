@@ -126,15 +126,15 @@ module.exports = () => describe('Sidebar', function () {
       it('Local I/O item is collapsible', async function () {
         browser.timeouts('implicit', 500)
         await browser.waitForVisible('#sidebar li[data-test-title="Local I/O"]', 10000)
-        await browser.waitForVisible('#sidebar ul[data-test-title="Local I/O"]', 10000)
+        await browser.waitForVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]', 10000)
 
         await browser.click('#sidebar li[data-test-title="Local I/O"]')
         await delay(300)
-        expect(await browser.isVisible('#sidebar ul[data-test-title="Local I/O"]')).to.be.false
+        expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.false
 
         await browser.click('#sidebar li[data-test-title="Local I/O"]')
         await delay(300)
-        expect(await browser.isVisible('#sidebar ul[data-test-title="Local I/O"]')).to.be.true
+        expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.true
       })
 
       it("shows Local I/O Channels", async function () {
@@ -146,10 +146,10 @@ module.exports = () => describe('Sidebar', function () {
 }`
         const {data: {Channels}} = await graphql({query, variables: null, operationName: null})
 
-        await browser.waitForVisible('#sidebar ul[data-test-title="Local I/O"]', 10000)
+        await browser.waitForVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]', 10000)
 
-        const displayedChannelIds = await browser.getText('#sidebar ul[data-test-title="Local I/O"] li [data-test-name="id"]')
-        const displayedChannelNames = await browser.getText('#sidebar ul[data-test-title="Local I/O"] li [data-test-name="name"]')
+        const displayedChannelIds = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStatusItem"] [data-test-name="id"]')
+        const displayedChannelNames = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStatusItem"] [data-test-name="name"]')
 
         expect(displayedChannelIds).to.deep.equal(Channels.map(({id}) => String(id)))
         expect(displayedChannelNames).to.deep.equal(Channels.map(({name}) => name))
@@ -172,7 +172,7 @@ module.exports = () => describe('Sidebar', function () {
     it("doesn't show a Local I/O item or channels", async function () {
       browser.timeouts('implicit', 500)
       expect(await browser.isVisible('#sidebar li[data-test-title="Local I/O"]')).to.be.false
-      expect(await browser.isVisible('#sidebar ul[data-test-title="Local I/O"]')).to.be.false
+      expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.false
     })
   })
 })

@@ -1,9 +1,8 @@
 // @flow
 
-import {fromJS} from 'immutable'
-import {Map, Record} from 'immutable'
+import {Record} from 'immutable'
 import type {RecordOf} from 'immutable'
-import {reducer as formReducer} from 'redux-form/immutable'
+import {reducer as formReducer} from 'redux-form'
 import {featuresReducer, featureStatesReducer} from 'redux-features'
 import type {Features, FeatureStates} from 'redux-features'
 
@@ -30,15 +29,15 @@ export type StateFields = {
   features: Features<State, Action>,
   featureStates: FeatureStates,
   renderMode: RenderMode,
-  form: Map<string, any>,
+  form: {[form: string]: Object},
   sidebar: SidebarState,
 }
 const stateInit: StateFields = {
   features: featuresReducer()((undefined: any), {type: ''}),
   featureStates: featureStatesReducer()((undefined: any), {type: ''}),
   renderMode: 'prerender',
-  form: formReducer(undefined, {}),
-  sidebar: sidebarReducer(undefined, {}),
+  form: formReducer(undefined, {type: ''}),
+  sidebar: sidebarReducer(undefined, {type: ''}),
 }
 
 export const StateRecord = Record(stateInit)
@@ -48,15 +47,14 @@ export type StateJSON = {
   features: Features<State, Action>,
   featureStates: FeatureStates,
   renderMode: RenderMode,
-  form: Object,
+  form: {[form: string]: Object},
   sidebar: SidebarStateJSON,
 }
 
 export function parseState({
-  form, sidebar, ...fields
+  sidebar, ...fields
 }: StateJSON): State {
   return StateRecord({
-    form: (fromJS(form || {}): any),
     sidebar: parseSidebarState(sidebar),
     ...fields,
   })

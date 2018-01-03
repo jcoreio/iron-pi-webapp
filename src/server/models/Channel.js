@@ -1,19 +1,20 @@
 // @flow
 
 import Sequelize, {Model} from 'sequelize'
-import type {ChannelMode} from '../../universal/types/Channel'
-import {channelIdPattern} from '../../universal/types/Channel'
+import type {ChannelConfig, ChannelMode} from '../../universal/types/Channel'
+import {channelIdPattern, ChannelConfigType} from '../../universal/types/Channel'
 
 export type ChannelInitAttributes = {
   id: number;
   name: string;
   channelId: string;
-  mode: ChannelMode;
 }
 
 export type ChannelAttributes = ChannelInitAttributes & {
   createdAt: Date;
   updatedAt: Date;
+  mode: ChannelMode;
+  config: ChannelConfig;
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
@@ -21,6 +22,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
   name: string;
   channelId: string;
   mode: ChannelMode;
+  config: ChannelConfig;
   createdAt: Date;
   updatedAt: Date;
 
@@ -30,22 +32,36 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
         primaryKey: true,
         type: Sequelize.INTEGER,
         allowNull: false,
-        min: 0,
+        validate: {
+          min: 0,
+        },
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        is: /^\S(.*\S)?$/, // no whitespace at beginning or end
+        validate: {
+          is: /^\S(.*\S)?$/, // no whitespace at beginning or end
+        }
       },
       channelId: {
         type: Sequelize.STRING,
         allowNull: false,
-        is: channelIdPattern,
+        validate: {
+          is: channelIdPattern,
+        },
       },
       mode: {
         type: Sequelize.ENUM('ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'),
         allowNull: false,
         defaultValue: 'DISABLED',
+      },
+      config: {
+        type: Sequelize.JSON,
+        allowNull: false,
+        defaultValue: {},
+        validate: {
+          isValid: config => ChannelConfigType.assert(config),
+        },
       },
     }, {sequelize})
   }

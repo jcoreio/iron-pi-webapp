@@ -3,7 +3,7 @@
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
-import {Field} from 'redux-form/immutable'
+import {Field} from 'redux-form'
 import {TextField} from 'redux-form-material-ui'
 import ErrorIcon from 'material-ui-icons/Error'
 import Snackbar from 'material-ui/Snackbar'

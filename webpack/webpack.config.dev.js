@@ -10,7 +10,8 @@ const babelOptions = require('./babelOptions')
 const babelInclude = require('./babelInclude')
 
 const root = path.resolve(__dirname, '..')
-const srcDir = path.join(root, 'src')
+const src = path.join(root, 'src')
+const universal = path.join(src, 'universal')
 
 const {BACKEND_PORT, PORT, BUILD_DIR} = process.env
 if (!BACKEND_PORT) throw new Error('missing process.env.BACKEND_PORT')
@@ -77,13 +78,28 @@ const config = {
       },
       {
         test: /Feature\.js$/,
-        include: path.join(srcDir, 'universal', 'features'),
+        include: path.join(src, 'universal', 'features'),
         loader: 'redux-features-hot-loader',
       },
       {
         test: /\.js$/,
         loader: process.env.NO_HAPPYPACK ? 'babel-loader' : 'happypack/loader',
         include: babelInclude,
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        options: {
+          ...babelOptions,
+          plugins: [
+            ...babelOptions.plugins,
+            'transform-decorators-legacy',
+            'flow-runtime',
+          ],
+        },
+        include: [
+          path.join(universal, 'types'),
+        ],
       },
     ],
   },
