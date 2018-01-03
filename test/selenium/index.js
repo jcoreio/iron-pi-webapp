@@ -2,14 +2,20 @@
 
 import * as webdriverio from 'webdriverio'
 import path from 'path'
-import mergeClientCoverage from './util/mergeClientCoverage'
 import fs from 'fs-extra'
-import superagent from './util/superagent'
-import resolveUrl from './util/resolveUrl'
 import poll from '@jcoreio/poll'
 import promisify from 'es6-promisify'
 import glob from 'glob'
+import requireEnv from '@jcoreio/require-env'
+
+import mergeClientCoverage from './util/mergeClientCoverage'
+import superagent from './util/superagent'
+import resolveUrl from './util/resolveUrl'
 import mergeCoverage from './util/mergeCoverage'
+
+import graphql from './util/graphql'
+
+const password = requireEnv('TEST_PASSWORD')
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
@@ -39,6 +45,13 @@ describe('selenium tests', function () {
     } catch (error) {
       throw new Error(`Can't connect to webapp: ${error.message}`)
     }
+
+    await graphql({
+      query: 'mutation ensureTestUser($password: String!) { ensureTestUser(password: $password) }',
+      operationName: 'ensureTestUser',
+      variables: {password},
+      withToken: false,
+    })
   })
 
   after(async function () {
@@ -88,12 +101,13 @@ describe('selenium tests', function () {
 
           await fs.mkdirs(errorShots)
           const logFile = `${filePrefix}_${new Date().toISOString()}.log`
+          let logs
           try {
-            const logs = (await browser.log('browser')).value
-            await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
+            logs = (await browser.log('browser')).value
           } catch (error) {
             console.error(error.stack) // eslint-disable-line no-console
           }
+          await fs.writeFile(logFile, [...logs.map(({message}) => message)].join('\n'), 'utf8')
         } else {
           const files = await promisify(glob)(filePrefix + '*')
           files.forEach(file => fs.remove(file)) // no need to wait for promise

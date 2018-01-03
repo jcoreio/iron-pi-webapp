@@ -12,7 +12,7 @@ import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
 import User from '../../models/User'
 
-type Options = {
+export type Options = {
   sequelize: Sequelize,
 }
 
@@ -21,7 +21,8 @@ export type Context = {
   sequelize: Sequelize,
 }
 
-export default function createSchema({sequelize}: Options): graphql.GraphQLSchema {
+export default function createSchema(options: Options): graphql.GraphQLSchema {
+  const {sequelize} = options
   const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
@@ -81,12 +82,13 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
         }
         return null
       },
-    }
+    },
   }
+  if (process.env.BABEL_ENV === 'test') Object.assign(queryFields, require('./testQueryFields').default(options))
 
-  function requireUserId<F: Object>(findOptions: F, args: any, context: Context): F {
+  function requireUserId<F: Object>(findOptions: F, args: any, context: Context, {fieldName}: {fieldName: string}): F {
     const {userId} = context
-    if (!userId) throw new graphql.GraphQLError("You must be logged in to access the requested data")
+    if (!userId) throw new graphql.GraphQLError(`You must be logged in to access ${fieldName}`)
     return findOptions
   }
 
@@ -116,6 +118,31 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
     fields: queryFields,
   })
 
+  const mutationFields = {
+    setUsername: {
+      type: types[User.name],
+      args: {
+        username: {
+          type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+        },
+      },
+      resolve: async (obj: any, {username}: Object, context: Context): Promise<any> => {
+        const {userId: id} = context
+        if (!id) throw new graphql.GraphQLError('You must be logged in to change your username')
+        const [numAffected] = await User.update({username}, {where: {id}})
+        if (!numAffected) throw new graphql.GraphQLError('Failed to find a user with the given id')
+        return await User.findOne({where: {id}})
+      }
+    }
+  }
+
+  if (process.env.BABEL_ENV === 'test') Object.assign(mutationFields, require('./testMutations').default(options))
+
+  const mutation = new graphql.GraphQLObjectType({
+    name: 'Mutation',
+    fields: mutationFields,
+  })
+
   const subscription = new graphql.GraphQLObjectType({
     name: 'Subscription',
     fields: {
@@ -130,6 +157,7 @@ export default function createSchema({sequelize}: Options): graphql.GraphQLSchem
 
   const schemaFields = {
     query,
+    mutation,
     subscription,
   }
 

@@ -7,13 +7,15 @@ import delay from 'delay'
 import navigateTo from "./util/navigateTo"
 import graphql from './util/graphql'
 import theme from '../../src/universal/theme'
+import loginIfNecessary from './util/loginIfNecessary'
 
 const WIDE = theme.sidebar.autoOpenBreakpoint()
 
 module.exports = () => describe('Sidebar', function () {
-  this.timeout(30000)
+  this.timeout(60000)
 
   beforeEach(async () => {
+    await loginIfNecessary()
     browser.timeouts('implicit', 5000)
   })
 

@@ -151,6 +151,7 @@
     "jsdom-global": "^3.0.2",
     "json-loader": "^0.5.4",
     "mocha": "^4.0.1",
+    "node-fetch": "^1.7.3",
     "node-sass": "^4.7.2",
     "nyc": "^11.3.0",
     "opn": "^5.1.0",

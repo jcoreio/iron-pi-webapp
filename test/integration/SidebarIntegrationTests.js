@@ -22,7 +22,7 @@ describe('Sidebar', () => {
     let close: () => void = () => {}
 
     beforeEach(async () => {
-      var apollo = createApolloClient()
+      var apollo = await createApolloClient()
       client = apollo.client
       close = apollo.close
 

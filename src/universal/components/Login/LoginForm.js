@@ -42,7 +42,7 @@ class LoginForm extends React.Component<Props> {
   render(): ?React.Node {
     const {classes, onSubmit, submitting, valid, error} = this.props
     return (
-      <form className={classes.root} onSubmit={onSubmit}>
+      <form id="loginForm" className={classes.root} onSubmit={onSubmit}>
         <Snackbar
           open={error != null}
           message={<span><ErrorIcon /> {error}</span>}
