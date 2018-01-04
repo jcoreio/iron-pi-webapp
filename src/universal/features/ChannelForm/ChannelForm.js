@@ -7,20 +7,27 @@ import {TextField} from 'redux-form-material-ui'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
-import ControlWithInfo from '../../components/ControlWithInfo'
-import Spinner from '../../components/Spinner'
 
 import type {Theme} from '../../theme'
+import ControlWithInfo from '../../components/ControlWithInfo'
+import Spinner from '../../components/Spinner'
+import Fader from '../../components/Fader'
 import ButtonGroupField from '../../components/ButtonGroupField'
+
 import {ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
 import type {ChannelMode, Channel as FullChannel} from '../../types/Channel'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
+import AnalogInputState from './AnalogInputState'
+import DisabledChannelState from './DisabledChannelState'
+import DigitalInputState from './DigitalInputState'
+import DigitalOutputState from './DigitalOutputState'
 
 const styles = ({spacing}: Theme) => ({
   form: {
     margin: '0 auto',
+    minWidth: 570 + spacing.unit * 4,
     maxWidth: 570 + spacing.unit * 4,
   },
   formControl: {
@@ -28,6 +35,7 @@ const styles = ({spacing}: Theme) => ({
   },
   buttons: {
     textAlign: 'right',
+    marginTop: spacing.unit * 2,
     '& > *': {
       minWidth: 120,
     },
@@ -39,13 +47,36 @@ const styles = ({spacing}: Theme) => ({
     height: spacing.unit * 7,
   },
   paper: {
-    padding: `${spacing.unit * 3}px ${spacing.unit * 4}px`,
+    padding: `${spacing.unit * 2}px ${spacing.unit * 4}px`,
     margin: spacing.unit * 2,
   },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
+
+const StateComponents: {[mode: ChannelMode]: React.ComponentType<any> | string} = {
+  ANALOG_INPUT: AnalogInputState,
+  DIGITAL_INPUT: DigitalInputState,
+  DIGITAL_OUTPUT: DigitalOutputState,
+  DISABLED: DisabledChannelState,
+}
+
+export type StateSectionProps = {
+  mode: ChannelMode,
+  paperClass: string,
+  formControlClass: string,
+}
+
+const StateSection = formValues('mode')(({paperClass, formControlClass, mode, ...props}: StateSectionProps): React.Node => (
+  <Paper className={paperClass}>
+    <Fader>
+      <ControlWithInfo key={mode}>
+        {mode ? React.createElement(StateComponents[mode], {key: mode, className: formControlClass, ...props}) : ''}
+      </ControlWithInfo>
+    </Fader>
+  </Paper>
+))
 
 const Empty = () => <div />
 
@@ -70,7 +101,9 @@ export type ConfigSectionProps = {
 
 const ConfigSection = formValues('mode')(
   ({mode, ...props}: ConfigSectionProps): React.Node => (
-    mode ? React.createElement(ConfigComponents[mode], {key: mode, ...props}) : ''
+    <Fader>
+      {mode ? React.createElement(ConfigComponents[mode], {key: mode, ...props}) : ''}
+    </Fader>
   )
 )
 
@@ -107,7 +140,7 @@ class ChannelForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
-            <Typography type="title">
+            <Typography type="subheading">
               <Spinner /> Loading channel configuration...
             </Typography>
           </Paper>
@@ -116,6 +149,10 @@ class ChannelForm extends React.Component<Props> {
     }
     return (
       <form id="channelForm" className={classes.form}>
+        <StateSection
+          paperClass={classes.paper}
+          formControlClass={classes.formControl}
+        />
         <Paper className={classes.paper}>
           <ControlWithInfo info="The mode of the channel">
             <Field

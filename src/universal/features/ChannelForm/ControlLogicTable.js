@@ -139,7 +139,9 @@ class ControlLogicTable extends React.Component<Props> {
                 <Field
                   name={`${condition}.channelId`}
                   component={Select}
+                  displayEmpty
                 >
+                  <MenuItem value="">Select Channel</MenuItem>
                   {map(channels, ({id, name}: Channel) => (
                     <MenuItem key={id} value={id}>{name}</MenuItem>
                   ))}

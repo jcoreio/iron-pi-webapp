@@ -62,6 +62,7 @@
     "prop-types": "^15.5.8",
     "react": "^16.2.0",
     "react-apollo": "^2.0.1",
+    "react-arrow": "^2.0.1",
     "react-dom": "^16.2.0",
     "react-fader": "^2.0.1",
     "react-hot-loader": "^3.0.0-beta.2",

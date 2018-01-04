@@ -4295,6 +4295,10 @@ isomorphic-fetch@^2.1.1:
     node-fetch "^1.0.1"
     whatwg-fetch ">=0.10.0"
 
+isotrope@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/isotrope/-/isotrope-1.0.1.tgz#56d23e74c86600fead4c37b34d60cfd1d9a59d79"
+
 isstream@0.1.x, isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.npmjs.org/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
@@ -6597,6 +6601,13 @@ react-apollo@^2.0.1:
     lodash.flowright "^3.5.0"
     lodash.pick "^4.4.0"
     prop-types "^15.5.8"
+
+react-arrow@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/react-arrow/-/react-arrow-2.0.1.tgz#ab5cd047ebec0ebb991b1471f3083e1a06b0d92a"
+  dependencies:
+    isotrope "^1.0.1"
+    prop-types "^15.6.0"
 
 react-deep-force-update@^2.1.1:
   version "2.1.1"

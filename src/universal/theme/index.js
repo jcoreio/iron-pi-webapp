@@ -32,6 +32,9 @@ export type Theme = {
       default: string,
       paper: string,
       sidebar: string,
+      valueBlock: {
+        ok: string,
+      },
     },
     text: {
       disabled: string,
@@ -110,6 +113,9 @@ const theme: Theme = createMuiTheme({
       appBar: '#fff',
       contentFrame: '#eef1f1',
       sidebar: '#333e47',
+      valueBlock: {
+        ok: '#f1fcea',
+      },
     },
     primary: {
       50: '#eaeff3',
