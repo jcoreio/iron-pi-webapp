@@ -30,6 +30,8 @@ export default compose(
       variables: {id: channelId}
     }),
   }),
-  reduxForm({form: 'Channel'})
+  reduxForm({
+    form: 'Channel',
+  })
 )(ChannelForm)
 

@@ -28,14 +28,16 @@ type Channel = {
 export type Props = {
   classes: Classes,
   formControlClass: string,
+  firstControlClass: string,
+  lastControlClass: string,
   tallButtonClass: string,
   channels?: Array<Channel>,
 }
 
 const DigitalOutputConfigSection = withStyles(styles, {withTheme: true})(
-  ({formControlClass, tallButtonClass, classes, channels}: Props) => (
+  ({formControlClass, firstControlClass, lastControlClass, tallButtonClass, classes, channels}: Props) => (
     <React.Fragment>
-      <ControlWithInfo info="How this output is controlled">
+      <ControlWithInfo info="How this output is controlled" className={firstControlClass}>
         <Field
           name="config.controlMode"
           component={ButtonGroupField}
@@ -50,7 +52,7 @@ const DigitalOutputConfigSection = withStyles(styles, {withTheme: true})(
         component={ControlLogicTable}
         channels={channels}
       />
-      <ControlWithInfo info="????">
+      <ControlWithInfo info="????" className={lastControlClass}>
         <Field
           name="config.safeStateOutputOn"
           label="Safe State"

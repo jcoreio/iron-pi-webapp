@@ -71,6 +71,19 @@ export type Theme = {
     on: string,
     off: string,
     warning: string,
+    arrow: {
+      fill: string,
+      shaftWidth: number,
+      shaftLength: number,
+      longShaftLength: number,
+      headWidth: number,
+      headLength: number,
+    },
+    block: {
+      height: number,
+      spacing: number,
+      padding: number,
+    },
   },
   typography: {
     body1: TypographyCategory,
@@ -106,8 +119,47 @@ export type Theme = {
   },
 }
 
+const primary = {
+  50: '#eaeff3',
+  100: '#cad7e2',
+  200: '#a7bdce',
+  300: '#84a2ba',
+  400: '#698eac',
+  500: '#4f7a9d',
+  600: '#487295',
+  700: '#3f678b',
+  800: '#365d81',
+  900: '#264a6f',
+  A100: '#b2d7ff',
+  A200: '#7fbcff',
+  A400: '#4ca1ff',
+  A700: '#3393ff',
+  'contrastDefaultColor': 'light',
+}
+const secondary = {
+  50: '#fff7e0',
+  100: '#ffecb3',
+  200: '#ffdf80',
+  300: '#ffd24d',
+  400: '#ffc826',
+  500: '#ffbe00',
+  600: '#ffb800',
+  700: '#ffaf00',
+  800: '#ffa700',
+  900: '#ff9900',
+  A100: '#ffecc7',
+  A200: '#ffdc99',
+  A400: '#ffcf5c',
+  A700: '#ffbe00',
+  'contrastDefaultColor': 'dark',
+}
+
+const spacing = {
+  unit: 8,
+}
 
 const theme: Theme = createMuiTheme({
+  spacing,
   palette: {
     background: {
       appBar: '#fff',
@@ -117,40 +169,8 @@ const theme: Theme = createMuiTheme({
         ok: '#f1fcea',
       },
     },
-    primary: {
-      50: '#eaeff3',
-      100: '#cad7e2',
-      200: '#a7bdce',
-      300: '#84a2ba',
-      400: '#698eac',
-      500: '#4f7a9d',
-      600: '#487295',
-      700: '#3f678b',
-      800: '#365d81',
-      900: '#264a6f',
-      A100: '#b2d7ff',
-      A200: '#7fbcff',
-      A400: '#4ca1ff',
-      A700: '#3393ff',
-      'contrastDefaultColor': 'light',
-    },
-    secondary: {
-      50: '#fff7e0',
-      100: '#ffecb3',
-      200: '#ffdf80',
-      300: '#ffd24d',
-      400: '#ffc826',
-      500: '#ffbe00',
-      600: '#ffb800',
-      700: '#ffaf00',
-      800: '#ffa700',
-      900: '#ff9900',
-      A100: '#ffecc7',
-      A200: '#ffdc99',
-      A400: '#ffcf5c',
-      A700: '#ffbe00',
-      'contrastDefaultColor': 'dark',
-    },
+    primary,
+    secondary,
   },
   sidebar: {
     width: 256,
@@ -170,7 +190,20 @@ const theme: Theme = createMuiTheme({
   channelState: {
     on: '#5dba54',
     off: '#d8d8d8',
-    warning: '#e2a000'
+    warning: '#e2a000',
+    arrow: {
+      fill: primary.A100,
+      shaftWidth: spacing.unit * 1.5,
+      shaftLength: spacing.unit * 3,
+      longShaftLength: spacing.unit * 6,
+      headWidth: spacing.unit * 2.1,
+      headLength: spacing.unit * 1.7,
+    },
+    block: {
+      height: spacing.unit * 6,
+      spacing: spacing.unit,
+      padding: spacing.unit / 2,
+    },
   },
   typography: {
     fontFamily: '"Helvetica", "Arial", sans-serif',

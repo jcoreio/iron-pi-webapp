@@ -10,19 +10,19 @@ import ValueBlock from './ValueBlock'
 import type {Theme} from '../../theme'
 import CalibrationIcon from '../../components/icons/CalibrationIcon'
 
-const FlowArrow = withTheme()(({theme: {spacing, palette}, ...props}: Object) => (
+const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
     direction="right"
-    shaftWidth={spacing.unit * 1.5}
-    shaftLength={spacing.unit * 2.5}
-    headWidth={spacing.unit * 2.1}
-    headLength={spacing.unit * 1.7}
-    fill={palette.primary.A100}
+    shaftWidth={arrow.shaftWidth}
+    shaftLength={arrow.shaftLength}
+    headWidth={arrow.headWidth}
+    headLength={arrow.headLength}
+    fill={arrow.fill}
     {...props}
   />
 ))
 
-const CalibrationBlockStyles = ({palette, spacing}: Theme) => ({
+const CalibrationBlockStyles = ({palette, spacing, channelState: {block}}: Theme) => ({
   block: {
     border: {
       width: 1,
@@ -30,7 +30,7 @@ const CalibrationBlockStyles = ({palette, spacing}: Theme) => ({
       color: palette.grey[400],
     },
     backgroundColor: palette.grey[100],
-    padding: spacing.unit / 2,
+    padding: block.padding,
   },
   title: {
     margin: 0,
@@ -64,7 +64,7 @@ const CalibrationBlock = withStyles(CalibrationBlockStyles, {withTheme: true})(
   )
 )
 
-const styles = ({palette, spacing}: Theme) => ({
+const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
   root: {
     display: 'flex',
     flexWrap: 'nowrap',
@@ -75,7 +75,7 @@ const styles = ({palette, spacing}: Theme) => ({
     margin: spacing.unit,
   },
   block: {
-    height: spacing.unit * 6,
+    height: block.height,
     minWidth: spacing.unit * 12,
   },
   valueBlock: {

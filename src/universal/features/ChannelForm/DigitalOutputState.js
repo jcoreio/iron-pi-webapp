@@ -13,25 +13,55 @@ import ValueBlock from './ValueBlock'
 
 import type {Theme} from '../../theme'
 
-const FlowArrow = withTheme()(({theme: {spacing, palette}, ...props}: Object) => (
+const LeftArrow = withTheme()(({theme: {channelState: {arrow, block}}, valueFromControl, ...props}: Object) => {
+  const {shaftLength, shaftWidth, headLength, headWidth, fill} = arrow
+  const width = shaftLength * 2 + headLength
+  const height = block.height * 2 + block.padding * 4 + block.spacing + /* border */ 4
+  const cy = height / 2
+  const vertical = height / 2 + (valueFromControl ? -1 : 1) * (block.spacing + block.height + block.padding + 1) / 2
+  const zigX = shaftLength + shaftWidth / 2
+  return (
+    <svg
+      viewBox={`0 0 ${width}, ${height}`}
+      preserveAspectRatio="xMidYMid meet"
+      style={{width, height}}
+      {...props}
+    >
+      <path
+        d={`M 0,${vertical} L ${zigX},${vertical} L ${zigX},${cy} L ${shaftLength * 2},${cy}`}
+        strokeWidth={shaftWidth}
+        fill="none"
+        stroke={fill}
+        strokeLinecap="round"
+      />
+      <path
+        d={`M ${shaftLength * 2},${cy - headWidth / 2} L ${width},${cy} L ${shaftLength * 2},${cy + headWidth / 2} Z`}
+        stroke="none"
+        fill={fill}
+      />
+    </svg>
+  )
+})
+
+const RightArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
     direction="right"
-    shaftWidth={spacing.unit * 1.5}
-    shaftLength={spacing.unit * 3}
-    headWidth={spacing.unit * 2.1}
-    headLength={spacing.unit * 1.7}
-    fill={palette.primary.A100}
+    shaftWidth={arrow.shaftWidth}
+    shaftLength={arrow.shaftLength}
+    headWidth={arrow.headWidth}
+    headLength={arrow.headLength}
+    fill={arrow.fill}
     {...props}
   />
 ))
 
-const polaritySectionStyles = ({palette}: Theme) => ({
+const polaritySectionStyles = ({palette, spacing}: Theme) => ({
   root: {
     position: 'relative',
   },
   title: {
     position: 'absolute',
-    top: 0,
+    top: spacing.unit,
     transform: 'translateY(-100%)',
     margin: 0,
     fontSize: '1rem',
@@ -72,7 +102,7 @@ const PolaritySection = withStyles(polaritySectionStyles, {withTheme: true})(
   )
 )
 
-const styles = ({palette, spacing}: Theme) => ({
+const styles = ({spacing, channelState: {block}}: Theme) => ({
   root: {
     display: 'flex',
     flexWrap: 'nowrap',
@@ -87,11 +117,11 @@ const styles = ({palette, spacing}: Theme) => ({
     flexDirection: 'column',
     flexGrow: 1,
     '& > :not(:last-child)': {
-      marginBottom: spacing.unit,
+      marginBottom: block.spacing,
     }
   },
   block: {
-    height: spacing.unit * 6,
+    height: block.height,
     minWidth: spacing.unit * 12,
   },
   valueBlock: {
@@ -125,12 +155,12 @@ const DigitalOutputState = (
           value={safeState != null && Number.isFinite(safeState) ? safeState.toFixed(0) : null}
         />
       </div>
-      <FlowArrow className={classes.arrow} />
+      <LeftArrow className={classes.arrow} />
       <Field
         name="config.reversePolarity"
         component={PolaritySection}
       />
-      <FlowArrow className={classes.arrow} />
+      <RightArrow className={classes.arrow} />
       <ValueBlock
         className={classNames(classes.block, classes.valueBlock)}
         title="Raw Output"

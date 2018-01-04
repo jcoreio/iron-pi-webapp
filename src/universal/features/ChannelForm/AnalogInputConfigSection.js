@@ -11,15 +11,17 @@ import {CALIBRATION} from '../../react-router/routePaths'
 
 export type Props = {
   formControlClass: string,
+  firstControlClass: string,
+  lastControlClass: string,
   match: {
     url: string,
   },
 }
 
 const AnalogInputConfigSection = withRouter(
-  ({formControlClass, match}: Props) => (
+  ({formControlClass, firstControlClass, lastControlClass, match}: Props) => (
     <React.Fragment>
-      <ControlWithInfo info="The units for the system value">
+      <ControlWithInfo info="The units for the system value" className={firstControlClass}>
         <Field
           name="config.units"
           label="Units"
@@ -28,7 +30,7 @@ const AnalogInputConfigSection = withRouter(
           className={formControlClass}
         />
       </ControlWithInfo>
-      <ControlWithInfo info="Takes you to the calibration wizard">
+      <ControlWithInfo info="Takes you to the calibration wizard" className={lastControlClass}>
         <DrilldownButton
           className={formControlClass}
           component={Link}

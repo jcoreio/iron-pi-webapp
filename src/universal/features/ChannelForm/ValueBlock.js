@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../../theme'
 
-const styles = ({palette, spacing}: Theme) => ({
+const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
   block: {
     border: {
       width: 1,
@@ -17,7 +17,7 @@ const styles = ({palette, spacing}: Theme) => ({
     justifyContent: 'center',
     alignItems: 'baseline',
     flexWrap: 'wrap',
-    padding: spacing.unit / 2,
+    padding: block.padding,
   },
   title: {
     margin: 0,

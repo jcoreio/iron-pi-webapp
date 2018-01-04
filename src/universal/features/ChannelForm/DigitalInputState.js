@@ -13,25 +13,25 @@ import ValueBlock from './ValueBlock'
 
 import type {Theme} from '../../theme'
 
-const FlowArrow = withTheme()(({theme: {spacing, palette}, ...props}: Object) => (
+const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
     direction="right"
-    shaftWidth={spacing.unit * 1.5}
-    shaftLength={spacing.unit * 6}
-    headWidth={spacing.unit * 2.1}
-    headLength={spacing.unit * 1.7}
-    fill={palette.primary.A100}
+    shaftWidth={arrow.shaftWidth}
+    shaftLength={arrow.longShaftLength}
+    headWidth={arrow.headWidth}
+    headLength={arrow.headLength}
+    fill={arrow.fill}
     {...props}
   />
 ))
 
-const polaritySectionStyles = ({palette}: Theme) => ({
+const polaritySectionStyles = ({palette, spacing}: Theme) => ({
   root: {
     position: 'relative',
   },
   title: {
     position: 'absolute',
-    top: 0,
+    top: spacing.unit,
     transform: 'translateY(-100%)',
     margin: 0,
     fontSize: '1rem',
@@ -72,7 +72,7 @@ const PolaritySection = withStyles(polaritySectionStyles, {withTheme: true})(
   )
 )
 
-const styles = ({palette, spacing}: Theme) => ({
+const styles = ({spacing, channelState: {block}}: Theme) => ({
   root: {
     display: 'flex',
     flexWrap: 'nowrap',
@@ -83,7 +83,7 @@ const styles = ({palette, spacing}: Theme) => ({
     margin: spacing.unit,
   },
   block: {
-    height: spacing.unit * 6,
+    height: block.height,
     minWidth: spacing.unit * 12,
   },
   valueBlock: {

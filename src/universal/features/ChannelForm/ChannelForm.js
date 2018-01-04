@@ -33,6 +33,12 @@ const styles = ({spacing}: Theme) => ({
   formControl: {
     width: '100%',
   },
+  firstFaderChild: {
+    marginTop: 0,
+  },
+  lastFaderChild: {
+    marginBottom: 0,
+  },
   buttons: {
     textAlign: 'right',
     marginTop: spacing.unit * 2,
@@ -68,15 +74,18 @@ export type StateSectionProps = {
   formControlClass: string,
 }
 
-const StateSection = formValues('mode')(({paperClass, formControlClass, mode, ...props}: StateSectionProps): React.Node => (
-  <Paper className={paperClass}>
-    <Fader>
-      <ControlWithInfo key={mode}>
-        {mode ? React.createElement(StateComponents[mode], {key: mode, className: formControlClass, ...props}) : ''}
-      </ControlWithInfo>
-    </Fader>
-  </Paper>
-))
+const StateSection = formValues('mode')(({paperClass, formControlClass, mode, ...props}: StateSectionProps): React.Node => {
+  mode = mode || 'DISABLED'
+  return (
+    <Paper className={paperClass}>
+      <Fader animateHeight>
+        <ControlWithInfo key={mode}>
+          {mode ? React.createElement(StateComponents[mode], {key: mode, className: formControlClass, ...props}) : ''}
+        </ControlWithInfo>
+      </Fader>
+    </Paper>
+  )
+})
 
 const Empty = () => <div />
 
@@ -95,16 +104,23 @@ type Channel = {
 export type ConfigSectionProps = {
   mode: ChannelMode,
   formControlClass: string,
+  firstControlClass: string,
+  lastControlClass: string,
   tallButtonClass: string,
   channels?: Array<Channel>,
 }
 
 const ConfigSection = formValues('mode')(
-  ({mode, ...props}: ConfigSectionProps): React.Node => (
-    <Fader>
-      {mode ? React.createElement(ConfigComponents[mode], {key: mode, ...props}) : ''}
-    </Fader>
-  )
+  ({mode, ...props}: ConfigSectionProps): React.Node => {
+    mode = mode || 'DISABLED'
+    return (
+      <Fader animateHeight>
+        <div key={mode}>
+          {mode ? React.createElement(ConfigComponents[mode], {key: mode, ...props}) : ''}
+        </div>
+      </Fader>
+    )
+  }
 )
 
 export type Props = {
@@ -185,6 +201,8 @@ class ChannelForm extends React.Component<Props> {
           </ControlWithInfo>
           <ConfigSection
             formControlClass={classes.formControl}
+            firstControlClass={classes.firstFaderChild}
+            lastControlClass={classes.lastFaderChild}
             tallButtonClass={classes.tallButton}
             channels={Channels}
           />

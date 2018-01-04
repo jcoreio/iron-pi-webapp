@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../theme'
 import Tooltip from 'material-ui/Tooltip'
@@ -29,13 +30,14 @@ type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {
   classes: Classes,
+  className: string,
   children: React.Node,
   info: React.Node,
 }
 
 const ControlWithInfo = withStyles(styles, {withTheme: true})(
-  ({classes, children, info}: Props) => (
-    <div className={classes.root}>
+  ({classes, className, children, info}: Props) => (
+    <div className={classNames(classes.root, className)}>
       <div className={classes.control}>
         {children}
       </div>
