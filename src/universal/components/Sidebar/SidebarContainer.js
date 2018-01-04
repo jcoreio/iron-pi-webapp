@@ -2,17 +2,21 @@
 
 import * as React from 'react'
 import {withRouter} from 'react-router-dom'
+import type {Location} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createSelector, createStructuredSelector} from 'reselect'
 import {compose, bindActionCreators} from 'redux'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
+import {withTheme} from 'material-ui/styles'
+import {throttle} from 'lodash'
 
 import Sidebar from './Sidebar'
 import type {Action, Dispatch, State} from '../../redux/types'
 import {setSidebarOpen, setSectionExpanded} from '../../redux/sidebar'
 import type {ChannelMode} from '../../types/Channel'
 import type {SectionName} from '../../redux/sidebar'
+import type {Theme} from '../../theme'
 
 type ChannelState = {
   id?: number,
@@ -24,6 +28,14 @@ type Channel = {
   name: string,
   mode: ChannelMode,
   state?: ChannelState,
+}
+
+type PropsFromRouter = {
+  location: Location,
+}
+
+type PropsFromTheme = {
+  theme: Theme,
 }
 
 type PropsFromApollo = {
@@ -44,17 +56,46 @@ type PropsFromState = {
 
 type PropsFromDispatch = {
   dispatch: Dispatch,
-  setSidebarOpen: (open: boolean) => Action,
+  setSidebarOpen: (open: ?boolean) => Action,
   setSectionExpanded: (section: SectionName, expanded: boolean) => Action,
 }
 
-type Props = PropsFromState & PropsFromDispatch & PropsFromApollo
+type Props = PropsFromState & PropsFromRouter & PropsFromTheme & PropsFromDispatch & PropsFromApollo
 
 class SidebarContainer extends React.Component<Props> {
   handleSidebarClose = () => this.props.setSidebarOpen(false)
 
+  closeSidebarIfNecessary = () => {
+    if (typeof window !== 'undefined') {
+      /* eslint-env browser */
+      const {open, setSidebarOpen, theme: {sidebar: {isAutoOpen}}} = this.props
+      if (open && !isAutoOpen(window.innerWidth)) {
+        setSidebarOpen(null)
+      }
+    }
+  }
+
+  handleWindowResize = throttle(this.closeSidebarIfNecessary, 250)
+
   componentDidMount() {
     this.props.subscribeToChannelStates()
+    if (typeof window !== 'undefined') {
+      /* eslint-env browser */
+      window.addEventListener('resize', this.handleWindowResize, true)
+    }
+  }
+
+  componentWillUnmount() {
+    if (typeof window !== 'undefined') {
+      /* eslint-env browser */
+      window.removeEventListener('resize', this.handleWindowResize, true)
+    }
+  }
+
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.location.key !== this.props.location.key) {
+      this.closeSidebarIfNecessary()
+    }
   }
 
   render(): ?React.Node {
@@ -147,6 +188,7 @@ export default compose(
     }),
   }),
   withRouter,
+  withTheme(),
   connect(mapStateToProps, mapDispatchToProps),
 )(SidebarContainer)
 

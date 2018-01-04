@@ -28,7 +28,7 @@ const SIDEBAR = 'SIDEBAR.'
 const SET_SIDEBAR_OPEN = SIDEBAR + 'SET_OPEN'
 const SET_SECTION_EXPANDED = SIDEBAR + 'SET_SECTION_EXPANDED'
 
-export function setSidebarOpen(open: boolean): {type: string, payload: boolean} {
+export function setSidebarOpen(open: ?boolean): {type: string, payload: ?boolean} {
   return {
     type: SET_SIDEBAR_OPEN,
     payload: open,

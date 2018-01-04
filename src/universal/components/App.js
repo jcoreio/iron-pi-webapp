@@ -4,7 +4,7 @@ import * as React from 'react'
 import classNames from 'classnames'
 import {Route, Link, withRouter} from 'react-router-dom'
 import Switch from 'react-router-transition-switch'
-import Fader from 'react-fader'
+import Fader from './Fader'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
 import {withStyles} from 'material-ui/styles'
@@ -25,7 +25,7 @@ const About = () => (
   </div>
 )
 
-const styles = ({sidebar}: Theme) => ({
+const styles = ({spacing, sidebar, palette: {background}}: Theme) => ({
   frame: {
     position: 'fixed',
     display: 'flex',
@@ -62,7 +62,19 @@ const styles = ({sidebar}: Theme) => ({
     },
   },
   body: {
-    padding: '0 20px',
+    padding: `0 ${spacing.unit * 3}px`,
+    overflowY: 'auto',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 56,
+    "@media (min-width:0px) and (orientation: landscape)": {
+      top: 48
+    },
+    "@media (min-width:600px)": {
+      top: 64
+    }
   },
 })
 
@@ -99,7 +111,7 @@ class App extends React.Component<Props> {
           <NavbarContainer />
           {renderMode === 'client' && <LoginDialogContainer />}
           <div className={classes.body} id="body">
-            <Switch component={Fader}>
+            <Switch render={({children}) => <Fader>{children}</Fader>}>
               <Route path="/" exact component={Home} />
               <Route path="/about" exact component={About} />
               <Route path="*" component={NotFound} />
