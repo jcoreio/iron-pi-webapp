@@ -139,17 +139,19 @@ module.exports = () => describe('Sidebar', function () {
 
       it("shows Local I/O Channels", async function () {
         const query = `{
-  Channels {
-    id
-    name
-  }      
-}`
+          Channels {
+            id
+            name
+          }      
+        }`
         const {data: {Channels}} = await graphql({query, variables: null, operationName: null})
 
+        browser.timeouts('implicit', 500)
         await browser.waitForVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]', 10000)
 
-        const displayedChannelIds = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStatusItem"] [data-test-name="id"]')
-        const displayedChannelNames = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStatusItem"] [data-test-name="name"]')
+        browser.timeouts('implicit', 5000)
+        const displayedChannelIds = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="id"]')
+        const displayedChannelNames = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="name"]')
 
         expect(displayedChannelIds).to.deep.equal(Channels.map(({id}) => String(id)))
         expect(displayedChannelNames).to.deep.equal(Channels.map(({name}) => name))
