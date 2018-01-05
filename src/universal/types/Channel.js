@@ -21,10 +21,41 @@ export function getChannelModeDisplayText(mode: ChannelMode): string {
 export const channelIdPart = "[a-z_][a-z0-9_]*"
 export const channelIdPattern = new RegExp(`${channelIdPart}(/${channelIdPart})*`, 'i')
 
-export type ChannelState = {
+export type AnalogInputState = {|
   id: number,
-  value: number,
-}
+  mode: 'ANALOG_INPUT',
+  rawInput: number | null,
+  systemValue: number | null,
+|}
+export const AnalogInputStateType = (reify: Type<AnalogInputState>)
+
+export type DigitalInputState = {|
+  id: number,
+  mode: 'DIGITAL_INPUT',
+  rawInput: 0 | 1 | null,
+  systemValue: 0 | 1 | null,
+  reversePolarity: boolean,
+|}
+export const DigitalInputStateType = (reify: Type<DigitalInputState>)
+
+export type DigitalOutputState = {|
+  id: number,
+  mode: 'DIGITAL_OUTPUT',
+  controlValue: 0 | 1 | null,
+  safeState: 0 | 1,
+  reversePolarity: boolean,
+  rawOutput: 0 | 1,
+|}
+export const DigitalOutputStateType = (reify: Type<DigitalOutputState>)
+
+export type DisabledState = {|
+  id: number,
+  mode: 'DISABLED',
+|}
+export const DisabledStateType = (reify: Type<DisabledState>)
+
+export type ChannelState = AnalogInputState | DigitalInputState | DigitalOutputState | DisabledState
+export const ChannelStateType = (reify: Type<ChannelState>)
 
 export type CalibrationPoint = {
   x: number,
@@ -130,4 +161,62 @@ export type Channel = {
   config: ChannelConfig,
   state?: ChannelState,
 }
+
+export type SetAnalogInputState = {|
+  id: number,
+  mode: 'ANALOG_INPUT',
+  rawInput?: number | null,
+|}
+export const SetAnalogInputStateType = (reify: Type<SetAnalogInputState>)
+
+export type SetDigitalInputState = {|
+  id: number,
+  mode: 'DIGITAL_INPUT',
+  rawInput?: 0 | 1 | null,
+  reversePolarity: boolean,
+|}
+export const SetDigitalInputStateType = (reify: Type<SetDigitalInputState>)
+
+export type SetDigitalOutputState = {|
+  id: number,
+  mode: 'DIGITAL_OUTPUT',
+  controlValue?: 0 | 1 | null,
+  safeState: 0 | 1,
+  reversePolarity: boolean,
+|}
+export const SetDigitalOutputStateType = (reify: Type<SetDigitalOutputState>)
+
+export type SetDisabledState = {|
+  id: number,
+  mode: 'DISABLED',
+|}
+export const SetDisabledStateType = (reify: Type<SetDisabledState>)
+
+export type SetChannelState =
+  SetAnalogInputState |
+  SetDigitalInputState |
+  SetDigitalOutputState |
+  SetDisabledState
+export const SetChannelStateType = (reify: Type<SetChannelState>)
+
+export type SetAnalogInputValue = {|
+  id: number,
+  rawInput: number | null,
+|}
+export const SetAnalogInputValueType = (reify: Type<SetAnalogInputValue>)
+
+export type SetDigitalInputValue = {|
+  id: number,
+  rawInput: 0 | 1 | null,
+|}
+export const SetDigitalInputValueType = (reify: Type<SetDigitalInputValue>)
+
+export type SetDigitalOutputValue = {|
+  id: number,
+  controlValue: 0 | 1 | null,
+|}
+export const SetDigitalOutputValueType = (reify: Type<SetDigitalOutputValue>)
+
+export type SetChannelValue = SetAnalogInputValue | SetDigitalInputValue | SetDigitalOutputValue
+export const SetChannelValueType = (reify: Type<SetChannelValue>)
 

@@ -9,6 +9,7 @@ import ValueBlock from './ValueBlock'
 
 import type {Theme} from '../../theme'
 import CalibrationIcon from '../../components/icons/CalibrationIcon'
+import type {AnalogInputState, ChannelConfig} from '../../types/Channel'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
@@ -89,33 +90,39 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className?: string,
-  rawValue?: number,
-  systemValue?: number,
-  systemPrecision?: number,
-  systemUnits?: string,
+  channel?: {
+    config: ChannelConfig,
+    state?: AnalogInputState,
+  },
 }
 
-const AnalogInputState = withStyles(styles, {withTheme: true})(
-  ({classes, className, rawValue, systemValue, systemPrecision, systemUnits}: Props) => (
-    <div className={classNames(classes.root, className)}>
-      <ValueBlock
-        className={classNames(classes.block, classes.valueBlock)}
-        title="Raw Input"
-        value={rawValue != null && Number.isFinite(rawValue) ? rawValue.toFixed(2) : null}
-        units="V"
-      />
-      <FlowArrow className={classes.arrow} />
-      <CalibrationBlock className={classes.block} />
-      <FlowArrow className={classes.arrow} />
-      <ValueBlock
-        className={classNames(classes.block, classes.valueBlock)}
-        title="System Value"
-        value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(systemPrecision || 0) : null}
-        units={systemUnits}
-      />
-    </div>
-  )
+const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
+  ({classes, className, channel}: Props) => {
+    const {config, state} = channel || {config: {}, state: null}
+    const {units} = config
+    const precision = config.precision || 0
+    const {rawInput, systemValue} = state || {}
+    return (
+      <div className={classNames(classes.root, className)}>
+        <ValueBlock
+          className={classNames(classes.block, classes.valueBlock)}
+          title="Raw Input"
+          value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(2) : null}
+          units="V"
+        />
+        <FlowArrow className={classes.arrow} />
+        <CalibrationBlock className={classes.block} />
+        <FlowArrow className={classes.arrow} />
+        <ValueBlock
+          className={classNames(classes.block, classes.valueBlock)}
+          title="System Value"
+          value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(precision || 0) : null}
+          units={units}
+        />
+      </div>
+    )
+  }
 )
 
-export default AnalogInputState
+export default AnalogInputStateWidget
 

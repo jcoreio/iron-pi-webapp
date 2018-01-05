@@ -5,6 +5,7 @@ import {compose} from 'redux'
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import ChannelForm from './ChannelForm'
+import createSubscribeToChannelState from '../../apollo/createSubscribeToChannelState'
 
 const channelQuery = gql(`query Channels($id: Int!) {
   Channel(id: $id) {
@@ -13,6 +14,7 @@ const channelQuery = gql(`query Channels($id: Int!) {
     name
     mode
     config
+    state
   }
   Channels {
     id
@@ -29,6 +31,10 @@ export default compose(
     options: ({channelId}: Props) => ({
       variables: {id: channelId}
     }),
+    props: props => ({
+      ...props,
+      subscribeToChannelState: createSubscribeToChannelState(props),
+    })
   }),
   reduxForm({
     form: 'Channel',

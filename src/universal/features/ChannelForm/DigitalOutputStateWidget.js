@@ -2,9 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {Field} from 'redux-form'
 import {withStyles, withTheme} from 'material-ui/styles'
-import IconButton from 'material-ui/IconButton'
 import Positive from 'material-ui-icons/AddCircleOutline'
 import Negative from 'material-ui-icons/RemoveCircleOutline'
 import Arrow from 'react-arrow'
@@ -12,6 +10,7 @@ import Arrow from 'react-arrow'
 import ValueBlock from './ValueBlock'
 
 import type {Theme} from '../../theme'
+import type {DigitalOutputState} from '../../types/Channel'
 
 const LeftArrow = withTheme()(({theme: {channelState: {arrow, block}}, valueFromControl, ...props}: Object) => {
   const {shaftLength, shaftWidth, headLength, headWidth, fill} = arrow
@@ -80,24 +79,19 @@ type PolaritySectionClasses = $Call<ExtractClasses, typeof polaritySectionStyles
 
 export type PolaritySectionProps = {
   classes: PolaritySectionClasses,
-  input: {
-    value?: boolean,
-    onChange: (newValue: boolean) => any,
-  },
+  reversePolarity?: boolean,
 }
 
 const PolaritySection = withStyles(polaritySectionStyles, {withTheme: true})(
-  ({classes, input: {value, onChange}}: PolaritySectionProps) => (
+  ({classes, reversePolarity}: PolaritySectionProps) => (
     <div className={classes.root}>
       <h4 className={classes.title}>
         Polarity
       </h4>
-      <IconButton className={classes.icon} onClick={() => onChange(!value)}>
-        {value
-          ? <Negative />
-          : <Positive />
-        }
-      </IconButton>
+      {reversePolarity
+        ? <Negative />
+        : <Positive />
+      }
     </div>
   )
 )
@@ -135,13 +129,15 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className?: string,
-  controlValue?: number,
-  safeState?: number,
-  rawOutput?: number,
+  channel?: {
+    state?: DigitalOutputState,
+  },
 }
 
-const DigitalOutputState = (
-  ({classes, className, controlValue, safeState, rawOutput}: Props) => (
+const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
+  const {state} = channel || {state: null}
+  const {controlValue, safeState, rawOutput, reversePolarity} = state || {}
+  return (
     <div className={classNames(classes.root, className)}>
       <div className={classes.inputBlockHolder}>
         <ValueBlock
@@ -156,10 +152,7 @@ const DigitalOutputState = (
         />
       </div>
       <LeftArrow className={classes.arrow} />
-      <Field
-        name="config.reversePolarity"
-        component={PolaritySection}
-      />
+      <PolaritySection reversePolarity={reversePolarity} />
       <RightArrow className={classes.arrow} />
       <ValueBlock
         className={classNames(classes.block, classes.valueBlock)}
@@ -168,7 +161,7 @@ const DigitalOutputState = (
       />
     </div>
   )
-)
+}
 
-export default withStyles(styles, {withTheme: true})(DigitalOutputState)
+export default withStyles(styles, {withTheme: true})(DigitalOutputStateWidget)
 

@@ -41,9 +41,9 @@ describe('ChannelStateIcon', () => {
   describe('for DISABLED channel', () => {
     it('renders hollow border', () => {
       const {node} = setup({
-        mode: 'DISABLED',
         state: {
-          value: 2, // make sure this is ignored
+          id: 0,
+          mode: 'DISABLED',
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -54,9 +54,12 @@ describe('ChannelStateIcon', () => {
   describe('for DIGITAL_INPUT channel', () => {
     it('renders correct border width', () => {
       const {node} = setup({
-        mode: 'DIGITAL_INPUT',
         state: {
-          value: 0, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_INPUT',
+          reversePolarity: false,
+          rawInput: 0,
+          systemValue: 0,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -64,9 +67,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders off color correctly', () => {
       const {node} = setup({
-        mode: 'DIGITAL_INPUT',
         state: {
-          value: 0, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_INPUT',
+          reversePolarity: false,
+          rawInput: 0,
+          systemValue: 0,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -74,9 +80,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders on color correctly', () => {
       const {node} = setup({
-        mode: 'DIGITAL_INPUT',
         state: {
-          value: 1, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_INPUT',
+          reversePolarity: true,
+          rawInput: 0,
+          systemValue: 1,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -86,9 +95,13 @@ describe('ChannelStateIcon', () => {
   describe('for DIGITAL_OUTPUT channel', () => {
     it('renders correct border width', () => {
       const {node} = setup({
-        mode: 'DIGITAL_OUTPUT',
         state: {
-          value: 0, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_OUTPUT',
+          reversePolarity: false,
+          safeState: 0,
+          controlValue: 0,
+          rawOutput: 0,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -96,9 +109,13 @@ describe('ChannelStateIcon', () => {
     })
     it('renders off color correctly', () => {
       const {node} = setup({
-        mode: 'DIGITAL_OUTPUT',
         state: {
-          value: 0, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_OUTPUT',
+          reversePolarity: false,
+          safeState: 0,
+          controlValue: 0,
+          rawOutput: 0,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -106,9 +123,13 @@ describe('ChannelStateIcon', () => {
     })
     it('renders on color correctly', () => {
       const {node} = setup({
-        mode: 'DIGITAL_OUTPUT',
         state: {
-          value: 1, // make sure this is ignored
+          id: 0,
+          mode: 'DIGITAL_OUTPUT',
+          reversePolarity: true,
+          safeState: 0,
+          controlValue: 0,
+          rawOutput: 1,
         },
       })
       const computedStyle = getComputedStyle(node)

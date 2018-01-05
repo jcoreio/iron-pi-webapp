@@ -4,14 +4,15 @@ import type Sequelize, {Model} from 'sequelize'
 import * as graphql from 'graphql'
 import {mapValues} from 'lodash'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
-
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
+
 import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
 import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
 import User from '../../models/User'
 import type {ChannelAttributes} from '../../models/Channel'
+import ChannelStateType from './ChannelStateType'
 
 export type Options = {
   sequelize: Sequelize,
@@ -35,21 +36,6 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
   function getType(model: Class<Model<any>>): Object {
     return types[model.name]
   }
-
-  const ChannelStateType = new graphql.GraphQLObjectType({
-    name: 'ChannelState',
-    description: 'the realtime state of a channel',
-    fields: {
-      id: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-        description: 'the numeric id (primary key) of the channel',
-      },
-      value: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLFloat),
-        description: 'the current value of the channel',
-      },
-    },
-  })
 
   const extraFields = {
     [Channel.name]: {
@@ -195,6 +181,19 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
   const subscription = new graphql.GraphQLObjectType({
     name: 'Subscription',
     fields: {
+      ChannelState: {
+        type: new graphql.GraphQLNonNull(ChannelStateType),
+        description: 'Subscribes to the state of a single channel',
+        args: {
+          id: {
+            type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+            description: 'The id (primary key) of the channel to subscribe to',
+          },
+        },
+        subscribe(): AsyncIterator<ChannelState> {
+          return pubsub.asyncIterator('ChannelStates')
+        }
+      },
       ChannelStates: {
         type: new graphql.GraphQLNonNull(ChannelStateType),
         subscribe(): AsyncIterator<ChannelState> {

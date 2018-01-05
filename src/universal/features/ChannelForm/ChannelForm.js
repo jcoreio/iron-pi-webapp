@@ -19,10 +19,7 @@ import type {ChannelMode, Channel as FullChannel} from '../../types/Channel'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
-import AnalogInputState from './AnalogInputState'
-import DisabledChannelState from './DisabledChannelState'
-import DigitalInputState from './DigitalInputState'
-import DigitalOutputState from './DigitalOutputState'
+import ChannelStateWidget from './ChannelStateWidget'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -60,32 +57,6 @@ const styles = ({spacing}: Theme) => ({
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
-
-const StateComponents: {[mode: ChannelMode]: React.ComponentType<any> | string} = {
-  ANALOG_INPUT: AnalogInputState,
-  DIGITAL_INPUT: DigitalInputState,
-  DIGITAL_OUTPUT: DigitalOutputState,
-  DISABLED: DisabledChannelState,
-}
-
-export type StateSectionProps = {
-  mode: ChannelMode,
-  paperClass: string,
-  formControlClass: string,
-}
-
-const StateSection = formValues('mode')(({paperClass, formControlClass, mode, ...props}: StateSectionProps): React.Node => {
-  mode = mode || 'DISABLED'
-  return (
-    <Paper className={paperClass}>
-      <Fader animateHeight>
-        <ControlWithInfo key={mode}>
-          {mode ? React.createElement(StateComponents[mode], {key: mode, className: formControlClass, ...props}) : ''}
-        </ControlWithInfo>
-      </Fader>
-    </Paper>
-  )
-})
 
 const Empty = () => <div />
 
@@ -133,25 +104,44 @@ export type Props = {
     Channels?: Array<Channel>,
     loading?: boolean,
   },
+  subscribeToChannelState?: (id: number) => Function,
 }
 
 class ChannelForm extends React.Component<Props> {
+  unsubscribeFromChannelState: ?Function
+
   componentDidMount() {
-    const {data: {Channel}, initialize} = this.props
-    if (Channel) initialize(Channel)
+    const {data: {Channel}, initialize, subscribeToChannelState} = this.props
+    if (Channel) {
+      initialize(Channel)
+      if (subscribeToChannelState) {
+        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
   }
 
   componentWillReceiveProps(nextProps: Props) {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 
-    if (nextChannel && nextChannel !== prevChannel) {
-      nextProps.initialize(nextChannel)
+    if (nextChannel !== prevChannel) {
+      if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
+      if (nextChannel) {
+        nextProps.initialize(nextChannel)
+        const {subscribeToChannelState} = nextProps
+        if (subscribeToChannelState) {
+          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
+        }
+      }
     }
   }
 
   render(): React.Node {
-    const {classes, data: {Channels, loading}, valid, submitting} = this.props
+    const {classes, data: {Channels, Channel, loading}, valid, submitting} = this.props
     if (loading) {
       return (
         <div className={classes.form}>
@@ -165,10 +155,18 @@ class ChannelForm extends React.Component<Props> {
     }
     return (
       <form id="channelForm" className={classes.form}>
-        <StateSection
-          paperClass={classes.paper}
-          formControlClass={classes.formControl}
-        />
+        {Channel &&
+          <Paper className={classes.paper}>
+            <Fader animateHeight>
+              <ControlWithInfo
+                info="The current state of the channel"
+                key={Channel.state && Channel.state.mode || 'DISABLED'}
+              >
+                <ChannelStateWidget channel={Channel} className={classes.formControl} />
+              </ControlWithInfo>
+            </Fader>
+          </Paper>
+        }
         <Paper className={classes.paper}>
           <ControlWithInfo info="The mode of the channel">
             <Field

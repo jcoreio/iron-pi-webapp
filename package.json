@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@jcoreio/graphql-sequelize-extra": "^1.0.0",
+    "@jcoreio/mutate": "^1.0.0",
     "@jcoreio/poll": "^1.0.0",
     "@jcoreio/require-env": "^1.0.0",
     "apollo-cache-inmemory": "^1.1.3",

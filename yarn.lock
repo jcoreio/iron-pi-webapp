@@ -92,6 +92,12 @@
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jcoreio/graphql-sequelize-extra/-/graphql-sequelize-extra-1.0.0.tgz#671127ff2f37bf9684286684ef6f0a0cae75fb43"
 
+"@jcoreio/mutate@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@jcoreio/mutate/-/mutate-1.0.0.tgz#d10a40e1e5c8480cefc64d9d19d0f2691669b9ea"
+  dependencies:
+    iterall "^1.1.3"
+
 "@jcoreio/poll@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jcoreio/poll/-/poll-1.0.0.tgz#63d871a63848e2ea8b0714352c0955437c37454f"

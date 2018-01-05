@@ -19,15 +19,16 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className?: string,
+  children?: React.Node,
 }
 
-const DisabledChannelState = withStyles(styles, {withTheme: true})(
-  ({classes, className}: Props) => (
+const TextStateWidget = withStyles(styles, {withTheme: true})(
+  ({classes, className, children}: Props) => (
     <div className={classNames(classes.root, className)}>
-      Channel is disabled
+      {children}
     </div>
   )
 )
 
-export default DisabledChannelState
+export default TextStateWidget
 

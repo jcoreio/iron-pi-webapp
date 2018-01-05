@@ -2,9 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {Field} from 'redux-form'
 import {withStyles, withTheme} from 'material-ui/styles'
-import IconButton from 'material-ui/IconButton'
 import Positive from 'material-ui-icons/AddCircleOutline'
 import Negative from 'material-ui-icons/RemoveCircleOutline'
 import Arrow from 'react-arrow'
@@ -12,6 +10,7 @@ import Arrow from 'react-arrow'
 import ValueBlock from './ValueBlock'
 
 import type {Theme} from '../../theme'
+import type {DigitalInputState} from '../../types/Channel'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
@@ -50,24 +49,19 @@ type PolaritySectionClasses = $Call<ExtractClasses, typeof polaritySectionStyles
 
 export type PolaritySectionProps = {
   classes: PolaritySectionClasses,
-  input: {
-    value?: boolean,
-    onChange: (newValue: boolean) => any,
-  },
+  reversePolarity?: boolean,
 }
 
 const PolaritySection = withStyles(polaritySectionStyles, {withTheme: true})(
-  ({classes, input: {value, onChange}}: PolaritySectionProps) => (
+  ({classes, reversePolarity}: PolaritySectionProps) => (
     <div className={classes.root}>
       <h4 className={classes.title}>
         Polarity
       </h4>
-      <IconButton className={classes.icon} onClick={() => onChange(!value)}>
-        {value
-          ? <Negative />
-          : <Positive />
-        }
-      </IconButton>
+      {reversePolarity
+        ? <Negative />
+        : <Positive />
+      }
     </div>
   )
 )
@@ -97,32 +91,34 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className?: string,
-  rawValue?: number,
-  systemValue?: number,
+  channel?: {
+    state?: DigitalInputState,
+  },
 }
 
-const DigitalInputState = (
-  ({classes, className, rawValue, systemValue}: Props) => (
-    <div className={classNames(classes.root, className)}>
-      <ValueBlock
-        className={classNames(classes.block, classes.valueBlock)}
-        title="Raw Input"
-        value={rawValue != null && Number.isFinite(rawValue) ? rawValue.toFixed(0) : null}
-      />
-      <FlowArrow className={classes.arrow} />
-      <Field
-        name="config.reversePolarity"
-        component={PolaritySection}
-      />
-      <FlowArrow className={classes.arrow} />
-      <ValueBlock
-        className={classNames(classes.block, classes.valueBlock)}
-        title="System Value"
-        value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(0) : null}
-      />
-    </div>
-  )
+const DigitalInputStateWidget = (
+  ({classes, className, channel}: Props) => {
+    const {state} = channel || {state: null}
+    const {rawInput, reversePolarity, systemValue} = state || {}
+    return (
+      <div className={classNames(classes.root, className)}>
+        <ValueBlock
+          className={classNames(classes.block, classes.valueBlock)}
+          title="Raw Input"
+          value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(0) : null}
+        />
+        <FlowArrow className={classes.arrow} />
+        <PolaritySection reversePolarity={reversePolarity} />
+        <FlowArrow className={classes.arrow} />
+        <ValueBlock
+          className={classNames(classes.block, classes.valueBlock)}
+          title="System Value"
+          value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(0) : null}
+        />
+      </div>
+    )
+  }
 )
 
-export default withStyles(styles, {withTheme: true})(DigitalInputState)
+export default withStyles(styles, {withTheme: true})(DigitalInputStateWidget)
 
