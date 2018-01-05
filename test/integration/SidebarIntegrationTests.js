@@ -28,16 +28,19 @@ describe('Sidebar', () => {
 
       await Promise.all([
         'ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'
-      ].map((mode: ChannelMode, id: number) => Channel.update({
-        channelId: `Channel ${id}`,
-        name: `Channel ${id}`,
-        mode,
-      }, {where: {id}})))
+      ].map((mode: ChannelMode, index: number) => {
+        const id = index + 1
+        return Channel.update({
+          channelId: `Channel ${id}`,
+          name: `Channel ${id}`,
+          mode,
+        }, {where: {id}})
+      }))
 
       setChannelStates(
-        {id: 0, mode: 'ANALOG_INPUT', rawInput: 2.3},
-        {id: 1, mode: 'DIGITAL_INPUT', reversePolarity: false, rawInput: 1},
-        {id: 2, mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlValue: 1},
+        {id: 1, mode: 'ANALOG_INPUT', rawInput: 2.3},
+        {id: 2, mode: 'DIGITAL_INPUT', reversePolarity: false, rawInput: 1},
+        {id: 3, mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlValue: 1},
       )
     })
 
@@ -56,22 +59,22 @@ describe('Sidebar', () => {
           const stateItems = comp.update().find(ChannelStateItem)
 
           expect(stateItems.at(0).prop('channel')).to.containSubset({
-            id: 0,
-            name: 'Channel 0',
+            id: 1,
+            name: 'Channel 1',
             mode: 'ANALOG_INPUT',
             state: {
-              id: 0,
+              id: 1,
               mode: 'ANALOG_INPUT',
               rawInput: 2.3,
               systemValue: 2.3,
             },
           })
           expect(stateItems.at(1).prop('channel')).to.containSubset({
-            id: 1,
-            name: 'Channel 1',
+            id: 2,
+            name: 'Channel 2',
             mode: 'DIGITAL_INPUT',
             state: {
-              id: 1,
+              id: 2,
               mode: 'DIGITAL_INPUT',
               reversePolarity: false,
               rawInput: 1,
@@ -79,11 +82,11 @@ describe('Sidebar', () => {
             },
           })
           expect(stateItems.at(2).prop('channel')).to.containSubset({
-            id: 2,
-            name: 'Channel 2',
+            id: 3,
+            name: 'Channel 3',
             mode: 'DIGITAL_OUTPUT',
             state: {
-              id: 2,
+              id: 3,
               mode: 'DIGITAL_OUTPUT',
               reversePolarity: false,
               safeState: 0,
@@ -103,8 +106,8 @@ describe('Sidebar', () => {
         </IntegrationContainer>
       )
       setChannelValues(
-        {id: 0, rawInput: 2.5},
-        {id: 1, rawInput: 0},
+        {id: 1, rawInput: 2.5},
+        {id: 2, rawInput: 0},
       )
       await poll(
         () => {
@@ -112,7 +115,7 @@ describe('Sidebar', () => {
 
           expect(stateItems.at(0).prop('channel')).to.containSubset({
             state: {
-              id: 0,
+              id: 1,
               mode: 'ANALOG_INPUT',
               rawInput: 2.5,
               systemValue: 2.5,
@@ -120,7 +123,7 @@ describe('Sidebar', () => {
           })
           expect(stateItems.at(1).prop('channel')).to.containSubset({
             state: {
-              id: 1,
+              id: 2,
               mode: 'DIGITAL_INPUT',
               reversePolarity: false,
               rawInput: 0,
@@ -129,7 +132,7 @@ describe('Sidebar', () => {
           })
           expect(stateItems.at(2).prop('channel')).to.containSubset({
             state: {
-              id: 2,
+              id: 3,
               mode: 'DIGITAL_OUTPUT',
               reversePolarity: false,
               safeState: 0,
@@ -142,10 +145,10 @@ describe('Sidebar', () => {
       )
 
       setChannelStates(
-        {id: 1, mode: 'DIGITAL_INPUT', reversePolarity: true}
+        {id: 2, mode: 'DIGITAL_INPUT', reversePolarity: true}
       )
       setChannelValues(
-        {id: 2, controlValue: 0}
+        {id: 3, controlValue: 0}
       )
       await poll(
         () => {
@@ -153,7 +156,7 @@ describe('Sidebar', () => {
 
           expect(stateItems.at(0).prop('channel')).to.containSubset({
             state: {
-              id: 0,
+              id: 1,
               mode: 'ANALOG_INPUT',
               rawInput: 2.5,
               systemValue: 2.5,
@@ -161,7 +164,7 @@ describe('Sidebar', () => {
           })
           expect(stateItems.at(1).prop('channel')).to.containSubset({
             state: {
-              id: 1,
+              id: 2,
               mode: 'DIGITAL_INPUT',
               reversePolarity: true,
               rawInput: 0,
@@ -170,7 +173,7 @@ describe('Sidebar', () => {
           })
           expect(stateItems.at(2).prop('channel')).to.containSubset({
             state: {
-              id: 2,
+              id: 3,
               mode: 'DIGITAL_OUTPUT',
               reversePolarity: false,
               safeState: 0,

@@ -56,7 +56,7 @@ export default async function migrate(options: Options): Promise<void> {
   }
 
   if (!(await Channel.findOne())) {
-    await Channel.bulkCreate(range(8).map(id => ({
+    await Channel.bulkCreate(range(1, 9).map(id => ({
       id,
       channelId: `channel${id}`,
       name: `Channel ${id}`,
