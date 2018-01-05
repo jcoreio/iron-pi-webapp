@@ -104,10 +104,11 @@ describe('selenium tests', function () {
           let logs
           try {
             logs = (await browser.log('browser')).value
+            await fs.writeFile(logFile, [...logs.map(({message}) => message)].join('\n'), 'utf8')
+            await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
           } catch (error) {
             console.error(error.stack) // eslint-disable-line no-console
           }
-          await fs.writeFile(logFile, [...logs.map(({message}) => message)].join('\n'), 'utf8')
         } else {
           const files = await promisify(glob)(filePrefix + '*')
           files.forEach(file => fs.remove(file)) // no need to wait for promise
