@@ -68,6 +68,16 @@ export function setChannelStates(...newStates: Array<SetChannelState>) {
           if (!newState.hasOwnProperty('controlValue')) (newState: Object).controlValue = current.controlValue
           break
         }
+      } else {
+        switch (newState.mode) {
+        case 'ANALOG_INPUT':
+        case 'DIGITAL_INPUT':
+          if (!newState.hasOwnProperty('rawInput')) (newState: Object).rawInput = null
+          break
+        case 'DIGITAL_OUTPUT':
+          if (!newState.hasOwnProperty('controlValue')) (newState: Object).controlValue = null
+          break
+        }
       }
       calculateDerivedValue((newState: Object))
       pubsub.publish('ChannelStates', {ChannelStates: newState})
