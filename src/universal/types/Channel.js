@@ -138,7 +138,7 @@ export type DigitalOutputConfig = {
   controlMode?: ControlMode,
   controlLogic?: ControlLogic,
   reversePolarity?: boolean,
-  safeStateOutputOn?: boolean,
+  safeState?: 0 | 1,
 }
 
 export type ChannelConfig = AnalogInputConfig & DigitalInputConfig & DigitalOutputConfig
