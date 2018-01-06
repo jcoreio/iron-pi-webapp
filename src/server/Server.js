@@ -26,6 +26,7 @@ import login from './express/login'
 import addAuthHeader from './express/addAuthHeader'
 import handleGraphql from './express/graphql'
 import handleGraphiql from './express/graphiql'
+import Channel, {updateChannelState} from './models/Channel'
 
 const log = logger('Server')
 
@@ -76,6 +77,9 @@ export default class Server {
         sequelize,
         umzug,
       })
+
+      const channels = await Channel.findAll()
+      channels.forEach(channel => updateChannelState(channel))
 
       const app = express()
 

@@ -1,8 +1,12 @@
 // @flow
 
 import Sequelize, {Model} from 'sequelize'
-import type {ChannelConfig, ChannelMode} from '../../universal/types/Channel'
+import type {
+  ChannelConfig, ChannelMode, DigitalInputConfig, DigitalOutputConfig, SetAnalogInputState,
+  SetDisabledState
+} from '../../universal/types/Channel'
 import {channelIdPattern, ChannelConfigType} from '../../universal/types/Channel'
+import {setChannelStates} from '../localio/ChannelStates'
 
 export type ChannelInitAttributes = {
   id: number;
@@ -15,6 +19,35 @@ export type ChannelAttributes = ChannelInitAttributes & {
   updatedAt: Date;
   mode: ChannelMode;
   config: ChannelConfig;
+}
+
+export function updateChannelState(channel: Channel) {
+  const {id, mode, config} = channel
+  switch (mode) {
+  case 'ANALOG_INPUT':
+    setChannelStates(({id, mode}: SetAnalogInputState))
+    break
+  case 'DIGITAL_INPUT': {
+    const reversePolarity = (config: DigitalInputConfig).reversePolarity || false
+    setChannelStates({id, mode, reversePolarity})
+    break
+  }
+  case 'DIGITAL_OUTPUT': {
+    const safeState = (config: DigitalOutputConfig).safeState || 0
+    const reversePolarity = (config: DigitalOutputConfig).reversePolarity || false
+    setChannelStates({id, mode, safeState, reversePolarity})
+    break
+  }
+  case 'DISABLED':
+    setChannelStates(({id, mode}: SetDisabledState))
+    break
+  }
+}
+
+function updateChannelStateHook(channel: Channel) {
+  if (channel.changed('mode') || channel.changed('config')) {
+    updateChannelState(channel)
+  }
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
@@ -64,6 +97,9 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
         },
       },
     }, {sequelize})
+
+    this.afterCreate(updateChannelStateHook)
+    this.afterUpdate(updateChannelStateHook)
   }
 
   static initAssociations() {
