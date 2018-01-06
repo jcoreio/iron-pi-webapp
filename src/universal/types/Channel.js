@@ -100,10 +100,6 @@ export const LogicOperationsArray = Object.keys(LogicOperations)
 
 export type LogicOperation = $Keys<typeof LogicOperations>
 
-export function getLogicOperationDisplayText(op: LogicOperation): string {
-  return LogicOperations[op].displayText
-}
-
 export const Comparisons = {
   GT: {displayText: '>'},
   GTE: {displayText: '>='},
@@ -116,10 +112,6 @@ export const Comparisons = {
 export const ComparisonsArray = Object.keys(Comparisons)
 
 export type Comparison = $Keys<typeof Comparisons>
-
-export function getComparisonDisplayText(comparsion: Comparison): string {
-  return Comparisons[comparsion].displayText
-}
 
 export type ControlCondition = {
   operation?: LogicOperation,
