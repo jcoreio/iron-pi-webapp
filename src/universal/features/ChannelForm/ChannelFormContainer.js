@@ -20,13 +20,27 @@ const channelQuery = gql(`query Channels($id: Int!) {
     id
     name
   }
-}`)
+}
+`)
+
+const mutationQuery = gql(`
+mutation updateChannel($channel: InputChannel!) {
+  updateChannel(channel: $channel) {
+    id
+    channelId
+    name
+    mode 
+    config
+  }
+}
+`)
 
 type Props = {
   channelId: number,
 }
 
 export default compose(
+  graphql(mutationQuery),
   graphql(channelQuery, {
     options: ({channelId}: Props) => ({
       variables: {id: channelId}

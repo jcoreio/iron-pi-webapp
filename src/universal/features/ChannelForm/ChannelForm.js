@@ -105,6 +105,8 @@ export type Props = {
     loading?: boolean,
   },
   subscribeToChannelState?: (id: number) => Function,
+  handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
+  mutate: (options: {variables: {channel: FullChannel}}) => Promise<void>,
 }
 
 class ChannelForm extends React.Component<Props> {
@@ -141,8 +143,14 @@ class ChannelForm extends React.Component<Props> {
     }
   }
 
+  handleSubmit = (channel: FullChannel): Promise<void> => {
+    const {mutate} = this.props
+    const {id, channelId, name, mode, config} = channel
+    return mutate({variables: {channel: {id, channelId, name, mode, config}}})
+  }
+
   render(): React.Node {
-    const {classes, data: {Channels, Channel, loading}, valid, submitting} = this.props
+    const {classes, data: {Channels, Channel, loading}, valid, submitting, handleSubmit} = this.props
     if (loading) {
       return (
         <div className={classes.form}>
@@ -155,7 +163,7 @@ class ChannelForm extends React.Component<Props> {
       )
     }
     return (
-      <form id="channelForm" className={classes.form}>
+      <form id="channelForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         {Channel &&
           <Paper className={classes.paper}>
             <Fader animateHeight>
