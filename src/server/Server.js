@@ -17,7 +17,7 @@ import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
-import {getChannelState, getChannelStates, setChannelStates} from './localio/ChannelStates'
+import {getChannelState, getChannelStates, setChannelStates, setChannelValues} from './localio/ChannelStates'
 
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -42,6 +42,7 @@ export default class Server {
     getChannelState,
     getChannelStates,
     setChannelStates,
+    setChannelValues,
   }
   _port: number
   dbConnectionParams: DbConnectionParams
