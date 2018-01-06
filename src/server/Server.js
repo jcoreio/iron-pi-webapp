@@ -3,7 +3,6 @@
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
-import {graphiqlExpress} from 'apollo-server-express'
 import {execute, subscribe, GraphQLSchema} from 'graphql'
 import {SubscriptionServer} from 'subscriptions-transport-ws'
 import Sequelize from 'sequelize'
@@ -24,8 +23,9 @@ import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
 import login from './express/login'
-import authorize from './express/authorize'
+import addAuthHeader from './express/addAuthHeader'
 import handleGraphql from './express/graphql'
+import handleGraphiql from './express/graphiql'
 
 const log = logger('Server')
 
@@ -89,10 +89,11 @@ export default class Server {
       app.post('/login', bodyParser.json(), login)
 
       const GRAPHQL_PATH = '/graphql'
-      app.use(GRAPHQL_PATH, authorize)
-      app.use(GRAPHQL_PATH, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
+      app.use(GRAPHQL_PATH, addAuthHeader, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
 
-      app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))
+      if (process.env.NODE_ENV !== 'production') {
+        app.use('/graphiql', handleGraphiql({endpointURL: GRAPHQL_PATH}))
+      }
       app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
       app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 

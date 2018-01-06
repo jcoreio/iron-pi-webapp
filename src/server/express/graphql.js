@@ -1,3 +1,5 @@
+// @flow
+
 import type {$Request, $Response} from 'express'
 import type {Context} from '../graphql/schema'
 import {graphqlExpress} from "apollo-server-express"

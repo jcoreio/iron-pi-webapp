@@ -8,7 +8,7 @@ import type {$Request, $Response} from 'express'
 const ROOT_URL = requireEnv('ROOT_URL')
 const JWT_SECRET = requireEnv('JWT_SECRET')
 
-export default async function authorize(req: $Request, res: $Response, next: Function): Promise<void> {
+export default async function addAuthHeader(req: $Request, res: $Response, next: Function): Promise<void> {
   const auth = req.get('authorization')
   const match = /^Bearer (.*)$/i.exec(auth || '')
   if (match) {
