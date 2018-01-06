@@ -42,7 +42,7 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
       state: {
         type: ChannelStateType,
         description: 'the state of this channel',
-        resolve(source: Channel): ?ChannelState {
+        resolve(source: ChannelAttributes): ?ChannelState {
           return getChannelState(source.id)
         },
       },
