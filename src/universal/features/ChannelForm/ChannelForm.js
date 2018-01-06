@@ -113,7 +113,8 @@ class ChannelForm extends React.Component<Props> {
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
-      initialize(Channel)
+      const {id, channelId, name, mode, config} = Channel
+      initialize({id, channelId, name, mode, config})
       if (subscribeToChannelState) {
         this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
