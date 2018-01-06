@@ -81,6 +81,7 @@ export function setChannelStates(...newStates: Array<SetChannelState>) {
       }
       calculateDerivedValue((newState: Object))
       pubsub.publish('ChannelStates', {ChannelStates: newState})
+      pubsub.publish(`ChannelStates/${newState.id}`, {ChannelState: newState})
       currentStates.set(newState.id, newState)
     })
   )
@@ -110,6 +111,7 @@ export function setChannelValues(...newValues: Array<SetChannelValue>) {
       const newState = {...current, ...newValue}
       calculateDerivedValue(newState)
       pubsub.publish('ChannelStates', {ChannelStates: newState})
+      pubsub.publish(`ChannelStates/${newState.id}`, {ChannelState: newState})
       currentStates.set(newState.id, newState)
     })
   )

@@ -190,8 +190,8 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
             description: 'The id (primary key) of the channel to subscribe to',
           },
         },
-        subscribe(): AsyncIterator<ChannelState> {
-          return pubsub.asyncIterator('ChannelStates')
+        subscribe(doc: any, {id}: {id: number}): AsyncIterator<ChannelState> {
+          return pubsub.asyncIterator(`ChannelState/${id}`)
         }
       },
       ChannelStates: {
