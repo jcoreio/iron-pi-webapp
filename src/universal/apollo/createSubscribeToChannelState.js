@@ -10,6 +10,9 @@ const channelStateSubscription = gql(`
   }  
 `)
 
+/**
+ * Creates a function that initiates a subscription to a Channel State
+ */
 export default function createSubscribeToChannelState(
   props: Object,
   options?: {
