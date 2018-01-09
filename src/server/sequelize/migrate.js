@@ -3,7 +3,6 @@
 import {Client} from 'pg'
 import umzug from './umzug'
 import promisify from 'es6-promisify'
-import {range} from 'lodash'
 
 import sequelize, {dbConnectionParams} from './index'
 import logger from '../../universal/logger'
