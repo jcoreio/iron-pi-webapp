@@ -30,6 +30,15 @@ const AnalogInputConfigSection = withRouter(
           className={formControlClass}
         />
       </ControlWithInfo>
+      <ControlWithInfo info="The number of digits to show after the decimal place" className={firstControlClass}>
+        <Field
+          name="config.precision"
+          label="Precision"
+          type="text"
+          component={TextField}
+          className={formControlClass}
+        />
+      </ControlWithInfo>
       <ControlWithInfo info="Takes you to the calibration wizard" className={lastControlClass}>
         <DrilldownButton
           className={formControlClass}

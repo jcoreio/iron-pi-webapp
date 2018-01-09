@@ -143,8 +143,8 @@
   resolved "https://registry.npmjs.org/@types/geojson/-/geojson-1.0.6.tgz#3e02972728c69248c2af08d60a48cbb8680fffdf"
 
 "@types/node@*":
-  version "8.5.2"
-  resolved "https://registry.npmjs.org/@types/node/-/node-8.5.2.tgz#83b8103fa9a2c2e83d78f701a9aa7c9539739aa5"
+  version "9.3.0"
+  resolved "https://registry.npmjs.org/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
 
 "@types/zen-observable@0.5.3", "@types/zen-observable@^0.5.3":
   version "0.5.3"
@@ -3641,6 +3641,10 @@ graphql-subscriptions@^0.5.5:
 graphql-tag@^2.6.0:
   version "2.6.0"
   resolved "https://registry.npmjs.org/graphql-tag/-/graphql-tag-2.6.0.tgz#0fb1b9f6d6651263c47a3420e827910e6fed3952"
+
+graphql-type-json@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/graphql-type-json/-/graphql-type-json-0.1.4.tgz#89f13f5d32ce08c9a76c79fdf9c1968384d81a4e"
 
 graphql@^0.11.7:
   version "0.11.7"
@@ -7381,8 +7385,8 @@ send@0.16.1:
     statuses "~1.3.1"
 
 sequelize@^4.23.2:
-  version "4.28.6"
-  resolved "https://registry.npmjs.org/sequelize/-/sequelize-4.28.6.tgz#44b4b69f550bc53f41135bf8db73c5d492cb7e64"
+  version "4.29.2"
+  resolved "https://registry.npmjs.org/sequelize/-/sequelize-4.29.2.tgz#f31d720f6d0d7dad36ac8a994336fae913fe1fe7"
   dependencies:
     bluebird "^3.4.6"
     cls-bluebird "^2.0.1"

@@ -26,21 +26,40 @@ describe('Sidebar', () => {
       client = apollo.client
       close = apollo.close
 
-      await Promise.all([
-        'ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'
-      ].map((mode: ChannelMode, index: number) => {
-        const id = index + 1
-        return Channel.update({
-          channelId: `Channel ${id}`,
-          name: `Channel ${id}`,
-          mode,
-        }, {where: {id}})
-      }))
+      // await Promise.all([
+      //   'ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'
+      // ].map((mode: ChannelMode, index: number) => {
+      //   const id = index + 1
+      //   return Channel.update({
+      //     channelId: `Channel ${id}`,
+      //     name: `Channel ${id}`,
+      //     mode,
+      //   }, {where: {id}})
+      // }))
+      //
 
-      setChannelStates(
-        {id: 1, mode: 'ANALOG_INPUT', rawInput: 2.3},
-        {id: 2, mode: 'DIGITAL_INPUT', reversePolarity: false, rawInput: 1},
-        {id: 3, mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlValue: 1},
+      await Promise.all([
+        Channel.update({
+          channelId: 'channel1',
+          name: 'Channel 1',
+          config: {mode: 'ANALOG_INPUT'},
+        }, {where: {id: 1}}),
+        Channel.update({
+          channelId: 'channel2',
+          name: 'Channel 2',
+          config: {mode: 'DIGITAL_INPUT', reversePolarity: false},
+        }, {where: {id: 2}}),
+        Channel.update({
+          channelId: 'channel3',
+          name: 'Channel 3',
+          config: {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0},
+        }, {where: {id: 3}}),
+      ])
+
+      setChannelValues(
+        {id: 1, rawInput: 2.3},
+        {id: 2, rawInput: 1},
+        {id: 3, controlValue: 1},
       )
     })
 
@@ -61,7 +80,9 @@ describe('Sidebar', () => {
           expect(stateItems.at(0).prop('channel')).to.containSubset({
             id: 1,
             name: 'Channel 1',
-            mode: 'ANALOG_INPUT',
+            config: {
+              mode: 'ANALOG_INPUT'
+            },
             state: {
               id: 1,
               mode: 'ANALOG_INPUT',
@@ -72,7 +93,9 @@ describe('Sidebar', () => {
           expect(stateItems.at(1).prop('channel')).to.containSubset({
             id: 2,
             name: 'Channel 2',
-            mode: 'DIGITAL_INPUT',
+            config: {
+              mode: 'DIGITAL_INPUT'
+            },
             state: {
               id: 2,
               mode: 'DIGITAL_INPUT',
@@ -84,7 +107,9 @@ describe('Sidebar', () => {
           expect(stateItems.at(2).prop('channel')).to.containSubset({
             id: 3,
             name: 'Channel 3',
-            mode: 'DIGITAL_OUTPUT',
+            config: {
+              mode: 'DIGITAL_OUTPUT'
+            },
             state: {
               id: 3,
               mode: 'DIGITAL_OUTPUT',
@@ -144,9 +169,11 @@ describe('Sidebar', () => {
         50
       )
 
-      setChannelStates(
-        {id: 2, mode: 'DIGITAL_INPUT', reversePolarity: true}
+      await Channel.update(
+        {config: {mode: 'DIGITAL_INPUT', reversePolarity: true}},
+        {where: {id: 2}}
       )
+
       setChannelValues(
         {id: 3, controlValue: 0}
       )

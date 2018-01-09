@@ -5,36 +5,37 @@ import type {
   ChannelConfig, ChannelMode, DigitalInputConfig, DigitalOutputConfig, SetAnalogInputState,
   SetDisabledState
 } from '../../universal/types/Channel'
-import {channelIdPattern, ChannelConfigType} from '../../universal/types/Channel'
+import {channelIdPattern, validateChannelConfig} from '../../universal/types/Channel'
 import {setChannelStates} from '../localio/ChannelStates'
+import validateWithFlowRuntime from '../sequelize/validateWithFlowRuntime'
 
 export type ChannelInitAttributes = {
   id: number;
   name: string;
   channelId: string;
+  config?: ChannelConfig;
 }
 
 export type ChannelAttributes = ChannelInitAttributes & {
   createdAt: Date;
   updatedAt: Date;
-  mode: ChannelMode;
   config: ChannelConfig;
 }
 
 export function updateChannelState(channel: Channel) {
-  const {id, mode, config} = channel
+  const {id, config} = channel
+  const {mode} = config
   switch (mode) {
   case 'ANALOG_INPUT':
     setChannelStates(({id, mode}: SetAnalogInputState))
     break
   case 'DIGITAL_INPUT': {
-    const reversePolarity = (config: DigitalInputConfig).reversePolarity || false
+    const {reversePolarity}: DigitalInputConfig = (config: any)
     setChannelStates({id, mode, reversePolarity})
     break
   }
   case 'DIGITAL_OUTPUT': {
-    const safeState = (config: DigitalOutputConfig).safeState || 0
-    const reversePolarity = (config: DigitalOutputConfig).reversePolarity || false
+    const {safeState, reversePolarity}: DigitalOutputConfig = (config: any)
     setChannelStates({id, mode, safeState, reversePolarity})
     break
   }
@@ -45,7 +46,7 @@ export function updateChannelState(channel: Channel) {
 }
 
 function updateChannelStateHook(channel: Channel) {
-  if (channel.changed('mode') || channel.changed('config')) {
+  if (channel.changed('config')) {
     updateChannelState(channel)
   }
 }
@@ -73,30 +74,33 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          is: /^\S(.*\S)?$/, // no whitespace at beginning or end
+          is: {
+            args: /^\S(.*\S)?$/,
+            msg: 'must not start or end with whitespace',
+          } // no whitespace at beginning or end
         }
       },
       channelId: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          is: channelIdPattern,
+          is: {
+            args: channelIdPattern,
+            msg: 'must be a valid channel ID'
+          },
         },
-      },
-      mode: {
-        type: Sequelize.ENUM('ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'),
-        allowNull: false,
-        defaultValue: 'DISABLED',
       },
       config: {
         type: Sequelize.JSON,
         allowNull: false,
-        defaultValue: {},
+        defaultValue: {mode: 'DISABLED'},
         validate: {
-          isValid: config => ChannelConfigType.assert(config),
+          isValid: validateWithFlowRuntime(validateChannelConfig)
         },
       },
-    }, {sequelize})
+    }, {
+      sequelize,
+    })
 
     this.afterCreate(updateChannelStateHook)
     this.afterUpdate(updateChannelStateHook)

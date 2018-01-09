@@ -13,7 +13,6 @@ import DigitalOutputStateWidget from './DigitalOutputStateWidget'
 export type Props = {
   className?: string,
   channel: {
-    mode: ChannelMode,
     config: ChannelConfig,
     state?: ChannelState,
   },
@@ -27,7 +26,7 @@ const widgets: {[mode: ChannelMode]: React.ComponentType<Props>} = {
 }
 
 const ChannelStateWidget = ({channel, ...props}: Props): React.Node => {
-  const {mode, state} = channel
+  const {config: {mode}, state} = channel
   if (!state || mode !== state.mode) {
     return (
       <TextStateWidget key="updating" {...props}>

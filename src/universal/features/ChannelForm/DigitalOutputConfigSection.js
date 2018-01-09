@@ -2,17 +2,21 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
+import {compose} from 'redux'
 import {withStyles} from 'material-ui/styles'
-import {Field, FieldArray} from 'redux-form'
+import Collapse from 'material-ui/transitions/Collapse'
+import {Field, FieldArray, formValues} from 'redux-form'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {ControlModesArray, getControlModeDisplayText} from '../../types/Channel'
 import ControlLogicTable from './ControlLogicTable'
+import {required} from '../../redux-form/validators'
+import type {ControlMode} from '../../types/Channel'
 
 const styles = ({spacing}: Theme) => ({
-  safeStateOutputOnField: {
+  safeStateField: {
     marginRight: spacing.unit,
   },
 })
@@ -31,11 +35,15 @@ export type Props = {
   firstControlClass: string,
   lastControlClass: string,
   tallButtonClass: string,
+  "config.controlMode"?: ControlMode,
   channels?: Array<Channel>,
 }
 
-const DigitalOutputConfigSection = withStyles(styles, {withTheme: true})(
-  ({formControlClass, firstControlClass, lastControlClass, tallButtonClass, classes, channels}: Props) => (
+const DigitalOutputConfigSection = (
+  ({
+    formControlClass, firstControlClass, lastControlClass, tallButtonClass, classes, channels,
+    "config.controlMode": controlMode
+  }: Props) => (
     <React.Fragment>
       <ControlWithInfo info="How this output is controlled" className={firstControlClass}>
         <Field
@@ -45,22 +53,28 @@ const DigitalOutputConfigSection = withStyles(styles, {withTheme: true})(
           buttonClassName={tallButtonClass}
           availableValues={ControlModesArray}
           getDisplayText={getControlModeDisplayText}
+          validate={required}
         />
       </ControlWithInfo>
-      <FieldArray
-        name="config.controlLogic"
-        component={ControlLogicTable}
-        channels={channels}
-      />
+      <Collapse in={controlMode === 'LOCAL_CONTROL'} unmountOnExit>
+        <FieldArray
+          name="config.controlLogic"
+          component={ControlLogicTable}
+          channels={channels}
+          formControlClass={formControlClass}
+          validate={required}
+        />
+      </Collapse>
       <ControlWithInfo info="????" className={lastControlClass}>
         <Field
-          name="config.safeStateOutputOn"
+          name="config.safeState"
           label="Safe State"
           component={ButtonGroupField}
-          className={classNames(formControlClass, classes.safeStateOutputOnField)}
+          className={classNames(formControlClass, classes.safeStateField)}
           buttonClassName={tallButtonClass}
-          availableValues={[false, true]}
+          availableValues={[0, 1]}
           getDisplayText={value => value ? 'Output On' : 'Output Off'}
+          validate={required}
         />
         <Field
           name="config.reversePolarity"
@@ -70,11 +84,15 @@ const DigitalOutputConfigSection = withStyles(styles, {withTheme: true})(
           buttonClassName={tallButtonClass}
           availableValues={[false, true]}
           getDisplayText={value => value ? 'Reversed' : 'Normal'}
+          validate={required}
         />
       </ControlWithInfo>
     </React.Fragment>
   )
 )
 
-export default DigitalOutputConfigSection
+export default compose(
+  withStyles(styles, {withTheme: true}),
+  formValues('config.controlMode')
+)(DigitalOutputConfigSection)
 

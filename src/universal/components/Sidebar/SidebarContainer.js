@@ -27,7 +27,6 @@ type ChannelState = {
 type Channel = {
   id: number,
   name: string,
-  mode: ChannelMode,
   state?: ChannelState,
 }
 
@@ -136,7 +135,6 @@ const query = gql(`{
   Channels {
     id
     name 
-    mode
     state
   }  
 }`)

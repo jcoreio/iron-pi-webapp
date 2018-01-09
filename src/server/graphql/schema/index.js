@@ -5,6 +5,7 @@ import * as graphql from 'graphql'
 import {mapValues} from 'lodash'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
+import GraphQLJSON from 'graphql-type-json'
 
 import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
@@ -12,7 +13,6 @@ import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
 import User from '../../models/User'
 import type {ChannelAttributes} from '../../models/Channel'
-import ChannelStateType from './ChannelStateType'
 
 export type Options = {
   sequelize: Sequelize,
@@ -40,7 +40,7 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
   const extraFields = {
     [Channel.name]: {
       state: {
-        type: ChannelStateType,
+        type: GraphQLJSON,
         description: 'the state of this channel',
         resolve(source: ChannelAttributes): ?ChannelState {
           return getChannelState(source.id)
@@ -182,7 +182,7 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
     name: 'Subscription',
     fields: {
       ChannelState: {
-        type: new graphql.GraphQLNonNull(ChannelStateType),
+        type: new graphql.GraphQLNonNull(GraphQLJSON),
         description: 'Subscribes to the state of a single channel',
         args: {
           id: {
@@ -195,7 +195,7 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
         }
       },
       ChannelStates: {
-        type: new graphql.GraphQLNonNull(ChannelStateType),
+        type: new graphql.GraphQLNonNull(GraphQLJSON),
         subscribe(): AsyncIterator<ChannelState> {
           return pubsub.asyncIterator('ChannelStates')
         }

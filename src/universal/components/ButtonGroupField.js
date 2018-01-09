@@ -47,6 +47,7 @@ export type Props<V> = {
   meta: {
     warning?: string,
     error?: string,
+    touched?: boolean,
   },
 }
 
@@ -61,9 +62,9 @@ const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
   availableValues,
   getDisplayText,
   input: {value: selectedValue, onChange, disabled},
-  meta: {warning, error},
+  meta: {warning, error, touched},
 }: Props<V>): React.Node => (
-  <FormControl className={className}>
+  <FormControl className={className} error={touched && (error != null || warning != null)}>
     {label &&
       <FormLabel className={classNames(classes.label, labelClassName)}>
         {label}
@@ -87,7 +88,7 @@ const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
         )
       })}
     </ButtonGroup>
-    {(error || warning) &&
+    {touched && (error || warning) &&
       <FormHelperText className={helperTextClassName}>
         {error || warning}
       </FormHelperText>

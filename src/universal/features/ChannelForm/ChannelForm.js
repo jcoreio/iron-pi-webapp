@@ -20,6 +20,8 @@ import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
+import handleError from '../../redux-form/createSubmissionError'
+import {required} from '../../redux-form/validators'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -73,7 +75,9 @@ type Channel = {
 }
 
 export type ConfigSectionProps = {
-  mode: ChannelMode,
+  config: {
+    mode: ChannelMode,
+  },
   formControlClass: string,
   firstControlClass: string,
   lastControlClass: string,
@@ -81,9 +85,9 @@ export type ConfigSectionProps = {
   channels?: Array<Channel>,
 }
 
-const ConfigSection = formValues('mode')(
-  ({mode, ...props}: ConfigSectionProps): React.Node => {
-    mode = mode || 'DISABLED'
+const ConfigSection = formValues('config')(
+  ({config, ...props}: ConfigSectionProps): React.Node => {
+    const mode = config && config.mode || 'DISABLED'
     return (
       <Fader animateHeight>
         <div key={mode}>
@@ -98,7 +102,7 @@ export type Props = {
   classes: Classes,
   initialize: (values: FullChannel) => any,
   submitting?: boolean,
-  valid?: boolean,
+  pristine?: boolean,
   data: {
     Channel?: FullChannel,
     Channels?: Array<Channel>,
@@ -115,8 +119,8 @@ class ChannelForm extends React.Component<Props> {
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
-      const {id, channelId, name, mode, config} = Channel
-      initialize({id, channelId, name, mode, config})
+      const {id, channelId, name, config} = Channel
+      initialize({id, channelId, name, config})
       if (subscribeToChannelState) {
         this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
@@ -145,12 +149,12 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate} = this.props
-    const {id, channelId, name, mode, config} = channel
-    return mutate({variables: {channel: {id, channelId, name, mode, config}}})
+    const {id, channelId, name, config} = channel
+    return mutate({variables: {channel: {id, channelId, name, config}}}).catch(handleError)
   }
 
   render(): React.Node {
-    const {classes, data: {Channels, Channel, loading}, valid, submitting, handleSubmit} = this.props
+    const {classes, data: {Channels, Channel, loading}, pristine, submitting, handleSubmit} = this.props
     if (loading) {
       return (
         <div className={classes.form}>
@@ -179,13 +183,14 @@ class ChannelForm extends React.Component<Props> {
         <Paper className={classes.paper}>
           <ControlWithInfo info="The mode of the channel">
             <Field
-              name="mode"
+              name="config.mode"
               component={ButtonGroupField}
               buttonClassName={classes.tallButton}
               availableValues={ChannelModesArray}
               activeButtonProps={{accent: true}}
               getDisplayText={getChannelModeDisplayText}
               className={classes.formControl}
+              validate={required}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The name of the channel">
@@ -222,7 +227,7 @@ class ChannelForm extends React.Component<Props> {
               raised
               color="primary"
               className={classes.tallButton}
-              disabled={!valid || submitting}
+              disabled={pristine || submitting}
             >
               OK
             </Button>

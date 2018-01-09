@@ -12,7 +12,6 @@ const channelQuery = gql(`query Channels($id: Int!) {
     id
     channelId
     name
-    mode
     config
     state
   }
@@ -29,8 +28,8 @@ mutation updateChannel($channel: InputChannel!) {
     id
     channelId
     name
-    mode 
     config
+    state
   }
 }
 `)

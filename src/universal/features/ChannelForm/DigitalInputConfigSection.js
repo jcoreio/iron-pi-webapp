@@ -5,6 +5,7 @@ import classNames from 'classnames'
 import {Field} from 'redux-form'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
+import {required} from '../../redux-form/validators'
 
 export type Props = {
   tallButtonClass: string,
@@ -26,6 +27,7 @@ const DigitalInputConfigSection = (
           buttonClassName={tallButtonClass}
           availableValues={[false, true]}
           getDisplayText={value => value ? 'Reversed' : 'Normal'}
+          validate={required}
         />
       </ControlWithInfo>
     </React.Fragment>

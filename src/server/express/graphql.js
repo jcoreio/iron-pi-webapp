@@ -5,6 +5,7 @@ import type {Context} from '../graphql/schema'
 import {graphqlExpress} from "apollo-server-express"
 import type Sequelize from 'sequelize'
 import type {GraphQLSchema} from 'graphql'
+import formatError from '../graphql/formatError'
 
 type Options = {
   sequelize: Sequelize,
@@ -21,6 +22,7 @@ export default function handleGraphql({sequelize, schema}: Options): (req: $Requ
     return {
       schema,
       context,
+      formatError,
     }
   })
 }

@@ -24,14 +24,16 @@ const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Objec
   />
 ))
 
-const polaritySectionStyles = ({palette, spacing}: Theme) => ({
+const polaritySectionStyles = ({palette}: Theme) => ({
   root: {
     position: 'relative',
+    overflow: 'visible',
   },
   title: {
     position: 'absolute',
-    top: spacing.unit,
-    transform: 'translateY(-100%)',
+    top: 0,
+    left: '50%',
+    transform: 'translate(-50%, -100%)',
     margin: 0,
     fontSize: '1rem',
     fontWeight: 400,

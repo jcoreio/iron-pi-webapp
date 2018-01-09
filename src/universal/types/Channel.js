@@ -1,7 +1,7 @@
 // @flow
 
-import {reify} from 'flow-runtime'
-import type {Type} from 'flow-runtime'
+import {reify, validate} from 'flow-runtime'
+import type {Type, Validation} from 'flow-runtime'
 
 export const ChannelModes = {
   ANALOG_INPUT: {displayText: 'Analog Input'},
@@ -19,7 +19,7 @@ export function getChannelModeDisplayText(mode: ChannelMode): string {
 }
 
 export const channelIdPart = "[a-z_][a-z0-9_]*"
-export const channelIdPattern = new RegExp(`${channelIdPart}(/${channelIdPart})*`, 'i')
+export const channelIdPattern = new RegExp(`^${channelIdPart}(/${channelIdPart})*$`, 'i')
 
 export type AnalogInputState = {|
   id: number,
@@ -67,14 +67,16 @@ export type Calibration = {
 }
 
 export type AnalogInputConfig = {
-  units?: string,
-  precision?: number,
+  units: string,
+  precision: number,
   calibration?: Calibration,
 }
+export const AnalogInputConfigType = (reify: Type<AnalogInputConfig>)
 
 export type DigitalInputConfig = {
-  reversePolarity?: boolean,
+  reversePolarity: boolean,
 }
+export const DigitalInputConfigType = (reify: Type<DigitalInputConfig>)
 
 export const ControlModes = {
   FORCE_OFF: {displayText: 'Force Off'},
@@ -123,10 +125,7 @@ export type ControlCondition = {
 export type ControlLogic = Array<ControlCondition>
 
 export const ControlLogicType = (reify: Type<ControlLogic>)
-ControlLogicType.addConstraint((logic: ControlLogic) => {
-  if (logic.length === 0) {
-    return 'cannot be empty'
-  }
+ControlLogicType.addConstraint((logic: any) => {
   for (let i = 1; i < logic.length; i++) {
     if (!logic[i].operation) {
       return 'all conditions except the first must have an operation'
@@ -134,22 +133,73 @@ ControlLogicType.addConstraint((logic: ControlLogic) => {
   }
 })
 
+export type NonEmptyControlLogic = ControlLogic
+export const NonEmptyControlLogicType = (reify: Type<NonEmptyControlLogic>)
+NonEmptyControlLogicType.addConstraint((logic: any) => {
+  if (!logic.length) {
+    return 'at least one condition must be provided'
+  }
+})
+
 export type DigitalOutputConfig = {
+  controlMode: ControlMode,
+  controlLogic?: ControlLogic,
+  reversePolarity: boolean,
+  safeState: 0 | 1,
+}
+export const DigitalOutputConfigType = (reify: Type<DigitalOutputConfig>)
+
+export type LocalControlDigitalOutputConfig = {
+  controlMode: 'LOCAL_CONTROL',
+  controlLogic: NonEmptyControlLogic,
+  reversePolarity: boolean,
+  safeState: 0 | 1,
+}
+export const LocalControlDigitalOutputConfigType = (reify: Type<LocalControlDigitalOutputConfig>)
+
+export type DisabledConfig = Object
+export const DisabledConfigType = (reify: Type<DisabledConfig>)
+
+export const ChannelConfigTypes: {[mode: ChannelMode]: Type<any>} = {
+  ANALOG_INPUT: AnalogInputConfigType,
+  DIGITAL_INPUT: DigitalInputConfigType,
+  DIGITAL_OUTPUT: DigitalOutputConfigType,
+  DISABLED: DisabledConfigType,
+}
+
+export type ChannelConfig = {|
+  mode: ChannelMode,
+  units?: string,
+  precision?: number,
+  calibration?: Calibration,
   controlMode?: ControlMode,
   controlLogic?: ControlLogic,
   reversePolarity?: boolean,
   safeState?: 0 | 1,
-}
-
-export type ChannelConfig = AnalogInputConfig & DigitalInputConfig & DigitalOutputConfig
+|}
 
 export const ChannelConfigType = (reify: Type<ChannelConfig>)
+
+export function validateChannelConfig(config: any): ?Validation {
+  let validation = validate(ChannelConfigType, config)
+  if (validation.hasErrors()) return validation
+  const {mode} = config
+  validation = validate(ChannelConfigTypes[mode], config)
+  if (validation.hasErrors()) return validation
+  if (mode === 'DIGITAL_OUTPUT') {
+    const {controlMode} = config
+    if (controlMode === 'LOCAL_CONTROL') {
+      validation = validate(LocalControlDigitalOutputConfigType, config)
+      if (validation.hasErrors()) return validation
+    }
+  }
+  return null
+}
 
 export type Channel = {
   id: number,
   name: string,
   channelId: string,
-  mode: ChannelMode,
   config: ChannelConfig,
   state?: ChannelState,
 }
