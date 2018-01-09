@@ -12,12 +12,12 @@ import ValueBlock from './ValueBlock'
 import type {Theme} from '../../theme'
 import type {DigitalOutputState} from '../../types/Channel'
 
-const LeftArrow = withTheme()(({theme: {channelState: {arrow, block}}, valueFromControl, ...props}: Object) => {
+const LeftArrow = withTheme()(({theme: {channelState: {arrow, block}}, controlValue, ...props}: Object) => {
   const {shaftLength, shaftWidth, headLength, headWidth, fill} = arrow
   const width = shaftLength * 2 + headLength
   const height = block.height * 2 + block.padding * 4 + block.spacing + /* border */ 4
   const cy = height / 2
-  const vertical = height / 2 + (valueFromControl ? -1 : 1) * (block.spacing + block.height + block.padding + 1) / 2
+  const vertical = height / 2 + (Number.isFinite(controlValue) ? -1 : 1) * (block.spacing + block.height + block.padding + 1) / 2
   const zigX = shaftLength + shaftWidth / 2
   return (
     <svg
@@ -152,7 +152,7 @@ const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
           value={safeState != null && Number.isFinite(safeState) ? safeState.toFixed(0) : null}
         />
       </div>
-      <LeftArrow className={classes.arrow} />
+      <LeftArrow className={classes.arrow} controlValue={controlValue} />
       <PolaritySection reversePolarity={reversePolarity} />
       <RightArrow className={classes.arrow} />
       <ValueBlock
