@@ -42,7 +42,8 @@ export default compose(
   graphql(mutationQuery),
   graphql(channelQuery, {
     options: ({channelId}: Props) => ({
-      variables: {id: channelId}
+      variables: {id: channelId},
+      errorPolicy: 'all',
     }),
     props: props => ({
       ...props,
