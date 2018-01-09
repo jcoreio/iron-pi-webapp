@@ -21,7 +21,7 @@ export type Props = {
 const AnalogInputConfigSection = withRouter(
   ({formControlClass, firstControlClass, lastControlClass, match}: Props) => (
     <React.Fragment>
-      <ControlWithInfo info="The units for the system value" className={firstControlClass}>
+      <ControlWithInfo info="???" className={firstControlClass}>
         <Field
           name="config.units"
           label="Units"
@@ -29,8 +29,6 @@ const AnalogInputConfigSection = withRouter(
           component={TextField}
           className={formControlClass}
         />
-      </ControlWithInfo>
-      <ControlWithInfo info="The number of digits to show after the decimal place" className={firstControlClass}>
         <Field
           name="config.precision"
           label="Precision"

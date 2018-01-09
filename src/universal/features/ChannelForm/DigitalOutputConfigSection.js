@@ -1,13 +1,9 @@
 // @flow
 
 import * as React from 'react'
-import classNames from 'classnames'
-import {compose} from 'redux'
-import {withStyles} from 'material-ui/styles'
 import Collapse from 'material-ui/transitions/Collapse'
 import {Field, FieldArray, formValues} from 'redux-form'
 
-import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {ControlModesArray, getControlModeDisplayText} from '../../types/Channel'
@@ -15,22 +11,12 @@ import ControlLogicTable from './ControlLogicTable'
 import {required} from '../../redux-form/validators'
 import type {ControlMode} from '../../types/Channel'
 
-const styles = ({spacing}: Theme) => ({
-  safeStateField: {
-    marginRight: spacing.unit,
-  },
-})
-
-type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
-type Classes = $Call<ExtractClasses, typeof styles>
-
 type Channel = {
   id: number,
   name: string,
 }
 
 export type Props = {
-  classes: Classes,
   formControlClass: string,
   firstControlClass: string,
   lastControlClass: string,
@@ -41,7 +27,7 @@ export type Props = {
 
 const DigitalOutputConfigSection = (
   ({
-    formControlClass, firstControlClass, lastControlClass, tallButtonClass, classes, channels,
+    formControlClass, firstControlClass, lastControlClass, tallButtonClass, channels,
     "config.controlMode": controlMode
   }: Props) => (
     <React.Fragment>
@@ -70,7 +56,7 @@ const DigitalOutputConfigSection = (
           name="config.safeState"
           label="Safe State"
           component={ButtonGroupField}
-          className={classNames(formControlClass, classes.safeStateField)}
+          className={formControlClass}
           buttonClassName={tallButtonClass}
           availableValues={[0, 1]}
           getDisplayText={value => value ? 'Output On' : 'Output Off'}
@@ -91,8 +77,5 @@ const DigitalOutputConfigSection = (
   )
 )
 
-export default compose(
-  withStyles(styles, {withTheme: true}),
-  formValues('config.controlMode')
-)(DigitalOutputConfigSection)
+export default formValues('config.controlMode')(DigitalOutputConfigSection)
 

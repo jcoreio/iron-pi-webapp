@@ -17,6 +17,9 @@ const styles = ({spacing, palette}: Theme) => ({
   control: {
     flex: '1 1 auto',
     display: 'flex',
+    '& > :not(:first-child)': {
+      marginLeft: spacing.unit,
+    },
   },
   infoIcon: {
     marginLeft: spacing.unit,
