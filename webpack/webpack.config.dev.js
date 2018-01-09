@@ -46,7 +46,13 @@ const config = {
       loaders: [
         {
           loader: 'babel-loader',
-          options: babelOptions,
+          options: {
+            ...babelOptions,
+            plugins: [
+              ...babelOptions.plugins,
+              'react-hot-loader/babel',
+            ]
+          }
         },
       ],
       threads: 4,
