@@ -50,6 +50,7 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
     },
     '& td': {
       borderBottom: 'none',
+      verticalAlign: 'top',
     },
   },
   fullWidth: {

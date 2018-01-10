@@ -151,6 +151,10 @@ export type Theme = {
     MuiInput?: {
       root?: Object,
     },
+    MuiSelect?: {
+      select?: Object,
+      selectMenu?: Object,
+    },
     MuiFormLabel?: {
       root?: Object,
     },
@@ -288,6 +292,17 @@ theme.overrides = {
     root: {
       fontSize: theme.typography.pxToRem(20),
       fontWeight: theme.typography.fontWeightRegular,
+    },
+  },
+  MuiSelect: {
+    // see https://github.com/mui-org/material-ui/issues/9826
+    select: {
+      padding: undefined,
+      paddingRight: theme.spacing.unit * 4,
+      height: undefined,
+    },
+    selectMenu: {
+      lineHeight: undefined,
     },
   },
   MuiFormLabel: {
