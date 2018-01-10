@@ -119,20 +119,16 @@ class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
+  pickFormFields = ({id, channelId, name, config}: FullChannel) => ({id, channelId, name, config})
+
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
-      const {id, channelId, name, config} = Channel
-      this.initializeTimeout = setTimeout(() => initialize({id, channelId, name, config}), 0)
+      this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
       if (subscribeToChannelState) {
         this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
     }
-  }
-
-  componentWillUnmount() {
-    if (this.initializeTimeout != null) clearTimeout(this.initializeTimeout)
-    if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -142,13 +138,23 @@ class ChannelForm extends React.Component<Props> {
     if (nextChannel !== prevChannel) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
       if (nextChannel) {
-        this.initializeTimeout = setTimeout(() => nextProps.initialize(nextChannel), 0)
+        this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
         const {subscribeToChannelState} = nextProps
         if (subscribeToChannelState) {
           this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
         }
       }
     }
+  }
+
+  componentWillUnmount() {
+    if (this.initializeTimeout != null) clearTimeout(this.initializeTimeout)
+    if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
+  }
+
+  handleCancel = () => {
+    const {data: {Channel}, initialize} = this.props
+    if (Channel) initialize(this.pickFormFields(Channel))
   }
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
@@ -223,7 +229,11 @@ class ChannelForm extends React.Component<Props> {
             channels={Channels}
           />
           <div className={classes.buttons}>
-            <Button raised className={classes.tallButton}>
+            <Button
+              raised
+              className={classes.tallButton}
+              onClick={this.handleCancel}
+            >
               Cancel
             </Button>
             <Button
