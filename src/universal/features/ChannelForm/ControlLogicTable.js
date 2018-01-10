@@ -24,6 +24,7 @@ import Table, {
 import type {Theme} from '../../theme'
 import type {Comparison, ControlCondition, LogicOperation} from '../../types/Channel'
 import {Comparisons, LogicOperations} from '../../types/Channel'
+import {required} from '../../redux-form/validators'
 
 const styles = ({spacing, palette}: Theme) => ({
   table: {
@@ -46,17 +47,24 @@ const styles = ({spacing, palette}: Theme) => ({
       paddingRight: 0,
       textAlign: 'right',
     },
+    '& td': {
+      borderBottom: 'none',
+    }
   },
-  topRightCell: {
+  header: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+  },
+  label: {
+    flexGrow: 1,
+    textAlign: 'left',
   },
   addIcon: {
     marginLeft: spacing.unit,
   },
   infoIcon: {
     marginLeft: spacing.unit,
+    color: palette.infoIcon,
   },
   deleteButton: {
     marginRight: -spacing.unit * 1.5,
@@ -111,13 +119,11 @@ class ControlLogicTable extends React.Component<Props> {
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
-              <TableCell colSpan={3}>
-                <FormLabel>
-                  Control Logic
-                </FormLabel>
-              </TableCell>
-              <TableCell colSpan={2}>
-                <div className={classes.topRightCell}>
+              <TableCell colSpan={5}>
+                <div className={classes.header}>
+                  <FormLabel className={classes.label}>
+                    Control Logic
+                  </FormLabel>
                   <Button onClick={this.handleAddConditionClick}>
                     Add Condition
                     <AddIcon className={classes.addIcon} />
@@ -148,6 +154,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.channelId`}
                     component={Select}
                     displayEmpty
+                    validate={required}
                   >
                     <MenuItem value="">Select Channel</MenuItem>
                     {map(channels, ({id, name}: Channel) => (
@@ -172,6 +179,7 @@ class ControlLogicTable extends React.Component<Props> {
                     placeholder="Threshold"
                     component={TextField}
                     className={classes.thresholdField}
+                    validate={required}
                   />
                 </TableCell>
                 <TableCell>

@@ -11,8 +11,8 @@ const styles = ({spacing, palette}: Theme) => ({
   root: {
     display: 'flex',
     alignItems: 'center',
-    marginTop: spacing.unit,
-    marginBottom: spacing.unit,
+    marginTop: spacing.unit * 1.5,
+    marginBottom: spacing.unit * 1.5,
   },
   control: {
     flex: '1 1 auto',
@@ -24,7 +24,7 @@ const styles = ({spacing, palette}: Theme) => ({
   infoIcon: {
     marginLeft: spacing.unit,
     flex: '0 0 auto',
-    color: palette.text.secondary,
+    color: palette.infoIcon,
   },
 })
 

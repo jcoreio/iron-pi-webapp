@@ -3,8 +3,8 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles, withTheme} from 'material-ui/styles'
-import Positive from 'material-ui-icons/AddCircleOutline'
-import Negative from 'material-ui-icons/RemoveCircleOutline'
+import Positive from 'material-ui-icons/AddCircle'
+import Negative from 'material-ui-icons/RemoveCircle'
 import Arrow from 'react-arrow'
 
 import ValueBlock from './ValueBlock'
@@ -54,7 +54,7 @@ const RightArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Obje
   />
 ))
 
-const polaritySectionStyles = ({palette}: Theme) => ({
+const polaritySectionStyles = ({palette, channelState: {polarityIcon}}: Theme) => ({
   root: {
     position: 'relative',
   },
@@ -69,10 +69,9 @@ const polaritySectionStyles = ({palette}: Theme) => ({
     color: palette.grey[600],
   },
   icon: {
-    color: palette.grey[600],
+    ...polarityIcon,
     display: 'block',
     margin: '0 auto',
-    fontSize: '2.5rem',
   }
 })
 
@@ -90,8 +89,8 @@ const PolaritySection = withStyles(polaritySectionStyles, {withTheme: true})(
         Polarity
       </h4>
       {reversePolarity
-        ? <Negative />
-        : <Positive />
+        ? <Negative className={classes.icon} />
+        : <Positive className={classes.icon} />
       }
     </div>
   )

@@ -63,6 +63,12 @@ async function bootstrap(): Promise<any> {
       mount(require('./Root').default)
     })
   }
+  // istanbul ignore next
+  if (module.hot instanceof Object) {
+    module.hot.accept('../universal/theme', () => {
+      window.theme = require('../universal/theme').default
+    })
+  }
 
   try {
     await store.dispatch(loadInitialFeatures())

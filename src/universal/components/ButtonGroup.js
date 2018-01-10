@@ -10,7 +10,7 @@ const styles = (theme: Theme) => ({
     flexWrap: 'wrap',
     '& > button': {
       flex: '1 1 30px',
-      whiteSpace: 'wrap',
+      whiteSpace: 'pre-wrap',
       margin: 0,
       '&:not(:last-child)': {
         borderTopRightRadius: 0,

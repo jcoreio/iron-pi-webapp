@@ -22,6 +22,7 @@ import DigitalOutputConfigSection from './DigitalOutputConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
 import handleError from '../../redux-form/createSubmissionError'
 import {required} from '../../redux-form/validators'
+import parseChannelFormValues from './parseChannelFormValues'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -101,6 +102,7 @@ const ConfigSection = formValues('config')(
 export type Props = {
   classes: Classes,
   initialize: (values: FullChannel) => any,
+  initialized?: boolean,
   submitting?: boolean,
   pristine?: boolean,
   data: {
@@ -115,12 +117,13 @@ export type Props = {
 
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
+  initializeTimeout: ?number
 
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
       const {id, channelId, name, config} = Channel
-      initialize({id, channelId, name, config})
+      this.initializeTimeout = setTimeout(() => initialize({id, channelId, name, config}), 0)
       if (subscribeToChannelState) {
         this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
@@ -128,6 +131,7 @@ class ChannelForm extends React.Component<Props> {
   }
 
   componentWillUnmount() {
+    if (this.initializeTimeout != null) clearTimeout(this.initializeTimeout)
     if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
   }
 
@@ -138,7 +142,7 @@ class ChannelForm extends React.Component<Props> {
     if (nextChannel !== prevChannel) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
       if (nextChannel) {
-        nextProps.initialize(nextChannel)
+        this.initializeTimeout = setTimeout(() => nextProps.initialize(nextChannel), 0)
         const {subscribeToChannelState} = nextProps
         if (subscribeToChannelState) {
           this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
@@ -149,13 +153,13 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate} = this.props
-    const {id, channelId, name, config} = channel
+    const {id, channelId, name, config} = parseChannelFormValues(channel)
     return mutate({variables: {channel: {id, channelId, name, config}}}).catch(handleError)
   }
 
   render(): React.Node {
-    const {classes, data: {Channels, Channel, loading}, pristine, submitting, handleSubmit} = this.props
-    if (loading) {
+    const {classes, data: {Channels, Channel, loading}, initialized, pristine, submitting, handleSubmit} = this.props
+    if (loading || !initialized) {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
