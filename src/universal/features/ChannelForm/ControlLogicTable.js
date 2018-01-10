@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {map} from 'lodash'
 import {Field} from 'redux-form'
 import {Select, TextField} from 'redux-form-material-ui'
@@ -26,7 +27,7 @@ import type {Comparison, ControlCondition, LogicOperation} from '../../types/Cha
 import {Comparisons, LogicOperations} from '../../types/Channel'
 import {required} from '../../redux-form/validators'
 
-const styles = ({spacing, palette}: Theme) => ({
+const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   table: {
     marginTop: spacing.unit * 2,
     borderCollapse: 'separate',
@@ -58,6 +59,14 @@ const styles = ({spacing, palette}: Theme) => ({
   label: {
     flexGrow: 1,
     textAlign: 'left',
+    fontSize: pxToRem(18),
+  },
+  labelValid: {
+    color: palette.input.inputText,
+  },
+  addConditionButton: {
+    fontSize: pxToRem(16),
+    color: palette.text.secondary,
   },
   addIcon: {
     marginLeft: spacing.unit,
@@ -114,17 +123,18 @@ class ControlLogicTable extends React.Component<Props> {
   render(): React.Node {
     const {fields, classes, channels, meta, formControlClass} = this.props
     const {warning, error, submitFailed} = meta || {}
+    const hasError = submitFailed && (error != null || warning != null)
     return (
-      <FormControl error={submitFailed && (error != null || warning != null)} className={formControlClass}>
+      <FormControl error={hasError} className={formControlClass}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
               <TableCell colSpan={5}>
                 <div className={classes.header}>
-                  <FormLabel className={classes.label}>
+                  <FormLabel className={classNames(classes.label, {[classes.labelValid]: !hasError})}>
                     Control Logic
                   </FormLabel>
-                  <Button onClick={this.handleAddConditionClick}>
+                  <Button onClick={this.handleAddConditionClick} className={classes.addConditionButton}>
                     Add Condition
                     <AddIcon className={classes.addIcon} />
                   </Button>

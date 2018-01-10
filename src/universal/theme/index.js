@@ -56,6 +56,13 @@ export type Theme = {
       primary: string,
       secondary: string,
     },
+    input: {
+      inputText: string,
+      labelText: string,
+      helperText: string,
+      disabled: string,
+      bottomLine: string,
+    },
     grey: Palette,
     primary: Palette,
     secondary: Palette,
@@ -200,6 +207,7 @@ const theme: Theme = createMuiTheme({
     },
     text: {
       primary: 'rgba(0, 0, 0, 0.5)',
+      secondary: 'rgba(0, 0, 0, 0.41)',
     },
     input: {
       inputText: 'rgba(0, 0, 0, 0.61)',
