@@ -67,8 +67,10 @@ export type Calibration = {
 }
 
 export type AnalogInputConfig = {
-  units: string,
+  units?: string,
   precision: number,
+  min: number,
+  max: number,
   calibration?: Calibration,
 }
 export const AnalogInputConfigType = (reify: Type<AnalogInputConfig>)
@@ -137,7 +139,7 @@ export type NonEmptyControlLogic = ControlLogic
 export const NonEmptyControlLogicType = (reify: Type<NonEmptyControlLogic>)
 NonEmptyControlLogicType.addConstraint((logic: any) => {
   if (!logic.length) {
-    return 'at least one condition must be provided'
+    return 'must have at least one condition'
   }
 })
 
@@ -171,6 +173,8 @@ export type ChannelConfig = {|
   mode: ChannelMode,
   units?: string,
   precision?: number,
+  min?: number,
+  max?: number,
   calibration?: Calibration,
   controlMode?: ControlMode,
   controlLogic?: ControlLogic,
@@ -182,18 +186,16 @@ export const ChannelConfigType = (reify: Type<ChannelConfig>)
 
 export function validateChannelConfig(config: any): ?Validation {
   let validation = validate(ChannelConfigType, config)
-  if (validation.hasErrors()) return validation
   const {mode} = config
-  validation = validate(ChannelConfigTypes[mode], config)
+  validation.errors.push(...validate(ChannelConfigTypes[mode], config).errors)
   if (validation.hasErrors()) return validation
   if (mode === 'DIGITAL_OUTPUT') {
     const {controlMode} = config
     if (controlMode === 'LOCAL_CONTROL') {
-      validation = validate(LocalControlDigitalOutputConfigType, config)
-      if (validation.hasErrors()) return validation
+      validation.errors.push(...validate(LocalControlDigitalOutputConfigType, config).errors)
     }
   }
-  return null
+  return validation.hasErrors() ? validation : null
 }
 
 export type Channel = {
