@@ -50,7 +50,10 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
     },
     '& td': {
       borderBottom: 'none',
-    }
+    },
+  },
+  fullWidth: {
+    width: '100%',
   },
   header: {
     display: 'flex',
@@ -165,6 +168,7 @@ class ControlLogicTable extends React.Component<Props> {
                     component={Select}
                     displayEmpty
                     validate={required}
+                    className={classes.fullWidth}
                   >
                     <MenuItem value="">Select Channel</MenuItem>
                     {map(channels, ({id, name}: Channel) => (
@@ -176,6 +180,7 @@ class ControlLogicTable extends React.Component<Props> {
                   <Field
                     name={`${condition}.comparison`}
                     component={Select}
+                    className={classes.fullWidth}
                   >
                     {map(Comparisons, ({displayText}: {displayText: string}, value: Comparison) => (
                       <MenuItem key={value} value={value}>{displayText}</MenuItem>
