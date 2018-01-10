@@ -91,6 +91,9 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   hidden: {
     visibility: 'hidden',
   },
+  selectChannelItem: {
+    color: palette.text.hint,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -171,7 +174,9 @@ class ControlLogicTable extends React.Component<Props> {
                     validate={required}
                     className={classes.fullWidth}
                   >
-                    <MenuItem value="">Select Channel</MenuItem>
+                    <MenuItem value="">
+                      <span className={classes.selectChannelItem}>Select Channel</span>
+                    </MenuItem>
                     {map(channels, ({id, name}: Channel) => (
                       <MenuItem key={id} value={id}>{name}</MenuItem>
                     ))}
