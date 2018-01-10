@@ -35,8 +35,11 @@ export function updateChannelState(channel: Channel) {
     break
   }
   case 'DIGITAL_OUTPUT': {
-    const {safeState, reversePolarity}: DigitalOutputConfig = (config: any)
-    setChannelStates({id, mode, safeState, reversePolarity})
+    const {safeState, reversePolarity, controlMode}: DigitalOutputConfig = (config: any)
+    const state = {id, mode, safeState, reversePolarity}
+    if (controlMode === 'FORCE_OFF') (state: any).controlValue = 0
+    else if (controlMode === 'FORCE_ON') (state: any).controlValue = 1
+    setChannelStates(state)
     break
   }
   case 'DISABLED':
