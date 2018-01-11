@@ -5,13 +5,13 @@ import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import {Field} from 'redux-form'
 import {TextField} from 'redux-form-material-ui'
-import ErrorIcon from 'material-ui-icons/Error'
-import Snackbar from 'material-ui/Snackbar'
+import ErrorAlert from '../ErrorAlert'
+import Autocollapse from '../Autocollapse'
 
 import Spinner from '../Spinner'
 import type {Theme} from '../../theme'
 
-const styles = (theme: Theme) => ({
+const styles = ({palette, spacing}: Theme) => ({
   root: {
   },
   footer: {
@@ -21,8 +21,15 @@ const styles = (theme: Theme) => ({
     }
   },
   error: {
-    maxWidth: 180,
-  }
+    color: palette.error.A400,
+    display: 'flex',
+  },
+  errorIcon: {
+    marginRight: spacing.unit,
+  },
+  errorMessage: {
+    flexGrow: 1,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -43,10 +50,9 @@ class LoginForm extends React.Component<Props> {
     const {classes, onSubmit, submitting, valid, error} = this.props
     return (
       <form id="loginForm" className={classes.root} onSubmit={onSubmit}>
-        <Snackbar
-          open={error != null}
-          message={<span><ErrorIcon /> {error}</span>}
-        />
+        <Autocollapse>
+          {error ? <ErrorAlert data-test-name="submitError">{error}</ErrorAlert> : null}
+        </Autocollapse>
         <Field
           data-test-name="password"
           name="password"

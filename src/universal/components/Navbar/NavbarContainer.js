@@ -13,6 +13,7 @@ import Navbar from './Navbar'
 import type {Dispatch, State} from '../../redux/types'
 import {setSidebarOpen} from '../../redux/sidebar'
 import type {Theme} from '../../theme/index'
+import {logout} from '../../auth/actions'
 
 type PropsFromTheme = {
   theme: Theme,
@@ -49,7 +50,10 @@ class NavbarContainer extends React.Component<Props> {
   }
 
   handleLogOutClick = () => {
-    if (__CLIENT__) require('../../../client/auth/logout').default()
+    if (__CLIENT__) {
+      const {dispatch} = this.props
+      dispatch(logout())
+    }
   }
 
   render(): ?React.Node {

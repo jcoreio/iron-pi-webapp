@@ -6,6 +6,9 @@ import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../../theme'
 
 const styles = (theme: Theme) => ({
+  content: {
+    maxWidth: 220,
+  }
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -20,7 +23,7 @@ const LoginDialog = withStyles(styles, {withTheme: true})(
   ({classes, children, ...props}: Props) => (
     <Dialog id="loginDialog" aria-labelledby="loginDialogTitle" {...props}>
       <DialogTitle id="loginDialogTitle">Log In</DialogTitle>
-      <DialogContent>
+      <DialogContent className={classes.content}>
         {children}
       </DialogContent>
     </Dialog>

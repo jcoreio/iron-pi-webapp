@@ -16,7 +16,7 @@ export default function handleGraphiql({endpointURL}: Options): (req: $Request, 
       res.status(403).send("Error: failed to get root user")
       return
     }
-    const token = await createToken({userId: user.id})
+    const token = await createToken({userId: user.id, expiresIn: '2d'})
     graphiqlExpress({
       endpointURL,
       passHeader: `'Authorization': 'Bearer ${token}'`,

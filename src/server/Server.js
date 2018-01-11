@@ -23,10 +23,14 @@ import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
 import login from './express/login'
-import addAuthHeader from './express/addAuthHeader'
+import parseAuthHeader from './express/parseAuthHeader'
 import handleGraphql from './express/graphql'
 import handleGraphiql from './express/graphiql'
 import Channel, {updateChannelState} from './models/Channel'
+import authorize from './auth/authorize'
+import createToken from './auth/createToken'
+import verifyToken from './auth/verifyToken'
+import requireAuthHeader from './express/requireAuthHeader'
 
 const log = logger('Server')
 
@@ -44,6 +48,9 @@ export default class Server {
     getChannelStates,
     setChannelStates,
     setChannelValues,
+    authorize,
+    createToken,
+    verifyToken,
   }
   _port: number
   dbConnectionParams: DbConnectionParams
@@ -92,9 +99,29 @@ export default class Server {
       })
 
       app.post('/login', bodyParser.json(), login)
+      app.use('/verifyToken', requireAuthHeader, parseAuthHeader, (req: $Request, res: $Response) => {
+        res.status(req.userId ? 200 : 500).send()
+      })
+      app.use('/verifyToken', (error: ?Error, req: $Request, res: $Response, next: Function) => {
+        if (error) {
+          res.status((error: any).statusCode || 500).send(error.message + '\n')
+          return
+        }
+        res.status(req.userId ? 200 : (error: any).statusCode || 500).send()
+      })
+      if (process.env.BABEL_ENV === 'test') {
+        app.post('/createTestToken', bodyParser.json(), require('./express/createTestToken'))
+      }
 
       const GRAPHQL_PATH = '/graphql'
-      app.use(GRAPHQL_PATH, addAuthHeader, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
+      app.use(GRAPHQL_PATH, parseAuthHeader, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
+      app.use(GRAPHQL_PATH, (error: ?Error, req: $Request, res: $Response, next: Function) => {
+        if (error) {
+          res.status((error: any).statusCode || 500).send({error: error.message})
+          return
+        }
+        next(error)
+      })
 
       if (process.env.NODE_ENV !== 'production') {
         app.use('/graphiql', handleGraphiql({endpointURL: GRAPHQL_PATH}))

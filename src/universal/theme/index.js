@@ -66,6 +66,7 @@ export type Theme = {
     grey: Palette,
     primary: Palette,
     secondary: Palette,
+    error: Palette,
     infoIcon: string,
   },
   shadows: Array<string>,

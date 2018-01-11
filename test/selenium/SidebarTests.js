@@ -70,6 +70,7 @@ module.exports = () => describe('Sidebar', function () {
         height: 800,
       })
       await navigateTo('/')
+      await loginIfNecessary()
       expect(await browser.getLocation('body #body', 'x')).to.equal(theme.sidebar.width)
 
       await browser.click('body #closeSidebarButton')

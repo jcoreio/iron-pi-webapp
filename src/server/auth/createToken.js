@@ -9,9 +9,10 @@ const ROOT_URL = requireEnv('ROOT_URL')
 
 type Request = {
   userId: number,
+  expiresIn: string,
 }
 
-export default async function createToken({userId}: Request): Promise<string> {
+export default async function createToken({userId, expiresIn}: Request): Promise<string> {
   return await promisify(cb => jwt.sign(
     {
       userId,
@@ -19,7 +20,7 @@ export default async function createToken({userId}: Request): Promise<string> {
     JWT_SECRET,
     {
       algorithm: 'HS256',
-      expiresIn: '10h',
+      expiresIn,
       issuer: ROOT_URL,
     },
     cb

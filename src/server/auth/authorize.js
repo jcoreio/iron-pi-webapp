@@ -20,6 +20,6 @@ export default async function authorize({username, password}: Request): Promise<
   if (!matches) {
     throw new Error('Invalid username or password')
   }
-  return await createToken({userId: user.id})
+  return await createToken({userId: user.id, expiresIn: '1d'})
 }
 

@@ -53,7 +53,7 @@ class Navbar extends React.Component<Props, State> {
     })
   }
   render(): ?React.Node {
-    const {classes, onToggleSidebar, loggedIn, onLogOutClick} = this.props
+    const {classes, onToggleSidebar, loggedIn} = this.props
     const {userMenuAnchorEl} = this.state
     return (
       <div id="navbar" className={classes.root}>
