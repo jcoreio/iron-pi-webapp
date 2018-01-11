@@ -63,7 +63,7 @@ class Navbar extends React.Component<Props, State> {
     const {userMenuAnchorEl} = this.state
     return (
       <div id="navbar" className={classes.root}>
-        <AppBar position="static" color="default">
+        <AppBar position="fixed" color="default">
           <Toolbar className={classes.toolbar}>
             <IconButton
               id="toggleSidebarButton"
