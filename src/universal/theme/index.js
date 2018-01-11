@@ -89,6 +89,15 @@ export type Theme = {
     autoOpenBreakpoint: () => number,
     isAutoOpen: (viewportWidth: number) => boolean,
   },
+  navbar: {
+    title: {
+      color: string,
+      fontSize: string,
+      fontWeight: number,
+      textAlign: string,
+      lineHeight: string,
+    },
+  },
   jcoreLogo: {
     color: string,
     fontFamily: string,
@@ -290,6 +299,15 @@ theme.sidebar = {
   foregroundColor: '#d3d3d3',
   autoOpenBreakpoint: (): number => theme.breakpoints.values.md,
   isAutoOpen: (viewportWidth: number): boolean => viewportWidth >= theme.sidebar.autoOpenBreakpoint(),
+}
+theme.navbar = {
+  title: {
+    color: '#596269',
+    textAlign: 'center',
+    fontSize: theme.typography.pxToRem(26),
+    fontWeight: 500,
+    lineHeight: theme.typography.pxToRem(32),
+  },
 }
 theme.channelState = {
   on: '#5dba54',

@@ -1,17 +1,30 @@
 // @flow
 
 import * as React from 'react'
-import Typography from 'material-ui/Typography'
+import classNames from 'classnames'
+import {withStyles} from 'material-ui/styles'
+import type {Theme} from '../../theme'
+
+const styles = ({navbar}: Theme) => ({
+  root: {
+    ...navbar.title,
+  },
+})
+
+type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
+type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {
+  classes: Classes,
+  className?: string,
   children: React.Node,
 }
 
-const Title = ({children, ...props}: Props) => (
-  <Typography type="title" color="inherit" {...props}>
+const Title = ({classes, className, children, ...props}: Props) => (
+  <div className={classNames(classes.root, className)} {...props}>
     {children}
-  </Typography>
+  </div>
 )
 
-export default Title
+export default withStyles(styles, {withTheme: true})(Title)
 

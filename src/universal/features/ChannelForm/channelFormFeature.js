@@ -5,6 +5,7 @@ import {Route} from 'react-router-dom'
 import featureLoader from '../../components/featureLoader'
 import {channelForm} from '../../react-router/routePaths'
 import Title from '../../components/Navbar/Title'
+import ChevronRight from '../../components/Navbar/ChevronRight'
 
 const ChannelFormContainer = featureLoader({
   featureId: 'channelForm',
@@ -18,7 +19,7 @@ const channelFormFeature = {
       key={channelForm((':id': any))}
       path={channelForm((':id': any))}
       exact
-      render={() => <Title>Edit Channel</Title>}
+      render={({match: {params: {id}}}) => <Title>Local I/O <ChevronRight /> Channel {id}</Title>}
     />,
   ],
   bodyRoutes: [
