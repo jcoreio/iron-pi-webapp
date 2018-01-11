@@ -14,6 +14,8 @@ const styles = (theme: Theme) => ({
     borderRadius: theme.spacing.unit / 2,
   },
   rootDisabled: {
+  },
+  rootMissing: {
     borderStyle: 'solid',
     borderWidth: 1,
     borderColor: theme.channelState.off,
@@ -56,20 +58,22 @@ function getDigitalValue(state: ?ChannelState): 0 | 1 | null {
   return null
 }
 
-const ChannelStateIcon = withStyles(styles, {withTheme: true})(
-  ({channel: {state}, classes}: Props) => (
+const ChannelStateIcon = ({channel: {state}, classes}: Props) => {
+  const isDigital = state != null && (state.mode === 'DIGITAL_INPUT' || state.mode === 'DIGITAL_OUTPUT')
+  return (
     <div
       className={classNames(classes.root, {
         [classes.rootDisabled]: state == null || state.mode === 'DISABLED',
         [classes.rootAnalogInput]: state != null && state.mode === 'ANALOG_INPUT',
         [classes.rootOutput]: state != null && state.mode === 'DIGITAL_OUTPUT',
+        [classes.rootMissing]: (isDigital && getDigitalValue(state) == null),
         [classes.rootOn]: getDigitalValue(state) === 1,
         [classes.rootOff]: getDigitalValue(state) === 0,
       })}
     >
     </div>
   )
-)
+}
 
-export default ChannelStateIcon
+export default withStyles(styles, {withTheme: true})(ChannelStateIcon)
 

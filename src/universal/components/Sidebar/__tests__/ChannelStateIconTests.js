@@ -4,6 +4,7 @@
 /* eslint-env browser */
 
 import * as React from 'react'
+import {JssProvider} from 'react-jss'
 import {findDOMNode} from 'react-dom'
 import {describe, it} from 'mocha'
 import {expect} from 'chai'
@@ -22,12 +23,14 @@ type Wrapper = $Call<ExtractWrapper, typeof mount>
 function setup(channel: Channel): {node: HTMLElement, comp: Wrapper} {
   let icon: ?React.ElementRef<'div'>
   const comp = mount(
-    <MuiThemeProvider theme={theme}>
-      <ChannelStateIcon
-        ref={c => icon = c}
-        channel={channel}
-      />
-    </MuiThemeProvider>
+    <JssProvider>
+      <MuiThemeProvider theme={theme}>
+        <ChannelStateIcon
+          ref={c => icon = c}
+          channel={channel}
+        />
+      </MuiThemeProvider>
+    </JssProvider>
   )
 
   const node = findDOMNode(icon)
@@ -39,7 +42,7 @@ function setup(channel: Channel): {node: HTMLElement, comp: Wrapper} {
 
 describe('ChannelStateIcon', () => {
   describe('for DISABLED channel', () => {
-    it('renders hollow border', () => {
+    it('renders nothing', () => {
       const {node} = setup({
         state: {
           id: 0,
@@ -47,7 +50,7 @@ describe('ChannelStateIcon', () => {
         },
       })
       const computedStyle = getComputedStyle(node)
-      expect(color(computedStyle.borderColor).toHexString()).to.equal(theme.channelState.off)
+      expect(computedStyle.borderColor).to.equal('')
       expect(computedStyle.backgroundColor).to.equal('')
     })
   })
@@ -64,6 +67,20 @@ describe('ChannelStateIcon', () => {
       })
       const computedStyle = getComputedStyle(node)
       expect(computedStyle.borderRadius).to.equal(`${theme.spacing.unit / 2}px`)
+    })
+    it('renders missing correctly', () => {
+      const {node} = setup({
+        state: {
+          id: 0,
+          mode: 'DIGITAL_INPUT',
+          reversePolarity: false,
+          rawInput: null,
+          systemValue: null,
+        },
+      })
+      const computedStyle = getComputedStyle(node)
+      expect(color(computedStyle.borderColor).toHexString()).to.equal(theme.channelState.off)
+      expect(computedStyle.backgroundColor).to.equal('')
     })
     it('renders off color correctly', () => {
       const {node} = setup({
