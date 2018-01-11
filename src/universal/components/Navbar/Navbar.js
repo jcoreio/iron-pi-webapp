@@ -1,15 +1,19 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {Route} from 'react-router-dom'
+import Switch from 'react-router-transition-switch'
+import Fader from '../Fader'
 
+import {withStyles} from 'material-ui/styles'
 import AppBar from 'material-ui/AppBar'
 import Toolbar from 'material-ui/Toolbar'
-import Typography from 'material-ui/Typography'
 import IconButton from 'material-ui/IconButton'
 import MenuIcon from 'material-ui-icons/Menu'
 import AccountCircle from 'material-ui-icons/AccountCircle'
 import Menu, { MenuItem } from 'material-ui/Menu'
+import featureContent from '../featureContent'
+import Title from './Title'
 
 const styles = {
   root: {
@@ -35,6 +39,8 @@ export type Props = {
 export type State = {
   userMenuAnchorEl: ?HTMLElement,
 }
+
+const NavbarRoutes = featureContent({getContent: feature => (feature: any).navbarRoutes})
 
 class Navbar extends React.Component<Props, State> {
   state: State = {
@@ -67,9 +73,18 @@ class Navbar extends React.Component<Props, State> {
             >
               <MenuIcon />
             </IconButton>
-            <Typography type="title" color="inherit" className={classes.title}>
-              Title
-            </Typography>
+            <div className={classes.title}>
+              <NavbarRoutes>
+                {routes => (
+                  <Switch component={Fader}>
+                    <Route path="/" exact render={() => <Title>Home</Title>} />
+                    <Route path="/about" exact render={() => <Title>About</Title>} />
+                    {routes}
+                    <Route path="*" render={() => <Title>Not Found</Title>} />
+                  </Switch>
+                )}
+              </NavbarRoutes>
+            </div>
             {loggedIn &&
               <IconButton
                 id="openUserMenuButton"

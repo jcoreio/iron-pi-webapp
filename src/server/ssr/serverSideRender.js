@@ -30,9 +30,11 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
       assets.manifest.text = fs.readFileSync(path.join(rootDir, assets.manifest.js), 'utf-8')
     }
 
+    const featurePromises = []
+
     // first create a context for <ServerRouter>, it's where we keep the
     // results of rendering for the second pass if necessary
-    const store: Store = makeStore(StateRecord())
+    const store: Store = makeStore(StateRecord(), {featurePromises})
     addFeatures(store)
 
     const headers: Object = {}

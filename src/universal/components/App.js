@@ -16,8 +16,7 @@ import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, RenderMode, State} from '../redux/types'
 import type {Theme} from '../theme'
 import LoginDialogContainer from './Login/LoginDialogContainer'
-import ChannelFormContainer from '../features/ChannelForm/ChannelFormContainer'
-import {channelForm} from '../react-router/routePaths'
+import featureContent from './featureContent'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -99,6 +98,8 @@ type PropsFromDispatch = {
 
 type Props = PropsFromJss & PropsFromState & PropsFromDispatch
 
+const BodyRoutes = featureContent({getContent: feature => (feature: any).bodyRoutes})
+
 class App extends React.Component<Props> {
   render(): ?React.Node {
     const {classes, sidebarOpen, renderMode} = this.props
@@ -114,16 +115,16 @@ class App extends React.Component<Props> {
           <NavbarContainer />
           {renderMode === 'client' && <LoginDialogContainer />}
           <div className={classes.body} id="body">
-            <Switch render={({children}) => <Fader>{children}</Fader>}>
-              <Route path="/" exact component={Home} />
-              <Route path="/about" exact component={About} />
-              <Route
-                path={channelForm((':id': any))}
-                exact
-                render={({match: {params: {id}}}) => <ChannelFormContainer channelId={parseInt(id)} />}
-              />
-              <Route path="*" component={NotFound} />
-            </Switch>
+            <BodyRoutes>
+              {routes => (
+                <Switch component={Fader}>
+                  <Route path="/" exact component={Home} />
+                  <Route path="/about" exact component={About} />
+                  {routes}
+                  <Route path="*" component={NotFound} />
+                </Switch>
+              )}
+            </BodyRoutes>
           </div>
         </div>
       </div>

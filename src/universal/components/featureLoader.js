@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 import {featureLoader as _featureLoader} from 'react-redux-features'
-import {Alert} from '@jcoreio/rubix'
 import type {Feature, FeatureState} from 'redux-features'
 import Spinner from './Spinner'
+import ErrorAlert from './ErrorAlert'
 
 type Options = {
   featureId: string,
@@ -30,15 +30,15 @@ export default function featureLoader<P: Object>(options: Options): React.Compon
 
     if (featureState instanceof Error) {
       return (
-        <Alert danger style={{margin: 15}}>
+        <ErrorAlert style={{margin: '15px auto', textAlign: 'center'}}>
           Failed to load {featureName}: {featureState.message}
-        </Alert>
+        </ErrorAlert>
       )
     } else if (!Comp) {
       return (
-        <Alert info style={{margin: 15}}>
+        <div style={{margin: '15px auto', textAlign: 'center'}}>
           <Spinner /> Loading {featureName}...
-        </Alert>
+        </div>
       )
     }
     return <Comp {...props} />

@@ -9,7 +9,8 @@ module.exports = {
   "plugins": [
     "transform-class-properties",
     "transform-object-rest-spread",
-    "transform-async-generator-functions"
+    "transform-async-generator-functions",
+    "syntax-dynamic-import"
   ],
   "env": {
     "test": {

@@ -5,7 +5,7 @@ import { render, hydrate } from 'react-dom'
 import * as React from 'react'
 import { AppContainer } from 'react-hot-loader'
 import promisify from 'es6-promisify'
-import {loadInitialFeatures} from 'redux-features'
+import {loadInitialFeatures, loadFeature} from 'redux-features'
 
 import makeStore from './redux/makeStore'
 import {parseState} from '../universal/redux/types'
@@ -91,6 +91,11 @@ async function bootstrap(): Promise<any> {
   }
 
   await mount(Root)
+
+  const {featureStates} = store.getState()
+  for (let featureId in featureStates) {
+    if (featureStates[featureId] === 'LOADING') store.dispatch(loadFeature(featureId))
+  }
 
   // We don't need the static css any more once we have launched our application.
   const ssStyles = document.getElementById('server-side-styles')
