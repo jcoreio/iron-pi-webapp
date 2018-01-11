@@ -33,7 +33,7 @@ module.exports = () => {
       )
     })
   })
-  describe('LoginForm', function () {
+  describe('LoginDialog', function () {
     beforeEach(async () => {
       await navigateTo('/')
       browser.timeouts('implicit', 1000)
@@ -42,7 +42,7 @@ module.exports = () => {
     it('displays correct initial text', async function () {
       this.timeout(15000)
       await logoutIfNecessary()
-      expect(await browser.getText('body #loginDialogTitle')).to.equal('Log In')
+      expect(await browser.getText('body #loginDialogTitle')).to.equal('jcore.io\nIRON PI')
       expect(await browser.getText('#loginForm [data-test-name="password"] > label')).to.equal('Password')
       expect(await browser.getText('#loginForm button[type="submit"]')).to.equal('Log In')
     })

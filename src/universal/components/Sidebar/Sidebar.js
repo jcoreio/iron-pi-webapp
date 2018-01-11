@@ -15,7 +15,7 @@ import LocalIOSection from './LocalIOSection'
 import type {Channel} from './ChannelStateItem'
 import type {Theme} from '../../theme'
 
-const styles = ({palette: {background, secondary}, sidebar, zIndex}: Theme) => ({
+const styles = ({palette: {background, secondary}, sidebar, jcoreLogo, ironPiLogo, zIndex}: Theme) => ({
   sidebar: {
     position: 'absolute',
     top: 0,
@@ -44,9 +44,11 @@ const styles = ({palette: {background, secondary}, sidebar, zIndex}: Theme) => (
     },
   },
   sidebarHeader: {
-    borderBottomWidth: 3,
-    borderBottomStyle: 'solid',
-    borderBottomColor: secondary[500],
+    borderBottom: {
+      style: 'solid',
+      width: 3,
+      color: secondary[500],
+    },
     padding: `${sidebar.padding.vertical}px ${sidebar.padding.horizontal}px`,
     fontFamily: 'Rubik',
     fontWeight: 300,
@@ -58,10 +60,7 @@ const styles = ({palette: {background, secondary}, sidebar, zIndex}: Theme) => (
     marginRight: -sidebar.padding.horizontal,
   },
   jcoreHeader: {
-    color: secondary[500],
-    fontSize: 32,
-    lineHeight: '38px',
-    fontWeight: 300,
+    ...jcoreLogo,
     margin: 0,
     '& a': {
       '&, &:hover, &:active, &:visited, &:focus': {
@@ -71,9 +70,7 @@ const styles = ({palette: {background, secondary}, sidebar, zIndex}: Theme) => (
     },
   },
   ironPiHeader: {
-    fontSize: 22,
-    lineHeight: '27px',
-    fontWeight: 300,
+    ...ironPiLogo,
     margin: 0,
   },
 })
@@ -121,7 +118,7 @@ class Sidebar extends React.Component<Props> {
               <ChevronLeftIcon />
             </IconButton>
           </h1>
-          <h2 className={classes.ironPiHeader}>IRON PI</h2>
+          <h2 className={classes.ironPiHeader}>iron pi</h2>
         </div>
         <List className={classes.sidebarBody}>
           <SidebarSectionHeader title="Status" />

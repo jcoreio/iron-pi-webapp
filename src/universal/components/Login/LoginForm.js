@@ -30,6 +30,12 @@ const styles = ({palette, spacing}: Theme) => ({
   errorMessage: {
     flexGrow: 1,
   },
+  passwordField: {
+    width: '100%',
+  },
+  loginButton: {
+    padding: `${spacing.unit}px ${spacing.unit * 5}px`,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -37,6 +43,7 @@ type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {
   classes: Classes,
+  passwordFieldClass?: string,
   onSubmit: (event: Event) => any,
   submitting?: boolean,
   valid?: boolean,
@@ -59,6 +66,7 @@ class LoginForm extends React.Component<Props> {
           type="password"
           label="Password"
           component={TextField}
+          className={classes.passwordField}
           margin="normal"
           validate={required}
         />
@@ -68,6 +76,7 @@ class LoginForm extends React.Component<Props> {
             type="submit"
             raised
             color="primary"
+            className={classes.loginButton}
             disabled={!valid || submitting}
           >
             Log In

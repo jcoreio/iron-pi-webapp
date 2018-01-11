@@ -43,6 +43,10 @@ export type Theme = {
       default: string,
       paper: string,
       sidebar: string,
+      loginDialog: {
+        header: string,
+      },
+      opaqueBackdrop: string,
       valueBlock: {
         ok: string,
       },
@@ -84,6 +88,21 @@ export type Theme = {
     foregroundColor: string,
     autoOpenBreakpoint: () => number,
     isAutoOpen: (viewportWidth: number) => boolean,
+  },
+  jcoreLogo: {
+    color: string,
+    fontFamily: string,
+    fontSize: string,
+    lineHeight: string,
+    fontWeight: number,
+  },
+  ironPiLogo: {
+    color: string,
+    fontFamily: string,
+    fontSize: string,
+    lineHeight: string,
+    fontWeight: number,
+    textTransform?: string,
   },
   spacing: {
     unit: number,
@@ -165,13 +184,19 @@ export type Theme = {
   },
 }
 
+const darkBackground = '#333e47'
+
 const theme: Theme = createMuiTheme({
   spacing: {unit: 8},
   palette: {
     background: {
       appBar: '#fff',
       contentFrame: '#eef1f1',
-      sidebar: '#333e47',
+      sidebar: darkBackground,
+      loginDialog: {
+        header: darkBackground,
+      },
+      opaqueBackdrop: '#eef1f1',
       valueBlock: {
         ok: '#f1fcea',
       },
@@ -236,6 +261,21 @@ const theme: Theme = createMuiTheme({
   },
 })
 
+theme.jcoreLogo = {
+  fontFamily: 'Rubik',
+  color: theme.palette.secondary[500],
+  fontSize: theme.typography.pxToRem(32),
+  lineHeight: theme.typography.pxToRem(38),
+  fontWeight: 300,
+}
+theme.ironPiLogo = {
+  fontFamily: 'Rubik',
+  color: '#d3d3d3',
+  fontSize: theme.typography.pxToRem(22),
+  lineHeight: theme.typography.pxToRem(27),
+  fontWeight: 300,
+  textTransform: 'uppercase',
+}
 theme.sidebar = {
   width: 256,
   padding: {
