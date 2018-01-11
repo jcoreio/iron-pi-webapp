@@ -23,7 +23,6 @@ const config = {
   devtool: process.env.WEBPACK_DEVTOOL,
   entry: [
     'babel-polyfill',
-    'react-hot-loader/patch',
     './src/client/index.js',
     'webpack-hot-middleware/client',
   ],
