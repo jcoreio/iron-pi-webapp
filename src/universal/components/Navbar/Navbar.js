@@ -27,6 +27,9 @@ const styles = {
   title: {
     flex: 1,
   },
+  appBar: {
+    position: 'relative',
+  },
 }
 
 export type Props = {
@@ -63,7 +66,7 @@ class Navbar extends React.Component<Props, State> {
     const {userMenuAnchorEl} = this.state
     return (
       <div id="navbar" className={classes.root}>
-        <AppBar position="fixed" color="default">
+        <AppBar color="default" className={classes.appBar}>
           <Toolbar className={classes.toolbar}>
             <IconButton
               id="toggleSidebarButton"
