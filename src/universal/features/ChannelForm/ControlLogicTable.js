@@ -4,6 +4,8 @@ import * as React from 'react'
 import classNames from 'classnames'
 import {map} from 'lodash'
 import {Field} from 'redux-form'
+import {NumericField} from 'redux-form-numeric-field'
+import {required} from '@jcoreio/redux-form-validators'
 import {Select, TextField} from 'redux-form-material-ui'
 import type {FieldArrayProps} from 'redux-form'
 import {withStyles} from 'material-ui/styles'
@@ -25,7 +27,6 @@ import Table, {
 import type {Theme} from '../../theme'
 import type {Comparison, ControlCondition, LogicOperation} from '../../types/Channel'
 import {Comparisons, LogicOperations} from '../../types/Channel'
-import {required} from '../../redux-form/validators'
 
 const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   table: {
@@ -160,6 +161,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.operation`}
                     component={Select}
                     className={index === 0 ? classes.hidden : undefined}
+                    validate={index === 0 ? undefined : required()}
                   >
                     {map(LogicOperations, ({displayText}: {displayText: string}, value: LogicOperation) => (
                       <MenuItem key={value} value={value}>{displayText}</MenuItem>
@@ -171,7 +173,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.channelId`}
                     component={Select}
                     displayEmpty
-                    validate={required}
+                    validate={required()}
                     className={classes.fullWidth}
                   >
                     <MenuItem value="">
@@ -187,6 +189,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.comparison`}
                     component={Select}
                     className={classes.fullWidth}
+                    validate={required()}
                   >
                     {map(Comparisons, ({displayText}: {displayText: string}, value: Comparison) => (
                       <MenuItem key={value} value={value}>{displayText}</MenuItem>
@@ -194,13 +197,13 @@ class ControlLogicTable extends React.Component<Props> {
                   </Field>
                 </TableCell>
                 <TableCell>
-                  <Field
+                  <NumericField
                     name={`${condition}.threshold`}
                     type="text"
                     placeholder="Threshold"
                     component={TextField}
                     className={classes.thresholdField}
-                    validate={required}
+                    validate={required()}
                   />
                 </TableCell>
                 <TableCell>

@@ -1,6 +1,6 @@
 // @flow
 
-import {reify, validate} from 'flow-runtime'
+import t, {reify, validate} from 'flow-runtime'
 import type {Type, Validation} from 'flow-runtime'
 
 export const ChannelModes = {
@@ -189,11 +189,19 @@ export function validateChannelConfig(config: any): ?Validation {
   const {mode} = config
   validation.errors.push(...validate(ChannelConfigTypes[mode], config).errors)
   if (validation.hasErrors()) return validation
-  if (mode === 'DIGITAL_OUTPUT') {
+  switch (mode) {
+  case 'ANALOG_INPUT': {
+    const {min, max} = config
+    if (max <= min) validation.errors.push([['max'], 'must be > min', t.number()])
+    break
+  }
+  case 'DIGITAL_OUTPUT': {
     const {controlMode} = config
     if (controlMode === 'LOCAL_CONTROL') {
       validation.errors.push(...validate(LocalControlDigitalOutputConfigType, config).errors)
     }
+    break
+  }
   }
   return validation.hasErrors() ? validation : null
 }

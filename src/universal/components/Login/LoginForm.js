@@ -7,6 +7,7 @@ import {Field} from 'redux-form'
 import {TextField} from 'redux-form-material-ui'
 import ErrorAlert from '../ErrorAlert'
 import Autocollapse from '../Autocollapse'
+import {required} from '@jcoreio/redux-form-validators'
 
 import Spinner from '../Spinner'
 import type {Theme} from '../../theme'
@@ -50,8 +51,6 @@ export type Props = {
   error?: any,
 }
 
-const required = value => value == null ? 'Required' : null
-
 class LoginForm extends React.Component<Props> {
   render(): ?React.Node {
     const {classes, onSubmit, submitting, valid, error} = this.props
@@ -68,7 +67,7 @@ class LoginForm extends React.Component<Props> {
           component={TextField}
           className={classes.passwordField}
           margin="normal"
-          validate={required}
+          validate={required()}
         />
         <div className={classes.footer}>
           {submitting && <Spinner />}

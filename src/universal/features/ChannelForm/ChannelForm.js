@@ -2,11 +2,13 @@
 
 import * as React from 'react'
 import Paper from 'material-ui/Paper'
-import {Field, formValues} from 'redux-form'
+import {formValues} from 'redux-form'
+import {Field} from 'redux-form-normalize-on-blur'
 import {TextField} from 'redux-form-material-ui'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
+import {required} from '@jcoreio/redux-form-validators'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
@@ -21,7 +23,6 @@ import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
 import handleError from '../../redux-form/createSubmissionError'
-import {required} from '../../redux-form/validators'
 import parseChannelFormValues from './parseChannelFormValues'
 
 const styles = ({spacing}: Theme) => ({
@@ -60,6 +61,8 @@ const styles = ({spacing}: Theme) => ({
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
+
+const trim = (value: ?string) => value && value.trim()
 
 const Empty = () => <div />
 
@@ -200,7 +203,7 @@ class ChannelForm extends React.Component<Props> {
               activeButtonProps={{accent: true}}
               getDisplayText={getChannelModeDisplayText}
               className={classes.formControl}
-              validate={required}
+              validate={required()}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The name of the channel">
@@ -210,6 +213,8 @@ class ChannelForm extends React.Component<Props> {
               type="text"
               component={TextField}
               className={classes.formControl}
+              validate={required()}
+              normalizeOnBlur={trim}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The internal id of the channel">
@@ -219,6 +224,8 @@ class ChannelForm extends React.Component<Props> {
               type="text"
               component={TextField}
               className={classes.formControl}
+              validate={required()}
+              normalizeOnBlur={trim}
             />
           </ControlWithInfo>
           <ConfigSection

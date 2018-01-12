@@ -102,6 +102,10 @@
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jcoreio/poll/-/poll-1.0.0.tgz#63d871a63848e2ea8b0714352c0955437c37454f"
 
+"@jcoreio/redux-form-validators@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.npmjs.org/@jcoreio/redux-form-validators/-/redux-form-validators-2.4.0.tgz#6429d7e57c273b77744791fdea78868f0801234e"
+
 "@jcoreio/require-env@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jcoreio/require-env/-/require-env-1.0.0.tgz#ea476bb5498a49e65040ea5a7011a96f5ef712ba"
@@ -6494,7 +6498,7 @@ promisify-event@^1.0.0:
   dependencies:
     pinkie-promise "^2.0.0"
 
-prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.5.9, prop-types@^15.6.0:
+prop-types@^15.0.0, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.5.9, prop-types@^15.6.0:
   version "15.6.0"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
   dependencies:
@@ -6968,6 +6972,19 @@ redux-features@^3.0.0:
 redux-form-material-ui@^5.0.0-beta.2:
   version "5.0.0-beta.2"
   resolved "https://registry.npmjs.org/redux-form-material-ui/-/redux-form-material-ui-5.0.0-beta.2.tgz#4a9186d0a6216fbb5871b07156fb0e7f591fb3e8"
+
+redux-form-normalize-on-blur@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/redux-form-normalize-on-blur/-/redux-form-normalize-on-blur-1.0.0.tgz#c1054cf3bc99b2842437c6ce5b534a6c2a7bf2e3"
+  dependencies:
+    prop-types "^15.0.0"
+
+redux-form-numeric-field@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/redux-form-numeric-field/-/redux-form-numeric-field-1.0.1.tgz#a5a9f0b6d64e6be1ebb32feb244dcc8ecc3c473a"
+  dependencies:
+    prop-types "^15.0.0"
+    redux-form-normalize-on-blur "^1.0.0"
 
 redux-form@^7.2.0:
   version "7.2.0"

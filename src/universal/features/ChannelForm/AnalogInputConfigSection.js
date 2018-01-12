@@ -8,6 +8,8 @@ import {Field} from 'redux-form'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import DrilldownButton from '../../components/DrilldownButton'
 import {CALIBRATION} from '../../react-router/routePaths'
+import {NumericField} from 'redux-form-numeric-field'
+import {required, numericality} from '@jcoreio/redux-form-validators'
 
 export type Props = {
   formControlClass: string,
@@ -28,28 +30,31 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
         component={TextField}
         className={formControlClass}
       />
-      <Field
+      <NumericField
         name="config.precision"
         label="Precision"
         type="text"
         component={TextField}
         className={formControlClass}
+        validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
       />
     </ControlWithInfo>
     <ControlWithInfo info="The number of digits to show after the decimal place" className={firstControlClass}>
-      <Field
+      <NumericField
         name="config.min"
         label="Range Min"
         type="text"
         component={TextField}
         className={formControlClass}
+        validate={required()}
       />
-      <Field
+      <NumericField
         name="config.max"
         label="Range Max"
         type="text"
         component={TextField}
         className={formControlClass}
+        validate={required()}
       />
     </ControlWithInfo>
     <ControlWithInfo info="Takes you to the calibration wizard" className={lastControlClass}>

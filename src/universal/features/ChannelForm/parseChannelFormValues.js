@@ -1,18 +1,11 @@
 export default function parseChannelFormValues(channel) {
-  const {config: {precision, min, max, controlLogic, ...restConfig}, ...rest} = channel
-  const result = {
-    ...rest,
-    config: {
-      ...restConfig,
-      precision: parseInt(precision),
-      min: Number(min),
-      max: Number(max),
-    }
-  }
-  if (controlLogic) result.config.controlLogic = controlLogic.map(({threshold, ...condition}) => ({
-    ...condition,
-    threshold: Number(threshold),
-  }))
+  const {config, ...rest} = channel
+  const result = {config: {...config}, ...rest}
+
+  if (typeof result.config.precision !== 'number') delete result.config.precision
+  if (typeof result.config.min !== 'number') delete result.config.min
+  if (typeof result.config.max !== 'number') delete result.config.max
+
   return result
 }
 

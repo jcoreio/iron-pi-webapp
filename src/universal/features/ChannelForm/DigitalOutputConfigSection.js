@@ -8,7 +8,7 @@ import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {ControlModesArray, getControlModeDisplayText} from '../../types/Channel'
 import ControlLogicTable from './ControlLogicTable'
-import {required} from '../../redux-form/validators'
+import {required} from '@jcoreio/redux-form-validators'
 import type {ControlMode} from '../../types/Channel'
 
 type Channel = {
@@ -39,7 +39,7 @@ const DigitalOutputConfigSection = (
           buttonClassName={tallButtonClass}
           availableValues={ControlModesArray}
           getDisplayText={getControlModeDisplayText}
-          validate={required}
+          validate={required()}
         />
       </ControlWithInfo>
       <Collapse in={controlMode === 'LOCAL_CONTROL'} unmountOnExit>
@@ -48,7 +48,7 @@ const DigitalOutputConfigSection = (
           component={ControlLogicTable}
           channels={channels}
           formControlClass={formControlClass}
-          validate={required}
+          validate={required()}
         />
       </Collapse>
       <ControlWithInfo info="????" className={lastControlClass}>
@@ -60,7 +60,7 @@ const DigitalOutputConfigSection = (
           buttonClassName={tallButtonClass}
           availableValues={[0, 1]}
           getDisplayText={value => value ? 'Output On' : 'Output Off'}
-          validate={required}
+          validate={required()}
         />
         <Field
           name="config.reversePolarity"
@@ -70,7 +70,7 @@ const DigitalOutputConfigSection = (
           buttonClassName={tallButtonClass}
           availableValues={[false, true]}
           getDisplayText={value => value ? 'Reversed' : 'Normal'}
-          validate={required}
+          validate={required()}
         />
       </ControlWithInfo>
     </React.Fragment>
