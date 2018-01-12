@@ -3,7 +3,6 @@
 // $FlowFixMe
 import { render, hydrate } from 'react-dom'
 import * as React from 'react'
-import { AppContainer } from 'react-hot-loader'
 import promisify from 'es6-promisify'
 import {loadInitialFeatures, loadFeature} from 'redux-features'
 
@@ -61,9 +60,7 @@ async function bootstrap(): Promise<any> {
 
   const mount = promisify((Root: typeof Root, callback?: () => void) => {
     hydrate(
-      <AppContainer key={++reloads}>
-        <Root store={store} client={client} />
-      </AppContainer>,
+      <Root key={++reloads} store={store} client={client} />,
       rootElement,
       // $FlowFixMe
       callback,

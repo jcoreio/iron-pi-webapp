@@ -49,7 +49,7 @@ const config = {
             ...babelOptions,
             plugins: [
               ...babelOptions.plugins,
-              'react-hot-loader/babel',
+              // 'react-hot-loader/babel',
             ]
           }
         },
