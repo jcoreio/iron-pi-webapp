@@ -50,7 +50,7 @@ function formatErrorItem(item: ValidationErrorItem, submitErrors: Object): any {
       set(submitErrors, [path, ...subpath], message)
     }
   } catch (error) {
-    return {path, message: formatMessage(item)}
+    set(submitErrors, path, formatMessage(item))
   }
 }
 

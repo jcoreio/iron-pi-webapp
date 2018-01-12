@@ -214,7 +214,7 @@ class ChannelForm extends React.Component<Props> {
               component={TextField}
               className={classes.formControl}
               validate={required()}
-              normalizeOnBlur={trim}
+              normalize={trim}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The internal id of the channel">
@@ -225,7 +225,7 @@ class ChannelForm extends React.Component<Props> {
               component={TextField}
               className={classes.formControl}
               validate={required()}
-              normalizeOnBlur={trim}
+              normalize={trim}
             />
           </ControlWithInfo>
           <ConfigSection

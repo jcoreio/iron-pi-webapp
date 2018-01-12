@@ -46,7 +46,7 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
         type="text"
         component={TextField}
         className={formControlClass}
-        validate={required()}
+        validate={[required(), (value, {config: {max}}) => value >= max ? 'must be < max' : undefined]}
       />
       <NumericField
         name="config.max"
@@ -54,7 +54,7 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
         type="text"
         component={TextField}
         className={formControlClass}
-        validate={required()}
+        validate={[required(), (value, {config: {min}}) => value <= min ? 'must be > min' : undefined]}
       />
     </ControlWithInfo>
     <ControlWithInfo info="Takes you to the calibration wizard" className={lastControlClass}>

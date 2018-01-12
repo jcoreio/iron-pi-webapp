@@ -6980,8 +6980,8 @@ redux-form-normalize-on-blur@^1.0.0:
     prop-types "^15.0.0"
 
 redux-form-numeric-field@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/redux-form-numeric-field/-/redux-form-numeric-field-1.0.1.tgz#a5a9f0b6d64e6be1ebb32feb244dcc8ecc3c473a"
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/redux-form-numeric-field/-/redux-form-numeric-field-1.0.2.tgz#73a05b170d8ef0f91ca36d56897d05512c07c261"
   dependencies:
     prop-types "^15.0.0"
     redux-form-normalize-on-blur "^1.0.0"
