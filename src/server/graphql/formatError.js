@@ -46,8 +46,8 @@ function formatErrorItem(item: ValidationErrorItem, submitErrors: Object): any {
   const {message, path} = item
   try {
     const {errors} = JSON.parse(message)
-    for (let error of errors) {
-      set(submitErrors, [path, ...error.path], error.message)
+    for (let [subpath, message] of errors) {
+      set(submitErrors, [path, ...subpath], message)
     }
   } catch (error) {
     return {path, message: formatMessage(item)}
