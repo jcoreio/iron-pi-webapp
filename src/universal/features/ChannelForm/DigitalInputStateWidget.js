@@ -7,7 +7,7 @@ import Positive from 'material-ui-icons/AddCircle'
 import Negative from 'material-ui-icons/RemoveCircle'
 import Arrow from 'react-arrow'
 
-import ValueBlock from './ValueBlock'
+import ValueBlock from '../../components/ValueBlock'
 
 import type {Theme} from '../../theme'
 import type {DigitalInputState} from '../../types/Channel'

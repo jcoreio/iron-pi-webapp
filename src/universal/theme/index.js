@@ -98,6 +98,15 @@ export type Theme = {
       lineHeight: string,
     },
   },
+  calibration: {
+    title: {
+      color: string,
+      fontSize: string,
+      fontWeight: number,
+      textAlign: string,
+      lineHeight: string,
+    },
+  },
   jcoreLogo: {
     color: string,
     fontFamily: string,
@@ -171,14 +180,17 @@ export type Theme = {
     snackbar: string,
     tooltip: string,
   },
-  overrides?: {
+  overrides: {
     MuiButton?: {
       root?: Object,
       raised?: Object,
       raisedAccent?: Object,
     },
-    MuiInput?: {
-      root?: Object,
+    MuiInput: {
+      root: {
+        fontSize: string,
+        fontWeight: number,
+      },
     },
     MuiSelect?: {
       select?: Object,
@@ -330,6 +342,15 @@ theme.channelState = {
     color: theme.palette.grey[500],
     width: '2.5rem',
     height: '2.5rem',
+  },
+}
+theme.calibration = {
+  title: {
+    color: theme.palette.grey[700],
+    fontSize: theme.typography.pxToRem(24),
+    fontWeight: 500,
+    lineHeight: theme.typography.pxToRem(29),
+    textAlign: 'left',
   },
 }
 

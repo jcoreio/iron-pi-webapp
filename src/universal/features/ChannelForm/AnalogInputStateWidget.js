@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import {withStyles, withTheme} from 'material-ui/styles'
 import Arrow from 'react-arrow'
 
-import ValueBlock from './ValueBlock'
+import ValueBlock from '../../components/ValueBlock'
 
 import type {Theme} from '../../theme'
 import CalibrationIcon from '../../components/icons/CalibrationIcon'

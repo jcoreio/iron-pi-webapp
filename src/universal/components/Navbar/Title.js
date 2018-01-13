@@ -8,6 +8,10 @@ import type {Theme} from '../../theme'
 const styles = ({navbar}: Theme) => ({
   root: {
     ...navbar.title,
+    '& > a': {
+      textDecoration: 'none',
+      color: navbar.title.color,
+    }
   },
 })
 

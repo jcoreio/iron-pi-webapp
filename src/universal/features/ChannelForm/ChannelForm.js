@@ -8,7 +8,7 @@ import {TextField} from 'redux-form-material-ui'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
-import {required} from '@jcoreio/redux-form-validators'
+import {required, format} from '@jcoreio/redux-form-validators'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
@@ -16,7 +16,7 @@ import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
 import ButtonGroupField from '../../components/ButtonGroupField'
 
-import {ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
+import {channelIdPattern, ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
 import type {ChannelMode, Channel as FullChannel} from '../../types/Channel'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
@@ -214,7 +214,7 @@ class ChannelForm extends React.Component<Props> {
               component={TextField}
               className={classes.formControl}
               validate={required()}
-              normalize={trim}
+              normalizeOnBlur={trim}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The internal id of the channel">
@@ -224,7 +224,7 @@ class ChannelForm extends React.Component<Props> {
               type="text"
               component={TextField}
               className={classes.formControl}
-              validate={required()}
+              validate={[required(), format({with: channelIdPattern, message: 'invalid Channel ID'})]}
               normalize={trim}
             />
           </ControlWithInfo>

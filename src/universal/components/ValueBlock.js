@@ -3,7 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
-import type {Theme} from '../../theme'
+import type {Theme} from '../theme/index'
 
 const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
   block: {
@@ -15,6 +15,7 @@ const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
     backgroundColor: palette.background.valueBlock.ok,
     display: 'inline-flex',
     justifyContent: 'center',
+    alignContent: 'center',
     alignItems: 'baseline',
     flexWrap: 'wrap',
     padding: block.padding,
