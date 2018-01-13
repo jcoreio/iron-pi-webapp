@@ -8,6 +8,7 @@ import {range} from 'lodash'
 
 import logger from '../../universal/logger'
 import Channel from '../models/Channel'
+import User from '../models/User'
 
 const log = logger('sequelize:migrate')
 
@@ -61,5 +62,11 @@ export default async function migrate(options: Options): Promise<void> {
       channelId: `channel${id}`,
       name: `Channel ${id}`,
     })))
+  }
+
+  if (process.env.BABEL_ENV === 'test' || process.env.NODE_ENV === 'development') {
+    if (!(await User.findOne({where: {username: 'root'}}))) {
+      await User.create({username: 'root', password: 'correct horse battery staple'})
+    }
   }
 }
