@@ -2,22 +2,172 @@
 
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
+import {NumericField} from 'redux-form-numeric-field'
+import {TextField} from 'redux-form-material-ui'
+import {required} from '@jcoreio/redux-form-validators'
+import type {FieldArrayProps} from 'redux-form'
+import IconButton from 'material-ui/IconButton'
+import DeleteIcon from 'material-ui-icons/Delete'
+import {FormControl, FormHelperText} from 'material-ui/Form'
+import Arrow from 'react-arrow'
+import Table, {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from 'material-ui/Table'
+import {withTheme} from 'material-ui/styles/index'
+
 import type {Theme} from '../../theme'
+import AddIcon from '../../components/icons/AddRectangle'
 
-const styles = (theme: Theme) => ({
+const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
+  <Arrow
+    direction="right"
+    shaftWidth={arrow.shaftWidth}
+    shaftLength={arrow.shaftLength}
+    headWidth={arrow.headWidth}
+    headLength={arrow.headLength}
+    fill={arrow.fill}
+    {...props}
+  />
+))
 
+const styles = ({spacing, palette}: Theme) => ({
+  table: {
+    marginTop: spacing.unit * 2,
+    borderCollapse: 'separate',
+    border: {
+      width: 2,
+      style: 'solid',
+      color: palette.grey[500],
+    },
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    '& td, & th': {
+      padding: spacing.unit / 2,
+    },
+    '& td:first-child, & th:first-child': {
+      paddingLeft: 0,
+    },
+    '& td:last-child, & th:last-child': {
+      paddingRight: 0,
+      textAlign: 'right',
+    },
+    '& td': {
+      borderBottom: 'none',
+      verticalAlign: 'top',
+    },
+    '& td$arrowCell': {
+      verticalAlign: 'middle',
+    },
+  },
+  arrowCell: {
+  },
+  textField: {
+    '& input': {
+      textAlign: 'center',
+    }
+  },
+  addButton: {
+    marginRight: -spacing.unit * 1.5,
+  },
+  deleteButton: {
+    marginRight: -spacing.unit * 1.5,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
+type ExtractFields = <T>(props: {fields: T}) => T
+type Fields = $Call<ExtractFields, FieldArrayProps>
+
 export type Props = {
   classes: Classes,
+  fields: Fields,
+  editable?: boolean,
+  bodyClass?: string,
+  channel?: {
+    config: {
+      units?: string,
+    },
+  },
+  meta?: {
+    warning?: string,
+    error?: string,
+    submitFailed?: boolean,
+  },
 }
 
 class CalibrationTable extends React.Component<Props> {
   render(): ?React.Node {
-    return <div {...this.props} />
+    const {classes, fields, meta, channel, bodyClass} = this.props
+    const editable = this.props.editable !== false
+    const {warning, error, submitFailed} = meta || {}
+    const hasError = submitFailed && (error != null || warning != null)
+    const {units} = channel && channel.config || {}
+    return (
+      <FormControl error={hasError} className={bodyClass}>
+        <Table className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                Raw Value (V)
+              </TableCell>
+              <TableCell />
+              <TableCell>
+                Actual Value ({units})
+              </TableCell>
+              {editable &&
+                <TableCell>
+                  <IconButton className={classes.addButton} onClick={() => fields.push({})}>
+                    <AddIcon />
+                  </IconButton>
+                </TableCell>
+              }
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {fields.map((point: string, index: number) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <NumericField
+                    name={`${point}.x`}
+                    component={TextField}
+                    validate={required()}
+                    className={classes.textField}
+                  />
+                </TableCell>
+                <TableCell className={classes.arrowCell}>
+                  <FlowArrow />
+                </TableCell>
+                <TableCell>
+                  <NumericField
+                    name={`${point}.y`}
+                    component={TextField}
+                    validate={required()}
+                    className={classes.textField}
+                  />
+                </TableCell>
+                {editable &&
+                  <TableCell>
+                    <IconButton className={classes.deleteButton} onClick={() => fields.remove(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                }
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {submitFailed && (error || warning) &&
+          <FormHelperText>
+            {error || warning}
+          </FormHelperText>
+        }
+      </FormControl>
+    )
   }
 }
 

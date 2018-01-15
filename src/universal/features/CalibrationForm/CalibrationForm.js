@@ -6,7 +6,7 @@ import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
 import {compose} from 'redux'
 import Paper from 'material-ui/Paper'
-import {formValues} from 'redux-form'
+import {formValues, FieldArray} from 'redux-form'
 import Button from 'material-ui/Button'
 import Fade from 'material-ui/transitions/Fade'
 import ChevronLeft from 'material-ui-icons/ChevronLeft'
@@ -145,8 +145,12 @@ class CalibrationForm extends React.Component<Props, State> {
 
     if (this.isInCalibration(this.props)) {
       return (
-        <CalibrationTable
+        <FieldArray
+          name="points"
+          component={CalibrationTable}
           key={numSteps + 1}
+          channel={Channel}
+          bodyClass={classes.body}
         />
       )
     }
@@ -221,9 +225,25 @@ class CalibrationForm extends React.Component<Props, State> {
               {title}
             </Fader>
           </h3>
-          <ViewSlider className={classes.bodySlider}>
-            {this.renderBody()}
-          </ViewSlider>
+          {/*
+            Animating to/from the calibration table triggers a bug in redux-form
+            (https://github.com/erikras/redux-form/issues/3688).
+            Once that's fixed, we can restore animation to/from the calibration table.
+          */}
+          {isInCalibration
+            ? (
+              <FieldArray
+                name="points"
+                component={CalibrationTable}
+                channel={Channel}
+              />
+            )
+            : (
+              <ViewSlider className={classes.bodySlider}>
+                {this.renderBody()}
+              </ViewSlider>
+            )
+          }
           <div className={classes.buttons}>
             <Fade in={step === 0 && !isInCalibration}>
               <Button raised component={Link} to={`${match.url}/${CALIBRATION_TABLE}`}>
