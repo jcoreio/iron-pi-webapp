@@ -6,7 +6,7 @@ import {map} from 'lodash'
 import {Field} from 'redux-form'
 import {NumericField} from 'redux-form-numeric-field'
 import {required} from '@jcoreio/redux-form-validators'
-import {Select, TextField} from 'redux-form-material-ui'
+import {TextField} from 'redux-form-material-ui'
 import type {FieldArrayProps} from 'redux-form'
 import {withStyles} from 'material-ui/styles'
 import {MenuItem} from 'material-ui/Menu'
@@ -159,7 +159,8 @@ class ControlLogicTable extends React.Component<Props> {
                 <TableCell>
                   <Field
                     name={`${condition}.operation`}
-                    component={Select}
+                    component={TextField}
+                    select
                     className={index === 0 ? classes.hidden : undefined}
                     validate={index === 0 ? undefined : required()}
                   >
@@ -171,8 +172,9 @@ class ControlLogicTable extends React.Component<Props> {
                 <TableCell>
                   <Field
                     name={`${condition}.channelId`}
-                    component={Select}
-                    displayEmpty
+                    component={TextField}
+                    select
+                    SelectProps={{displayEmpty: true}}
                     validate={required()}
                     className={classes.fullWidth}
                   >
@@ -187,7 +189,8 @@ class ControlLogicTable extends React.Component<Props> {
                 <TableCell>
                   <Field
                     name={`${condition}.comparison`}
-                    component={Select}
+                    component={TextField}
+                    select
                     className={classes.fullWidth}
                     validate={required()}
                   >
