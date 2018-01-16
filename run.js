@@ -13,6 +13,7 @@ const fs = require('fs-extra')
 const chalk = require('chalk')
 const requireEnv = require('@jcoreio/require-env')
 const promake = require('./scripts/promake')
+const promisify = require('es6-promisify')
 const getCommitHash = require('./scripts/getCommitHash')
 const getDockerTags = require('./scripts/getDockerTags')
 
@@ -242,9 +243,9 @@ task('lint', '.eslintcache')
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles, '--cache'])).description('fix eslint errors automatically')
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed', '--cache'])).description('run eslint in watch mode')
 
-const seleniumServices = task('test:selenium:services', () =>
-  spawn('docker-compose', ['up', '-d', 'selenium', 'chrome', 'firefox'], {env: env('prod', 'local')})
-).description('start docker services for selenium tests')
+const seleniumServer = 'node_modules/selenium-standalone/.selenium/selenium-server'
+
+rule(seleniumServer, promisify(cb => require('selenium-standalone').install(cb)))
 
 function testRecipe(options /* : {
   unit?: boolean,
@@ -285,13 +286,13 @@ for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
     const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules', seleniumServices, services], testRecipe({unit: true, selenium: true, integration: true, coverage, watch}))
+    task(`${prefix}${suffix}`, ['node_modules', seleniumServer, services], testRecipe({unit: true, selenium: true, integration: true, coverage, watch}))
       .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
     task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
       .description(`run integration tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
     task(`${prefix}:integration${suffix}`, ['node_modules', services], testRecipe({integration: true, coverage, watch}))
       .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServices], testRecipe({selenium: true, coverage, watch}))
+    task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServer], testRecipe({selenium: true, coverage, watch}))
       .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
   }
 }
@@ -343,36 +344,5 @@ task('push:staging', async () => {
 
 task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
   .description('set up initial project after cloning from skeleton')
-
-const seleniumConfigs = [
-  {
-    desiredCapabilities: {
-      browserName: 'chrome',
-      chromeOptions: {
-        args: ['--headless', '--disable-gpu'],
-      },
-    },
-  },
-  {
-    desiredCapabilities: {
-      browserName: 'firefox',
-    },
-  },
-]
-
-seleniumConfigs.forEach(config => {
-  const {desiredCapabilities: {browserName}} = config
-  task(`wdio:repl:${browserName}`, ['node_modules', seleniumServices], async rule => {
-    require('defaultenv')(['env/local.js', 'env/dev.js'])
-    require('babel-register')
-    const resolveUrl = require('./test/selenium/util/resolveUrl')
-    await require('./scripts/wdioRepl')({
-      ...config,
-      logLevel: process.env.WDIO_LOG_LEVEL || 'silent',
-      baseUrl: resolveUrl(rule.args[0] || process.env.ROOT_URL),
-    })
-    await new Promise(() => {})
-  }).description(`launch webdriver.io repl for ${browserName}`)
-})
 
 cli()
