@@ -32,13 +32,11 @@ export type Props = {
   children: React.Node,
 }
 
-const ButtonGroup = withStyles(styles, {withTheme: true})(
-  ({classes, children}: Props) => (
-    <div className={classes.root}>
-      {children}
-    </div>
-  )
+const ButtonGroup = ({classes, children, ...props}: Props) => (
+  <div className={classes.root} {...props}>
+    {children}
+  </div>
 )
 
-export default ButtonGroup
+export default withStyles(styles, {withTheme: true})(ButtonGroup)
 

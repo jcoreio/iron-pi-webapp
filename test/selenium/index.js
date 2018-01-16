@@ -14,6 +14,7 @@ import resolveUrl from './util/resolveUrl'
 import mergeCoverage from './util/mergeCoverage'
 
 import graphql from './util/graphql'
+import getHostIP from './util/getHostIP'
 
 const password = requireEnv('TEST_PASSWORD')
 
@@ -40,6 +41,8 @@ describe('selenium tests', function () {
   this.timeout(60000)
 
   before(async function () {
+    process.env.HOST_IP_ADDRESS = await getHostIP()
+
     try {
       await poll(() => superagent.get('/'), 1000).timeout(15000)
     } catch (error) {
@@ -120,6 +123,7 @@ describe('selenium tests', function () {
       require('./basicTests')()
       require('./AuthTests')()
       require('./SidebarTests')()
+      require('./ChannelForm')()
     })
   })
 })

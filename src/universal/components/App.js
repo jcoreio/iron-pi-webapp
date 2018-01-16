@@ -17,6 +17,7 @@ import type {Dispatch, RenderMode, State} from '../redux/types'
 import type {Theme} from '../theme'
 import LoginDialogContainer from './Login/LoginDialogContainer'
 import featureContent from './featureContent'
+import Coolness from './Coolness'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -120,6 +121,7 @@ class App extends React.Component<Props> {
                 <Switch component={Fader}>
                   <Route path="/" exact component={Home} />
                   <Route path="/about" exact component={About} />
+                  <Route path="/coolness" component={Coolness} />
                   {routes}
                   <Route path="*" component={NotFound} />
                 </Switch>

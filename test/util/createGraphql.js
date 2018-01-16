@@ -2,6 +2,10 @@
 
 import type Superagent from 'superagent'
 import requireEnv from '@jcoreio/require-env'
+import {parse} from 'graphql'
+import type {DocumentNode} from 'graphql'
+import getOnlyOperationName from './getOnlyOperationName'
+import getOperationByName from './getOperationByName'
 
 const password = requireEnv('TEST_PASSWORD')
 
@@ -21,8 +25,9 @@ export default function createGraphql<T>(superagent: Superagent): (options: Opti
 
   return async (options: Options) => {
     const {query, withToken} = options
+    const doc: DocumentNode = parse(query)
     const variables = options.variables || null
-    const operationName = options.operationName || null
+    const operationName = options.operationName || getOnlyOperationName(doc)
 
     if (!token && withToken !== false) token = (
       await superagent.post('/login')
@@ -31,7 +36,9 @@ export default function createGraphql<T>(superagent: Superagent): (options: Opti
         .send({username: 'root', password})
     ).body.token
 
-    const isMutation = /^\s*mutation/.test(query)
+    const operation = operationName ? getOperationByName(doc, operationName) : null
+
+    const isMutation = operation && operation.operation === 'mutation'
 
     const request = isMutation
       ? superagent.post('/graphql')

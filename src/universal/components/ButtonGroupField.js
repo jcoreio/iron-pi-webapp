@@ -43,6 +43,7 @@ export type Props<V> = {
     value?: ?V,
     onChange?: (newValue: ?V) => any,
     disabled?: boolean,
+    name: string,
   },
   meta: {
     warning?: string,
@@ -51,7 +52,7 @@ export type Props<V> = {
   },
 }
 
-const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
+const ButtonGroupField = <V>({
   label,
   classes,
   className,
@@ -61,7 +62,7 @@ const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
   helperTextClassName,
   availableValues,
   getDisplayText,
-  input: {value: selectedValue, onChange, disabled},
+  input: {value: selectedValue, onChange, disabled, name},
   meta: {warning, error, touched},
 }: Props<V>): React.Node => (
   <FormControl className={className} error={touched && (error != null || warning != null)}>
@@ -70,12 +71,13 @@ const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
         {label}
       </FormLabel>
     }
-    <ButtonGroup>
+    <ButtonGroup name={name} data-value={selectedValue}>
       {availableValues.map((value: V, key: any) => {
         const selected = value === selectedValue
         return (
           <Button
             key={key}
+            value={value}
             className={classNames(buttonClassName, {
               [classes.buttonUnselected]: !selected,
             })}
@@ -94,7 +96,7 @@ const ButtonGroupField = withStyles(styles, {withTheme: true})(<V>({
       </FormHelperText>
     }
   </FormControl>
-))
+)
 ButtonGroupField.defaultProps = {
   getDisplayText: value => String(value),
   selectedButtonProps: {
@@ -103,5 +105,5 @@ ButtonGroupField.defaultProps = {
   },
 }
 
-export default ButtonGroupField
+export default withStyles(styles, {withTheme: true})(ButtonGroupField)
 

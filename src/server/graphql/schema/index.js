@@ -151,7 +151,7 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
       type: types[Channel.name],
       args: {
         channel: {
-          type: new graphql.GraphQLNonNull(inputTypes[Channel.name]),
+          type: inputTypes[Channel.name],
         }
       },
       resolve: async (doc: any, {channel}: {channel: $Shape<ChannelAttributes>}, context: Context): Promise<any> => {

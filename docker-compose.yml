@@ -21,6 +21,8 @@ services:
       NODE_MAX_SESSION: 3
     links:
       - selenium:hub
+    extra_hosts:
+      - "localhost:192.168.65.1"
   firefox:
     image: selenium/node-firefox:3.8.1-bohrium
     environment:
@@ -32,6 +34,8 @@ services:
       - /dev/shm:/dev/shm
     links:
       - selenium:hub
+    extra_hosts:
+      - "localhost:192.168.65.1"
   app:
     image: jcoreio/iron-pi-webapp
     ports:
