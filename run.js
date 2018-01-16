@@ -242,10 +242,6 @@ task('lint', '.eslintcache')
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles, '--cache'])).description('fix eslint errors automatically')
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed', '--cache'])).description('run eslint in watch mode')
 
-const testServices = task('test:services', () =>
-  spawn('docker-compose', ['up', '-d', 'selenium', 'chrome', 'firefox'], {env: env('prod', 'local')})
-).description('start docker services for tests')
-
 function testRecipe(options /* : {
   unit?: boolean,
   selenium?: boolean,
@@ -282,11 +278,11 @@ for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
     const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules', testServices], testRecipe({unit: true, selenium: true, coverage, watch}))
+    task(`${prefix}${suffix}`, ['node_modules'], testRecipe({unit: true, selenium: true, coverage, watch}))
       .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
     task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
       .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:selenium${suffix}`, ['node_modules', testServices], testRecipe({selenium: true, coverage, watch}))
+    task(`${prefix}:selenium${suffix}`, ['node_modules'], testRecipe({selenium: true, coverage, watch}))
       .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
   }
 }
