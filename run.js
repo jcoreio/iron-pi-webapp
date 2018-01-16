@@ -245,7 +245,7 @@ task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--ch
 
 const seleniumServer = 'node_modules/selenium-standalone/.selenium/selenium-server'
 
-rule(seleniumServer, promisify(cb => require('selenium-standalone').install(cb)))
+rule(seleniumServer, () => promisify(cb => require('selenium-standalone').install(cb))())
 
 function testRecipe(options /* : {
   unit?: boolean,
