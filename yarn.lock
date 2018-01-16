@@ -3280,16 +3280,6 @@ flow-config-parser@^0.3.0:
   version "0.3.0"
   resolved "https://registry.npmjs.org/flow-config-parser/-/flow-config-parser-0.3.0.tgz#704916efba88cd2518ab4d8f933079571276138f"
 
-flow-copy-source@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/flow-copy-source/-/flow-copy-source-1.2.1.tgz#705c2fa8fb29a281118e1c4b66218dec24b745ec"
-  dependencies:
-    chokidar "^1.7.0"
-    fs-extra "^3.0.1"
-    glob "^7.0.0"
-    kefir "^3.7.3"
-    yargs "^8.0.2"
-
 flow-runtime@^0.16.0:
   version "0.16.0"
   resolved "https://registry.npmjs.org/flow-runtime/-/flow-runtime-0.16.0.tgz#6da4aac36b8e26ea2dc80b38395ebecbfcb5a535"
@@ -3380,14 +3370,6 @@ fs-extra@^1.0.0:
     graceful-fs "^4.1.2"
     jsonfile "^2.1.0"
     klaw "^1.0.0"
-
-fs-extra@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-3.0.1.tgz#3794f378c58b342ea7dbbb23095109c4b3b62291"
-  dependencies:
-    graceful-fs "^4.1.2"
-    jsonfile "^3.0.0"
-    universalify "^0.1.0"
 
 fs-extra@^4.0.3:
   version "4.0.3"
@@ -4011,6 +3993,13 @@ inline-style-prefixer@^3.0.6:
     bowser "^1.7.3"
     css-in-js-utils "^2.0.0"
 
+inline-style-prefixer@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/inline-style-prefixer/-/inline-style-prefixer-4.0.0.tgz#30a03df1b346ba6b1fb8a812bc3c9dabef48022d"
+  dependencies:
+    bowser "^1.7.3"
+    css-in-js-utils "^2.0.0"
+
 inquirer@^3.0.6, inquirer@~3.3.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/inquirer/-/inquirer-3.3.0.tgz#9dd2f2ad765dcab1ff0443b491442a20ba227dc9"
@@ -4527,12 +4516,6 @@ jsonfile@^2.1.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonfile@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.npmjs.org/jsonfile/-/jsonfile-3.0.1.tgz#a5ecc6f65f53f662c4415c7675a0331d0992ec66"
-  optionalDependencies:
-    graceful-fs "^4.1.6"
-
 jsonfile@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/jsonfile/-/jsonfile-4.0.0.tgz#8771aae0799b64076b76640fca058f9c10e33ecb"
@@ -4712,12 +4695,6 @@ jxLoader@*:
     moo-server "1.3.x"
     promised-io "*"
     walker "1.x"
-
-kefir@^3.7.3:
-  version "3.8.1"
-  resolved "https://registry.npmjs.org/kefir/-/kefir-3.8.1.tgz#6b202bc78c01ed4aa1c329e885b43631bf62ec0c"
-  dependencies:
-    symbol-observable "1.0.4"
 
 kew@^0.7.0:
   version "0.7.0"
@@ -6705,13 +6682,11 @@ react-event-listener@^0.5.0, react-event-listener@^0.5.1:
     warning "^3.0.0"
 
 react-fader@^2.0.1:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/react-fader/-/react-fader-2.0.2.tgz#0f9618f4183d515127024692e2c3d25af61f0caf"
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/react-fader/-/react-fader-2.0.3.tgz#dac73b0d25f693b2163f25d6b73c3b8525dfad0b"
   dependencies:
     inline-style-prefixer "^3.0.6"
     prop-types "^15.6.0"
-  optionalDependencies:
-    react-transition-context "^2.0.0"
 
 react-hot-loader@^4.0.0-beta:
   version "4.0.0-beta.13"
@@ -6851,15 +6826,12 @@ react-transition-group@^2.2.1:
     warning "^3.0.0"
 
 react-view-slider@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.npmjs.org/react-view-slider/-/react-view-slider-3.0.2.tgz#3274760e112d57a40a5a434bff6a4eb6d912374a"
+  version "3.0.4"
+  resolved "https://registry.npmjs.org/react-view-slider/-/react-view-slider-3.0.4.tgz#d4b7fd06dba0c249dd786fb5fcd6a7279c15e2ec"
   dependencies:
-    flow-copy-source "^1.2.1"
-    inline-style-prefixer "^3.0.6"
+    inline-style-prefixer "^4.0.0"
     lodash.range "^3.2.0"
     prop-types "^15.6.0"
-  optionalDependencies:
-    react-transition-context "^2.0.0"
 
 react@^16.2.0:
   version "16.2.0"
@@ -7447,13 +7419,17 @@ semver-diff@^2.0.0:
   dependencies:
     semver "^5.0.3"
 
-"semver@2 || 3 || 4 || 5", semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1:
-  version "5.4.1"
-  resolved "https://registry.npmjs.org/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
+"semver@2 || 3 || 4 || 5", semver@^5.3.0:
+  version "5.5.0"
+  resolved "https://registry.npmjs.org/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
 
 semver@4.3.2:
   version "4.3.2"
   resolved "https://registry.npmjs.org/semver/-/semver-4.3.2.tgz#c7a07158a80bedd052355b770d82d6640f803be7"
+
+semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.npmjs.org/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
 
 semver@~5.3.0:
   version "5.3.0"
@@ -7967,10 +7943,6 @@ svgo@^0.7.0:
     sax "~1.2.1"
     whet.extend "~0.9.9"
 
-symbol-observable@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
-
 symbol-observable@^0.2.2:
   version "0.2.4"
   resolved "https://registry.npmjs.org/symbol-observable/-/symbol-observable-0.2.4.tgz#95a83db26186d6af7e7a18dbd9760a2f86d08f40"
@@ -8396,7 +8368,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
 
-uuid@^3.0.0, uuid@^3.1.0:
+uuid@^3.0.0:
+  version "3.2.1"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-3.2.1.tgz#12c528bb9d58d0b9265d9a2f6f0fe8be17ff1f14"
+
+uuid@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
