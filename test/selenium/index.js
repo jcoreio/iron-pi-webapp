@@ -26,6 +26,10 @@ const seleniumConfigs = [
   {
     desiredCapabilities: {
       browserName: 'firefox',
+      "moz:firefoxOptions": {
+        // flag to activate Firefox headless mode (see https://github.com/mozilla/geckodriver/blob/master/README.md#firefox-capabilities for more details about moz:firefoxOptions)
+        args: ['-headless']
+      },
     },
   },
 ]
@@ -33,12 +37,15 @@ const seleniumConfigs = [
 describe('selenium tests', function () {
   this.timeout(30000)
 
+  let selenium
+
   before(async function () {
     try {
       await poll(() => superagent.get('/'), 1000).timeout(15000)
     } catch (error) {
       throw new Error(`Can't connect to webapp: ${error.message}`)
     }
+    selenium = await promisify(cb => require('selenium-standalone').start(cb))()
   })
 
   after(async function () {
@@ -48,6 +55,7 @@ describe('selenium tests', function () {
     } catch (error) {
       console.error("Couldn't get server coverage:", error.message) // eslint-disable-line no-console
     }
+    if (selenium) selenium.kill()
   })
 
   seleniumConfigs.forEach(config => {
