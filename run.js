@@ -13,6 +13,7 @@ const fs = require('fs-extra')
 const chalk = require('chalk')
 const requireEnv = require('@jcoreio/require-env')
 const promake = require('./scripts/promake')
+const promisify = require('es6-promisify')
 const getCommitHash = require('./scripts/getCommitHash')
 const getDockerTags = require('./scripts/getDockerTags')
 
@@ -242,6 +243,10 @@ task('lint', '.eslintcache')
 task('lint:fix', 'node_modules', () => spawn('eslint', ['--fix', ...lintFiles, '--cache'])).description('fix eslint errors automatically')
 task('lint:watch', 'node_modules', () => spawn('esw', ['-w', ...lintFiles, '--changed', '--cache'])).description('run eslint in watch mode')
 
+const seleniumServer = 'node_modules/selenium-standalone/.selenium/selenium-server'
+
+rule(seleniumServer, promisify(cb => require('selenium-standalone').install(cb)))
+
 function testRecipe(options /* : {
   unit?: boolean,
   selenium?: boolean,
@@ -278,11 +283,11 @@ for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
     const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules'], testRecipe({unit: true, selenium: true, coverage, watch}))
+    task(`${prefix}${suffix}`, ['node_modules', seleniumServer], testRecipe({unit: true, selenium: true, coverage, watch}))
       .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
     task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
       .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:selenium${suffix}`, ['node_modules'], testRecipe({selenium: true, coverage, watch}))
+    task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServer], testRecipe({selenium: true, coverage, watch}))
       .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
   }
 }
