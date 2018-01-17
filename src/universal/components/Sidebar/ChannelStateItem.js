@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import {Link} from 'react-router-dom'
+import {NavLink} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles/index'
 import {ListItemSecondaryAction} from 'material-ui/List'
 
@@ -47,7 +47,7 @@ export type ChannelStateProps = {
 
 const ChannelStateItem = withStyles(channelStateStyles, {withTheme: true})(
   ({channel, classes}: ChannelStateProps): React.Node => (
-    <SidebarItem component={Link} to={channelForm(channel.id)} data-component="ChannelStateItem">
+    <SidebarItem component={NavLink} to={channelForm(channel.id)} data-component="ChannelStateItem">
       <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.id)} />
       <SidebarItemText data-test-name="name" disableTypography primary={channel.name} />
       <ListItemSecondaryAction className={classes.secondaryAction}>
