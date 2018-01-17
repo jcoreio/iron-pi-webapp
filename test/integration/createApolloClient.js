@@ -21,12 +21,15 @@ export default async function createApolloClient(): Promise<{
   client: ApolloClient,
   close: () => void,
 }> {
-  const subscriptionClient = new SubscriptionClient(`ws://localhost:${port}/graphql`, {}, WebSocket)
-
   const {body: {token}} = await superagent.post('/login')
     .type('json')
     .accept('json')
     .send({username: 'root', password: TEST_PASSWORD})
+
+  const subscriptionClient = new SubscriptionClient(`ws://localhost:${port}/graphql`, {
+    reconnect: true,
+    connectionParams: () => ({token}),
+  }, WebSocket)
 
   const authLink = setContext((_: any, {headers}: any) => {
     return {

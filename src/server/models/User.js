@@ -28,7 +28,6 @@ export default class User extends Model<UserAttributes, UserInitAttributes> {
   id: number;
   createdAt: Date;
   updatedAt: Date;
-  passwordHash: string;
 
   static initAttributes({sequelize}: {sequelize: Sequelize}) {
     super.init({

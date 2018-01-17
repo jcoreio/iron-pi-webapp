@@ -1,16 +1,23 @@
 /* @flow */
 
+import type { ApolloClient } from 'apollo-client'
 import { createStore, compose, applyMiddleware } from 'redux'
 import {createMiddleware, composeMiddleware} from 'mindfront-redux-utils'
 import {loadFeatureMiddleware, featureMiddlewaresMiddleware} from 'redux-features'
 
 import reducer from '../../universal/redux/reducer'
 import type {Store, Middleware, State, Action} from '../../universal/redux/types'
+import {authMiddleware} from '../auth/middleware'
 
-export default (initialState: State): Store => {
+type Options = {
+  client: ApolloClient,
+}
+
+export default (initialState: State, {client}: Options): Store => {
   const middlewares: Array<Middleware> = [
     loadFeatureMiddleware({createMiddleware}),
     featureMiddlewaresMiddleware({composeMiddleware}),
+    authMiddleware({client}),
   ]
 
   // istanbul ignore next

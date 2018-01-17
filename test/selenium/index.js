@@ -14,6 +14,7 @@ import resolveUrl from './util/resolveUrl'
 import mergeCoverage from './util/mergeCoverage'
 
 import graphql from './util/graphql'
+import getHostIP from './util/getHostIP'
 
 const password = requireEnv('TEST_PASSWORD')
 
@@ -32,14 +33,22 @@ const seleniumConfigs = [
   {
     desiredCapabilities: {
       browserName: 'firefox',
+      "moz:firefoxOptions": {
+        // flag to activate Firefox headless mode (see https://github.com/mozilla/geckodriver/blob/master/README.md#firefox-capabilities for more details about moz:firefoxOptions)
+        args: ['-headless']
+      },
     },
   },
 ]
 
 describe('selenium tests', function () {
-  this.timeout(30000)
+  this.timeout(60000)
+
+  let selenium
 
   before(async function () {
+    process.env.HOST_IP_ADDRESS = await getHostIP()
+
     try {
       await poll(() => superagent.get('/'), 1000).timeout(15000)
     } catch (error) {
@@ -52,6 +61,7 @@ describe('selenium tests', function () {
       variables: {password},
       withToken: false,
     })
+    selenium = await promisify(cb => require('selenium-standalone').start(cb))()
   })
 
   after(async function () {
@@ -61,6 +71,7 @@ describe('selenium tests', function () {
     } catch (error) {
       console.error("Couldn't get server coverage:", error.message) // eslint-disable-line no-console
     }
+    if (selenium) selenium.kill()
   })
 
   seleniumConfigs.forEach(config => {
@@ -104,10 +115,11 @@ describe('selenium tests', function () {
           let logs
           try {
             logs = (await browser.log('browser')).value
+            await fs.writeFile(logFile, [...logs.map(({message}) => message)].join('\n'), 'utf8')
+            await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
           } catch (error) {
             console.error(error.stack) // eslint-disable-line no-console
           }
-          await fs.writeFile(logFile, [...logs.map(({message}) => message)].join('\n'), 'utf8')
         } else {
           const files = await promisify(glob)(filePrefix + '*')
           files.forEach(file => fs.remove(file)) // no need to wait for promise
@@ -119,6 +131,7 @@ describe('selenium tests', function () {
       require('./basicTests')()
       require('./AuthTests')()
       require('./SidebarTests')()
+      require('./ChannelForm')()
     })
   })
 })

@@ -14,9 +14,9 @@ import {throttle} from 'lodash'
 import Sidebar from './Sidebar'
 import type {Action, Dispatch, State} from '../../redux/types'
 import {setSidebarOpen, setSectionExpanded} from '../../redux/sidebar'
-import type {ChannelMode} from '../../types/Channel'
 import type {SectionName} from '../../redux/sidebar'
 import type {Theme} from '../../theme'
+import createSubscribeToChannelStates from '../../apollo/createSubscribeToChannelStates'
 
 type ChannelState = {
   id?: number,
@@ -26,7 +26,6 @@ type ChannelState = {
 type Channel = {
   id: number,
   name: string,
-  mode: ChannelMode,
   state?: ChannelState,
 }
 
@@ -135,22 +134,10 @@ const query = gql(`{
   Channels {
     id
     name 
-    mode
-    state {
-      id
-      value
-    }
+    config
+    state
   }  
 }`)
-
-const channelStatesSubscription = gql(`
-  subscription ChannelStates {
-    ChannelStates {
-      id
-      value
-    }
-  }  
-`)
 
 export default compose(
   graphql(query, {
@@ -160,31 +147,7 @@ export default compose(
     },
     props: props => ({
       ...props,
-      subscribeToChannelStates: () => {
-        return props.data.subscribeToMore({
-          document: channelStatesSubscription,
-          updateQuery: (prev: {Channels: Array<Channel>}, update: {subscriptionData: {data: ?{ChannelStates: ChannelState}, errors?: Array<Error>}}) => {
-            const {subscriptionData: {data, errors}} = update
-            if (errors) {
-              errors.forEach(error => console.error(error.message)) // eslint-disable-line no-console
-              return prev
-            }
-            if (!data) return prev
-            const {ChannelStates: newState} = data
-            if (!newState.id) return prev
-            const Channels = [...prev.Channels]
-            const index = Channels.findIndex(channel => channel.id === newState.id)
-            if (index >= 0) Channels[index] = {
-              ...Channels[index],
-              state: newState,
-            }
-            return {
-              ...prev,
-              Channels,
-            }
-          },
-        })
-      }
+      subscribeToChannelStates: createSubscribeToChannelStates(props)
     }),
   }),
   withRouter,

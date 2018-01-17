@@ -8,7 +8,7 @@ import {enableBatching} from 'redux-batched-actions'
 import type {Reducer} from './types'
 import {StateRecord} from './types'
 import {renderModeReducer} from './renderMode'
-import {reducer as form} from 'redux-form/immutable'
+import {reducer as form} from 'redux-form'
 import {sidebarReducer} from './sidebar'
 
 const reducer: Reducer = enableBatching(composeReducers(

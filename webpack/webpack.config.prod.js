@@ -10,6 +10,8 @@ const babelOptions = require('./babelOptions')
 const babelInclude = require('./babelInclude')
 
 const root = path.resolve(__dirname, '..')
+const src = path.join(root, 'src')
+const universal = path.join(src, 'universal')
 
 const vendor = [
   'babel-polyfill',
@@ -95,6 +97,21 @@ const config = {
             {loader: 'sass-loader', options: {sourceMap: true}},
           ]
         }),
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        options: {
+          ...babelOptions,
+          plugins: [
+            ...babelOptions.plugins,
+            'transform-decorators-legacy',
+            'flow-runtime',
+          ],
+        },
+        include: [
+          path.join(universal, 'types'),
+        ],
       },
       {
         test: /\.js$/,

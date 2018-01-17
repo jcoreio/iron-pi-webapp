@@ -18,7 +18,7 @@ const SidebarSection = (
     <React.Fragment>
       <SidebarSectionHeader title={title} expanded={expanded} onClick={onHeaderClick} />
       <Collapse component="li" in={expanded} timeout="auto" unmountOnExit>
-        <List disablePadding data-test-title={title}>
+        <List component="div" disablePadding data-test-title={title} data-component="List">
           {children}
         </List>
       </Collapse>

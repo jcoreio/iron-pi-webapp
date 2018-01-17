@@ -1,19 +1,57 @@
 // @flow
 
 import Sequelize, {Model} from 'sequelize'
-import type {ChannelMode} from '../../universal/types/Channel'
-import {channelIdPattern} from '../../universal/types/Channel'
+import type {
+  ChannelConfig, ChannelMode, DigitalInputConfig, DigitalOutputConfig, SetAnalogInputState,
+  SetDisabledState
+} from '../../universal/types/Channel'
+import {channelIdPattern, validateChannelConfig} from '../../universal/types/Channel'
+import {setChannelStates} from '../localio/ChannelStates'
+import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
 
 export type ChannelInitAttributes = {
   id: number;
   name: string;
   channelId: string;
-  mode: ChannelMode;
+  config?: ChannelConfig;
 }
 
 export type ChannelAttributes = ChannelInitAttributes & {
   createdAt: Date;
   updatedAt: Date;
+  config: ChannelConfig;
+}
+
+export function updateChannelState(channel: Channel) {
+  const {id, config} = channel
+  const {mode} = config
+  switch (mode) {
+  case 'ANALOG_INPUT':
+    setChannelStates(({id, mode}: SetAnalogInputState))
+    break
+  case 'DIGITAL_INPUT': {
+    const {reversePolarity}: DigitalInputConfig = (config: any)
+    setChannelStates({id, mode, reversePolarity})
+    break
+  }
+  case 'DIGITAL_OUTPUT': {
+    const {safeState, reversePolarity, controlMode}: DigitalOutputConfig = (config: any)
+    const state = {id, mode, safeState, reversePolarity}
+    if (controlMode === 'FORCE_OFF') (state: any).controlValue = 0
+    else if (controlMode === 'FORCE_ON') (state: any).controlValue = 1
+    setChannelStates(state)
+    break
+  }
+  case 'DISABLED':
+    setChannelStates(({id, mode}: SetDisabledState))
+    break
+  }
+}
+
+function updateChannelStateHook(channel: Channel) {
+  if (channel.changed('config')) {
+    updateChannelState(channel)
+  }
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
@@ -21,6 +59,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
   name: string;
   channelId: string;
   mode: ChannelMode;
+  config: ChannelConfig;
   createdAt: Date;
   updatedAt: Date;
 
@@ -30,24 +69,44 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
         primaryKey: true,
         type: Sequelize.INTEGER,
         allowNull: false,
-        min: 0,
+        validate: {
+          min: 0,
+        },
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        is: /^\S(.*\S)?$/, // no whitespace at beginning or end
+        validate: {
+          is: {
+            args: /^\S(.*\S)?$/,
+            msg: 'must not start or end with whitespace',
+          } // no whitespace at beginning or end
+        }
       },
       channelId: {
         type: Sequelize.STRING,
         allowNull: false,
-        is: channelIdPattern,
+        validate: {
+          is: {
+            args: channelIdPattern,
+            msg: 'must be a valid channel ID'
+          },
+        },
       },
-      mode: {
-        type: Sequelize.ENUM('ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED'),
+      config: {
+        type: Sequelize.JSON,
         allowNull: false,
-        defaultValue: 'DISABLED',
+        defaultValue: {mode: 'DISABLED'},
+        validate: {
+          isValid: validateWithFlowRuntime(validateChannelConfig, {reduxFormStyle: true})
+        },
       },
-    }, {sequelize})
+    }, {
+      sequelize,
+    })
+
+    this.afterCreate(updateChannelStateHook)
+    this.afterUpdate(updateChannelStateHook)
   }
 
   static initAssociations() {

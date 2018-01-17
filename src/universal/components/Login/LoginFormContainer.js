@@ -1,24 +1,27 @@
 // @flow
 
 import * as React from 'react'
-import {reduxForm, SubmissionError} from 'redux-form/immutable'
+import {reduxForm, SubmissionError} from 'redux-form'
 import LoginForm from './LoginForm'
+import type {Dispatch} from '../../redux/types'
+import {login} from '../../auth/actions'
 
 type Props = {
-  handleSubmit: (onSubmit: (values: Map<string, any>) => Promise<void>) => (values: Map<string, any>) => void,
+  handleSubmit: (onSubmit: (values: {password: string}) => Promise<void>) => (values: {password: string}) => void,
   submitting?: boolean,
   valid?: boolean,
   error?: any,
+  dispatch: Dispatch,
 }
 
 class LoginFormContainer extends React.Component<Props> {
-  handleSubmit = async (values: Map<string, any>): Promise<any> => {
+  handleSubmit = async (values: {password: string}): Promise<any> => {
+    const {dispatch} = this.props
     if (__CLIENT__) {
-      const login = require('../../../client/auth/login').default
-
-      const password = values.get('password')
+      const {password} = values
       if (!password) throw new Error("missing password")
-      return login({password}).catch((error: Error) => {
+      const promise: Promise<void> = (dispatch(login({password})): any)
+      return promise.catch((error: Error) => {
         if (/invalid .*password/i.test(error.message)) {
           throw new SubmissionError({password: 'Incorrect password'})
         }

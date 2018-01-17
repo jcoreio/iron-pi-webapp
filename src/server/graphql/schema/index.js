@@ -4,13 +4,15 @@ import type Sequelize, {Model} from 'sequelize'
 import * as graphql from 'graphql'
 import {mapValues} from 'lodash'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
-
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
+import GraphQLJSON from 'graphql-type-json'
+
 import Channel from '../../models/Channel'
-import type {ChannelState} from '../../../universal/types/Channel'
+import type {Calibration, ChannelState} from '../../../universal/types/Channel'
 import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
 import User from '../../models/User'
+import type {ChannelAttributes} from '../../models/Channel'
 
 export type Options = {
   sequelize: Sequelize,
@@ -35,39 +37,50 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
     return types[model.name]
   }
 
-  const ChannelStateType = new graphql.GraphQLObjectType({
-    name: 'ChannelState',
-    description: 'the realtime state of a channel',
-    fields: {
-      id: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-        description: 'the numeric id (primary key) of the channel',
-      },
-      value: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLFloat),
-        description: 'the current value of the channel',
-      },
-    },
-  })
-
   const extraFields = {
     [Channel.name]: {
       state: {
-        type: ChannelStateType,
+        type: GraphQLJSON,
         description: 'the state of this channel',
-        resolve(source: Channel): ?ChannelState {
+        resolve(source: ChannelAttributes): ?ChannelState {
           return getChannelState(source.id)
         },
       },
     },
   }
 
+  const attributeFieldsCache = {}
+
   const types = mapValues(models, (model: Class<Model<any>>) => new graphql.GraphQLObjectType({
     name: model.name,
     fields: () => ({
-      ...attributeFields(model),
+      ...attributeFields(model, {cache: attributeFieldsCache}),
       ...associationFields(model, {getType, getArgs}),
       ...extraFields[model.name] || {},
+    })
+  }))
+
+  const inputTypes = mapValues(models, (model: Class<Model<any>>) => new graphql.GraphQLInputObjectType({
+    name: `Input${model.name}`,
+    fields: () => ({
+      ...attributeFields(model, {
+        cache: attributeFieldsCache,
+        only: (key: string) => model.primaryKeys.hasOwnProperty(key),
+      }),
+      ...attributeFields(model, {
+        allowNull: true,
+        cache: attributeFieldsCache,
+        exclude: (key: string) => {
+          if (model.primaryKeys.hasOwnProperty(key)) {
+            return true
+          }
+          switch (key) {
+          case 'createdAt':
+          case 'updatedAt':
+            return true
+          }
+        },
+      }),
     })
   }))
 
@@ -126,13 +139,57 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
           type: new graphql.GraphQLNonNull(graphql.GraphQLString),
         },
       },
-      resolve: async (obj: any, {username}: Object, context: Context): Promise<any> => {
+      resolve: async (doc: any, {username}: Object, context: Context): Promise<any> => {
         const {userId: id} = context
         if (!id) throw new graphql.GraphQLError('You must be logged in to change your username')
         const [numAffected] = await User.update({username}, {where: {id}})
         if (!numAffected) throw new graphql.GraphQLError('Failed to find a user with the given id')
         return await User.findOne({where: {id}})
       }
+    },
+    updateChannel: {
+      type: types[Channel.name],
+      args: {
+        channel: {
+          type: inputTypes[Channel.name],
+        }
+      },
+      resolve: async (doc: any, {channel}: {channel: $Shape<ChannelAttributes>}, context: Context): Promise<any> => {
+        const {userId} = context
+        if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
+
+        const {
+          id,
+          createdAt, updatedAt, // eslint-disable-line no-unused-vars
+          ...updates
+        } = channel
+        await Channel.update(updates, {where: {id}, individualHooks: true})
+        const result = await Channel.findOne({where: {id}})
+        if (!result) throw new graphql.GraphQLError('Failed to find updated Channel')
+        return result.get({plain: true, raw: true})
+      },
+    },
+    updateCalibration: {
+      type: types[Channel.name],
+      args: {
+        id: {
+          type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+        },
+        calibration: {
+          type: new graphql.GraphQLNonNull(GraphQLJSON),
+        },
+      },
+      resolve: async (doc: any, {id, calibration}: {id: number, calibration: Calibration}, context: Context): Promise<any> => {
+        const {userId} = context
+        if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
+
+        const channel = await Channel.findOne({where: {id}})
+        if (!channel) throw new graphql.GraphQLError('Failed to find Channel to update')
+        await channel.update({config: {...channel.config, calibration}}, {individualHooks: true})
+        const result = await Channel.findOne({where: {id}})
+        if (!result) throw new graphql.GraphQLError('Failed to find updated Channel')
+        return result.get({plain: true, raw: true})
+      },
     }
   }
 
@@ -146,9 +203,26 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
   const subscription = new graphql.GraphQLObjectType({
     name: 'Subscription',
     fields: {
+      ChannelState: {
+        type: new graphql.GraphQLNonNull(GraphQLJSON),
+        description: 'Subscribes to the state of a single channel',
+        args: {
+          id: {
+            type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+            description: 'The id (primary key) of the channel to subscribe to',
+          },
+        },
+        subscribe(doc: any, {id}: {id: number}, context: Context): AsyncIterator<ChannelState> {
+          const {userId} = context
+          if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
+          return pubsub.asyncIterator(`ChannelState/${id}`)
+        }
+      },
       ChannelStates: {
-        type: new graphql.GraphQLNonNull(ChannelStateType),
-        subscribe(): AsyncIterator<ChannelState> {
+        type: new graphql.GraphQLNonNull(GraphQLJSON),
+        subscribe(doc: any, args: any, context: Context): AsyncIterator<ChannelState> {
+          const {userId} = context
+          if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
           return pubsub.asyncIterator('ChannelStates')
         }
       },
