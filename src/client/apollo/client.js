@@ -58,7 +58,8 @@ export default function createClient(options: Options = {}): ApolloClient {
   const wsLink = new WebSocketLink({
     uri: `ws://${window.location.host}/graphql`,
     options: {
-      reconnect: true
+      reconnect: true,
+      connectionParams: () => ({token: localStorage.getItem('token')}),
     }
   })
 

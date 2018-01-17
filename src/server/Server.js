@@ -3,8 +3,7 @@
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
-import {execute, subscribe, GraphQLSchema} from 'graphql'
-import {SubscriptionServer} from 'subscriptions-transport-ws'
+import type {GraphQLSchema} from 'graphql'
 import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import {defaults} from 'lodash'
@@ -31,6 +30,7 @@ import authorize from './auth/authorize'
 import createToken from './auth/createToken'
 import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
+import createSubscriptionServer from './express/subscriptionServer'
 
 const log = logger('Server')
 
@@ -147,10 +147,11 @@ export default class Server {
 
       const port = this._port
       const httpServer = this._httpServer = app.listen(port)
-      SubscriptionServer.create(
-        {schema: graphqlSchema, execute, subscribe},
-        {server: httpServer, path: GRAPHQL_PATH},
-      )
+      createSubscriptionServer({
+        schema: graphqlSchema,
+        server: httpServer,
+        path: GRAPHQL_PATH,
+      })
 
       // istanbul ignore next
       if (process.env.NODE_ENV !== 'production') {

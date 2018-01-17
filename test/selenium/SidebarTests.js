@@ -9,6 +9,7 @@ import graphql from './util/graphql'
 import theme from '../../src/universal/theme'
 import loginIfNecessary from './util/loginIfNecessary'
 import logoutIfNecessary from './util/logoutIfNecessary'
+import getText from './util/getText'
 
 const WIDE = theme.sidebar.autoOpenBreakpoint()
 
@@ -151,8 +152,8 @@ module.exports = () => describe('Sidebar', function () {
         await browser.waitForVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]', 10000)
 
         browser.timeouts('implicit', 5000)
-        const displayedChannelIds = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="id"]')
-        const displayedChannelNames = await browser.getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="name"]')
+        const displayedChannelIds = await getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="id"]')
+        const displayedChannelNames = await getText('#sidebar [data-component="List"][data-test-title="Local I/O"] [data-component="ChannelStateItem"] [data-test-name="name"]')
 
         expect(displayedChannelIds).to.deep.equal(Channels.map(({id}) => String(id)))
         expect(displayedChannelNames).to.deep.equal(Channels.map(({name}) => name))

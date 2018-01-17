@@ -212,13 +212,17 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
             description: 'The id (primary key) of the channel to subscribe to',
           },
         },
-        subscribe(doc: any, {id}: {id: number}): AsyncIterator<ChannelState> {
+        subscribe(doc: any, {id}: {id: number}, context: Context): AsyncIterator<ChannelState> {
+          const {userId} = context
+          if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
           return pubsub.asyncIterator(`ChannelState/${id}`)
         }
       },
       ChannelStates: {
         type: new graphql.GraphQLNonNull(GraphQLJSON),
-        subscribe(): AsyncIterator<ChannelState> {
+        subscribe(doc: any, args: any, context: Context): AsyncIterator<ChannelState> {
+          const {userId} = context
+          if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
           return pubsub.asyncIterator('ChannelStates')
         }
       },
