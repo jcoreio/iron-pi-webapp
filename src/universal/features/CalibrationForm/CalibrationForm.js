@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import {dirname} from 'path'
 import type {Match, Location, RouterHistory} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
@@ -12,7 +13,6 @@ import ChevronLeft from 'material-ui-icons/ChevronLeft'
 import ChevronRight from 'material-ui-icons/ChevronRight'
 import Typography from 'material-ui/Typography'
 import ViewSlider from 'react-view-slider/lib/simpleWithTransitionContext'
-import {dirname} from 'path'
 import {createSelector} from 'reselect'
 
 import NumPointsStep from './NumPointsStep'
@@ -194,8 +194,13 @@ class CalibrationForm extends React.Component<Props, State> {
   }
 
   handleSubmit = ({points}: Calibration): Promise<any> => {
-    const {mutate, channelId} = this.props
-    return mutate({variables: {id: channelId, calibration: {points}}}).catch(handleError)
+    const {mutate, channelId, history, match} = this.props
+    return mutate({variables: {id: channelId, calibration: {points}}}).then(
+      () => {
+        history.push(dirname(match.url))
+      },
+      handleError
+    )
   }
 
   render(): ?React.Node {
