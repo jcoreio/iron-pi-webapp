@@ -48,9 +48,7 @@ const Html = ({routerContext, location, title, assets, store}: Props): React.Ele
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>{title}</title>
         {vendor && vendor.css && <link rel="stylesheet" type="text/css" href={vendor.css} />}
-        <style type="text/css" id="server-side-styles">
-          {sheets.toString()}
-        </style>
+        <style type="text/css" id="server-side-styles" dangerouslySetInnerHTML={{__html: sheets.toString()}} />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{__html: environmentScript}} />
