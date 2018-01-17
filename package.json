@@ -88,6 +88,8 @@
     "redux-form-numeric-field": "^1.0.0",
     "redux-track-promise": "^2.1.0",
     "sequelize": "^4.23.2",
+    "sequelize-validate-subfields": "^1.1.0",
+    "sequelize-validate-subfields-flow-runtime": "^1.0.0",
     "subscriptions-transport-ws": "^0.9.4",
     "superagent": "^3.6.0",
     "superagent-logger": "^1.1.0",

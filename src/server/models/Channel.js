@@ -7,7 +7,7 @@ import type {
 } from '../../universal/types/Channel'
 import {channelIdPattern, validateChannelConfig} from '../../universal/types/Channel'
 import {setChannelStates} from '../localio/ChannelStates'
-import validateWithFlowRuntime from '../sequelize/validateWithFlowRuntime'
+import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
 
 export type ChannelInitAttributes = {
   id: number;
@@ -98,7 +98,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
         allowNull: false,
         defaultValue: {mode: 'DISABLED'},
         validate: {
-          isValid: validateWithFlowRuntime(validateChannelConfig)
+          isValid: validateWithFlowRuntime(validateChannelConfig, {reduxFormStyle: true})
         },
       },
     }, {

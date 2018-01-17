@@ -7453,6 +7453,17 @@ send@0.16.1:
     range-parser "~1.2.0"
     statuses "~1.3.1"
 
+sequelize-validate-subfields-flow-runtime@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/sequelize-validate-subfields-flow-runtime/-/sequelize-validate-subfields-flow-runtime-1.0.0.tgz#5ae650b4adbee1c6f956ccaa414ff7781d6929c8"
+  dependencies:
+    lodash.get "^4.4.2"
+    sequelize-validate-subfields "^1.0.0"
+
+sequelize-validate-subfields@^1.0.0, sequelize-validate-subfields@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/sequelize-validate-subfields/-/sequelize-validate-subfields-1.1.0.tgz#a808961e1e7c978daa2fcf1dad2fad3f737d45fb"
+
 sequelize@^4.23.2:
   version "4.29.2"
   resolved "https://registry.npmjs.org/sequelize/-/sequelize-4.29.2.tgz#f31d720f6d0d7dad36ac8a994336fae913fe1fe7"
