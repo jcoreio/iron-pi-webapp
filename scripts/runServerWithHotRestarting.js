@@ -2,7 +2,7 @@
 
 import path from 'path'
 import chokidar from 'chokidar'
-import {debounce} from 'lodash'
+import debounce from 'lodash.debounce'
 // $FlowFixMe
 import _module from 'module'
 import watchMigrations from 'umzug-beobachten'

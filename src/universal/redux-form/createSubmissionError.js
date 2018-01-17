@@ -1,6 +1,6 @@
 // @flow
 
-import {set} from 'lodash'
+import set from 'lodash.set'
 import {SubmissionError} from 'redux-form'
 
 export default function createSubmissionError(err: {message: string, graphQLErrors?: Array<any>}) {

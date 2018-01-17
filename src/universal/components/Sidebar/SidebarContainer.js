@@ -9,7 +9,7 @@ import {compose, bindActionCreators} from 'redux'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
 import {withTheme} from 'material-ui/styles'
-import {throttle} from 'lodash'
+import throttle from 'lodash.throttle'
 
 import Sidebar from './Sidebar'
 import type {Action, Dispatch, State} from '../../redux/types'

@@ -4,7 +4,7 @@ import {Client} from 'pg'
 import type Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import promisify from 'es6-promisify'
-import {range} from 'lodash'
+import range from 'lodash.range'
 
 import logger from '../../universal/logger'
 import Channel from '../models/Channel'

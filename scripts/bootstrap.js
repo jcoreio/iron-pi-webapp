@@ -5,10 +5,8 @@ const path = require('path')
 const glob = require('glob')
 const {exec} = require('./promake')
 const fs = require('fs-extra')
-const {
-  snakeCase,
-  startCase,
-} = require('lodash')
+const snakeCase = require('lodash.snakecase')
+const startCase = require('lodash.startcase')
 
 const homedir = path.normalize(require('os').homedir())
 

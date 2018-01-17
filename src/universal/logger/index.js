@@ -5,7 +5,7 @@
  * these functions allows us to easily swap in another logging framework or appender later.
  */
 
-import _ from 'lodash'
+import invert from 'lodash.invert'
 
 export type Logger = {
   trace: (...args: Array<any>) => void,
@@ -32,7 +32,7 @@ export const logLevelToName = {
   [LOG_LEVEL_FATAL]: 'FATAL',
 }
 
-export const nameToLogLevel = _.invert(logLevelToName)
+export const nameToLogLevel = invert(logLevelToName)
 
 export default function logger(loggerName: string): Logger & {setLevel: (level: string) => void} {
   let logLevel: number = nameToLogLevel[process.env.LOG_LEVEL || 'INFO'] || LOG_LEVEL_INFO
@@ -49,7 +49,7 @@ export default function logger(loggerName: string): Logger & {setLevel: (level: 
       logLevel = newLevel
       console.log('log level is ', logLevel, typeof logLevel)
     } else {
-      log(LOG_LEVEL_ERROR, new Error(`could not set log level to ${level}: must be one of ${_.values(logLevelToName).join(', ')}`).stack)
+      log(LOG_LEVEL_ERROR, new Error(`could not set log level to ${level}: must be one of ${Object.values(logLevelToName).join(', ')}`).stack)
     }
   }
   return {

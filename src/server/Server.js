@@ -6,7 +6,7 @@ import bodyParser from 'body-parser'
 import type {GraphQLSchema} from 'graphql'
 import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
-import {defaults} from 'lodash'
+import defaults from 'lodash.defaults'
 
 import type {$Request, $Response} from 'express'
 

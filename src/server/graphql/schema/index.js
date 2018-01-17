@@ -2,7 +2,7 @@
 
 import type Sequelize, {Model} from 'sequelize'
 import * as graphql from 'graphql'
-import {mapValues} from 'lodash'
+import mapValues from 'lodash.mapvalues'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
 import GraphQLJSON from 'graphql-type-json'

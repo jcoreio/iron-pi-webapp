@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {map} from 'lodash'
+import map from 'lodash.map'
 import {Field} from 'redux-form'
 import {NumericField} from 'redux-form-numeric-field'
 import {required} from '@jcoreio/redux-form-validators'

@@ -1,7 +1,7 @@
 // @flow
 
 import gql from 'graphql-tag'
-import {get} from 'lodash'
+import get from 'lodash.get'
 import {setIn} from '@jcoreio/mutate'
 
 const channelStatesSubscription = gql(`
