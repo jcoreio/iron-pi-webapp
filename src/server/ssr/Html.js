@@ -9,6 +9,8 @@ import {SheetsRegistry, JssProvider} from 'react-jss'
 import type {ApolloClient} from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
 import {MuiThemeProvider} from 'material-ui/styles'
+import postcss from 'postcss'
+import autoprefixer from 'autoprefixer'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
@@ -16,6 +18,8 @@ import theme from '../../universal/theme'
 import createJss from '../../universal/jss/createJss'
 
 const jss = createJss()
+
+const postcssInstance = postcss([autoprefixer()])
 
 type Props = {
   title: string,
@@ -76,7 +80,11 @@ const Html = ({
         <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500" rel="stylesheet" />
         {vendor && vendor.css && <link rel="stylesheet" type="text/css" href={vendor.css} />}
         <style type="text/css">{staticCss}</style>
-        <style type="text/css" id="server-side-styles" dangerouslySetInnerHTML={{__html: sheets.toString()}} />
+        <style
+          type="text/css"
+          id="server-side-styles"
+          dangerouslySetInnerHTML={{__html: postcssInstance.process(sheets.toString())}}
+        />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{__html: environmentScript}} />
