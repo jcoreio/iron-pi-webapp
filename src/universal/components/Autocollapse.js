@@ -36,7 +36,7 @@ export default class Autocollapse extends React.Component<Props, State> {
     const {hasChildren, children} = this.state
 
     return (
-      <Collapse in={hasChildren}>
+      <Collapse in={hasChildren} {...this.props}>
         {children.length === 1 ? children[0] : <div>{children}</div>}
       </Collapse>
     )

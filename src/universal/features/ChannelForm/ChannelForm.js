@@ -14,6 +14,7 @@ import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
+import ErrorAlert from '../../components/ErrorAlert'
 import ButtonGroupField from '../../components/ButtonGroupField'
 
 import {channelIdPattern, ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
@@ -24,6 +25,7 @@ import DigitalOutputConfigSection from './DigitalOutputConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
 import handleError from '../../redux-form/createSubmissionError'
 import parseChannelFormValues from './parseChannelFormValues'
+import Autocollapse from '../../components/Autocollapse'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -40,10 +42,13 @@ const styles = ({spacing}: Theme) => ({
   lastFaderChild: {
     marginBottom: 0,
   },
+  errorCollapse: {
+    marginTop: spacing.unit * 2,
+  },
   buttons: {
     textAlign: 'right',
     marginTop: spacing.unit * 2,
-    '& > *': {
+    '& > button': {
       minWidth: 120,
     },
     '& > :not(:last-child)': {
@@ -108,6 +113,7 @@ export type Props = {
   initialized?: boolean,
   submitting?: boolean,
   pristine?: boolean,
+  error?: string,
   data: {
     Channel?: FullChannel,
     Channels?: Array<Channel>,
@@ -167,7 +173,10 @@ class ChannelForm extends React.Component<Props> {
   }
 
   render(): React.Node {
-    const {classes, data: {Channels, Channel, loading}, initialized, pristine, submitting, handleSubmit} = this.props
+    const {
+      classes, data: {Channels, Channel, loading}, initialized, pristine, submitting, handleSubmit,
+      error,
+    } = this.props
     if (loading || !initialized) {
       return (
         <div className={classes.form}>
@@ -235,7 +244,11 @@ class ChannelForm extends React.Component<Props> {
             tallButtonClass={classes.tallButton}
             channels={Channels}
           />
+          <Autocollapse className={classes.errorCollapse}>
+            {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
+          </Autocollapse>
           <div className={classes.buttons}>
+            <Spinner in={Boolean(submitting)} />
             <Button
               raised
               className={classes.tallButton}
@@ -250,7 +263,7 @@ class ChannelForm extends React.Component<Props> {
               className={classes.tallButton}
               disabled={pristine || submitting}
             >
-              OK
+              Save
             </Button>
           </div>
         </Paper>
