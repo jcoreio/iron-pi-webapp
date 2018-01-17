@@ -28,6 +28,7 @@
     "apollo-link-ws": "^1.0.2",
     "apollo-server-express": "^1.2.0",
     "apollo-utilities": "^1.0.3",
+    "autoprefixer": "^7.2.5",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
@@ -51,6 +52,7 @@
     "p-timeout": "^2.0.1",
     "pg": "^6",
     "pg-hstore": "^2.3.2",
+    "postcss": "^6.0.16",
     "promisify-event": "^1.0.0",
     "prop-types": "^15.5.8",
     "react": "^16.2.0",
@@ -177,5 +179,9 @@
   "pre-commit": [
     "lint",
     "flow"
+  ],
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
   ]
 }

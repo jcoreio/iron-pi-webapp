@@ -2,7 +2,7 @@ module.exports = {
   "babelrc": false,
   "presets": [
     ["env", {
-      "targets": {"browsers": "> 5%", "uglify": true}, "loose": true, "modules": false,
+      "targets": {"browsers": require('../package.json').browserslist, "uglify": true}, "loose": true, "modules": false,
     }],
     "react", "flow"
   ],
