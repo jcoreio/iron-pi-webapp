@@ -34,14 +34,18 @@ const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Objec
 ))
 
 const styles = ({spacing, palette}: Theme) => ({
+  root: {
+    width: '100%',
+  },
   table: {
-    marginTop: spacing.unit * 2,
+    marginTop: -spacing.unit * 3,
     borderCollapse: 'separate',
     border: {
       width: 2,
       style: 'solid',
       color: palette.grey[500],
     },
+    borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
     '& td, & th': {
@@ -87,7 +91,6 @@ export type Props = {
   classes: Classes,
   fields: Fields,
   editable?: boolean,
-  bodyClass?: string,
   channel?: {
     config: {
       units?: string,
@@ -102,13 +105,13 @@ export type Props = {
 
 class CalibrationTable extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes, fields, meta, channel, bodyClass} = this.props
+    const {classes, fields, meta, channel} = this.props
     const editable = this.props.editable !== false
     const {warning, error, submitFailed} = meta || {}
     const hasError = submitFailed && (error != null || warning != null)
     const {units} = channel && channel.config || {}
     return (
-      <FormControl error={hasError} className={bodyClass}>
+      <FormControl error={hasError} className={classes.root}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
@@ -117,7 +120,7 @@ class CalibrationTable extends React.Component<Props> {
               </TableCell>
               <TableCell />
               <TableCell>
-                Actual Value ({units})
+                Actual Value {units ? `(${units})` : undefined}
               </TableCell>
               {editable &&
                 <TableCell>

@@ -18,11 +18,22 @@ const channelQuery = gql(`query Channels($id: Int!) {
 }
 `)
 
+const mutationQuery = gql(`
+mutation updateCalibration($id: Int!, $calibration: JSON!) {
+  updateCalibration(id: $id, calibration: $calibration) {
+    id
+    config
+  }
+}
+`)
+
+
 type Props = {
   channelId: number,
 }
 
 export default compose(
+  graphql(mutationQuery),
   graphql(channelQuery, {
     options: ({channelId}: Props) => ({
       variables: {id: channelId},

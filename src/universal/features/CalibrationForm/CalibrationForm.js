@@ -8,7 +8,6 @@ import {compose} from 'redux'
 import Paper from 'material-ui/Paper'
 import {formValues, FieldArray} from 'redux-form'
 import Button from 'material-ui/Button'
-import Fade from 'material-ui/transitions/Fade'
 import ChevronLeft from 'material-ui-icons/ChevronLeft'
 import ChevronRight from 'material-ui-icons/ChevronRight'
 import Typography from 'material-ui/Typography'
@@ -22,9 +21,12 @@ import CalibrationTable from './CalibrationTable'
 import Spinner from '../../components/Spinner'
 
 import Fader from '../../components/Fader'
+import ErrorAlert from '../../components/ErrorAlert'
+import Autocollapse from '../../components/Autocollapse'
 import type {Theme} from '../../theme/index'
 import type {Calibration, Channel as FullChannel} from '../../types/Channel'
 import {CALIBRATION_TABLE} from '../../react-router/routePaths'
+import handleError from '../../redux-form/createSubmissionError'
 
 const styles = ({spacing, calibration}: Theme) => ({
   form: {
@@ -57,11 +59,17 @@ const styles = ({spacing, calibration}: Theme) => ({
       marginLeft: spacing.unit,
     },
   },
+  errorCollapse: {
+    marginTop: spacing.unit,
+  },
   flexSpacer: {
     flexGrow: 1,
   },
   numPointsField: {
     width: '100%',
+  },
+  hidden: {
+    visibility: 'hidden',
   },
 })
 
@@ -81,6 +89,9 @@ export type Props = {
   initialize: (values: Calibration) => any,
   change: (field: string, newValue: any) => void,
   subscribeToChannelState?: (id: number) => Function,
+  channelId: number,
+  error?: string,
+  mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
   data: {
     Channel?: FullChannel,
     loading?: boolean,
@@ -182,18 +193,25 @@ class CalibrationForm extends React.Component<Props, State> {
     else this.setState({step: step + 1})
   }
 
+  handleSubmit = ({points}: Calibration): Promise<any> => {
+    const {mutate, channelId} = this.props
+    return mutate({variables: {id: channelId, calibration: {points}}}).catch(handleError)
+  }
+
   render(): ?React.Node {
-    const {match, classes, handleSubmit, submitting, data: {Channel, loading}, initialized} = this.props
+    const {match, classes, handleSubmit, submitting, data: {Channel, loading}, initialized, error} = this.props
     const isInCalibration = this.isInCalibration(this.props)
 
     if (loading || !initialized) {
-      <div className={classes.form}>
-        <Paper className={classes.paper}>
-          <Typography type="subheading">
-            <Spinner /> Loading channel calibration...
-          </Typography>
-        </Paper>
-      </div>
+      return (
+        <div className={classes.form}>
+          <Paper className={classes.paper}>
+            <Typography type="subheading">
+              <Spinner /> Loading channel calibration...
+            </Typography>
+          </Paper>
+        </div>
+      )
     }
 
     const {step} = this.state
@@ -218,7 +236,7 @@ class CalibrationForm extends React.Component<Props, State> {
       }
 
     return (
-      <form className={classes.form} onSubmit={handleSubmit(this.handleNext)}>
+      <form className={classes.form} onSubmit={handleSubmit(isInCalibration ? this.handleSubmit : this.handleNext)}>
         <Paper className={classes.paper}>
           <h3 className={classes.title}>
             <Fader>
@@ -244,13 +262,20 @@ class CalibrationForm extends React.Component<Props, State> {
               </ViewSlider>
             )
           }
+          <Autocollapse className={classes.errorCollapse}>
+            {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
+          </Autocollapse>
           <div className={classes.buttons}>
-            <Fade in={step === 0 && !isInCalibration}>
-              <Button raised component={Link} to={`${match.url}/${CALIBRATION_TABLE}`}>
-                Calibration Table
-              </Button>
-            </Fade>
+            <Button
+              raised
+              component={Link}
+              to={`${match.url}/${CALIBRATION_TABLE}`}
+              className={step === 0 && !isInCalibration ? undefined : classes.hidden}
+            >
+              Calibration Table
+            </Button>
             <div className={classes.flexSpacer} />
+            <Spinner in={Boolean(submitting)} />
             <Button component={Link} raised to={dirname(match.url)}>
               Cancel
             </Button>
@@ -268,8 +293,8 @@ class CalibrationForm extends React.Component<Props, State> {
               type="submit"
               disabled={submitting}
             >
-              Next
-              <ChevronRight />
+              {isInCalibration ? 'OK' : 'Next'}
+              {!isInCalibration && <ChevronRight />}
             </Button>
           </div>
         </Paper>

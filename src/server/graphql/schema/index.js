@@ -8,7 +8,7 @@ import {resolver, attributeFields, defaultArgs} from 'graphql-sequelize'
 import GraphQLJSON from 'graphql-type-json'
 
 import Channel from '../../models/Channel'
-import type {ChannelState} from '../../../universal/types/Channel'
+import type {Calibration, ChannelState} from '../../../universal/types/Channel'
 import {getChannelState} from '../../localio/ChannelStates'
 import pubsub from '../pubsub'
 import User from '../../models/User'
@@ -164,6 +164,28 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
           ...updates
         } = channel
         await Channel.update(updates, {where: {id}, individualHooks: true})
+        const result = await Channel.findOne({where: {id}})
+        if (!result) throw new graphql.GraphQLError('Failed to find updated Channel')
+        return result.get({plain: true, raw: true})
+      },
+    },
+    updateCalibration: {
+      type: types[Channel.name],
+      args: {
+        id: {
+          type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+        },
+        calibration: {
+          type: new graphql.GraphQLNonNull(GraphQLJSON),
+        },
+      },
+      resolve: async (doc: any, {id, calibration}: {id: number, calibration: Calibration}, context: Context): Promise<any> => {
+        const {userId} = context
+        if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
+
+        const channel = await Channel.findOne({where: {id}})
+        if (!channel) throw new graphql.GraphQLError('Failed to find Channel to update')
+        await channel.update({config: {...channel.config, calibration}}, {individualHooks: true})
         const result = await Channel.findOne({where: {id}})
         if (!result) throw new graphql.GraphQLError('Failed to find updated Channel')
         return result.get({plain: true, raw: true})
