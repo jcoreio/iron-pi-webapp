@@ -54,6 +54,117 @@ describe('ChannelStateIcon', () => {
       expect(computedStyle.backgroundColor).to.equal('')
     })
   })
+  describe('for ANALOG_INPUT channel', () => {
+    it('renders correct basic state', () => {
+      const {node} = setup({
+        config: {
+          mode: 'ANALOG_INPUT',
+          precision: 0,
+          min: -10,
+          max: 10,
+        },
+        state: {
+          id: 0,
+          mode: 'ANALOG_INPUT',
+          rawInput: 5,
+          systemValue: 5,
+        },
+      })
+      const computedStyle = getComputedStyle(node)
+      expect(computedStyle.borderRadius).to.equal(`${theme.spacing.unit / 2}px`)
+      expect(computedStyle.width).to.equal(`${theme.spacing.unit * 3}px`)
+      expect(color(computedStyle.backgroundColor).toHexString()).to.equal(theme.channelState.off)
+
+      const bar = node.children[0]
+      if (!bar) throw new Error("couldn't find bar element")
+      const barStyle = getComputedStyle(bar)
+      expect(color(barStyle.backgroundColor).toHexString()).to.equal(theme.channelState.on)
+    })
+    it('renders positive value correctly with zero in the middle', () => {
+      const {node} = setup({
+        config: {
+          mode: 'ANALOG_INPUT',
+          precision: 0,
+          min: -10,
+          max: 10,
+        },
+        state: {
+          id: 0,
+          mode: 'ANALOG_INPUT',
+          rawInput: 5,
+          systemValue: 5,
+        },
+      })
+      const bar = node.children[0]
+      if (!bar) throw new Error("couldn't find bar element")
+      const computedStyle = getComputedStyle(bar)
+      expect(computedStyle.left).to.equal('50%')
+      expect(computedStyle.right).to.equal('25%')
+    })
+    it('renders negative value correctly with zero in the middle', () => {
+      const {node} = setup({
+        config: {
+          mode: 'ANALOG_INPUT',
+          precision: 0,
+          min: -10,
+          max: 10,
+        },
+        state: {
+          id: 0,
+          mode: 'ANALOG_INPUT',
+          rawInput: -4,
+          systemValue: -4,
+        },
+      })
+      const bar = node.children[0]
+      if (!bar) throw new Error("couldn't find bar element")
+      const computedStyle = getComputedStyle(bar)
+      expect(computedStyle.left).to.equal('30%')
+      expect(computedStyle.right).to.equal('50%')
+    })
+    it('renders positive value correctly with zero beyond left', () => {
+      const {node} = setup({
+        config: {
+          mode: 'ANALOG_INPUT',
+          precision: 0,
+          min: 2,
+          max: 6,
+        },
+        state: {
+          id: 0,
+          mode: 'ANALOG_INPUT',
+          rawInput: 4,
+          systemValue: 4,
+        },
+      })
+      const bar = node.children[0]
+      if (!bar) throw new Error("couldn't find bar element")
+      const computedStyle = getComputedStyle(bar)
+      expect(computedStyle.left).to.equal('0%')
+      expect(computedStyle.right).to.equal('50%')
+    })
+    it('renders negative value correctly with zero beyond right', () => {
+      const {node} = setup({
+        config: {
+          mode: 'ANALOG_INPUT',
+          precision: 0,
+          min: -6,
+          max: -2,
+        },
+        state: {
+          id: 0,
+          mode: 'ANALOG_INPUT',
+          rawInput: -4,
+          systemValue: -4,
+        },
+      })
+      const bar = node.children[0]
+      if (!bar) throw new Error("couldn't find bar element")
+      const computedStyle = getComputedStyle(bar)
+      expect(computedStyle.left).to.equal('50%')
+      expect(computedStyle.right).to.equal('0%')
+    })
+  })
   describe('for DIGITAL_INPUT channel', () => {
     it('renders correct border width', () => {
       const {node} = setup({

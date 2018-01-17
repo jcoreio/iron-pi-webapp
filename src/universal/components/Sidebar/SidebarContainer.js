@@ -134,6 +134,7 @@ const query = gql(`{
   Channels {
     id
     name 
+    config
     state
   }  
 }`)

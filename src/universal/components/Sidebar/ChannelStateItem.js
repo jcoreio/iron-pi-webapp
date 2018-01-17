@@ -8,7 +8,7 @@ import {ListItemSecondaryAction} from 'material-ui/List'
 import {sidebarItemTextStyles} from './SidebarItemText'
 import SidebarItem from './SidebarItem'
 import SidebarItemText from './SidebarItemText'
-import type {ChannelState} from '../../types/Channel'
+import type {ChannelMode, ChannelState} from '../../types/Channel'
 
 import ChannelStateIcon from './ChannelStateIcon'
 import type {Theme} from '../../theme'
@@ -17,6 +17,11 @@ import {channelForm} from '../../react-router/routePaths'
 export type Channel = {
   id: number,
   name: string,
+  config?: {
+    mode: ChannelMode,
+    min?: number,
+    max?: number,
+  },
   state?: ChannelState,
 }
 
