@@ -161,6 +161,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.operation`}
                     component={TextField}
                     select
+                    props={{onBlur: null}}
                     className={index === 0 ? classes.hidden : undefined}
                     validate={index === 0 ? undefined : required()}
                   >
@@ -175,6 +176,7 @@ class ControlLogicTable extends React.Component<Props> {
                     component={TextField}
                     select
                     SelectProps={{displayEmpty: true}}
+                    props={{onBlur: null}}
                     validate={required()}
                     className={classes.fullWidth}
                   >
@@ -191,6 +193,7 @@ class ControlLogicTable extends React.Component<Props> {
                     name={`${condition}.comparison`}
                     component={TextField}
                     select
+                    props={{onBlur: null}}
                     className={classes.fullWidth}
                     validate={required()}
                   >

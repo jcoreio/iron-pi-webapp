@@ -146,9 +146,23 @@
   version "1.0.6"
   resolved "https://registry.npmjs.org/@types/geojson/-/geojson-1.0.6.tgz#3e02972728c69248c2af08d60a48cbb8680fffdf"
 
+"@types/jss@^9.3.0":
+  version "9.3.0"
+  resolved "https://registry.npmjs.org/@types/jss/-/jss-9.3.0.tgz#0f8484fd03ded206917be27b58217f274a0ad59f"
+
 "@types/node@*":
   version "9.3.0"
   resolved "https://registry.npmjs.org/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
+
+"@types/react-transition-group@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.npmjs.org/@types/react-transition-group/-/react-transition-group-2.0.6.tgz#8903fa2cf540ba454461590bff811a787889617c"
+  dependencies:
+    "@types/react" "*"
+
+"@types/react@*":
+  version "16.0.34"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.0.34.tgz#7a8f795afd8a404a9c4af9539b24c75d3996914e"
 
 "@types/zen-observable@0.5.3", "@types/zen-observable@^0.5.3":
   version "0.5.3"
@@ -5162,10 +5176,12 @@ material-ui-icons@^1.0.0-beta.17:
   dependencies:
     recompose "^0.26.0"
 
-material-ui@^1.0.0-beta.27:
-  version "1.0.0-beta.27"
-  resolved "https://registry.npmjs.org/material-ui/-/material-ui-1.0.0-beta.27.tgz#f3073b7acffebd1fc6d0339a3260d4555445daf7"
+material-ui@^1.0.0-beta.29:
+  version "1.0.0-beta.29"
+  resolved "https://registry.npmjs.org/material-ui/-/material-ui-1.0.0-beta.29.tgz#21ddf110d7aae4a6582584fc10ce948f144b1f2b"
   dependencies:
+    "@types/jss" "^9.3.0"
+    "@types/react-transition-group" "^2.0.6"
     babel-runtime "^6.26.0"
     brcast "^3.0.1"
     classnames "^2.2.5"
