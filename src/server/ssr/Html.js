@@ -76,9 +76,7 @@ const Html = ({
         <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500" rel="stylesheet" />
         {vendor && vendor.css && <link rel="stylesheet" type="text/css" href={vendor.css} />}
         <style type="text/css">{staticCss}</style>
-        <style type="text/css" id="server-side-styles">
-          {sheets.toString()}
-        </style>
+        <style type="text/css" id="server-side-styles" dangerouslySetInnerHTML={{__html: sheets.toString()}} />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{__html: environmentScript}} />
