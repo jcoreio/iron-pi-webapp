@@ -117,7 +117,7 @@ class App extends React.Component<Props> {
           <div className={classes.body} id="body">
             <BodyRoutes>
               {routes => (
-                <Switch component={Fader}>
+                <Switch component={Fader} createKey={(child, match) => match.url}>
                   <Route path="/" exact component={Home} />
                   <Route path="/about" exact component={About} />
                   {routes}
