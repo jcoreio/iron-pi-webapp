@@ -23,11 +23,12 @@ export type Props = {
   tallButtonClass: string,
   "config.controlMode"?: ControlMode,
   channels?: Array<Channel>,
+  change: (field: string, newValue: any) => any,
 }
 
 const DigitalOutputConfigSection = (
   ({
-    formControlClass, firstControlClass, lastControlClass, tallButtonClass, channels,
+    formControlClass, firstControlClass, lastControlClass, tallButtonClass, channels, change,
     "config.controlMode": controlMode
   }: Props) => (
     <React.Fragment>
@@ -47,6 +48,7 @@ const DigitalOutputConfigSection = (
           name="config.controlLogic"
           component={ControlLogicTable}
           channels={channels}
+          change={change}
           formControlClass={formControlClass}
           validate={required()}
         />

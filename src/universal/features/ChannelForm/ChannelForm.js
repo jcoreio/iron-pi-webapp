@@ -114,6 +114,7 @@ export type Props = {
   submitting?: boolean,
   pristine?: boolean,
   error?: string,
+  change?: (field: string, newValue: any) => any,
   data: {
     Channel?: FullChannel,
     Channels?: Array<Channel>,
@@ -175,7 +176,7 @@ class ChannelForm extends React.Component<Props> {
   render(): React.Node {
     const {
       classes, data: {Channels, Channel, loading}, initialized, pristine, submitting, handleSubmit,
-      error,
+      error, change,
     } = this.props
     if (loading || !initialized) {
       return (
@@ -243,6 +244,7 @@ class ChannelForm extends React.Component<Props> {
             lastControlClass={classes.lastFaderChild}
             tallButtonClass={classes.tallButton}
             channels={Channels}
+            change={change}
           />
           <Autocollapse className={classes.errorCollapse}>
             {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}

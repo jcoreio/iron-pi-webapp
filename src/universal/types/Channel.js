@@ -112,6 +112,7 @@ export const Comparisons = {
   LTE: {displayText: '<='},
   EQ: {displayText: '='},
   NE: {displayText: '!='},
+  UNAVAILABLE: {displayText: 'unavailable'},
 }
 
 export const ComparisonsArray = Object.keys(Comparisons)
@@ -122,7 +123,7 @@ export type ControlCondition = {
   operation?: LogicOperation,
   channelId: number,
   comparison: Comparison,
-  threshold: number,
+  threshold?: ?number,
 }
 
 export type ControlLogic = Array<ControlCondition>
@@ -197,9 +198,15 @@ export function validateChannelConfig(config: any): ?Validation {
     break
   }
   case 'DIGITAL_OUTPUT': {
-    const {controlMode} = config
+    const {controlMode, controlLogic} = config
     if (controlMode === 'LOCAL_CONTROL') {
       validation.errors.push(...validate(LocalControlDigitalOutputConfigType, config).errors)
+      for (let i = 0; i < controlLogic.length; i++) {
+        const {comparison, threshold} = controlLogic[i]
+        if (comparison !== 'UNAVAILABLE' && typeof threshold !== 'number') {
+          validation.errors.push([['controlLogic', i, 'threshold'], 'must be a number', t.number()])
+        }
+      }
     }
     break
   }

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import map from 'lodash.map'
-import {Field} from 'redux-form'
+import {Field, formValues} from 'redux-form'
 import {NumericField} from 'redux-form-numeric-field'
 import {required} from '@jcoreio/redux-form-validators'
 import {TextField} from 'redux-form-material-ui'
@@ -17,6 +17,7 @@ import AddIcon from '../../components/icons/AddRectangle'
 import InfoIcon from 'material-ui-icons/Info'
 import DeleteIcon from 'material-ui-icons/Delete'
 import {FormControl, FormHelperText, FormLabel} from 'material-ui/Form'
+import {createSelector} from 'reselect'
 import Table, {
   TableBody,
   TableCell,
@@ -27,6 +28,33 @@ import Table, {
 import type {Theme} from '../../theme'
 import type {Comparison, ControlCondition, LogicOperation} from '../../types/Channel'
 import {Comparisons, LogicOperations} from '../../types/Channel'
+
+export type ThresholdFieldProps = {
+  condition: string,
+  comparison: ?Comparison,
+  classes: Classes,
+}
+
+const ThresholdField = ({condition, classes, comparison}: ThresholdFieldProps): React.Node => {
+  if (comparison === 'UNAVAILABLE') return <span />
+  return (
+    <NumericField
+      name={`${condition}.threshold`}
+      type="text"
+      placeholder="Threshold"
+      component={TextField}
+      className={classes.thresholdField}
+      validate={required()}
+    />
+  )
+}
+
+const ConnectedThresholdField = formValues(createSelector(
+  ({condition}) => condition,
+  (condition: string) => ({comparison: `${condition}.comparison`})
+))(
+  ThresholdField
+)
 
 const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   table: {
@@ -118,6 +146,7 @@ export type Props = {
     error?: string,
     submitFailed?: boolean,
   },
+  change: (field: string, newValue: any) => any,
 }
 
 class ControlLogicTable extends React.Component<Props> {
@@ -127,6 +156,12 @@ class ControlLogicTable extends React.Component<Props> {
       operation: 'AND',
       comparison: 'GT',
     }: $Shape<ControlCondition>))
+  }
+  handleComparisonChange = (condition: string) => (event: any, newValue: Comparison) => {
+    if (newValue === 'UNAVAILABLE') {
+      const {change} = this.props
+      change(`${condition}.threshold`, null)
+    }
   }
   render(): React.Node {
     const {fields, classes, channels, meta, formControlClass} = this.props
@@ -196,6 +231,7 @@ class ControlLogicTable extends React.Component<Props> {
                     props={{onBlur: null}}
                     className={classes.fullWidth}
                     validate={required()}
+                    onChange={this.handleComparisonChange(condition)}
                   >
                     {map(Comparisons, ({displayText}: {displayText: string}, value: Comparison) => (
                       <MenuItem key={value} value={value}>{displayText}</MenuItem>
@@ -203,14 +239,7 @@ class ControlLogicTable extends React.Component<Props> {
                   </Field>
                 </TableCell>
                 <TableCell>
-                  <NumericField
-                    name={`${condition}.threshold`}
-                    type="text"
-                    placeholder="Threshold"
-                    component={TextField}
-                    className={classes.thresholdField}
-                    validate={required()}
-                  />
+                  <ConnectedThresholdField condition={condition} classes={classes} />
                 </TableCell>
                 <TableCell>
                   <IconButton className={classes.deleteButton} onClick={() => fields.remove(index)}>
