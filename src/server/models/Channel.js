@@ -2,6 +2,7 @@
 
 import Sequelize, {Model} from 'sequelize'
 import type {
+  AnalogInputConfig,
   ChannelConfig, ChannelMode, DigitalInputConfig, DigitalOutputConfig, SetAnalogInputState,
   SetDisabledState
 } from '../../universal/types/Channel'
@@ -26,9 +27,11 @@ export function updateChannelState(channel: Channel) {
   const {id, config} = channel
   const {mode} = config
   switch (mode) {
-  case 'ANALOG_INPUT':
-    setChannelStates(({id, mode}: SetAnalogInputState))
+  case 'ANALOG_INPUT': {
+    const {calibration}: AnalogInputConfig = (config: any)
+    setChannelStates(({id, mode, calibration}: SetAnalogInputState))
     break
+  }
   case 'DIGITAL_INPUT': {
     const {reversePolarity}: DigitalInputConfig = (config: any)
     setChannelStates({id, mode, reversePolarity})

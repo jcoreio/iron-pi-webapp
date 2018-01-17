@@ -63,6 +63,8 @@
     "lodash.invert": "^4.3.0",
     "lodash.map": "^4.6.0",
     "lodash.mapvalues": "^4.6.0",
+    "lodash.memoize": "^4.1.2",
+    "lodash.omit": "^4.5.0",
     "lodash.range": "^3.2.0",
     "lodash.set": "^4.3.2",
     "lodash.snakecase": "^4.1.1",

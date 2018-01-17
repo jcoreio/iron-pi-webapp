@@ -2,11 +2,18 @@
 
 import {Map} from 'immutable'
 import pubsub from '../graphql/pubsub'
-import type {AnalogInputState, ChannelState, SetChannelState, SetChannelValue} from '../../universal/types/Channel'
+import type {
+  AnalogInputState, Calibration, CalibrationPoint, ChannelState, SetChannelState,
+  SetChannelValue
+} from '../../universal/types/Channel'
 import {
   SetAnalogInputValueType, SetChannelStateType, SetDigitalInputValueType,
   SetDigitalOutputValueType
 } from '../../universal/types/Channel'
+import memoize from 'lodash.memoize'
+import omit from 'lodash.omit'
+import {createSelector} from 'reselect'
+import Calibrator from './Calibrator'
 
 type ChannelStates = Map<number, ChannelState>
 
@@ -28,18 +35,34 @@ function isChanged(current: ?Object, next: Object): boolean {
   return false
 }
 
+const selectCalibrator: (state: ChannelState) => Calibrator = createSelector(
+  state => state.calibration,
+  createSelector(
+    state => state.id,
+    memoize((channelId: number) => createSelector(
+      (calibration: Calibration) => calibration.points,
+      (points: Array<CalibrationPoint> = []) => new Calibrator(points)
+    ))
+  ),
+  (calibration: Calibration = {points: []}, selectCalibrator) => selectCalibrator(calibration)
+)
+
 function calculateDerivedValue(state: ChannelState) {
   switch (state.mode) {
-  case 'ANALOG_INPUT':
-    (state: AnalogInputState).systemValue = state.rawInput
+  case 'ANALOG_INPUT': {
+    const {rawInput} = state
+    if (rawInput == null) state.systemValue = null
+    else (state: AnalogInputState).systemValue = selectCalibrator(state).calibrate(rawInput)
     break
-  case 'DIGITAL_INPUT':
+  }
+  case 'DIGITAL_INPUT': {
     if (state.rawInput == null) state.systemValue = null
     else {
       if (state.reversePolarity) state.systemValue = state.rawInput ? 0 : 1
       else state.systemValue = state.rawInput
     }
     break
+  }
   case 'DIGITAL_OUTPUT': {
     const rawValue = state.controlValue != null ? state.controlValue : state.safeState
     if (state.reversePolarity) state.rawOutput = rawValue ? 0 : 1
@@ -47,6 +70,12 @@ function calculateDerivedValue(state: ChannelState) {
     break
   }
   }
+}
+
+function publish(state: ChannelState) {
+  const publishedValue = omit(state, 'calibration')
+  pubsub.publish('ChannelStates', {ChannelStates: publishedValue})
+  pubsub.publish(`ChannelStates/${publishedValue.id}`, {ChannelState: publishedValue})
 }
 
 export function setChannelStates(...newStates: Array<SetChannelState>) {
@@ -80,8 +109,7 @@ export function setChannelStates(...newStates: Array<SetChannelState>) {
         }
       }
       calculateDerivedValue((newState: Object))
-      pubsub.publish('ChannelStates', {ChannelStates: newState})
-      pubsub.publish(`ChannelStates/${newState.id}`, {ChannelState: newState})
+      publish((newState: Object))
       currentStates.set(newState.id, newState)
     })
   )
@@ -108,10 +136,9 @@ export function setChannelValues(...newValues: Array<SetChannelValue>) {
       if (!isChanged(current, newValue)) {
         return
       }
-      const newState = {...current, ...newValue}
+      const newState: ChannelState = {...current, ...newValue}
       calculateDerivedValue(newState)
-      pubsub.publish('ChannelStates', {ChannelStates: newState})
-      pubsub.publish(`ChannelStates/${newState.id}`, {ChannelState: newState})
+      publish(newState)
       currentStates.set(newState.id, newState)
     })
   )

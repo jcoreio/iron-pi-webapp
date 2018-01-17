@@ -26,6 +26,7 @@ export type AnalogInputState = {|
   mode: 'ANALOG_INPUT',
   rawInput: number | null,
   systemValue: number | null,
+  calibration?: Calibration,
 |}
 export const AnalogInputStateType = (reify: Type<AnalogInputState>)
 
@@ -218,6 +219,7 @@ export type SetAnalogInputState = {|
   id: number,
   mode: 'ANALOG_INPUT',
   rawInput?: number | null,
+  calibration?: Calibration,
 |}
 export const SetAnalogInputStateType = (reify: Type<SetAnalogInputState>)
 
