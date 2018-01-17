@@ -5,10 +5,14 @@ import {Provider} from 'react-redux'
 import {StaticRouter} from 'react-router-dom'
 import {renderToString} from 'react-dom/server'
 import {SheetsRegistry, JssProvider} from 'react-jss'
+import postcss from 'postcss'
+import autoprefixer from 'autoprefixer'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
 import '../../universal/components/initJss'
+
+const postcssInstance = postcss([autoprefixer()])
 
 type Props = {
   title: string,
@@ -48,7 +52,11 @@ const Html = ({routerContext, location, title, assets, store}: Props): React.Ele
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>{title}</title>
         {vendor && vendor.css && <link rel="stylesheet" type="text/css" href={vendor.css} />}
-        <style type="text/css" id="server-side-styles" dangerouslySetInnerHTML={{__html: sheets.toString()}} />
+        <style
+          type="text/css"
+          id="server-side-styles"
+          dangerouslySetInnerHTML={{__html: postcssInstance.process(sheets.toString())}}
+        />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{__html: environmentScript}} />
