@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import {NumericField} from 'redux-form-numeric-field'
 import {TextField} from 'redux-form-material-ui'
@@ -35,10 +36,10 @@ const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Objec
 
 const styles = ({spacing, palette}: Theme) => ({
   root: {
-    width: '100%',
+    display: 'block',
+    paddingTop: 0,
   },
   table: {
-    marginTop: -spacing.unit * 3,
     borderCollapse: 'separate',
     border: {
       width: 2,
@@ -89,6 +90,7 @@ type Fields = $Call<ExtractFields, FieldArrayProps>
 
 export type Props = {
   classes: Classes,
+  bodyClass?: string,
   fields: Fields,
   editable?: boolean,
   channel?: {
@@ -105,13 +107,13 @@ export type Props = {
 
 class CalibrationTable extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes, fields, meta, channel} = this.props
+    const {classes, fields, meta, channel, bodyClass} = this.props
     const editable = this.props.editable !== false
     const {warning, error, submitFailed} = meta || {}
     const hasError = submitFailed && (error != null || warning != null)
     const {units} = channel && channel.config || {}
     return (
-      <FormControl error={hasError} className={classes.root}>
+      <FormControl error={hasError} className={classNames(bodyClass, classes.root)}>
         <Table className={classes.table}>
           <TableHead>
             <TableRow>

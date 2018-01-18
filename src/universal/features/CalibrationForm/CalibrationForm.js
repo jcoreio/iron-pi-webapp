@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {dirname} from 'path'
 import type {Match, Location, RouterHistory} from 'react-router-dom'
 import {Link} from 'react-router-dom'
@@ -40,12 +41,15 @@ const styles = ({spacing, calibration}: Theme) => ({
   body: {
     padding: `0 ${spacing.unit * 4}px`,
   },
+  bodyStep: {
+    paddingTop: spacing.unit * 3,
+  },
   bodySlider: {
     margin: `0 -${spacing.unit * 4}px`,
   },
   title: {
     ...calibration.title,
-    marginTop: 0,
+    margin: 0,
     borderBottom: {
       style: 'solid',
       width: 2,
@@ -168,12 +172,12 @@ class CalibrationForm extends React.Component<Props, State> {
 
     const {step} = this.state
 
-    if (step === 0) return <NumPointsStep key={0} bodyClass={classes.body} />
+    if (step === 0) return <NumPointsStep key={0} bodyClass={classNames(classes.body, classes.bodyStep)} />
     return (
       <PointStep
         key={step}
         pointIndex={step - 1}
-        bodyClass={classes.body}
+        bodyClass={classNames(classes.body, classes.bodyStep)}
         channel={Channel}
         change={change}
       />
@@ -248,25 +252,9 @@ class CalibrationForm extends React.Component<Props, State> {
               {title}
             </Fader>
           </h3>
-          {/*
-            Animating to/from the calibration table triggers a bug in redux-form
-            (https://github.com/erikras/redux-form/issues/3688).
-            Once that's fixed, we can restore animation to/from the calibration table.
-          */}
-          {isInCalibration
-            ? (
-              <FieldArray
-                name="points"
-                component={CalibrationTable}
-                channel={Channel}
-              />
-            )
-            : (
-              <ViewSlider className={classes.bodySlider}>
-                {this.renderBody()}
-              </ViewSlider>
-            )
-          }
+          <ViewSlider className={classes.bodySlider}>
+            {this.renderBody()}
+          </ViewSlider>
           <Autocollapse className={classes.errorCollapse}>
             {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
           </Autocollapse>
@@ -309,6 +297,6 @@ class CalibrationForm extends React.Component<Props, State> {
 }
 
 export default compose(
-  withStyles(styles, {withTheme: true}),
-  formValues('numSteps')
+  formValues('numSteps'),
+  withStyles(styles, {withTheme: true})
 )(CalibrationForm)
