@@ -345,4 +345,16 @@ task('push:staging', async () => {
 task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
   .description('set up initial project after cloning from skeleton')
 
+task('simulate:values', async () => {
+  require('babel-register')
+  require('defaultenv')(['env/test.js', 'env/local.js'])
+  const ValueSimulator = require('./scripts/ValueSimulator')
+  await new ValueSimulator({
+    rootUrl: requireEnv('ROOT_URL'),
+    username: requireEnv('TEST_USERNAME'),
+    password: requireEnv('TEST_PASSWORD'),
+  }).start()
+  await new Promise(() => {})
+}).description('starts the channel value simulator')
+
 cli()

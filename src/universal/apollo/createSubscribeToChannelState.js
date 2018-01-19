@@ -23,7 +23,7 @@ export default function createSubscribeToChannelState(
   return function subscribeToChannelState(id: number): Function {
     const name = options.name || 'data'
     const channelPath = options.channelPath || ['Channel']
-    return props.data.subscribeToMore({
+    return props[name].subscribeToMore({
       document: channelStateSubscription,
       variables: {
         id,

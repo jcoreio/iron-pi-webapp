@@ -23,7 +23,7 @@ export default function createSubscribeToChannelStates(
   return function subscribeToChannelStates(): Function {
     const name = options.name || 'data'
     const channelsPath = options.channelsPath || ['Channels']
-    return props.data.subscribeToMore({
+    return props[name].subscribeToMore({
       document: channelStatesSubscription,
       updateQuery: (prev: Object, update: {subscriptionData: {errors?: Array<Error>}}) => {
         const {subscriptionData: {[name]: data, errors}} = (update: any)
