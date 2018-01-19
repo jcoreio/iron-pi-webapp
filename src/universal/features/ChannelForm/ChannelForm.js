@@ -148,7 +148,9 @@ class ChannelForm extends React.Component<Props> {
     if (nextChannel !== prevChannel) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
       if (nextChannel) {
-        this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
+        if (nextProps.pristine) {
+          this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
+        }
         const {subscribeToChannelState} = nextProps
         if (subscribeToChannelState) {
           this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
