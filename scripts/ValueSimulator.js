@@ -114,9 +114,12 @@ class ValueSimulator {
       case 'DIGITAL_INPUT':
         values.push({id, rawInput: Math.random() > 0.5 ? 1 : 0})
         break
-      case 'DIGITAL_OUTPUT':
-        values.push({id, controlValue: Math.random() > 0.5 ? 1 : 0})
+      case 'DIGITAL_OUTPUT': {
+        if (state.controlMode === 'REMOTE_CONTROL') {
+          values.push({id, controlValue: Math.random() > 0.5 ? 1 : 0})
+        }
         break
+      }
       }
     }
 

@@ -132,9 +132,14 @@ export function setChannelValues(...newValues: Array<SetChannelValue>): Array<Ch
       case 'DIGITAL_INPUT':
         SetDigitalInputValueType.assert(newValue)
         break
-      case 'DIGITAL_OUTPUT':
+      case 'DIGITAL_OUTPUT': {
+        const {controlMode} = current
+        if (controlMode !== 'REMOTE_CONTROL') {
+          throw new Error("Can't set value unless channel is remote controlled")
+        }
         SetDigitalOutputValueType.assert(newValue)
         break
+      }
       case 'DISABLED':
         throw new Error(`Can't set the value on channel ${newValue.id}, it's disabled`)
       }

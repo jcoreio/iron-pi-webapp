@@ -42,6 +42,7 @@ export const DigitalInputStateType = (reify: Type<DigitalInputState>)
 export type DigitalOutputState = {|
   id: number,
   mode: 'DIGITAL_OUTPUT',
+  controlMode: ControlMode,
   controlValue: 0 | 1 | null,
   safeState: 0 | 1,
   reversePolarity: boolean,
@@ -241,6 +242,7 @@ export const SetDigitalInputStateType = (reify: Type<SetDigitalInputState>)
 export type SetDigitalOutputState = {|
   id: number,
   mode: 'DIGITAL_OUTPUT',
+  controlMode: ControlMode,
   controlValue?: 0 | 1 | null,
   safeState: 0 | 1,
   reversePolarity: boolean,
