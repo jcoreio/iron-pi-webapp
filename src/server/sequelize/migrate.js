@@ -5,10 +5,12 @@ import type Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import promisify from 'es6-promisify'
 import range from 'lodash.range'
+import requireEnv from '@jcoreio/require-env'
 
 import logger from '../../universal/logger'
 import Channel from '../models/Channel'
 import User from '../models/User'
+import Scope from '../models/Scope'
 
 const log = logger('sequelize:migrate')
 
@@ -64,7 +66,24 @@ export default async function migrate(options: Options): Promise<void> {
     })))
   }
 
-  if (process.env.BABEL_ENV === 'test' || process.env.NODE_ENV === 'development') {
+  if (process.env.BABEL_ENV === 'test') {
+    const username = requireEnv('TEST_USERNAME')
+    const password = requireEnv('TEST_PASSWORD')
+    if (!(await User.findOne({where: {username}}))) {
+      const testUser = await User.create({username, password})
+      // $FlowFixMe
+      await testUser.addScopes(await Scope.findAll({where: {id: ['test:create:token', 'test:update:channelStates']}}))
+    } else {
+      await User.update({password}, {where: {username}, individualHooks: true})
+    }
+
+    if (!(await User.findOne({where: {username: 'root'}}))) {
+      await User.create({username: 'root', password})
+    } else {
+      await User.update({password}, {where: {username: 'root'}, individualHooks: true})
+    }
+  }
+  if (process.env.NODE_ENV === 'development') {
     if (!(await User.findOne({where: {username: 'root'}}))) {
       await User.create({username: 'root', password: 'correct horse battery staple'})
     }

@@ -15,6 +15,7 @@ import superagent from './util/superagent'
 import fetch from 'node-fetch'
 
 const port = requireEnv('INTEGRATION_SERVER_PORT')
+const TEST_USERNAME = requireEnv('TEST_USERNAME')
 const TEST_PASSWORD = requireEnv('TEST_PASSWORD')
 
 export default async function createApolloClient(): Promise<{
@@ -24,7 +25,7 @@ export default async function createApolloClient(): Promise<{
   const {body: {token}} = await superagent.post('/login')
     .type('json')
     .accept('json')
-    .send({username: 'root', password: TEST_PASSWORD})
+    .send({username: TEST_USERNAME, password: TEST_PASSWORD})
 
   const subscriptionClient = new SubscriptionClient(`ws://localhost:${port}/graphql`, {
     reconnect: true,

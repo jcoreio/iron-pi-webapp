@@ -22,8 +22,8 @@ export default function createSubscriptionServer(options: {
           ;(error: any).statusCode = 400
           throw error
         }
-        const {userId} = await verifyToken(token)
-        return {userId}
+        const {userId, scopes} = await verifyToken(token)
+        return {userId, scopes}
       }
     },
     serverOptions

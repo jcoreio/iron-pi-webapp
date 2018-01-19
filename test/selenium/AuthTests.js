@@ -3,6 +3,7 @@
 import {expect} from 'chai'
 import navigateTo from "./util/navigateTo"
 import poll from '@jcoreio/poll'
+import requireEnv from '@jcoreio/require-env'
 import loginIfNecessary from './util/loginIfNecessary'
 import logoutIfNecessary from './util/logoutIfNecessary'
 import superagent from './util/superagent'
@@ -10,6 +11,14 @@ import execute from './util/execute'
 import delay from 'delay'
 
 module.exports = () => {
+  let token
+  before(async () => {
+    token = (await superagent.post('/login').type('json').accept('json').send({
+      username: requireEnv('TEST_USERNAME'),
+      password: requireEnv('TEST_PASSWORD'),
+    })).body.token
+  })
+
   describe('Auth', function () {
     this.timeout(60000)
 
@@ -69,6 +78,7 @@ module.exports = () => {
       const {body: {token: shortLivedToken}} = (await superagent.post('/createTestToken')
         .type('json')
         .accept('json')
+        .set('Authorization', `Bearer ${token}`)
         .send({expiresIn: '3s'}))
       try {
         await execute(function (token) {
@@ -100,6 +110,7 @@ module.exports = () => {
       const {body: {token: shortLivedToken}} = (await superagent.post('/createTestToken')
         .type('json')
         .accept('json')
+        .set('Authorization', `Bearer ${token}`)
         .send({expiresIn: '3s'}))
       try {
         await execute(function (token) {

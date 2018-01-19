@@ -9,8 +9,9 @@ export default async function parseAuthHeader(req: $Request, res: $Response, nex
   if (match) {
     const token = match[1]
     try {
-      const {userId} = await verifyToken(token);
-      (req: Object).userId = userId
+      const {userId, scopes} = await verifyToken(token);
+      (req: Object).userId = userId;
+      (req: Object).scopes = scopes
     } catch (error) {
       if (/expired/i.test(error.message)) {
         error.message = 'Your session has expired; please log in again.'

@@ -79,6 +79,8 @@ function publish(state: ChannelState) {
 }
 
 export function setChannelStates(...newStates: Array<SetChannelState>) {
+  const changes: Array<ChannelState> = []
+
   channelStates = channelStates.withMutations(
     (currentStates: ChannelStates) => newStates.forEach((entry: SetChannelState) => {
       const newState = {...entry}
@@ -109,13 +111,16 @@ export function setChannelStates(...newStates: Array<SetChannelState>) {
         }
       }
       calculateDerivedValue((newState: Object))
-      publish((newState: Object))
+      changes.push((newState: Object))
       currentStates.set(newState.id, newState)
     })
   )
+  changes.forEach(state => publish(state))
 }
 
-export function setChannelValues(...newValues: Array<SetChannelValue>) {
+export function setChannelValues(...newValues: Array<SetChannelValue>): Array<ChannelState> {
+  const changes: Array<ChannelState> = []
+
   channelStates = channelStates.withMutations(
     (currentStates: ChannelStates) => newValues.forEach((newValue: SetChannelValue) => {
       const current = currentStates.get(newValue.id)
@@ -138,8 +143,13 @@ export function setChannelValues(...newValues: Array<SetChannelValue>) {
       }
       const newState: ChannelState = {...current, ...newValue}
       calculateDerivedValue(newState)
-      publish(newState)
+      changes.push(newState)
       currentStates.set(newState.id, newState)
     })
   )
+
+  changes.forEach(state => publish(state))
+
+  return changes
 }
+

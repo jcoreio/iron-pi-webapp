@@ -55,12 +55,6 @@ describe('selenium tests', function () {
       throw new Error(`Can't connect to webapp: ${error.message}`)
     }
 
-    await graphql({
-      query: 'mutation ensureTestUser($password: String!) { ensureTestUser(password: $password) }',
-      operationName: 'ensureTestUser',
-      variables: {password},
-      withToken: false,
-    })
     selenium = await promisify(cb => require('selenium-standalone').start(cb))()
   })
 

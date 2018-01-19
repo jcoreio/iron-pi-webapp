@@ -10,12 +10,14 @@ const ROOT_URL = requireEnv('ROOT_URL')
 type Request = {
   userId: number,
   expiresIn: string,
+  scopes?: Array<string>,
 }
 
-export default async function createToken({userId, expiresIn}: Request): Promise<string> {
+export default async function createToken({userId, scopes, expiresIn}: Request): Promise<string> {
   return await promisify(cb => jwt.sign(
     {
       userId,
+      scopes: scopes || [],
     },
     JWT_SECRET,
     {

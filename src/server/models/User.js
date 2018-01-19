@@ -1,9 +1,26 @@
 // @flow
 
-import Sequelize, {Model} from 'sequelize'
+import Sequelize, {Model, Association} from 'sequelize'
 import bcrypt from 'bcrypt'
 import promisify from 'es6-promisify'
 import zxcvbn from 'zxcvbn'
+import Scope from './Scope'
+import type {ScopeAttributes, ScopeInitAttributes} from './Scope'
+import UserScope from './UserScope'
+import type {UserScopeAttributes, UserScopeInitAttributes} from './UserScope'
+
+import type {
+  BelongsToManyGetMany,
+  BelongsToManySetMany,
+  BelongsToManyAddMany,
+  BelongsToManyAddOne,
+  BelongsToManyCreateOne,
+  BelongsToManyRemoveOne,
+  BelongsToManyRemoveMany,
+  BelongsToManyHasOne,
+  BelongsToManyHasMany,
+  BelongsToManyCount,
+} from 'sequelize'
 
 export type UserInitAttributes = {
   username: string;
@@ -14,6 +31,7 @@ export type UserAttributes = UserInitAttributes & {
   id: number;
   createdAt: Date;
   updatedAt: Date;
+  Scopes?: Array<Scope>;
 }
 
 async function hashPasswordHook(user: User): Promise<void> {
@@ -28,6 +46,27 @@ export default class User extends Model<UserAttributes, UserInitAttributes> {
   id: number;
   createdAt: Date;
   updatedAt: Date;
+  Scopes: ?Array<Scope>;
+
+  static Scopes: Association.BelongsToMany<UserAttributes,
+    UserInitAttributes,
+    User,
+    ScopeAttributes,
+    ScopeInitAttributes,
+    Scope,
+    UserScopeAttributes,
+    UserScope> = (null: any)
+
+  getScopes: BelongsToManyGetMany<Scope>
+  setScopes: BelongsToManySetMany<Scope, string, UserScopeInitAttributes>
+  addScopes: BelongsToManyAddMany<Scope, string, UserScopeInitAttributes>
+  addScope: BelongsToManyAddOne<Scope, string, UserScopeInitAttributes>
+  createScope: BelongsToManyCreateOne<ScopeInitAttributes, Scope, UserScopeInitAttributes>
+  removeScope: BelongsToManyRemoveOne<Scope, string>
+  removeScopes: BelongsToManyRemoveMany<Scope, string>
+  hasScope: BelongsToManyHasOne<Scope, string>
+  hasScopes: BelongsToManyHasMany<Scope, string>
+  countScopes: BelongsToManyCount
 
   static initAttributes({sequelize}: {sequelize: Sequelize}) {
     super.init({
@@ -59,6 +98,7 @@ export default class User extends Model<UserAttributes, UserInitAttributes> {
   }
 
   static initAssociations() {
+    this.Scopes = this.belongsToMany(Scope, {through: UserScope})
   }
 }
 

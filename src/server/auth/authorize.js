@@ -12,7 +12,10 @@ type Request = {
 }
 
 export default async function authorize({username, password}: Request): Promise<string> {
-  const user = await User.findOne({where: {username}})
+  const user = await User.findOne({
+    where: {username},
+    include: [{association: User.Scopes}],
+  })
   if (!user) {
     throw new Error('Invalid username or password')
   }
@@ -20,6 +23,7 @@ export default async function authorize({username, password}: Request): Promise<
   if (!matches) {
     throw new Error('Invalid username or password')
   }
-  return await createToken({userId: user.id, expiresIn: '1d'})
+  const scopes = user.Scopes && user.Scopes.map(scope => scope.id) || []
+  return await createToken({userId: user.id, scopes, expiresIn: '1d'})
 }
 

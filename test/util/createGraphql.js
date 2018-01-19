@@ -7,7 +7,8 @@ import type {DocumentNode} from 'graphql'
 import getOnlyOperationName from './getOnlyOperationName'
 import getOperationByName from './getOperationByName'
 
-const password = requireEnv('TEST_PASSWORD')
+const TEST_USERNAME = requireEnv('TEST_USERNAME')
+const TEST_PASSWORD = requireEnv('TEST_PASSWORD')
 
 type Options = {
   query: string,
@@ -33,7 +34,7 @@ export default function createGraphql<T>(superagent: Superagent): (options: Opti
       await superagent.post('/login')
         .type('json')
         .accept('json')
-        .send({username: 'root', password})
+        .send({username: TEST_USERNAME, password: TEST_PASSWORD})
     ).body.token
 
     const operation = operationName ? getOperationByName(doc, operationName) : null

@@ -1,7 +1,8 @@
 // @flow
 
 import {PubSub} from 'graphql-subscriptions'
+import type {PubSubEngine} from 'graphql-subscriptions'
 
-const pubsub = new PubSub()
+const pubsub: PubSubEngine = new PubSub()
 export default pubsub
 

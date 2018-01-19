@@ -11,12 +11,16 @@ type Options = {
 
 export default function handleGraphiql({endpointURL}: Options): (req: $Request, res: $Response, next: Function) => any {
   return async (req: $Request, res: $Response, next: Function) => {
-    const user = await User.findOne({username: 'root'})
+    const user = await User.findOne({
+      where: {username: process.env.TEST_USERNAME || 'root'},
+      include: [{association: User.Scopes}],
+    })
     if (!user) {
-      res.status(403).send("Error: failed to get root user")
+      res.status(403).send("Error: failed to get user")
       return
     }
-    const token = await createToken({userId: user.id, expiresIn: '2d'})
+    const scopes = user.Scopes && user.Scopes.map(scope => scope.id) || []
+    const token = await createToken({userId: user.id, scopes, expiresIn: '2d'})
     graphiqlExpress({
       endpointURL,
       passHeader: `'Authorization': 'Bearer ${token}'`,

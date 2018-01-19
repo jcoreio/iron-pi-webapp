@@ -14,12 +14,6 @@ describe('integration tests', () => {
   before(async function (): Promise<void> {
     server = new Server({port})
     await server.start()
-    await graphql({
-      query: 'mutation ensureTestUser($password: String!) { ensureTestUser(password: $password) }',
-      operationName: 'ensureTestUser',
-      variables: {password},
-      withToken: false,
-    })
   })
 
   after(async function (): Promise<void> {

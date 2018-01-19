@@ -110,7 +110,7 @@ export default class Server {
         res.status(req.userId ? 200 : (error: any).statusCode || 500).send()
       })
       if (process.env.BABEL_ENV === 'test') {
-        app.post('/createTestToken', bodyParser.json(), require('./express/createTestToken'))
+        app.post('/createTestToken', parseAuthHeader, bodyParser.json(), require('./express/createTestToken'))
       }
 
       const GRAPHQL_PATH = '/graphql'
