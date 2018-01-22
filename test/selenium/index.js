@@ -6,17 +6,13 @@ import fs from 'fs-extra'
 import poll from '@jcoreio/poll'
 import promisify from 'es6-promisify'
 import glob from 'glob'
-import requireEnv from '@jcoreio/require-env'
 
 import mergeClientCoverage from './util/mergeClientCoverage'
 import superagent from './util/superagent'
 import resolveUrl from './util/resolveUrl'
 import mergeCoverage from './util/mergeCoverage'
 
-import graphql from './util/graphql'
 import getHostIP from './util/getHostIP'
-
-const password = requireEnv('TEST_PASSWORD')
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')

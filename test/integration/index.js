@@ -3,10 +3,8 @@
 import {describe, before, after} from 'mocha'
 import requireEnv from '@jcoreio/require-env'
 import Server from '../../src/server/Server'
-import graphql from './util/graphql'
 
 const port = parseInt(requireEnv('INTEGRATION_SERVER_PORT'))
-const password = requireEnv('TEST_PASSWORD')
 
 let server
 
