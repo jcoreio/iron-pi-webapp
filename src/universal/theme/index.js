@@ -1,6 +1,7 @@
 // @flow
 
 import {createMuiTheme} from 'material-ui/styles'
+import red from 'material-ui/colors/red'
 
 type BreakpointKey = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 type Breakpoints = {
@@ -30,6 +31,9 @@ export type Palette = {
   A400: string,
   A700: string,
   constrastDefaultColor: 'light' | 'dark',
+  light?: string,
+  main?: string,
+  dark?: string,
 }
 
 export type Theme = {
@@ -256,6 +260,7 @@ const theme: Theme = createMuiTheme({
       A700: '#ffbe00',
       'contrastDefaultColor': 'dark',
     },
+    error: red,
     text: {
       primary: 'rgba(0, 0, 0, 0.5)',
       secondary: 'rgba(0, 0, 0, 0.41)',
