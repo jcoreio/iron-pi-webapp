@@ -14,7 +14,6 @@ import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
-import ErrorAlert from '../../components/ErrorAlert'
 import ButtonGroupField from '../../components/ButtonGroupField'
 
 import {channelIdPattern, ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
@@ -25,7 +24,7 @@ import DigitalOutputConfigSection from './DigitalOutputConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
 import handleError from '../../redux-form/createSubmissionError'
 import parseChannelFormValues from './parseChannelFormValues'
-import Autocollapse from '../../components/Autocollapse'
+import SubmitStatus from '../../components/SubmitStatus'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -112,6 +111,8 @@ export type Props = {
   initialize: (values: FullChannel) => any,
   initialized?: boolean,
   submitting?: boolean,
+  submitSucceeded?: boolean,
+  submitFailed?: boolean,
   pristine?: boolean,
   error?: string,
   change?: (field: string, newValue: any) => any,
@@ -177,8 +178,9 @@ class ChannelForm extends React.Component<Props> {
 
   render(): React.Node {
     const {
-      classes, data: {Channels, Channel, loading}, initialized, pristine, submitting, handleSubmit,
-      error, change,
+      classes, data: {Channels, Channel, loading}, initialized, pristine,
+      submitting, submitSucceeded, submitFailed, error,
+      handleSubmit, change,
     } = this.props
     if (loading || !initialized) {
       return (
@@ -248,11 +250,13 @@ class ChannelForm extends React.Component<Props> {
             channels={Channels}
             change={change}
           />
-          <Autocollapse className={classes.errorCollapse}>
-            {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
-          </Autocollapse>
+          <SubmitStatus
+            submitting={submitting}
+            submitSucceeded={submitSucceeded}
+            submitFailed={submitFailed}
+            error={error}
+          />
           <div className={classes.buttons}>
-            <Spinner in={Boolean(submitting)} />
             <Button
               raised
               className={classes.tallButton}

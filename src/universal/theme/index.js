@@ -31,9 +31,9 @@ export type Palette = {
   A400: string,
   A700: string,
   constrastDefaultColor: 'light' | 'dark',
-  light?: string,
-  main?: string,
-  dark?: string,
+  light: string,
+  main: string,
+  dark: string,
 }
 
 export type Theme = {
@@ -75,6 +75,7 @@ export type Theme = {
     primary: Palette,
     secondary: Palette,
     error: Palette,
+    success: Palette,
     infoIcon: string,
   },
   shadows: Array<string>,
@@ -261,6 +262,9 @@ const theme: Theme = createMuiTheme({
       'contrastDefaultColor': 'dark',
     },
     error: red,
+    success: {
+      main: '#5dba54',
+    },
     text: {
       primary: 'rgba(0, 0, 0, 0.5)',
       secondary: 'rgba(0, 0, 0, 0.41)',
@@ -327,7 +331,7 @@ theme.navbar = {
   },
 }
 theme.channelState = {
-  on: '#5dba54',
+  on: theme.palette.success.main,
   off: '#d8d8d8',
   warning: '#e2a000',
   arrow: {
