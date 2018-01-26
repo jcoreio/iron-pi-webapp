@@ -25,7 +25,6 @@ export default async function migrate(options: Options): Promise<void> {
   const {sequelize, umzug} = options
   // $FlowFixMe
   const {host, username: user, password, database} = sequelize.config
-  const {storage} = umzug
 
   const client = new Client({host, user, password, database: user})
 
@@ -41,13 +40,7 @@ export default async function migrate(options: Options): Promise<void> {
     }
 
     try {
-      const executed = await umzug.executed()
-      if (!executed.length) {
-        await sequelize.sync()
-        for (let migration of await umzug.pending()) await storage.logMigration(migration.file)
-      } else {
-        await umzug.up()
-      }
+      await umzug.up()
 
       log.info('Successfully migrated SQL Database')
     } catch (error) {

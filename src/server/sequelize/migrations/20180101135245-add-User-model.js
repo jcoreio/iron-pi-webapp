@@ -9,6 +9,8 @@ module.exports = {
       {
         id: {
           primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
           type: Sequelize.INTEGER,
         },
         username: {
