@@ -6380,6 +6380,13 @@ progress@2.0.0, progress@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/progress/-/progress-2.0.0.tgz#8a1be366bf8fc23db2bd23f10c6fe920b4389d1f"
 
+<<<<<<< HEAD
+=======
+progress@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.npmjs.org/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
+
+>>>>>>> e3ab1c67866388bb7d62cbac999a73c7263714dd
 promake-env@^1.1.4:
   version "1.1.4"
   resolved "https://registry.npmjs.org/promake-env/-/promake-env-1.1.4.tgz#0ff72e2f748543add14fc36a76cc6e4486e0e7e9"
@@ -6603,6 +6610,7 @@ react-dom@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
+<<<<<<< HEAD
 react-event-listener@^0.5.0, react-event-listener@^0.5.1:
   version "0.5.2"
   resolved "https://registry.npmjs.org/react-event-listener/-/react-event-listener-0.5.2.tgz#8fe116f8930a4c7fe363c631f56963d7e4ed3d66"
@@ -6622,6 +6630,11 @@ react-fader@^2.0.1:
 react-hot-loader@^4.0.0-beta:
   version "4.0.0-beta.13"
   resolved "https://registry.npmjs.org/react-hot-loader/-/react-hot-loader-4.0.0-beta.13.tgz#0d145579124e44bd0c9d517f86462a1231a9c9d9"
+=======
+react-hot-loader@^3.1.0:
+  version "3.1.3"
+  resolved "https://registry.npmjs.org/react-hot-loader/-/react-hot-loader-3.1.3.tgz#6f92877326958c7cb0134b512474517869126082"
+>>>>>>> e3ab1c67866388bb7d62cbac999a73c7263714dd
   dependencies:
     fast-levenshtein "^2.0.6"
     global "^4.3.0"
@@ -8477,7 +8490,11 @@ which-module@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/which-module/-/which-module-2.0.0.tgz#d9ef07dce77b9902b8a3a8fa4b31c3e3f7e6e87a"
 
+<<<<<<< HEAD
 which@1, which@^1.1.1, which@^1.2.12, which@^1.2.4, which@^1.2.9:
+=======
+which@1, which@^1.1.1, which@^1.2.10, which@^1.2.12, which@^1.2.4, which@^1.2.9:
+>>>>>>> e3ab1c67866388bb7d62cbac999a73c7263714dd
   version "1.3.0"
   resolved "https://registry.npmjs.org/which/-/which-1.3.0.tgz#ff04bdfc010ee547d780bec38e1ac1c2777d253a"
   dependencies:
