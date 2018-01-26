@@ -14,21 +14,44 @@ import mergeCoverage from './util/mergeCoverage'
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
 
+let {
+  NO_HEADLESS,
+  PIPE_SELENIUM_LOG,
+  CHROMEDRIVER_VERBOSE,
+  GECKODRIVER_LOG_LEVEL,
+  WDIO_LOG_LEVEL,
+  LOG_EVERYTHING,
+} = process.env
+
+if (LOG_EVERYTHING) {
+  if (!PIPE_SELENIUM_LOG) PIPE_SELENIUM_LOG = '1'
+  if (!CHROMEDRIVER_VERBOSE) CHROMEDRIVER_VERBOSE = '1'
+  if (!GECKODRIVER_LOG_LEVEL) GECKODRIVER_LOG_LEVEL = 'trace'
+  if (!WDIO_LOG_LEVEL) WDIO_LOG_LEVEL = 'verbose'
+}
+
 const seleniumConfigs = [
   {
     desiredCapabilities: {
       browserName: 'chrome',
       chromeOptions: {
-        args: ['--headless', '--disable-gpu'],
+        args: [
+          NO_HEADLESS ? null : '--headless',
+          CHROMEDRIVER_VERBOSE ? '--verbose' : null,
+          '--disable-gpu'
+        ].filter(Boolean),
       },
     },
   },
   {
     desiredCapabilities: {
       browserName: 'firefox',
+      // flag to activate Firefox headless mode (see https://github.com/mozilla/geckodriver/blob/master/README.md#firefox-capabilities for more details about moz:firefoxOptions)
       "moz:firefoxOptions": {
-        // flag to activate Firefox headless mode (see https://github.com/mozilla/geckodriver/blob/master/README.md#firefox-capabilities for more details about moz:firefoxOptions)
-        args: ['-headless']
+        log: {level: GECKODRIVER_LOG_LEVEL || 'info'},
+        args: [
+          NO_HEADLESS ? null : '-headless'
+        ].filter(Boolean),
       },
     },
   },
@@ -46,6 +69,7 @@ describe('selenium tests', function () {
       throw new Error(`Can't connect to webapp: ${error.message}`)
     }
     selenium = await promisify(cb => require('selenium-standalone').start(cb))()
+    if (PIPE_SELENIUM_LOG) selenium.stderr.pipe(process.stderr)
   })
 
   after(async function () {
@@ -65,7 +89,7 @@ describe('selenium tests', function () {
         try {
           global.browser = webdriverio.remote({
             ...config,
-            logLevel: process.env.WDIO_LOG_LEVEL || 'silent',
+            logLevel: WDIO_LOG_LEVEL || 'silent',
             baseUrl: resolveUrl('/'),
           })
           await browser.init()
