@@ -52,7 +52,7 @@ module.exports = () => {
       this.timeout(15000)
       await logoutIfNecessary()
       expect(await browser.getText('body #loginDialogTitle')).to.equal('jcore.io\nIRON PI')
-      expect(await browser.getText('#loginForm [data-test-name="password"] > label')).to.equal('Password')
+      expect(await browser.getText('#loginForm [data-name="password"] > label')).to.equal('Password')
       expect(await browser.getText('#loginForm button[type="submit"]')).to.equal('Log In')
     })
     it('displays error if user tries to log in with incorrect password', async function () {
@@ -65,7 +65,7 @@ module.exports = () => {
       await poll(
         async () => {
           expect(
-            await browser.getText('#loginForm [data-test-name="password"] > p')
+            await browser.getText('#loginForm [data-name="password"] [data-component="FormHelperText"]')
           ).to.equal('Incorrect password')
         },
         50
@@ -90,9 +90,9 @@ module.exports = () => {
         await navigateTo('/')
 
         browser.timeouts('implicit', 250)
-        await browser.waitForVisible('#loginForm [data-test-name="submitError"]', 15000)
+        await browser.waitForVisible('#loginForm [data-component="ErrorAlert"]', 15000)
 
-        expect(await browser.getText('#loginForm [data-test-name="submitError"]')).to.equal(
+        expect(await browser.getText('#loginForm [data-component="ErrorAlert"]')).to.equal(
           'Your session has expired; please log in again.'
         )
       } finally {
@@ -124,9 +124,9 @@ module.exports = () => {
         await browser.click('a[href="/channel/5"]')
 
         browser.timeouts('implicit', 250)
-        await browser.waitForVisible('#loginForm [data-test-name="submitError"]', 15000)
+        await browser.waitForVisible('#loginForm [data-component="ErrorAlert"]', 15000)
 
-        expect(await browser.getText('#loginForm [data-test-name="submitError"]')).to.equal(
+        expect(await browser.getText('#loginForm [data-component="ErrorAlert"]')).to.equal(
           'Your session has expired; please log in again.'
         )
       } finally {

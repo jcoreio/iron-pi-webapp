@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {withRouter, Link} from 'react-router-dom'
-import {TextField} from 'redux-form-material-ui'
+import TextField from '../../components/TextField'
 import {Field} from 'redux-form'
 
 import ControlWithInfo from '../../components/ControlWithInfo'

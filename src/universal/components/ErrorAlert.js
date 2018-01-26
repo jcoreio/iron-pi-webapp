@@ -28,7 +28,7 @@ export type Props = {
 }
 
 const ErrorAlert = ({classes, children, ...props}: Props) => (
-  <div className={classes.root} {...props}>
+  <div className={classes.root} {...props} data-component="ErrorAlert">
     <ErrorIcon className={classes.errorIcon} />
     <span className={classes.errorMessage}>{children}</span>
   </div>
