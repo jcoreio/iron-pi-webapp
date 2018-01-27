@@ -102,9 +102,10 @@ const DigitalInputStateWidget = (
     const {state} = channel || {state: null}
     const {rawInput, reversePolarity, systemValue} = state || {}
     return (
-      <div className={classNames(classes.root, className)}>
+      <div className={classNames(classes.root, className)} data-component="DigitalInputStateWidget">
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="rawInput"
           title="Raw Input"
           value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(0) : null}
         />
@@ -113,6 +114,7 @@ const DigitalInputStateWidget = (
         <FlowArrow className={classes.arrow} />
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="systemValue"
           title="System Value"
           value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(0) : null}
         />

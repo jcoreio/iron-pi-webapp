@@ -27,7 +27,7 @@ export type Props = {
   children: React.Node,
 }
 
-const ErrorAlert = ({classes, children, ...props}: Props) => (
+const ErrorAlert = ({classes, children, theme, ...props}: Props) => (
   <div className={classes.root} {...props} data-component="ErrorAlert">
     <ErrorIcon className={classes.errorIcon} />
     <span className={classes.errorMessage}>{children}</span>

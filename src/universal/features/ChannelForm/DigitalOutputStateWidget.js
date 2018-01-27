@@ -138,15 +138,17 @@ const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
   const {state} = channel || {state: null}
   const {controlValue, safeState, rawOutput, reversePolarity} = state || {}
   return (
-    <div className={classNames(classes.root, className)}>
+    <div className={classNames(classes.root, className)} data-component="DigitalOutputStateWidget">
       <div className={classes.inputBlockHolder}>
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="controlValue"
           title="Control Value"
           value={controlValue != null && Number.isFinite(controlValue) ? controlValue.toFixed(0) : null}
         />
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="safeState"
           title="Safe State"
           value={safeState != null && Number.isFinite(safeState) ? safeState.toFixed(0) : null}
         />
@@ -156,6 +158,7 @@ const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
       <RightArrow className={classes.arrow} />
       <ValueBlock
         className={classNames(classes.block, classes.valueBlock)}
+        data-test-name="rawOutput"
         title="Raw Output"
         value={rawOutput != null && Number.isFinite(rawOutput) ? rawOutput.toFixed(0) : null}
       />

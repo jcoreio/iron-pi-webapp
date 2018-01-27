@@ -51,20 +51,18 @@ export type Props = {
   units?: React.Node,
 }
 
-const ValueBlock = withStyles(styles, {withTheme: true})(
-  ({classes, className, title, value, units}: Props) => (
-    <div className={classNames(classes.block, className)}>
-      <h4 className={classes.title}>
-        {title}
-      </h4>
-      <span className={classes.value}>
-        {value}
-      </span>
-      <span className={classes.units}>
-        {units}
-      </span>
-    </div>
-  )
+const ValueBlock = ({classes, className, title, value, units, theme, ...props}: Props) => (
+  <div className={classNames(classes.block, className)} data-component="ValueBlock" {...props}>
+    <h4 className={classes.title} data-test-name="title">
+      {title}
+    </h4>
+    <span className={classes.value} data-test-name="value">
+      {value}
+    </span>
+    <span className={classes.units} data-test-name="units">
+      {units}
+    </span>
+  </div>
 )
 
-export default ValueBlock
+export default withStyles(styles, {withTheme: true})(ValueBlock)

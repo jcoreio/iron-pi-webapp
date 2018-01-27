@@ -32,7 +32,7 @@ export type Props = {
   children: React.Node,
 }
 
-const ButtonGroup = ({classes, children, ...props}: Props) => (
+const ButtonGroup = ({classes, children, theme, ...props}: Props) => (
   <div className={classes.root} {...props}>
     {children}
   </div>

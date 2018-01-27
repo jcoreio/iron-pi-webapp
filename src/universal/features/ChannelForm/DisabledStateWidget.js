@@ -9,7 +9,7 @@ export type Props = {
 }
 
 const DisabledStateWidget = ({channel, ...props}: Props): React.Node => (
-  <TextStateWidget {...props}>
+  <TextStateWidget {...props} data-component="DisabledStateWidget">
     Channel is disabled
   </TextStateWidget>
 )

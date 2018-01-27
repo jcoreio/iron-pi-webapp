@@ -103,9 +103,10 @@ const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
     const precision = config.precision || 0
     const {rawInput, systemValue} = state || {}
     return (
-      <div className={classNames(classes.root, className)}>
+      <div className={classNames(classes.root, className)} data-component="AnalogInputStateWidget">
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="rawInput"
           title="Raw Input"
           value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(2) : null}
           units="V"
@@ -115,6 +116,7 @@ const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
         <FlowArrow className={classes.arrow} />
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
+          data-test-name="systemValue"
           title="System Value"
           value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(precision || 0) : null}
           units={units}

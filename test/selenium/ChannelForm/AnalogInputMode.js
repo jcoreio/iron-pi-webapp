@@ -7,19 +7,20 @@ import {expect} from 'chai'
 import navigateTo from '../util/navigateTo'
 import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
+import poll from '@jcoreio/poll'
 
 module.exports = () => {
   describe('AnalogInput mode', function () {
     this.timeout(60000)
     beforeEach(async () => {
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!) {
+        query: `mutation prepareTest($channel: InputChannel!, $channelId: Int!, $rawInput: Float!) {
           updateChannel(channel: $channel) {
             id
           }
+          setChannelValue(channelId: $channelId, rawInput: $rawInput)
         }
         `,
-        operationName: 'prepareTest',
         variables: {
           channel: {
             id: 1,
@@ -28,11 +29,19 @@ module.exports = () => {
             config: {
               mode: 'ANALOG_INPUT',
               units: 'gal',
-              precision: 2,
+              precision: 1,
               min: 0.5,
               max: 2.5,
+              calibration: {
+                points: [
+                  {x: 0, y: 0},
+                  {x: 1, y: 10},
+                ]
+              }
             },
-          }
+          },
+          channelId: 1,
+          rawInput: 2.356,
         }
       })
       await navigateTo('/channel/1')
@@ -40,14 +49,43 @@ module.exports = () => {
       browser.timeouts('implicit', 5000)
     })
 
+    it('displays correct title in the navbar', async () => {
+      expect(await browser.getText('#navbar [data-component="Title"]')).to.match(/^\s*Local I\/O\s+Channel 1\s*$/)
+    })
+
     it('displays the correct initial values', async () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('ANALOG_INPUT')
       expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
       expect(await browser.getValue('#channelForm [name="channelId"]')).to.equal('channel1')
       expect(await browser.getValue('#channelForm [name="config.units"]')).to.equal('gal')
-      expect(await browser.getValue('#channelForm [name="config.precision"]')).to.equal('2')
+      expect(await browser.getValue('#channelForm [name="config.precision"]')).to.equal('1')
       expect(await browser.getValue('#channelForm [name="config.min"]')).to.equal('0.5')
       expect(await browser.getValue('#channelForm [name="config.max"]')).to.equal('2.5')
+
+      expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="rawInput"] [data-test-name="value"]')).to.equal('2.36')
+      expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="systemValue"] [data-test-name="value"]')).to.equal('23.6')
+    })
+
+    it('displays updated values', async () => {
+      await graphql({
+        query: `mutation update($channelId: Int!, $rawInput: Float!) {
+          setChannelValue(channelId: $channelId, rawInput: $rawInput)
+        }`,
+        operationName: 'update',
+        variables: {
+          channelId: 1,
+          rawInput: 3.58,
+        }
+      })
+
+      browser.timeouts('implicit', 100)
+      await poll(
+        async () => {
+          expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="rawInput"] [data-test-name="value"]')).to.equal('3.58')
+          expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="systemValue"] [data-test-name="value"]')).to.equal('35.8')
+        },
+        200
+      )
     })
 
     it('displays required validation errors', async () => {
@@ -118,7 +156,7 @@ module.exports = () => {
           }
         }`
       })
-      expect(Channel).to.deep.equal({
+      expect(Channel).to.containSubset({
         name: values.name.trim(),
         channelId: values.channelId.trim(),
         config: {

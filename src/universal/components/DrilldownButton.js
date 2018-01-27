@@ -23,7 +23,7 @@ export type Props = {
 }
 
 const DrilldownButton = withStyles(styles, {withTheme: true})(
-  ({classes, children, ...props}: Props) => (
+  ({classes, children, theme, ...props}: Props) => (
     <Button {...props}>
       {children}
       <ChevronRight className={classes.icon} />

@@ -27,7 +27,7 @@ export type Props = {
   children: React.Node,
 }
 
-const SuccessAlert = ({classes, children, ...props}: Props) => (
+const SuccessAlert = ({classes, children, theme, ...props}: Props) => (
   <div className={classes.root} {...props} data-component="SuccessAlert">
     <Check className={classes.icon} />
     <span className={classes.message}>{children}</span>

@@ -24,8 +24,8 @@ export type Props = {
   children: React.Node,
 }
 
-const Title = ({classes, className, children, ...props}: Props) => (
-  <div className={classNames(classes.root, className)} {...props}>
+const Title = ({classes, className, children, theme, ...props}: Props) => (
+  <div className={classNames(classes.root, className)} {...props} data-component="Title">
     {children}
   </div>
 )

@@ -74,18 +74,18 @@ class SubmitStatus extends React.Component<Props, State> {
 
     let content = null
     if (submitting) {
-      content = <span key="submitting"><Spinner /> {submittingText || 'Saving...'}</span>
+      content = <span key="submitting" data-status="submitting"><Spinner /> {submittingText || 'Saving...'}</span>
     }
     else if (submitFailed) {
       content = (
-        <ErrorAlert key="submitFailed">
+        <ErrorAlert key="submitFailed" data-status="submitFailed">
           {submitFailedText || 'Failed to save changes:'} {error || 'please correct the values highlighted in red above.'}
         </ErrorAlert>
       )
     }
     else if (submitSucceeded && showSuccess) {
       content = (
-        <SuccessAlert key="submitSucceeded">
+        <SuccessAlert key="submitSucceeded" data-status="submitSucceeded">
           {submitSucceededText || 'Your changes have been saved!'}
         </SuccessAlert>
       )
