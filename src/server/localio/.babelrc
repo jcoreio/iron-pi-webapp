@@ -1,0 +1,7 @@
+{
+  "extends": "../../.babelrc",
+  "plugins": [
+    ["flow-runtime", {"assert": false, "annotate": false}]
+  ]
+}
+

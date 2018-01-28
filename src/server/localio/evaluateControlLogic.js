@@ -14,7 +14,7 @@ function isAlarmComparison(comparison: Comparison): boolean {
 }
 
 type EvaluateOptions = {
-  getChannelValue: (channelId: string | number) => number | null,
+  getChannelValue: (channelId: number) => ?number,
 }
 
 export default function evaluateControlLogic(controlLogic: ControlLogic, options: EvaluateOptions): boolean {

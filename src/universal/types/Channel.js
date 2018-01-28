@@ -1,6 +1,6 @@
 // @flow
 
-import t, {reify, validate} from 'flow-runtime'
+import t, {reify, validate, makeTypeError} from 'flow-runtime'
 import type {Type, Validation} from 'flow-runtime'
 
 export const ChannelModes = {
@@ -213,6 +213,14 @@ export function validateChannelConfig(config: any): ?Validation {
   }
   }
   return validation.hasErrors() ? validation : null
+}
+
+export function assertChannelConfig(config: any) {
+  const validation: ?Validation = validateChannelConfig(config)
+  if (validation) {
+    const error = makeTypeError(validation)
+    if (error) throw error
+  }
 }
 
 export type Channel = {
