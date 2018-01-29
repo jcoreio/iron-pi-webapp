@@ -4,8 +4,8 @@ import {createSelector} from 'reselect'
 import type {ChannelConfigs} from './reduxChannelStates'
 import type {ChannelConfig, DigitalOutputConfig} from '../../universal/types/Channel'
 
-type DependentChannels = Map<number, Set<number>>
-type DependentChannelSelector<S> = (state: S) => DependentChannels
+export type DependentChannels = Map<number, Set<number>>
+export type DependentChannelSelector<S> = (state: S) => DependentChannels
 
 type Options<S> = {
   selectChannelConfigs: (state: S) => ChannelConfigs,

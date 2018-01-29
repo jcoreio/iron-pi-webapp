@@ -24,7 +24,7 @@ export default function evaluateControlLogic(controlLogic: ControlLogic, options
     const conditionResult = evaluateCondition(condition, options)
     result = isFirst
       ? conditionResult
-      : ('OR' === condition.operator
+      : (('OR' === condition.operation)
         ? result || conditionResult
         : result && conditionResult
       )

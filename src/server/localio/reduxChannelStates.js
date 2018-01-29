@@ -23,8 +23,12 @@ export type ChannelValueUpdate = {id: number, value: ChannelValue}
 export type ChannelConfigs = Map<number, ChannelConfig>
 export type ChannelValues = Map<number, ChannelValue>
 
-const SET_CHANNEL_CONFIGS = 'SET_CHANNEL_CONFIGS'
-const SET_CHANNEL_VALUES = 'SET_CHANNEL_VALUES'
+export const defaultActionTypes = {
+  SET_CHANNEL_CONFIGS: 'SET_CHANNEL_CONFIGS',
+  SET_CHANNEL_VALUES: 'SET_CHANNEL_VALUES',
+}
+
+export type ActionTypes = {[action: $Keys<typeof defaultActionTypes>]: string}
 
 export type SetChannelConfigsAction = {
   type: string,
@@ -54,25 +58,24 @@ export function checkForControlLogicCycle(configs: ChannelConfigs, startChannelI
   }
 }
 
-export default function reduxChannelStates(customizeActionType: string => string = i => i): {
+export default function reduxChannelStates(actionTypes: ActionTypes = defaultActionTypes): {
   setChannelConfigs: (...payload: Array<ChannelConfigUpdate>) => SetChannelConfigsAction,
   setChannelValues: (...payload: Array<ChannelValueUpdate>) => SetChannelValuesAction,
   channelConfigsReducer: Reducer<ChannelConfigs, {type: $Subtype<string>}>,
   channelValuesReducer: Reducer<ChannelValues, {type: $Subtype<string>}>,
 } {
-  const MY_SET_CHANNEL_CONFIGS = customizeActionType(SET_CHANNEL_CONFIGS)
-  const MY_SET_CHANNEL_VALUES = customizeActionType(SET_CHANNEL_VALUES)
+  const {SET_CHANNEL_CONFIGS, SET_CHANNEL_VALUES} = actionTypes
   return {
     setChannelConfigs: (...payload: Array<ChannelConfigUpdate>) => ({
-      type: MY_SET_CHANNEL_CONFIGS,
+      type: SET_CHANNEL_CONFIGS,
       payload,
     }),
     setChannelValues: (...payload: Array<ChannelValueUpdate>) => ({
-      type: MY_SET_CHANNEL_VALUES,
+      type: SET_CHANNEL_VALUES,
       payload,
     }),
     channelConfigsReducer: createReducer(Map(), {
-      [MY_SET_CHANNEL_CONFIGS]: (configs: ChannelConfigs, {payload}: SetChannelConfigsAction) => (
+      [SET_CHANNEL_CONFIGS]: (configs: ChannelConfigs, {payload}: SetChannelConfigsAction) => (
         configs.withMutations((configs: ChannelConfigs) => {
           const localControlChannelIds = []
           for (let {id, config} of payload) {
@@ -86,7 +89,7 @@ export default function reduxChannelStates(customizeActionType: string => string
           checkForControlLogicCycle(configs, localControlChannelIds)
         })
       ),
-      [MY_SET_CHANNEL_VALUES]: (configs: ChannelConfigs, {payload}: SetChannelValuesAction) => {
+      [SET_CHANNEL_VALUES]: (configs: ChannelConfigs, {payload}: SetChannelValuesAction) => {
         for (let {id, value} of payload) {
           const config = configs.get(id)
           if (!config) throw new Error(`channel ${id} must be configured before setting value`)
@@ -111,7 +114,7 @@ export default function reduxChannelStates(customizeActionType: string => string
       }
     }),
     channelValuesReducer: createReducer(Map(), {
-      [MY_SET_CHANNEL_CONFIGS]: (values: ChannelValues, {payload}: SetChannelConfigsAction) => (
+      [SET_CHANNEL_CONFIGS]: (values: ChannelValues, {payload}: SetChannelConfigsAction) => (
         values.withMutations((values: ChannelValues) => {
           for (let {id, config, value} of payload) {
             NumberType.assert(id)
@@ -179,7 +182,7 @@ export default function reduxChannelStates(customizeActionType: string => string
           }
         })
       ),
-      [MY_SET_CHANNEL_VALUES]: (values: ChannelValues, {payload}: SetChannelValuesAction) => (
+      [SET_CHANNEL_VALUES]: (values: ChannelValues, {payload}: SetChannelValuesAction) => (
         values.withMutations((values: ChannelValues) => {
           for (let {id, value} of payload) {
             NumberType.assert(id)

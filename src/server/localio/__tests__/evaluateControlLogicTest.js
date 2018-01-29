@@ -92,7 +92,7 @@ describe("evaluateControlLogic", () => {
         comparison: 'GT',
         threshold: 4
       }, {
-        operator: 'AND',
+        operation: 'AND',
         channelId: 2,
         comparison: 'GT',
         threshold: 9
@@ -121,7 +121,7 @@ describe("evaluateControlLogic", () => {
         comparison: 'GT',
         threshold: 5
       }, {
-        operator: 'OR',
+        operation: 'OR',
         channelId: 2,
         comparison: 'GT',
         threshold: 10
