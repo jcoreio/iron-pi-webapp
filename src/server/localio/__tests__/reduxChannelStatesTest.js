@@ -11,7 +11,7 @@ describe('reduxChannelStates', () => {
   describe('channelConfigsReducer', () => {
     const {channelConfigsReducer, setChannelConfigs, setChannelValues} = reduxChannelStates()
 
-    it('sets configs from setChannelConfigs action', () => {
+    it('applies configs from setChannelConfigs action', () => {
       expect(channelConfigsReducer(
         Map().withMutations((configs: ChannelConfigs) => {
           configs.set(1, {mode: 'DISABLED'})
@@ -47,6 +47,34 @@ describe('reduxChannelStates', () => {
       ]) {
         expect(() => channelConfigsReducer(Map(), setChannelConfigs(update))).to.throw(RuntimeTypeError)
       }
+    })
+    it('rejects control logic cycles', () => {
+      let error
+      try {
+        const commonConfig = {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 0, controlMode: 'LOCAL_CONTROL'}
+        channelConfigsReducer(
+          Map().withMutations((configs: ChannelConfigs) => {
+            configs.set(1, {...commonConfig, controlLogic: [
+              {channelId: 2, comparison: 'EQ', threshold: 1},
+              {channelId: 4, comparison: 'EQ', threshold: 1},
+              {channelId: 5, comparison: 'EQ', threshold: 1},
+            ]})
+            configs.set(2, {...commonConfig, controlLogic: [{channelId: 3, comparison: 'EQ', threshold: 1}]})
+            configs.set(3, {...commonConfig, controlLogic: [{channelId: 4, comparison: 'EQ', threshold: 1}]})
+            configs.set(4, {mode: 'DIGITAL_INPUT', reversePolarity: true})
+            configs.set(5, {...commonConfig, controlMode: 'REMOTE_CONTROL'})
+          }),
+          setChannelConfigs(
+            {id: 3, config: {...commonConfig, controlLogic: [{channelId: 1, comparison: 'EQ', threshold: 1}]}},
+            {id: 4, config: {mode: 'DIGITAL_INPUT', reversePolarity: false}},
+            {id: 5, config: {...commonConfig, controlMode: 'FORCE_ON'}},
+          )
+        )
+      } catch (err) {
+        error = err
+      }
+      if (!error) throw new Error('expected channelConfigsReducer to throw an error')
+      expect(error.cycle).to.deep.equal([3, 1, 2])
     })
     it('rejects setChannelValues actions for unconfigured channels', () => {
       expect(() => channelConfigsReducer(Map(), setChannelValues({id: 1, value: {rawAnalogInput: 1}}))).to.throw(Error)

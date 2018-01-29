@@ -2,11 +2,12 @@
 
 import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
-import type {ChannelConfig} from '../../universal/types/Channel'
+import type {ChannelConfig, DigitalOutputConfig} from '../../universal/types/Channel'
 import {Map} from 'immutable'
 import type {Reducer} from 'redux'
 import {createReducer} from 'mindfront-redux-utils'
 import {assertChannelConfig} from '../../universal/types/Channel'
+import findCycle from 'find-cycle/directed'
 
 const NumberType = (reify: Type<number>)
 
@@ -35,6 +36,24 @@ export type SetChannelValuesAction = {
   payload: Array<ChannelValueUpdate>,
 }
 
+export function checkForControlLogicCycle(configs: ChannelConfigs, startChannelIds: Iterable<number> = configs.keys()) {
+  function * getSourceChannelIds(channelId: number): Iterator<number> {
+    const config = configs.get(channelId)
+    if (!config || config.mode !== 'DIGITAL_OUTPUT' || config.controlMode !== 'LOCAL_CONTROL') return
+    const {controlLogic} = ((config: any): DigitalOutputConfig)
+    if (!controlLogic) return
+    for (let {channelId} of controlLogic) yield channelId
+  }
+  if (startChannelIds.length) {
+    const cycle = findCycle(startChannelIds, getSourceChannelIds)
+    if (cycle) {
+      const error = new Error(`Changes would cause circular control logic`);
+      (error: any).cycle = cycle
+      throw error
+    }
+  }
+}
+
 export default function reduxChannelStates(customizeActionType: string => string = i => i): {
   setChannelConfigs: (...payload: Array<ChannelConfigUpdate>) => SetChannelConfigsAction,
   setChannelValues: (...payload: Array<ChannelValueUpdate>) => SetChannelValuesAction,
@@ -55,11 +74,16 @@ export default function reduxChannelStates(customizeActionType: string => string
     channelConfigsReducer: createReducer(Map(), {
       [MY_SET_CHANNEL_CONFIGS]: (configs: ChannelConfigs, {payload}: SetChannelConfigsAction) => (
         configs.withMutations((configs: ChannelConfigs) => {
+          const localControlChannelIds = []
           for (let {id, config} of payload) {
             NumberType.assert(id)
             assertChannelConfig(config)
             configs.set(id, config)
+            if (config.mode === 'DIGITAL_OUTPUT' && config.controlMode === 'LOCAL_CONTROL') {
+              localControlChannelIds.push(id)
+            }
           }
+          checkForControlLogicCycle(configs, localControlChannelIds)
         })
       ),
       [MY_SET_CHANNEL_VALUES]: (configs: ChannelConfigs, {payload}: SetChannelValuesAction) => {
