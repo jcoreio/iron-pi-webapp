@@ -12,7 +12,7 @@ import { getDataFromTree } from 'react-apollo'
 import { SchemaLink } from 'apollo-link-schema'
 import schema from '../graphql/schema'
 
-import makeStore from '../redux/makeStore'
+import makeStore from './makeStore'
 import Html from './Html'
 import type {Store} from '../../universal/redux/types'
 import addFeatures from '../../universal/features/addFeatures'
