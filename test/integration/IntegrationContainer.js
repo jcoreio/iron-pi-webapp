@@ -11,7 +11,7 @@ import {MemoryRouter} from 'react-router'
 import type {ApolloClient} from "apollo-client"
 
 import theme from '../../src/universal/theme'
-import makeStore from '../../src/server/redux/makeStore'
+import makeStore from '../../src/server/ssr/makeStore'
 import type {Store} from '../../src/universal/redux/types'
 import {StateRecord} from '../../src/universal/redux/types'
 import type {Theme} from '../../src/universal/theme'
