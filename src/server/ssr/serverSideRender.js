@@ -6,7 +6,7 @@ import path from 'path'
 import type {$Request, $Response} from 'express'
 import {renderToString} from 'react-dom/server'
 
-import makeStore from '../redux/makeStore'
+import makeStore from './makeStore'
 import Html from './Html'
 import type {Store} from '../../universal/redux/types'
 import addFeatures from '../../universal/features/addFeatures'
