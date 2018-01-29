@@ -252,8 +252,9 @@ function testRecipe(options /* : {
   selenium?: boolean,
   coverage?: boolean,
   watch?: boolean,
+  debug?: boolean,
 } */) /* : (rule: {args: Array<string>}) => Promise<void> */ {
-  const {unit, selenium, coverage, watch} = options
+  const {unit, selenium, coverage, watch, debug} = options
   const args = [
     '-r', 'babel-core/register',
   ]
@@ -267,6 +268,7 @@ function testRecipe(options /* : {
     './test/selenium/index.js'
   )
   if (watch) args.push('--watch')
+  if (debug) args.push('--inspect-brk')
   let command = 'mocha'
   if (coverage) {
     args.unshift('--reporter=lcov', '--reporter=text', command)
@@ -282,13 +284,15 @@ function testRecipe(options /* : {
 for (let coverage of [false, true]) {
   const prefix = coverage ? 'coverage' : 'test'
   for (let watch of coverage ? [false] : [false, true]) {
-    const suffix = watch ? ':watch' : ''
-    task(`${prefix}${suffix}`, ['node_modules', seleniumServer], testRecipe({unit: true, selenium: true, coverage, watch}))
-      .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch}))
-      .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
-    task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServer], testRecipe({selenium: true, coverage, watch}))
-      .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}`)
+    for (let debug of watch ? [false] : [false, true]) {
+      const suffix = watch ? ':watch' : debug ? ':debug' : ''
+      task(`${prefix}${suffix}`, ['node_modules', seleniumServer], testRecipe({unit: true, selenium: true, coverage, watch, debug}))
+        .description(`run all tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}${debug ? ' in debug mode' : ''}`)
+      task(`${prefix}:unit${suffix}`, ['node_modules'], testRecipe({unit: true, coverage, watch, debug}))
+        .description(`run unit tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}${debug ? ' in debug mode' : ''}`)
+      task(`${prefix}:selenium${suffix}`, ['node_modules', seleniumServer], testRecipe({selenium: true, coverage, watch, debug}))
+        .description(`run selenium tests${coverage ? ' with code coverage' : ''}${watch ? ' in watch mode' : ''}${debug ? ' in debug mode' : ''}`)
+    }
   }
 }
 
