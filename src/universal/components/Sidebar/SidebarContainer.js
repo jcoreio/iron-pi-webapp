@@ -115,9 +115,11 @@ const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState 
   localIO: createSelector(
     (state: State) => state.sidebar.expandedSections.get('localIO', true),
     (state, {data: {Channels}}: PropsFromApollo): ?Array<Channel> => Channels,
-    (expanded: boolean, Channels: ?Array<Channel>) => {
-      if (!Channels) return null
+    (state, {data: {loading}}: PropsFromApollo): boolean => loading,
+    (expanded: boolean, Channels: ?Array<Channel>, loading: boolean) => {
+      if (!Channels) return {loading}
       return {
+        loading: false,
         expanded,
         channels: Channels,
       }

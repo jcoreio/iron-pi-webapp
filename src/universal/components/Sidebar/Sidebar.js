@@ -122,7 +122,7 @@ class Sidebar extends React.Component<Props> {
         </div>
         <List className={classes.sidebarBody}>
           <SidebarSectionHeader title="Status" />
-          {localIO && <LocalIOSection {...localIO} onSectionExpandedChange={onSectionExpandedChange} />}
+          <LocalIOSection {...localIO || {}} onSectionExpandedChange={onSectionExpandedChange} />
         </List>
       </div>
     )
