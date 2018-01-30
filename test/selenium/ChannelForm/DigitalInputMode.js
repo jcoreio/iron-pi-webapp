@@ -14,11 +14,11 @@ module.exports = () => {
     this.timeout(60000)
     beforeEach(async () => {
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: Int!, $rawInput: Float!) {
+        query: `mutation prepareTest($channel: InputChannel!, $channelId: Int!, $rawInput: Int!) {
           updateChannel(channel: $channel) {
             id
           }
-          setChannelValue(channelId: $channelId, rawInput: $rawInput)
+          setChannelValue(channelId: $channelId, rawDigitalInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
@@ -57,8 +57,8 @@ module.exports = () => {
 
     it('displays updated values', async () => {
       await graphql({
-        query: `mutation update($channelId: Int!, $rawInput: Float!) {
-          setChannelValue(channelId: $channelId, rawInput: $rawInput)
+        query: `mutation update($channelId: Int!, $rawInput: Int!) {
+          setChannelValue(channelId: $channelId, rawDigitalInput: $rawInput)
         }`,
         operationName: 'update',
         variables: {

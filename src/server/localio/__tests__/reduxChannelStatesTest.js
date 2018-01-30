@@ -190,6 +190,24 @@ describe('reduxChannelStates', () => {
         '10': {controlValue: null},
       })
     })
+    it("doesn't clear current value if mode remains the same", () => {
+      expect(channelValuesReducer(
+        Map([
+          [1, {rawAnalogInput: 1}],
+          [2, {rawDigitalInput: 0}],
+          [3, {controlValue: 0}],
+        ]),
+        setChannelConfigs(
+          {id: 1, config: {mode: 'ANALOG_INPUT'}},
+          {id: 2, config: {mode: 'DIGITAL_INPUT'}},
+          {id: 3, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}},
+        )
+      ).toJS()).to.deep.equal({
+        '1': {rawAnalogInput: 1},
+        '2': {rawDigitalInput: 0},
+        '3': {controlValue: 0},
+      })
+    })
     it('rejects invalid values/ids', () => {
       for (let update: any of [
         {id: 'a', value: {rawAnalogInput: 1}},

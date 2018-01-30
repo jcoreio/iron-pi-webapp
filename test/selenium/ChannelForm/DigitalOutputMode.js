@@ -28,16 +28,24 @@ module.exports = () => {
 
     async function init(channel: Channel = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: Int!, $controlValue: Int) {
+        query: `mutation prepareTest($channel: InputChannel!) {
           updateChannel(channel: $channel) {
             id
           }
-          setChannelValue(channelId: $channelId, controlValue: $controlValue)
         }
         `,
         operationName: 'prepareTest',
         variables: {
           channel: defaultChannel,
+        }
+      })
+      await graphql({
+        query: `mutation prepareTest($channelId: Int!, $controlValue: Int) {
+          setChannelValue(channelId: $channelId, controlValue: $controlValue)
+        }
+        `,
+        operationName: 'prepareTest',
+        variables: {
           channelId: channel.id,
           controlValue,
         }
@@ -199,7 +207,7 @@ module.exports = () => {
       )
     })
 
-    it("doesn't apply safe state when control value is missing", async () => {
+    it("doesn't apply safe state when control value is present", async () => {
       await init(defaultChannel, 0)
 
       await browser.click('#channelForm [name="config.safeState"] [value="1"]')

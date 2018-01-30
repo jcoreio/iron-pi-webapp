@@ -5,6 +5,7 @@ import requireEnv from '@jcoreio/require-env'
 
 import glob from 'glob'
 import path from 'path'
+import type {Store} from '../redux/types'
 
 export type DbConnectionParams = {
   host: string,
@@ -20,7 +21,14 @@ export const defaultDbConnectionParams = (): DbConnectionParams => ({
   database: requireEnv('DB_NAME'),
 })
 
-export default function createSequelize(params: DbConnectionParams = defaultDbConnectionParams()): Sequelize {
+type Options = {
+  params?: DbConnectionParams,
+  store?: Store,
+}
+
+export default function createSequelize(options: Options = {}): Sequelize {
+  const params = options.params || defaultDbConnectionParams()
+  const {store} = options
   const {host, user, password, database} = params
 
   const sequelize = new Sequelize(database, user, password, {
@@ -32,7 +40,7 @@ export default function createSequelize(params: DbConnectionParams = defaultDbCo
   files.forEach((file: string) => {
     // $FlowFixMe
     const model = require(file).default
-    if (model && model.initAttributes) model.initAttributes({sequelize})
+    if (model && model.initAttributes) model.initAttributes({sequelize, store})
   })
   files.forEach((file: string) => {
     // $FlowFixMe

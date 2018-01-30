@@ -1,14 +1,11 @@
 // @flow
 
 import Sequelize, {Model} from 'sequelize'
-import type {
-  AnalogInputConfig,
-  ChannelConfig, ChannelMode, DigitalInputConfig, DigitalOutputConfig, SetAnalogInputState,
-  SetDisabledState
-} from '../../universal/types/Channel'
+import type {ChannelConfig, ChannelMode} from '../../universal/types/Channel'
 import {channelIdPattern, validateChannelConfig} from '../../universal/types/Channel'
-import {setChannelStates} from '../localio/ChannelStates'
 import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
+import type {Store} from '../redux/types'
+import {setChannelConfigs} from '../redux'
 
 export type ChannelInitAttributes = {
   id: number;
@@ -23,38 +20,9 @@ export type ChannelAttributes = ChannelInitAttributes & {
   config: ChannelConfig;
 }
 
-export function updateChannelState(channel: Channel) {
+export function updateChannelState(store: Store, channel: Channel) {
   const {id, config} = channel
-  const {mode} = config
-  switch (mode) {
-  case 'ANALOG_INPUT': {
-    const {calibration}: AnalogInputConfig = (config: any)
-    setChannelStates(({id, mode, calibration}: SetAnalogInputState))
-    break
-  }
-  case 'DIGITAL_INPUT': {
-    const {reversePolarity}: DigitalInputConfig = (config: any)
-    setChannelStates({id, mode, reversePolarity})
-    break
-  }
-  case 'DIGITAL_OUTPUT': {
-    const {safeState, reversePolarity, controlMode}: DigitalOutputConfig = (config: any)
-    const state = {id, mode, safeState, reversePolarity, controlMode}
-    if (controlMode === 'FORCE_OFF') (state: any).controlValue = 0
-    else if (controlMode === 'FORCE_ON') (state: any).controlValue = 1
-    setChannelStates(state)
-    break
-  }
-  case 'DISABLED':
-    setChannelStates(({id, mode}: SetDisabledState))
-    break
-  }
-}
-
-function updateChannelStateHook(channel: Channel) {
-  if (channel.changed('config')) {
-    updateChannelState(channel)
-  }
+  store.dispatch(setChannelConfigs({id, config}))
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
@@ -66,7 +34,8 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
   createdAt: Date;
   updatedAt: Date;
 
-  static initAttributes({sequelize}: {sequelize: Sequelize}) {
+  static initAttributes(options: {sequelize: Sequelize, store?: Store}) {
+    const {sequelize, store} = options
     super.init({
       id: {
         primaryKey: true,
@@ -107,6 +76,12 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
     }, {
       sequelize,
     })
+
+    function updateChannelStateHook(channel: Channel) {
+      if (store && channel.changed('config')) {
+        updateChannelState(store, channel)
+      }
+    }
 
     this.afterCreate(updateChannelStateHook)
     this.afterUpdate(updateChannelStateHook)

@@ -9,20 +9,21 @@ import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import GraphQLJSON from 'graphql-type-json'
 
 import type {ChannelAttributes} from '../../models/Channel'
-import {getChannelState} from '../../localio/ChannelStates'
 import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
 import defaultInputType from './defaultInputType'
+import type {Store} from '../../redux/types'
 
 export type Options = {
   sequelize: Sequelize,
+  store: Store,
 }
 
 export default function createTypes(options: Options): {
   types: {[name: string]: GraphQLOutputType},
   inputTypes: {[name: string]: GraphQLInputType},
 } {
-  const {sequelize} = options
+  const {sequelize, store} = options
   const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
@@ -41,7 +42,7 @@ export default function createTypes(options: Options): {
         type: GraphQLJSON,
         description: 'the state of this channel',
         resolve(source: ChannelAttributes): ?ChannelState {
-          return getChannelState(source.id)
+          return store.getChannelState(source.id)
         },
       },
     },

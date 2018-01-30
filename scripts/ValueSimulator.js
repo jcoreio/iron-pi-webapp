@@ -109,14 +109,14 @@ class ValueSimulator {
     for (let {id, state} of Channels) {
       switch (state.mode) {
       case 'ANALOG_INPUT':
-        values.push({id, rawInput: Math.random()})
+        values.push({id, value: {rawAnalogInput: Math.random()}})
         break
       case 'DIGITAL_INPUT':
-        values.push({id, rawInput: Math.random() > 0.5 ? 1 : 0})
+        values.push({id, value: {rawDigitalInput: Math.random() > 0.5 ? 1 : 0}})
         break
       case 'DIGITAL_OUTPUT': {
         if (state.controlMode === 'REMOTE_CONTROL') {
-          values.push({id, controlValue: Math.random() > 0.5 ? 1 : 0})
+          values.push({id, value: {controlValue: Math.random() > 0.5 ? 1 : 0}})
         }
         break
       }

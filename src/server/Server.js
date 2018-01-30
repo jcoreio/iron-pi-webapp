@@ -16,7 +16,7 @@ import databaseReady from './sequelize/databaseReady'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
-import {getChannelState, getChannelStates, setChannelStates, setChannelValues} from './localio/ChannelStates'
+import {setChannelConfigs, setChannelValues} from './redux'
 
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
@@ -31,6 +31,9 @@ import createToken from './auth/createToken'
 import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
 import createSubscriptionServer from './express/subscriptionServer'
+import type {Store} from './redux/types'
+import makeStore from './redux/makeStore'
+import type {ChannelState} from '../universal/types/Channel'
 
 const log = logger('Server')
 
@@ -44,9 +47,7 @@ export default class Server {
   _devGlobals: Object = {
     Sequelize,
     pubsub,
-    getChannelState,
-    getChannelStates,
-    setChannelStates,
+    setChannelConfigs,
     setChannelValues,
     authorize,
     createToken,
@@ -57,6 +58,7 @@ export default class Server {
   sequelize: ?Sequelize
   umzug: ?Umzug
   graphqlSchema: ?GraphQLSchema
+  store: ?Store
 
   constructor(options?: $Shape<DbConnectionParams & {port: number}> = {}) {
     this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
@@ -69,15 +71,33 @@ export default class Server {
 
     log.info('Starting webapp server...')
     try {
+      const store = this.store = makeStore({
+        publishChannelStates(channelStates: Array<ChannelState>) {
+          for (let state of channelStates) {
+            pubsub.publish('ChannelStates', {ChannelStates: state})
+            pubsub.publish(`ChannelStates/${state.id}`, {ChannelState: state})
+          }
+        }
+      })
+      this._devGlobals.store = store
+      this._devGlobals.dispatch = store.dispatch
+      this._devGlobals.getState = store.getState
+
       await Promise.all([
         databaseReady(),
       ])
 
-      const sequelize = this.sequelize = this._devGlobals.sequelize = createSequelize(this.dbConnectionParams)
+      const sequelize = this.sequelize = this._devGlobals.sequelize = createSequelize({
+        params: this.dbConnectionParams,
+        store,
+      })
       Object.assign(this._devGlobals, sequelize.models)
       const umzug = this.umzug = this._devGlobals.umzug = createUmzug({sequelize})
 
-      const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({sequelize})
+      const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
+        sequelize,
+        store,
+      })
 
       const forceMigrate = 'production' !== process.env.NODE_ENV
       if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate({
@@ -86,7 +106,7 @@ export default class Server {
       })
 
       const channels = await Channel.findAll()
-      channels.forEach(channel => updateChannelState(channel))
+      channels.forEach(channel => updateChannelState(store, channel))
 
       const app = express()
 

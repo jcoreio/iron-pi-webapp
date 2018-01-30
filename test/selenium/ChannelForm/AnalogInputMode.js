@@ -18,7 +18,7 @@ module.exports = () => {
           updateChannel(channel: $channel) {
             id
           }
-          setChannelValue(channelId: $channelId, rawInput: $rawInput)
+          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
         }
         `,
         variables: {
@@ -69,7 +69,7 @@ module.exports = () => {
     it('displays updated values', async () => {
       await graphql({
         query: `mutation update($channelId: Int!, $rawInput: Float!) {
-          setChannelValue(channelId: $channelId, rawInput: $rawInput)
+          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
         }`,
         operationName: 'update',
         variables: {

@@ -8,9 +8,11 @@ import updateCalibration from './updateCalibration'
 import updateChannel from './updateChannel'
 import setChannelValues from './setChannelValues'
 import setChannelValue from './setChannelValue'
+import type {Store} from '../../redux/types'
 
 type Options = {
   sequelize: Sequelize,
+  store: Store,
   types: {[name: string]: GraphQLOutputType},
   inputTypes: {[name: string]: GraphQLInputType},
 }

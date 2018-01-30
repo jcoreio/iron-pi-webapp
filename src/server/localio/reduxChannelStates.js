@@ -128,7 +128,7 @@ export default function reduxChannelStates(actionTypes: ActionTypes = defaultAct
                 } else {
                   throw new Error('value must contain a valid rawAnalogInput when channel mode is ANALOG_INPUT')
                 }
-              } else values.set(id, {rawAnalogInput: null})
+              } else values.update(id, value => value && 'rawAnalogInput' in value ? value : {rawAnalogInput: null})
               break
             }
             case 'DIGITAL_INPUT': {
@@ -139,7 +139,7 @@ export default function reduxChannelStates(actionTypes: ActionTypes = defaultAct
                 } else {
                   throw new Error('value must contain a valid rawDigitalInput when channel mode is DIGITAL_INPUT')
                 }
-              } else values.set(id, {rawDigitalInput: null})
+              } else values.update(id, value => value && 'rawDigitalInput' in value ? value : {rawDigitalInput: null})
               break
             }
             case 'DIGITAL_OUTPUT': {
@@ -165,7 +165,7 @@ export default function reduxChannelStates(actionTypes: ActionTypes = defaultAct
                   values.delete(id)
                   break
                 case 'REMOTE_CONTROL':
-                  values.set(id, {controlValue: null})
+                  values.update(id, value => value && 'controlValue' in value ? value : {controlValue: null})
                   break
                 }
               }

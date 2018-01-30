@@ -6,9 +6,10 @@ import {createMiddleware} from 'mindfront-redux-utils'
 import type {ActionTypes} from './reduxChannelStates'
 import type {ChannelState} from '../../universal/types/Channel'
 import type {ChangedChannelStateSelector} from './createChangedChannelStatesSelector'
+import {defaultActionTypes} from './reduxChannelStates'
 
 type Options<S> = {
-  actionTypes: ActionTypes,
+  actionTypes?: ActionTypes,
   selectChangedChannelStates: ChangedChannelStateSelector<S>,
   publishChannelStates: (states: Array<ChannelState>) => any,
 }
@@ -16,8 +17,8 @@ type Options<S> = {
 export default function createPublishChannelStatesMiddleware<S, A: {type: $Subtype<string>}>(
   options: Options<S>
 ): Middleware<S, A> {
+  const {SET_CHANNEL_CONFIGS, SET_CHANNEL_VALUES} = options.actionTypes || defaultActionTypes
   const {
-    actionTypes: {SET_CHANNEL_CONFIGS, SET_CHANNEL_VALUES},
     selectChangedChannelStates,
     publishChannelStates,
   } = options
