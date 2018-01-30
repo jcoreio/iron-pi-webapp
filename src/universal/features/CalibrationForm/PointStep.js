@@ -2,14 +2,15 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
+import {Field} from 'redux-form'
 import {withStyles, withTheme} from 'material-ui/styles'
 import {required} from '@jcoreio/redux-form-validators/lib/index'
-import TextField from '../../components/TextField'
 import {NumericField} from 'redux-form-numeric-field'
 import {TransitionListener} from 'react-transition-context'
 import Arrow from 'react-arrow'
 
 import type {Theme} from '../../theme'
+import TextField from '../../components/TextField'
 import ValueBlock from '../../components/ValueBlock'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
@@ -23,6 +24,23 @@ const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Objec
     {...props}
   />
 ))
+
+export type ValueBlockFieldProps = {
+  input: {
+    value: any,
+  },
+  meta: {
+    error?: string,
+  },
+}
+
+const ValueBlockField = ({input, meta, ...props}: ValueBlockFieldProps): React.Node => (
+  <ValueBlock
+    value={input.value}
+    error={meta.error}
+    {...props}
+  />
+)
 
 const styles = ({spacing, palette, overrides}: Theme) => ({
   root: {
@@ -93,7 +111,7 @@ class PointStep extends React.Component<Props> {
   }
 
   updateX = (props: Props = this.props) => {
-    const {channel, change, pointIndex} = this.props
+    const {channel, change, pointIndex} = props
     const rawInput = getRawInput(channel)
     change(`points[${pointIndex}].x`, rawInput)
   }
@@ -111,14 +129,15 @@ class PointStep extends React.Component<Props> {
   render(): ?React.Node {
     const {classes, bodyClass, pointIndex, channel} = this.props
     const {config: {units}} = channel || {config: {}}
-    const {rawInput} = channel && channel.state || {}
     return (
       <div className={classNames(bodyClass, classes.root)}>
-        <ValueBlock
+        <Field
+          name={`points[${pointIndex}].x`}
           title="Raw Input"
           units="V"
-          value={rawInput}
           className={classes.block}
+          component={ValueBlockField}
+          validate={required()}
         />
         <FlowArrow className={classes.arrow} />
         <div className={classNames(classes.block, classes.actualValueBlock)}>

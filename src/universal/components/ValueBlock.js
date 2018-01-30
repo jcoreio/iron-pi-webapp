@@ -3,6 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
+import {FormHelperText} from 'material-ui/Form'
 import type {Theme} from '../theme/index'
 
 const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
@@ -19,6 +20,16 @@ const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
     alignItems: 'baseline',
     flexWrap: 'wrap',
     padding: block.padding,
+  },
+  error: {
+    border: {
+      width: 1,
+      style: 'solid',
+      color: palette.error.main,
+    },
+    '& $title, & $value, & $units, & $helperText': {
+      color: palette.error.main,
+    },
   },
   title: {
     margin: 0,
@@ -38,6 +49,9 @@ const styles = ({palette, spacing, channelState: {block}}: Theme) => ({
     color: palette.grey[600],
     fontSize: '1rem',
   },
+  helperText: {
+    flex: '1 0 100%',
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -49,10 +63,11 @@ export type Props = {
   title: React.Node,
   value?: React.Node,
   units?: React.Node,
+  error?: React.Node,
 }
 
-const ValueBlock = ({classes, className, title, value, units, theme, ...props}: Props) => (
-  <div className={classNames(classes.block, className)} data-component="ValueBlock" {...props}>
+const ValueBlock = ({classes, className, title, value, units, theme, error, ...props}: Props) => (
+  <div className={classNames(classes.block, {[classes.error]: error}, className)} data-component="ValueBlock" {...props}>
     <h4 className={classes.title} data-test-name="title">
       {title}
     </h4>
@@ -62,6 +77,7 @@ const ValueBlock = ({classes, className, title, value, units, theme, ...props}: 
     <span className={classes.units} data-test-name="units">
       {units}
     </span>
+    {error && <FormHelperText className={classes.helperText} data-component="FormHelperText">{error}</FormHelperText>}
   </div>
 )
 

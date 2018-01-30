@@ -3,6 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {dirname} from 'path'
+import get from 'lodash.get'
 import type {Match, Location, RouterHistory} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
@@ -131,15 +132,16 @@ class CalibrationForm extends React.Component<Props, State> {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 
-    if (nextChannel !== prevChannel) {
+    if (get(nextChannel, 'id') !== get(prevChannel, 'id')) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
-      if (nextChannel) {
-        this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
-        const {subscribeToChannelState} = nextProps
-        if (subscribeToChannelState) {
-          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
-        }
+      const {subscribeToChannelState} = nextProps
+      if (nextChannel && subscribeToChannelState) {
+        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
       }
+    }
+
+    if (nextChannel && nextChannel !== prevChannel && nextProps.pristine) {
+      this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
     }
   }
 
@@ -154,6 +156,10 @@ class CalibrationForm extends React.Component<Props, State> {
     (pathname: string, url: string) => pathname === `${url}/${CALIBRATION_TABLE}`
   )
 
+  validatePoints = (points: ?Array<any>): ?string => {
+    if (!points || points.length < 2) return 'You must define at least two points'
+  }
+
   renderBody = () => {
     const {classes, data: {Channel}, change} = this.props
     const numSteps = parseInt(this.props.numSteps) || 0
@@ -166,6 +172,7 @@ class CalibrationForm extends React.Component<Props, State> {
           key={numSteps + 1}
           channel={Channel}
           bodyClass={classes.body}
+          validate={this.validatePoints}
         />
       )
     }
