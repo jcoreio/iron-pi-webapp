@@ -168,7 +168,7 @@ class ControlLogicTable extends React.Component<Props> {
     const {warning, error, submitFailed} = meta || {}
     const hasError = submitFailed && (error != null || warning != null)
     return (
-      <FormControl error={hasError} className={formControlClass}>
+      <FormControl error={hasError} className={formControlClass} data-component="ControlLogicTable">
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
@@ -177,7 +177,11 @@ class ControlLogicTable extends React.Component<Props> {
                   <FormLabel className={classNames(classes.label, {[classes.labelValid]: !hasError})}>
                     Control Logic
                   </FormLabel>
-                  <Button onClick={this.handleAddConditionClick} className={classes.addConditionButton}>
+                  <Button
+                    onClick={this.handleAddConditionClick}
+                    className={classes.addConditionButton}
+                    data-test-name="addConditionButton"
+                  >
                     Add Condition
                     <AddIcon className={classes.addIcon} />
                   </Button>
@@ -242,7 +246,11 @@ class ControlLogicTable extends React.Component<Props> {
                   <ConnectedThresholdField condition={condition} classes={classes} />
                 </TableCell>
                 <TableCell>
-                  <IconButton className={classes.deleteButton} onClick={() => fields.remove(index)}>
+                  <IconButton
+                    className={classes.deleteButton}
+                    onClick={() => fields.remove(index)}
+                    data-test-name="deleteConditionButton"
+                  >
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -251,7 +259,7 @@ class ControlLogicTable extends React.Component<Props> {
           </TableBody>
         </Table>
         {submitFailed && (error || warning) &&
-          <FormHelperText>
+          <FormHelperText data-component="FormHelperText">
             {error || warning}
           </FormHelperText>
         }
