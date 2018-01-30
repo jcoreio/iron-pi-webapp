@@ -30,7 +30,9 @@ const channelFormFeature = {
         <Title>
           Local I/O
           <ChevronRight />
-          <Link to={match.url}>Channel {match.params.id}</Link>
+          <Link to={match.url} data-test-name="channelFormLink">
+            Channel {match.params.id}
+          </Link>
           <Route
             path={`${match.url}/${CALIBRATION}`}
             render={() => (

@@ -141,6 +141,7 @@ describe('selenium tests', function () {
       require('./AuthTests')()
       require('./SidebarTests')()
       require('./ChannelForm')()
+      require('./CalibrationForm')()
     })
   })
 })

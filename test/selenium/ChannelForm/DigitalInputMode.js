@@ -42,7 +42,7 @@ module.exports = () => {
     })
 
     it('displays correct title in the navbar', async () => {
-      expect(await browser.getText('#navbar [data-component="Title"]')).to.match(/^\s*Local I\/O\s+Channel 1\s*$/)
+      expect(await browser.getText('#navbar [data-component="Title"]')).to.match(/^\s*Local I\/O\s*Channel 1\s*$/)
     })
 
     it('displays the correct initial values', async () => {

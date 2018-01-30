@@ -36,7 +36,9 @@ export type ValueBlockFieldProps = {
 
 const ValueBlockField = ({input, meta, ...props}: ValueBlockFieldProps): React.Node => (
   <ValueBlock
-    value={input.value}
+    value={input.value != null && Number.isFinite(input.value)
+      ? input.value.toFixed(2)
+      : input.value}
     error={meta.error}
     {...props}
   />

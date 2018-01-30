@@ -86,7 +86,7 @@ export type Props = {
   location: Location,
   history: RouterHistory,
   classes: Classes,
-  numSteps: ?(string | number),
+  numPoints: ?(string | number),
   handleSubmit: Function,
   pristine?: boolean,
   submitting?: boolean,
@@ -115,7 +115,7 @@ class CalibrationForm extends React.Component<Props, State> {
   pickFormFields = ({config: {calibration}}: FullChannel): Calibration => ({
     points: [],
     ...calibration || {},
-    numSteps: calibration ? calibration.points.length : 2,
+    numPoints: calibration ? calibration.points.length : 2,
   })
 
   componentDidMount() {
@@ -162,14 +162,14 @@ class CalibrationForm extends React.Component<Props, State> {
 
   renderBody = () => {
     const {classes, data: {Channel}, change} = this.props
-    const numSteps = parseInt(this.props.numSteps) || 0
+    const numPoints = parseInt(this.props.numPoints) || 0
 
     if (this.isInCalibration(this.props)) {
       return (
         <FieldArray
           name="points"
           component={CalibrationTable}
-          key={numSteps + 1}
+          key={numPoints + 1}
           channel={Channel}
           bodyClass={classes.body}
           validate={this.validatePoints}
@@ -199,8 +199,8 @@ class CalibrationForm extends React.Component<Props, State> {
   handleNext = () => {
     const {history, match} = this.props
     const {step} = this.state
-    const numSteps = parseInt(this.props.numSteps) || 0
-    if (step >= numSteps) history.push(`${match.url}/${CALIBRATION_TABLE}`)
+    const numPoints = parseInt(this.props.numPoints) || 0
+    if (step >= numPoints) history.push(`${match.url}/${CALIBRATION_TABLE}`)
     else this.setState({step: step + 1})
   }
 
@@ -231,14 +231,14 @@ class CalibrationForm extends React.Component<Props, State> {
     }
 
     const {step} = this.state
-    const numSteps = parseInt(this.props.numSteps) || 0
+    const numPoints = parseInt(this.props.numPoints) || 0
 
     const {name} = Channel || {name: `Channel ${match.params.id || '?'}`}
 
     let title
     if (isInCalibration) title = `${name} Calibration`
     else if (step === 0) title = 'Begin Calibration'
-    else title = `Step ${step} of ${numSteps}`
+    else title = `Step ${step} of ${numPoints}`
 
     const backButtonProps = isInCalibration
       ? {
@@ -252,9 +252,13 @@ class CalibrationForm extends React.Component<Props, State> {
       }
 
     return (
-      <form className={classes.form} onSubmit={handleSubmit(isInCalibration ? this.handleSubmit : this.handleNext)}>
+      <form
+        id="calibrationForm"
+        className={classes.form}
+        onSubmit={handleSubmit(isInCalibration ? this.handleSubmit : this.handleNext)}
+      >
         <Paper className={classes.paper}>
-          <h3 className={classes.title}>
+          <h3 className={classes.title} data-test-name="calibrationFormTitle">
             <Fader>
               {title}
             </Fader>
@@ -271,17 +275,24 @@ class CalibrationForm extends React.Component<Props, State> {
               component={Link}
               to={`${match.url}/${CALIBRATION_TABLE}`}
               className={step === 0 && !isInCalibration ? undefined : classes.hidden}
+              data-test-name="calibrationTableButton"
             >
               Calibration Table
             </Button>
             <div className={classes.flexSpacer} />
             <Spinner in={Boolean(submitting)} />
-            <Button component={Link} raised to={dirname(match.url)}>
+            <Button
+              component={Link}
+              raised
+              to={dirname(match.url)}
+              data-test-name="cancelButton"
+            >
               Cancel
             </Button>
             <Button
               raised
               color="primary"
+              data-test-name="backButton"
               {...backButtonProps}
             >
               <ChevronLeft />
@@ -292,6 +303,7 @@ class CalibrationForm extends React.Component<Props, State> {
               color="primary"
               type="submit"
               disabled={submitting}
+              data-test-name={isInCalibration ? 'okButton' : 'nextButton'}
             >
               {isInCalibration ? 'OK' : 'Next'}
               {!isInCalibration && <ChevronRight />}
@@ -304,6 +316,6 @@ class CalibrationForm extends React.Component<Props, State> {
 }
 
 export default compose(
-  formValues('numSteps'),
+  formValues('numPoints'),
   withStyles(styles, {withTheme: true})
 )(CalibrationForm)

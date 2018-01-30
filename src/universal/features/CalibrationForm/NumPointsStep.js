@@ -24,13 +24,13 @@ export type Props = {
 }
 
 class BeginStep extends React.Component<Props> {
-  numStepsInput: ?HTMLInputElement = null
+  numPointsInput: ?HTMLInputElement = null
 
   handleCameIn = () => {
-    const {numStepsInput} = this
-    if (numStepsInput) {
-      numStepsInput.focus()
-      numStepsInput.select()
+    const {numPointsInput} = this
+    if (numPointsInput) {
+      numPointsInput.focus()
+      numPointsInput.select()
     }
   }
 
@@ -39,12 +39,12 @@ class BeginStep extends React.Component<Props> {
     return (
       <div className={bodyClass}>
         <NumericField
-          name="numSteps"
+          name="numPoints"
           label="How many calibration points do you want to enter?"
           component={TextField}
           className={classes.numPointsField}
           validate={[required(), numericality({int: true, '>=': 2, '<=': 10})]}
-          inputRef={c => this.numStepsInput = c}
+          inputRef={c => this.numPointsInput = c}
         />
         <TransitionListener didComeIn={this.handleCameIn} />
       </div>

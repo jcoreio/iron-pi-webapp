@@ -113,7 +113,7 @@ class CalibrationTable extends React.Component<Props> {
     const hasError = submitFailed && (error != null || warning != null)
     const {units} = channel && channel.config || {}
     return (
-      <FormControl error={hasError} className={classNames(bodyClass, classes.root)}>
+      <FormControl error={hasError} className={classNames(bodyClass, classes.root)} data-component="CalibrationTable">
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
