@@ -5,12 +5,13 @@ import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../../theme'
 import _ChevronRight from 'material-ui-icons/ChevronRight'
 
-const styles = (theme: Theme) => ({
+const styles = ({spacing, typography}: Theme) => ({
   root: {
-    width: theme.typography.pxToRem(32),
-    height: theme.typography.pxToRem(32),
+    width: typography.pxToRem(32),
+    height: typography.pxToRem(32),
     verticalAlign: 'middle',
     color: '#747f88',
+    margin: `0 ${spacing.unit}px`,
   },
 })
 

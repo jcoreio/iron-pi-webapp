@@ -28,12 +28,15 @@ const channelFormFeature = {
       path={channelForm((':id': any))}
       render={({match}) => (
         <Title>
-          Local I/O <ChevronRight /> <Link to={match.url}>Channel {match.params.id}</Link>
+          Local I/O
+          <ChevronRight />
+          <Link to={match.url}>Channel {match.params.id}</Link>
           <Route
             path={`${match.url}/${CALIBRATION}`}
             render={() => (
               <React.Fragment>
-                <ChevronRight /> Calibration
+                <ChevronRight />
+                Calibration
               </React.Fragment>
             )}
           />
