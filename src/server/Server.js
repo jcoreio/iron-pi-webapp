@@ -34,6 +34,7 @@ import createSubscriptionServer from './express/subscriptionServer'
 import type {Store} from './redux/types'
 import makeStore from './redux/makeStore'
 import type {ChannelState} from '../universal/types/Channel'
+import publishChannelStates from './graphql/subscription/publishChannelStates'
 
 const log = logger('Server')
 
@@ -72,12 +73,7 @@ export default class Server {
     log.info('Starting webapp server...')
     try {
       const store = this.store = makeStore({
-        publishChannelStates(channelStates: Array<ChannelState>) {
-          for (let state of channelStates) {
-            pubsub.publish('ChannelStates', {ChannelStates: state})
-            pubsub.publish(`ChannelStates/${state.id}`, {ChannelState: state})
-          }
-        }
+        publishChannelStates: (channelStates: Array<ChannelState>) => publishChannelStates(pubsub, channelStates),
       })
       this._devGlobals.store = store
       this._devGlobals.dispatch = store.dispatch
