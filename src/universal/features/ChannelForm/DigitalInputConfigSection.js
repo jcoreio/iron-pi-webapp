@@ -13,11 +13,19 @@ export type Props = {
   lastControlClass: string,
 }
 
+const polarityInfo = (
+  <span>
+    <p>Optionally inverts the logic level of the input:</p>
+    <p><strong>Normal</strong>: Logic level is not inverted</p>
+    <p><strong>Reversed</strong>: Logic level is inverted</p>
+  </span>
+)
+
 const DigitalInputConfigSection = (
   ({tallButtonClass, firstControlClass, lastControlClass}: Props) => (
     <React.Fragment>
       <ControlWithInfo
-        info="Whether the system value should be the opposite of the input value"
+        info={polarityInfo}
         className={classNames(firstControlClass, lastControlClass)}
       >
         <Field

@@ -106,6 +106,35 @@ const ConfigSection = formValues('config')(
   }
 )
 
+const channelStateInfo: {[name: ChannelMode]: React.Node} = {
+  ANALOG_INPUT: (
+    <span>
+      <p><strong>Raw Input</strong>: Voltage at the physical input</p>
+      <p><strong>System Value</strong>: Value after calibration</p>
+    </span>
+  ),
+  DIGITAL_INPUT: (
+    <span>
+      <p><strong>Raw Input</strong>: Logic level at physical input</p>
+      <p><strong>Polarity</strong>: Optionally inverts the input logic level</p>
+      <p><strong>System Value</strong>: Value after optional polarity invert step</p>
+    </span>
+  ),
+  DIGITAL_OUTPUT: (
+    <span>
+      <p><strong>Control Value</strong>: Value being sent to the output, if available</p>
+      <p><strong>Safe State</strong>: Value that will be sent to the output if the control value becomes unavailable for any reason</p>
+      <p><strong>Polarity</strong>: Optionally inverts the output logic level</p>
+      <p><strong>Raw Output</strong>: Value being sent to the physical output</p>
+    </span>
+  ),
+  DISABLED: (
+    <span>
+      To use this channel, select <strong>Analog Input</strong>, <strong>Digital Input</strong>, or <strong>Digital Output</strong> mode
+    </span>
+  )
+}
+
 export type Props = {
   classes: Classes,
   initialize: (values: FullChannel) => any,
@@ -193,14 +222,15 @@ class ChannelForm extends React.Component<Props> {
         </div>
       )
     }
+    const channelMode: ChannelMode = (Channel && Channel.state ? Channel.state.mode : null) || 'DISABLED'
     return (
       <form id="channelForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         {Channel &&
           <Paper className={classes.paper}>
             <Fader animateHeight>
               <ControlWithInfo
-                info="The current state of the channel"
-                key={Channel.state && Channel.state.mode || 'DISABLED'}
+                info={channelStateInfo[channelMode]}
+                key={channelMode}
               >
                 <ChannelStateWidget channel={Channel} className={classes.formControl} />
               </ControlWithInfo>
@@ -208,7 +238,7 @@ class ChannelForm extends React.Component<Props> {
           </Paper>
         }
         <Paper className={classes.paper}>
-          <ControlWithInfo info="The mode of the channel">
+          <ControlWithInfo info="The mode of this channel">
             <Field
               name="config.mode"
               component={ButtonGroupField}
@@ -220,7 +250,7 @@ class ChannelForm extends React.Component<Props> {
               validate={required()}
             />
           </ControlWithInfo>
-          <ControlWithInfo info="The name of the channel">
+          <ControlWithInfo info="Display name for this channel">
             <Field
               name="name"
               label="Channel Name"
@@ -231,7 +261,7 @@ class ChannelForm extends React.Component<Props> {
               normalizeOnBlur={trim}
             />
           </ControlWithInfo>
-          <ControlWithInfo info="The internal id of the channel">
+          <ControlWithInfo info="Unique ID used to link this channel with other system functions">
             <Field
               name="channelId"
               label="Channel ID"

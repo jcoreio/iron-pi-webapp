@@ -26,13 +26,44 @@ export type Props = {
   change: (field: string, newValue: any) => any,
 }
 
+const controlModeInfo = (
+  <span>
+    <p><strong>Force Off</strong>: Forces the output to an off state</p>
+    <p><strong>Force On</strong>: Forces the output to an on state</p>
+    <p><strong>Local Control</strong>: Controls the output based on a condition defined in the Control Logic section</p>
+    <p><strong>Remote Control</strong>: Controls the output based on remote MQTT commands. The mapping between MQTT and the channel must be configured in the MQTT section.</p>
+  </span>
+)
+
+const PolarityAndSafeStateInfo = ({controlMode}: {controlMode?: ControlMode}) => (
+  <span>
+    {controlMode === 'LOCAL_CONTROL' &&
+      <p><strong>Safe State</strong>: State of the output when inputs of the control logic are unavailable</p>
+    }
+    {controlMode === 'REMOTE_CONTROL' &&
+      <p><strong>Safe State</strong>: State of the output when the remote control connection is offline</p>
+    }
+    <p>
+      <strong>Polarity</strong>: Optionally inverts the logic level of the input:
+      <ul>
+        <li>
+          <strong>Normal</strong>: Logic level is not inverted
+        </li>
+        <li>
+          <strong>Reversed</strong>: Logic level is inverted
+        </li>
+      </ul>
+    </p>
+  </span>
+)
+
 const DigitalOutputConfigSection = (
   ({
     formControlClass, firstControlClass, lastControlClass, tallButtonClass, channels, change,
     "config.controlMode": controlMode
   }: Props) => (
     <React.Fragment>
-      <ControlWithInfo info="How this output is controlled" className={firstControlClass}>
+      <ControlWithInfo info={controlModeInfo} className={firstControlClass}>
         <Field
           name="config.controlMode"
           component={ButtonGroupField}
@@ -53,7 +84,7 @@ const DigitalOutputConfigSection = (
           validate={required()}
         />
       </Collapse>
-      <ControlWithInfo info="????" className={lastControlClass}>
+      <ControlWithInfo info={<PolarityAndSafeStateInfo controlMode={controlMode} />} className={lastControlClass}>
         <Field
           name="config.safeState"
           label="Safe State"

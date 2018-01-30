@@ -26,6 +26,9 @@ const styles = ({spacing, palette}: Theme) => ({
     flex: '0 0 auto',
     color: palette.infoIcon,
   },
+  tooltip: {
+    maxWidth: 320,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -44,7 +47,7 @@ const ControlWithInfo = withStyles(styles, {withTheme: true})(
       <div className={classes.control}>
         {children}
       </div>
-      <Tooltip title={info} placement="left">
+      <Tooltip title={info} placement="left" classes={{tooltip: classes.tooltip}}>
         <InfoIcon className={classes.infoIcon} />
       </Tooltip>
     </div>

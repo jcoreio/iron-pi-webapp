@@ -20,9 +20,16 @@ export type Props = {
   },
 }
 
+const unitsAndConfigInfo = (
+  <span>
+    <p><strong>Units</strong>: Display units for this channel. This system does not automatically perform unit conversions, so you must enter a calibration that converts between the raw input level and the display units.</p>
+    <p><strong>Precision</strong>: The number of digits to show after the decimal place in system values for this channel.</p>
+  </span>
+)
+
 const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastControlClass, match}: Props) => (
   <React.Fragment>
-    <ControlWithInfo info="???" className={firstControlClass}>
+    <ControlWithInfo info={unitsAndConfigInfo} className={firstControlClass}>
       <Field
         name="config.units"
         label="Units"
@@ -39,7 +46,7 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
         validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
       />
     </ControlWithInfo>
-    <ControlWithInfo info="The number of digits to show after the decimal place" className={firstControlClass}>
+    <ControlWithInfo info="The display range of guages for this channel" className={firstControlClass}>
       <NumericField
         name="config.min"
         label="Range Min"
@@ -57,7 +64,10 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
         validate={[required(), (value, {config: {min}}) => value <= min ? 'must be > min' : undefined]}
       />
     </ControlWithInfo>
-    <ControlWithInfo info="Takes you to the calibration wizard" className={lastControlClass}>
+    <ControlWithInfo
+      info="The calibration allows you to enter a linear conversion between the Raw Input and the System Value"
+      className={lastControlClass}
+    >
       <DrilldownButton
         className={formControlClass}
         component={Link}

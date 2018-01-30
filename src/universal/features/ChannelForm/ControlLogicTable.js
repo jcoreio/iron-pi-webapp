@@ -185,7 +185,7 @@ class ControlLogicTable extends React.Component<Props> {
                     Add Condition
                     <AddIcon className={classes.addIcon} />
                   </Button>
-                  <Tooltip title="???" placement="left">
+                  <Tooltip title="Controls the output based on one or more comparison conditions." placement="left">
                     <InfoIcon className={classes.infoIcon} />
                   </Tooltip>
                 </div>
