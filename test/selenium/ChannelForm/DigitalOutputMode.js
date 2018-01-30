@@ -254,6 +254,7 @@ module.exports = () => {
         await loginIfNecessary()
 
         await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
+        await delay(500)
         await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
@@ -330,6 +331,7 @@ module.exports = () => {
         await loginIfNecessary()
 
         await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
+        await delay(500)
         await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
