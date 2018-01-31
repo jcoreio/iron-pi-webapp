@@ -218,16 +218,15 @@ export function validateChannelConfig(config: any): ?Validation {
 export function assertChannelConfig(config: any) {
   const validation: ?Validation = validateChannelConfig(config)
   if (validation) {
-    console.log(validation, validation.errors)
     const error = makeTypeError(validation)
     if (error) throw error
   }
 }
 
 export type Channel = {
-  id: number,
+  id: string,
+  physicalChannelId?: number,
   name: string,
-  channelId: string,
   config: ChannelConfig,
   state?: ChannelState,
 }

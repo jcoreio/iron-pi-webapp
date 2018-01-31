@@ -9,30 +9,34 @@ import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
 import poll from '@jcoreio/poll/lib/index'
 
+const defaultChannel = {
+  id: 'channel1',
+  physicalChannelId: 1,
+  name: 'Channel 1',
+  config: {
+    mode: 'DIGITAL_INPUT',
+    reversePolarity: true,
+  },
+}
+
 module.exports = () => {
   describe('DigitalInput mode', function () {
     this.timeout(60000)
     beforeEach(async () => {
+      const {id, physicalChannelId} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: String!, $rawInput: Int!) {
-          updateChannel(channel: $channel) {
-            id
+        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Int!) {
+          updateChannel(where: $where, channel: $channel) {
+            physicalChannelId
           }
           setChannelValue(channelId: $channelId, rawDigitalInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          channel: {
-            id: 1,
-            name: 'Channel 1',
-            channelId: 'channel1',
-            config: {
-              mode: 'DIGITAL_INPUT',
-              reversePolarity: true,
-            },
-          },
-          channelId: 'channel1',
+          where: {physicalChannelId},
+          channel: defaultChannel,
+          channelId: id,
           rawInput: 0,
         }
       })
@@ -49,7 +53,7 @@ module.exports = () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('DIGITAL_INPUT')
       expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('true')
       expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="channelId"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
 
       expect(await browser.getText('[data-component="DigitalInputStateWidget"] [data-component="ValueBlock"][data-test-name="rawInput"] [data-test-name="value"]')).to.equal('0')
       expect(await browser.getText('[data-component="DigitalInputStateWidget"] [data-component="ValueBlock"][data-test-name="systemValue"] [data-test-name="value"]')).to.equal('1')
@@ -78,7 +82,7 @@ module.exports = () => {
     })
 
     it('displays required validation errors', async () => {
-      const fields = ['name', 'channelId']
+      const fields = ['name', 'id']
       for (let field of fields) {
         await browser.setValue(`#channelForm [name="${field}"]`, '')
       }
@@ -95,10 +99,10 @@ module.exports = () => {
 
     it('displays other validation errors', async () => {
       const values = {
-        channelId: '1channel',
+        id: '1channel',
       }
       const errors = {
-        channelId: 'invalid Channel ID',
+        id: 'invalid Channel ID',
       }
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
@@ -115,7 +119,7 @@ module.exports = () => {
     it('saves normalized values', async () => {
       const values = {
         name: '  Pump Pressure  ',
-        channelId: '  pump/pressure  ',
+        id: '  pump/pressure  ',
       }
 
       for (let name in values) {
@@ -128,16 +132,16 @@ module.exports = () => {
 
       const {data: {Channel}} = await graphql({
         query: `query {
-          Channel(id: 1) {
+          Channel(where: {physicalChannelId: 1}) {
             name
-            channelId
+            id
             config
           }
         }`
       })
       expect(Channel).to.containSubset({
         name: values.name.trim(),
-        channelId: values.channelId.trim(),
+        id: values.id.trim(),
         config: {
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,

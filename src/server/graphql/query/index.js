@@ -7,6 +7,7 @@ import {defaultArgs, resolver} from 'graphql-sequelize'
 import requireUserId from '../requireUserId'
 import type {Context} from '../Context'
 import User from '../../models/User'
+import Channel from '../../models/Channel'
 
 type Options = {
   sequelize: Sequelize,

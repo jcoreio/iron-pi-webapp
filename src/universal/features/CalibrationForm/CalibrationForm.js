@@ -93,10 +93,10 @@ export type Props = {
   initialized?: boolean,
   initialize: (values: Calibration) => any,
   change: (field: string, newValue: any) => void,
-  subscribeToChannelState?: (channelId: string) => Function,
-  channelId: number,
+  subscribeToChannelState?: (id: string) => Function,
+  physicalChannelId: number,
   error?: string,
-  mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
+  mutate: (options: {variables: {id: string, calibration: Calibration}}) => Promise<void>,
   data: {
     Channel?: FullChannel,
     loading?: boolean,
@@ -123,7 +123,7 @@ class CalibrationForm extends React.Component<Props, State> {
     if (Channel) {
       this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
       if (subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.channelId)
+        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
     }
   }
@@ -132,11 +132,11 @@ class CalibrationForm extends React.Component<Props, State> {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 
-    if (get(nextChannel, 'channelId') !== get(prevChannel, 'channelId')) {
+    if (get(nextChannel, 'id') !== get(prevChannel, 'id')) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
       const {subscribeToChannelState} = nextProps
       if (nextChannel && subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.channelId)
+        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
       }
     }
 
@@ -204,9 +204,11 @@ class CalibrationForm extends React.Component<Props, State> {
     else this.setState({step: step + 1})
   }
 
-  handleSubmit = ({points}: Calibration): Promise<any> => {
-    const {mutate, channelId, history, match} = this.props
-    return mutate({variables: {id: channelId, calibration: {points}}}).then(
+  handleSubmit = async ({points}: Calibration): Promise<any> => {
+    const {mutate, data: {Channel}, history, match} = this.props
+    if (!Channel) return
+    const {id} = Channel
+    return await mutate({variables: {id, calibration: {points}}}).then(
       () => {
         history.push(dirname(match.url))
       },

@@ -132,10 +132,11 @@ const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
   setSectionExpanded,
 }, dispatch)
 
+// use {gt: 0} instead of {not: null} because apollo doesn't seem to support inline null
 const query = gql(`{
-  Channels {
+  Channels(where: {physicalChannelId: {gt: 0}}) {
     id
-    channelId
+    physicalChannelId
     name 
     config
     state

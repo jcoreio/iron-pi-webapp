@@ -7,27 +7,27 @@ import gql from 'graphql-tag'
 import ChannelForm from './ChannelForm'
 import createSubscribeToChannelState from '../../apollo/createSubscribeToChannelState'
 
-const channelQuery = gql(`query Channels($id: Int!) {
-  Channel(id: $id) {
+const channelQuery = gql(`query Channels($where: SequelizeJSON!) {
+  Channel(where: $where) {
+    physicalChannelId
     id
-    channelId
     name
     config
     state
   }
   Channels {
+    physicalChannelId
     id
-    channelId
     name
   }
 }
 `)
 
 const mutationQuery = gql(`
-mutation updateChannel($channel: InputChannel!) {
-  updateChannel(channel: $channel) {
+mutation updateChannel($id: String, $where: JSON, $channel: InputChannel!) {
+  updateChannel(id: $id, where: $where, channel: $channel) {
+    physicalChannelId
     id
-    channelId
     name
     config
     state
@@ -36,14 +36,16 @@ mutation updateChannel($channel: InputChannel!) {
 `)
 
 type Props = {
-  channelId: number,
+  physicalChannelId: number,
 }
 
 export default compose(
   graphql(mutationQuery),
   graphql(channelQuery, {
-    options: ({channelId}: Props) => ({
-      variables: {id: channelId},
+    options: ({physicalChannelId}: Props) => ({
+      variables: {
+        where: {physicalChannelId}
+      },
       errorPolicy: 'all',
     }),
     props: props => ({

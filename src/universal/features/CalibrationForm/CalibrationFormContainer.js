@@ -7,10 +7,10 @@ import gql from 'graphql-tag'
 import CalibrationForm from './CalibrationForm'
 import createSubscribeToChannelState from '../../apollo/createSubscribeToChannelState'
 
-const channelQuery = gql(`query Channels($id: Int!) {
-  Channel(id: $id) {
+const channelQuery = gql(`query Channels($where: SequelizeJSON) {
+  Channel(where: $where) {
+    physicalChannelId
     id
-    channelId
     name
     config
     state
@@ -19,7 +19,7 @@ const channelQuery = gql(`query Channels($id: Int!) {
 `)
 
 const mutationQuery = gql(`
-mutation updateCalibration($id: Int!, $calibration: JSON!) {
+mutation updateCalibration($id: String!, $calibration: JSON!) {
   updateCalibration(id: $id, calibration: $calibration) {
     id
     config
@@ -29,14 +29,16 @@ mutation updateCalibration($id: Int!, $calibration: JSON!) {
 
 
 type Props = {
-  channelId: number,
+  physicalChannelId: number,
 }
 
 export default compose(
   graphql(mutationQuery),
   graphql(channelQuery, {
-    options: ({channelId}: Props) => ({
-      variables: {id: channelId},
+    options: ({physicalChannelId}: Props) => ({
+      variables: {
+        where: {physicalChannelId}
+      },
       errorPolicy: 'all',
     }),
     props: props => ({

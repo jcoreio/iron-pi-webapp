@@ -150,23 +150,23 @@ export type Props = {
     Channels?: Array<Channel>,
     loading?: boolean,
   },
-  subscribeToChannelState?: (channelId: string) => Function,
+  subscribeToChannelState?: (id: string) => Function,
   handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
-  mutate: (options: {variables: {channel: FullChannel}}) => Promise<void>,
+  mutate: (options: {variables: {id?: string, where?: Object, channel: FullChannel}}) => Promise<void>,
 }
 
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
-  pickFormFields = ({id, channelId, name, config}: FullChannel) => ({id, channelId, name, config})
+  pickFormFields = ({physicalChannelId, id, name, config}: FullChannel) => ({physicalChannelId, id, name, config})
 
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
       this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
       if (subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.channelId)
+        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
     }
   }
@@ -183,7 +183,7 @@ class ChannelForm extends React.Component<Props> {
         }
         const {subscribeToChannelState} = nextProps
         if (subscribeToChannelState) {
-          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.channelId)
+          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
         }
       }
     }
@@ -201,8 +201,13 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate} = this.props
-    const {id, channelId, name, config} = parseChannelFormValues(channel)
-    return mutate({variables: {channel: {id, channelId, name, config}}}).catch(handleError)
+    const {physicalChannelId, id, name, config} = parseChannelFormValues(channel)
+    return mutate({
+      variables: {
+        where: {physicalChannelId},
+        channel: {id, name, config}
+      }
+    }).catch(handleError)
   }
 
   render(): React.Node {
@@ -263,7 +268,7 @@ class ChannelForm extends React.Component<Props> {
           </ControlWithInfo>
           <ControlWithInfo info="Unique ID used to link this channel with other system functions">
             <Field
-              name="channelId"
+              name="id"
               label="Channel ID"
               type="text"
               component={TextField}

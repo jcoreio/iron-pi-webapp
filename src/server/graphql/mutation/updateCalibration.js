@@ -16,7 +16,7 @@ export default function updateCalibration({types}: Options): GraphQLFieldConfig<
     type: types[Channel.name],
     args: {
       id: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+        type: new graphql.GraphQLNonNull(graphql.GraphQLString),
       },
       calibration: {
         type: new graphql.GraphQLNonNull(GraphQLJSON),

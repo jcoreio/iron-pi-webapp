@@ -9,39 +9,43 @@ import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
 import poll from '@jcoreio/poll'
 
+const defaultChannel = {
+  id: 'channel1',
+  physicalChannelId: 1,
+  name: 'Channel 1',
+  config: {
+    mode: 'ANALOG_INPUT',
+    units: 'gal',
+    precision: 1,
+    min: 0.5,
+    max: 2.5,
+    calibration: {
+      points: [
+        {x: 0, y: 0},
+        {x: 1, y: 10},
+      ]
+    }
+  },
+}
+
 module.exports = () => {
   describe('AnalogInput mode', function () {
     this.timeout(60000)
     beforeEach(async () => {
+      const {id, physicalChannelId} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: String!, $rawInput: Float!) {
-          updateChannel(channel: $channel) {
-            id
+        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float!) {
+          updateChannel(where: $where, channel: $channel) {
+            physicalChannelId
           }
           setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          channel: {
-            id: 1,
-            name: 'Channel 1',
-            channelId: 'channel1',
-            config: {
-              mode: 'ANALOG_INPUT',
-              units: 'gal',
-              precision: 1,
-              min: 0.5,
-              max: 2.5,
-              calibration: {
-                points: [
-                  {x: 0, y: 0},
-                  {x: 1, y: 10},
-                ]
-              }
-            },
-          },
-          channelId: 'channel1',
+          where: {physicalChannelId},
+          channel: defaultChannel,
+          channelId: id,
           rawInput: 2.356,
         }
       })
@@ -57,7 +61,7 @@ module.exports = () => {
     it('displays the correct initial values', async () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('ANALOG_INPUT')
       expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="channelId"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
       expect(await browser.getValue('#channelForm [name="config.units"]')).to.equal('gal')
       expect(await browser.getValue('#channelForm [name="config.precision"]')).to.equal('1')
       expect(await browser.getValue('#channelForm [name="config.min"]')).to.equal('0.5')
@@ -90,7 +94,7 @@ module.exports = () => {
     })
 
     it('displays required validation errors', async () => {
-      const fields = ['name', 'channelId', 'config.units', 'config.precision', 'config.min', 'config.max']
+      const fields = ['name', 'id', 'config.units', 'config.precision', 'config.min', 'config.max']
       for (let field of fields) {
         await browser.setValue(`#channelForm [name="${field}"]`, '')
       }
@@ -108,13 +112,13 @@ module.exports = () => {
 
     it('displays other validation errors', async () => {
       const values = {
-        channelId: '1channel',
+        id: '1channel',
         'config.precision': '2.5',
         'config.min': '5',
         'config.max': '0',
       }
       const errors = {
-        channelId: 'invalid Channel ID',
+        id: 'invalid Channel ID',
         'config.precision': 'is not an integer',
         'config.min': 'must be < max',
         'config.max': 'must be > min',
@@ -134,7 +138,7 @@ module.exports = () => {
     it('saves normalized values', async () => {
       const values = {
         name: '  Pump Pressure  ',
-        channelId: '  pump/pressure  ',
+        id: '  pump/pressure  ',
         'config.precision': ' 1   ',
         'config.units': 'psi',
         'config.min': ' 0.3 ',
@@ -150,16 +154,16 @@ module.exports = () => {
 
       const {data: {Channel}} = await graphql({
         query: `query {
-          Channel(id: 1) {
+          Channel(where: {physicalChannelId: 1}) {
             name
-            channelId
+            id
             config
           }
         }`
       })
       expect(Channel).to.containSubset({
         name: values.name.trim(),
-        channelId: values.channelId.trim(),
+        id: values.id.trim(),
         config: {
           mode: 'ANALOG_INPUT',
           units: 'psi',

@@ -24,14 +24,14 @@ const CalibrationFormContainer = featureLoader({
 const channelFormFeature = {
   navbarRoutes: [
     <Route
-      key={channelForm((':id': any))}
-      path={channelForm((':id': any))}
+      key={channelForm((':physicalChannelId': any))}
+      path={channelForm((':physicalChannelId': any))}
       render={({match}) => (
         <Title>
           Local I/O
           <ChevronRight />
           <Link to={match.url} data-test-name="channelFormLink">
-            Channel {match.params.id}
+            Channel {match.params.physicalChannelId}
           </Link>
           <Route
             path={`${match.url}/${CALIBRATION}`}
@@ -48,18 +48,18 @@ const channelFormFeature = {
   ],
   bodyRoutes: [
     <Route
-      key={channelForm((':id': any))}
-      path={channelForm((':id': any))}
-      render={({match: {params: {id}}}) => (
+      key={channelForm((':physicalChannelId': any))}
+      path={channelForm((':physicalChannelId': any))}
+      render={({match: {params: {physicalChannelId}}}) => (
         <Drilldown animateHeight={false}>
           <Route
-            path={channelForm((':id': any))}
+            path={channelForm((':physicalChannelId': any))}
             exact
-            render={() => <ChannelFormContainer channelId={parseInt(id)} />}
+            render={() => <ChannelFormContainer physicalChannelId={parseInt(physicalChannelId)} />}
           />
           <Route
-            path={calibrationForm((':id': any))}
-            render={(props: ContextRouter) => <CalibrationFormContainer channelId={parseInt(id)} {...props} />}
+            path={calibrationForm((':physicalChannelId': any))}
+            render={(props: ContextRouter) => <CalibrationFormContainer physicalChannelId={parseInt(physicalChannelId)} {...props} />}
           />
         </Drilldown>
       )}

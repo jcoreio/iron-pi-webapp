@@ -43,7 +43,7 @@ const LocalIOSection = ({expanded, channels, onSectionExpandedChange, loading, c
     onHeaderClick={() => onSectionExpandedChange('localIO', !expanded)}
   >
     {channels && channels.map((channel: Channel) =>
-      <ChannelStateItem channel={channel} key={channel.id} />
+      <ChannelStateItem channel={channel} key={channel.physicalChannelId} />
     )}
   </SidebarSection>
 )

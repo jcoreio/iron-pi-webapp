@@ -8,27 +8,27 @@ import type {Store} from '../redux/types'
 import {setChannelConfigs} from '../redux'
 
 export type ChannelInitAttributes = {
-  id: number;
   name: string;
-  channelId: string;
+  id: string;
   config?: ChannelConfig;
 }
 
 export type ChannelAttributes = ChannelInitAttributes & {
+  physicalChannelId?: number;
   createdAt: Date;
   updatedAt: Date;
   config: ChannelConfig;
 }
 
 export function updateChannelState(store: Store, channel: Channel) {
-  const {channelId, config} = channel
-  store.dispatch(setChannelConfigs({channelId, config}))
+  const {id, config} = channel
+  store.dispatch(setChannelConfigs({channelId: id, config}))
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
-  id: number;
+  physicalChannelId: ?number;
   name: string;
-  channelId: string;
+  id: string;
   mode: ChannelMode;
   config: ChannelConfig;
   createdAt: Date;
@@ -38,9 +38,19 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
     const {sequelize, store} = options
     super.init({
       id: {
-        primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false,
+        primaryKey: true,
+        validate: {
+          is: {
+            args: channelIdPattern,
+            msg: 'must be a valid channel ID'
+          },
+        },
+      },
+      physicalChannelId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
         validate: {
           min: 0,
         },
@@ -55,16 +65,6 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
           } // no whitespace at beginning or end
         }
       },
-      channelId: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          is: {
-            args: channelIdPattern,
-            msg: 'must be a valid channel ID'
-          },
-        },
-      },
       config: {
         type: Sequelize.JSON,
         allowNull: false,
@@ -78,7 +78,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
     })
 
     function updateChannelStateHook(channel: Channel) {
-      if (store && (channel.changed('config') || channel.changed('channelId'))) {
+      if (store && (channel.changed('config') || channel.changed('id'))) {
         updateChannelState(store, channel)
       }
     }

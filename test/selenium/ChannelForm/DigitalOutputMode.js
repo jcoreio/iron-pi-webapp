@@ -16,9 +16,9 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 1,
+      id: 'channel1',
+      physicalChannelId: 1,
       name: 'Channel 1',
-      channelId: 'channel1',
       config: {
         mode: 'DIGITAL_OUTPUT',
         safeState: 0,
@@ -27,16 +27,18 @@ module.exports = () => {
       },
     }
 
-    async function init(channel: Channel = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
+    async function init(channel: Channel & {physicalChannelId: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
+      const {physicalChannelId} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!) {
-          updateChannel(channel: $channel) {
-            id
+        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+          updateChannel(where: $where, channel: $channel) {
+            physicalChannelId
           }
         }
         `,
         operationName: 'prepareTest',
         variables: {
+          where: {physicalChannelId},
           channel: defaultChannel,
         }
       })
@@ -47,11 +49,11 @@ module.exports = () => {
         `,
         operationName: 'prepareTest',
         variables: {
-          channelId: channel.channelId,
+          channelId: channel.id,
           controlValue,
         }
       })
-      await navigateTo(`/channel/${channel.id}`)
+      await navigateTo(`/channel/${channel.physicalChannelId}`)
       await loginIfNecessary()
       browser.timeouts('implicit', 5000)
     }
@@ -68,7 +70,7 @@ module.exports = () => {
       expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
       expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('REMOTE_CONTROL')
       expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="channelId"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
     })
 
     it('displays updated values', async () => {
@@ -76,15 +78,15 @@ module.exports = () => {
 
       await graphql({
         query: `mutation update($channel: InputChannel!, $channelId: String!, $controlValue: Int) {
-          updateChannel(channel: $channel) {
-            id
+          updateChannel(id: $channelId, channel: $channel) {
+            physicalChannelId
           }
           setChannelValue(channelId: $channelId, controlValue: $controlValue)
         }`,
         operationName: 'update',
         variables: {
           channel: {
-            id: 1,
+            physicalChannelId: 1,
             config: {
               mode: 'DIGITAL_OUTPUT',
               safeState: 0,
@@ -186,18 +188,18 @@ module.exports = () => {
     describe('local control mode', () => {
       it('displays the correct initial values for local control', async () => {
         await graphql({
-          query: `mutation prepareTest($channel: InputChannel!) {
-            updateChannel(channel: $channel) {
-              id
+          query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+            updateChannel(where: $where, channel: $channel) {
+              physicalChannelId
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
+            where: {physicalChannelId: 1},
             channel: {
-              id: 1,
               name: 'Channel 1',
-              channelId: 'channel1',
+              id: 'channel1',
               config: {
                 mode: 'DIGITAL_OUTPUT',
                 safeState: 0,
@@ -219,7 +221,7 @@ module.exports = () => {
         expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
         expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('LOCAL_CONTROL')
         expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-        expect(await browser.getValue('#channelForm [name="channelId"]')).to.equal('channel1')
+        expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].channelId"]')).to.equal('channel2')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].comparison"]')).to.equal('GTE')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].threshold"]')).to.equal('2.3')
@@ -230,18 +232,18 @@ module.exports = () => {
       })
       it('validates logic correctly', async () => {
         await graphql({
-          query: `mutation prepareTest($channel: InputChannel!) {
-            updateChannel(channel: $channel) {
-              id
+          query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+            updateChannel(where: $where, channel: $channel) {
+              physicalChannelId
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
+            where: {physicalChannelId: 1},
             channel: {
-              id: 1,
               name: 'Channel 1',
-              channelId: 'channel1',
+              id: 'channel1',
               config: {
                 mode: 'DISABLED',
                 controlLogic: [],
@@ -306,26 +308,68 @@ module.exports = () => {
         )
       })
       it('saves control logic changes', async () => {
-        await graphql({
-          query: `mutation prepareTest($channel: InputChannel!) {
-            updateChannel(channel: $channel) {
-              id
+        await Promise.all([
+          graphql({
+            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+              updateChannel(where: $where, channel: $channel) {
+                physicalChannelId
+              }
             }
-          }
-          `,
-          operationName: 'prepareTest',
-          variables: {
-            channel: {
-              id: 1,
-              name: 'Channel 1',
-              channelId: 'channel1',
-              config: {
-                mode: 'DISABLED',
-                controlLogic: [],
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              where: {physicalChannelId: 1},
+              channel: {
+                name: 'Channel 1',
+                id: 'channel1',
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
               },
-            },
-          }
-        })
+            }
+          }),
+          graphql({
+            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+              updateChannel(where: $where, channel: $channel) {
+                physicalChannelId
+              }
+            }
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              where: {physicalChannelId: 2},
+              channel: {
+                name: 'Channel 2',
+                id: 'channel2',
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
+              },
+            }
+          }),
+          graphql({
+            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
+              updateChannel(where: $where, channel: $channel) {
+                physicalChannelId
+              }
+            }
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              where: {physicalChannelId: 3},
+              channel: {
+                name: 'Channel 3',
+                id: 'channel3',
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
+              },
+            }
+          })
+        ])
         await navigateTo('/channel/1')
         await navigateTo('/channel/1')
         await loginIfNecessary()
@@ -377,7 +421,7 @@ module.exports = () => {
 
         const {data: {Channel: {config}}} = await graphql({
           query: `query {
-            Channel(id: 1) {
+            Channel(where: {physicalChannelId: 1}) {
               config
             }
           }`

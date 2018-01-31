@@ -15,9 +15,9 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 1,
+      id: 'channel1',
+      physicalChannelId: 1,
       name: 'Channel 1',
-      channelId: 'channel1',
       config: {
         mode: 'ANALOG_INPUT',
         units: 'gal',
@@ -33,10 +33,10 @@ module.exports = () => {
       },
     }
 
-    async function init(channel?: Channel = defaultChannel, rawInput?: number | null = null): Promise<void> {
+    async function init(channel?: Channel & {physicalChannelId: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: String!, $rawInput: Float) {
-          updateChannel(channel: $channel) {
+        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float) {
+          updateChannel(where: $where, channel: $channel) {
             id
           }
           setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
@@ -44,12 +44,13 @@ module.exports = () => {
         `,
         operationName: 'prepareTest',
         variables: {
+          where: {physicalChannelId: channel.physicalChannelId},
           channel,
-          channelId: channel.channelId,
+          channelId: channel.id,
           rawInput,
         }
       })
-      await navigateTo(`/channel/${channel.id}/calibration`)
+      await navigateTo(`/channel/${channel.physicalChannelId}/calibration`)
       await loginIfNecessary()
       browser.timeouts('implicit', 7000)
     }
@@ -158,7 +159,7 @@ module.exports = () => {
 
       const {data: {Channel: {config: {calibration}}}} = await graphql({
         query: `query {
-          Channel(id: 1) {
+          Channel(where: {physicalChannelId: 1}) {
             config
           }
         }`

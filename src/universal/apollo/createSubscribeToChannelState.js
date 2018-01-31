@@ -37,7 +37,7 @@ export default function createSubscribeToChannelState(
         if (!data) return prev
         const {ChannelState: newState} = data
         if (!newState.channelId) return prev
-        if (get(prev, [...channelPath, 'channelId']) !== newState.channelId) return prev
+        if (get(prev, [...channelPath, 'id']) !== newState.channelId) return prev
         return setIn(prev, [...channelPath, 'state'], newState)
       },
     })
