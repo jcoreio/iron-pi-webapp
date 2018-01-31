@@ -51,6 +51,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
       physicalChannelId: {
         type: Sequelize.INTEGER,
         allowNull: true,
+        unique: true,
         validate: {
           min: 0,
         },
