@@ -13,7 +13,7 @@ type Options = {
 }
 
 type Args = {
-  channelId: number,
+  channelId: string,
   rawAnalogInput?: number,
   rawDigitalInput?: number,
   controlValue?: number,
@@ -24,8 +24,8 @@ export default function createSetChannelValue({store}: Options): GraphQLFieldCon
     type: GraphQLJSON,
     args: {
       channelId: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-        description: 'The numeric id of the channel to change the value of'
+        type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+        description: 'The id of the channel to change the value of'
       },
       rawAnalogInput: {
         type: graphql.GraphQLFloat,
@@ -46,29 +46,29 @@ export default function createSetChannelValue({store}: Options): GraphQLFieldCon
         throw new graphql.GraphQLError('Forbidden')
       }
 
-      const {channelId: id} = args
+      const {channelId} = args
 
       if (args.hasOwnProperty('rawAnalogInput')) {
         const {rawAnalogInput} = args
         if (rawAnalogInput === undefined) throw new Error('Unexpected: rawAnalogInput is undefined')
-        store.dispatch(setChannelValues({id, value: {rawAnalogInput}}))
+        store.dispatch(setChannelValues({channelId, value: {rawAnalogInput}}))
       } else if (args.hasOwnProperty('rawDigitalInput')) {
         const {rawDigitalInput} = args
         if (rawDigitalInput !== 0 && rawDigitalInput !== 1 && rawDigitalInput !== null) {
           throw new Error('rawDigitalInput must be 0, 1, or null')
         }
-        store.dispatch(setChannelValues({id, value: {rawDigitalInput}}))
+        store.dispatch(setChannelValues({channelId, value: {rawDigitalInput}}))
       } else if (args.hasOwnProperty('controlValue')) {
         const {controlValue} = args
         if (controlValue !== 0 && controlValue !== 1 && controlValue !== null) {
           throw new Error('controlValue must be 0, 1, or null')
         }
-        store.dispatch(setChannelValues({id, value: {controlValue}}))
+        store.dispatch(setChannelValues({channelId, value: {controlValue}}))
       } else {
         throw new Error('must provide rawAnalogInput, rawDigitalInput, or controlValue')
       }
 
-      return store.getChannelState(id)
+      return store.getChannelState(channelId)
     },
   }
 }

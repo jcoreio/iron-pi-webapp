@@ -31,14 +31,14 @@ export type Props = {
 
 const LocalIOSection = ({expanded, channels, onSectionExpandedChange, loading, classes}: Props): React.Node => (
   <SidebarSection
-    title={
-      <span>
-        Local I/O
+    title="Local I/O"
+    headerProps={{
+      children: (
         <ListItemSecondaryAction className={classes.secondaryAction}>
           <Spinner in={loading} />
         </ListItemSecondaryAction>
-      </span>
-    }
+      )
+    }}
     expanded={expanded}
     onHeaderClick={() => onSectionExpandedChange('localIO', !expanded)}
   >

@@ -93,7 +93,7 @@ export type Props = {
   initialized?: boolean,
   initialize: (values: Calibration) => any,
   change: (field: string, newValue: any) => void,
-  subscribeToChannelState?: (id: number) => Function,
+  subscribeToChannelState?: (channelId: string) => Function,
   channelId: number,
   error?: string,
   mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
@@ -123,7 +123,7 @@ class CalibrationForm extends React.Component<Props, State> {
     if (Channel) {
       this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
       if (subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
+        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.channelId)
       }
     }
   }
@@ -132,11 +132,11 @@ class CalibrationForm extends React.Component<Props, State> {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 
-    if (get(nextChannel, 'id') !== get(prevChannel, 'id')) {
+    if (get(nextChannel, 'channelId') !== get(prevChannel, 'channelId')) {
       if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
       const {subscribeToChannelState} = nextProps
       if (nextChannel && subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
+        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.channelId)
       }
     }
 

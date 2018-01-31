@@ -23,7 +23,7 @@ export default function createPublishChannelStatesMiddleware<S, A: {type: $Subty
     publishChannelStates,
   } = options
 
-  const handleChange = ({getState}: MiddlewareAPI<S, A>) => (next: Dispatch<A>) => (action: A & {payload: Array<{id: number}>}) => {
+  const handleChange = ({getState}: MiddlewareAPI<S, A>) => (next: Dispatch<A>) => (action: A & {payload: Array<{channelId: string}>}) => {
     const stateBefore = getState()
     const result = next(action)
     const stateAfter = getState()

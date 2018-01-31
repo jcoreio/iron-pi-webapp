@@ -29,7 +29,7 @@ export default function createSetChannelValues({store}: Options): GraphQLFieldCo
 
       store.dispatch(setChannelValues(...values))
 
-      return values.map(({id}) => store.getChannelState(id))
+      return values.map(({channelId}) => store.getChannelState(channelId))
     },
   }
 }

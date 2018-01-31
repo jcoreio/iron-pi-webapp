@@ -18,13 +18,13 @@ type Options<S> = {
   selectChannelValues: (state: S) => ChannelValues,
 }
 
-export type ChannelStateSelector<S> = (channelId: number) => (state: S) => ?ChannelState
+export type ChannelStateSelector<S> = (channelId: string) => (state: S) => ?ChannelState
 
 export default function createChannelStateSelector<S>({
   selectChannelConfigs,
   selectChannelValues,
 }: Options<S>): ChannelStateSelector<S> {
-  const selectChannelState = memoize((channelId: number) => {
+  const selectChannelState = memoize((channelId: string) => {
     const selectCalibrator: (config: AnalogInputConfig) => Calibrator = createSelector(
       (config: AnalogInputConfig) => config.calibration,
       (calibration: Calibration = {points: []}) => new Calibrator(calibration.points)
@@ -40,7 +40,7 @@ export default function createChannelStateSelector<S>({
       },
       (calibrator: Calibrator, rawInput: number | null): AnalogInputState => {
         const systemValue = rawInput == null ? null : calibrator.calibrate(rawInput)
-        return {id: channelId, mode: 'ANALOG_INPUT', rawInput, systemValue}
+        return {channelId, mode: 'ANALOG_INPUT', rawInput, systemValue}
       }
     )
 
@@ -58,7 +58,7 @@ export default function createChannelStateSelector<S>({
           : reversePolarity
             ? (rawInput === 0 ? 1 : 0)
             : rawInput
-        return {id: channelId, mode: 'DIGITAL_INPUT', reversePolarity, rawInput, systemValue}
+        return {channelId, mode: 'DIGITAL_INPUT', reversePolarity, rawInput, systemValue}
       }
     )
 
@@ -67,7 +67,7 @@ export default function createChannelStateSelector<S>({
       if (!Number.isFinite(controlValue)) controlValue = null
       let rawOutput = controlValue == null ? safeState : controlValue
       if (reversePolarity) rawOutput = rawOutput ? 0 : 1
-      return {id: channelId, mode: 'DIGITAL_OUTPUT', controlMode, reversePolarity, safeState, controlValue, rawOutput}
+      return {channelId, mode: 'DIGITAL_OUTPUT', controlMode, reversePolarity, safeState, controlValue, rawOutput}
     }
 
     const selectLocalControlState: (config: LocalControlDigitalOutputConfig, state: S) => DigitalOutputState = createSelector(
@@ -77,7 +77,7 @@ export default function createChannelStateSelector<S>({
         (config, state: S) => state,
         (controlLogic: ControlLogic, state: S) => {
           const result = evaluateControlLogic(controlLogic, {
-            getChannelValue: (otherId: number): ?number => {
+            getChannelValue: (otherId: string): ?number => {
               const channelState = selectChannelState(otherId)(state)
               if (channelState == null) return null
               switch (channelState.mode) {
@@ -117,7 +117,7 @@ export default function createChannelStateSelector<S>({
       case 'ANALOG_INPUT': return selectAnalogInputState((config: any), values)
       case 'DIGITAL_INPUT': return selectDigitalInputState((config: any), values)
       case 'DIGITAL_OUTPUT': return selectDigitalOutputState((config: any), values)
-      case 'DISABLED': return ({id: channelId, mode: 'DISABLED'}: DisabledState)
+      case 'DISABLED': return ({channelId, mode: 'DISABLED'}: DisabledState)
       }
     }
   })

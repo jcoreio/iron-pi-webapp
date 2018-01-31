@@ -22,7 +22,7 @@ export const channelIdPart = "[a-z_][a-z0-9_]*"
 export const channelIdPattern = new RegExp(`^${channelIdPart}(/${channelIdPart})*$`, 'i')
 
 export type AnalogInputState = {|
-  id: number,
+  channelId: string,
   mode: 'ANALOG_INPUT',
   rawInput: number | null,
   systemValue: number | null,
@@ -31,7 +31,7 @@ export type AnalogInputState = {|
 export const AnalogInputStateType = (reify: Type<AnalogInputState>)
 
 export type DigitalInputState = {|
-  id: number,
+  channelId: string,
   mode: 'DIGITAL_INPUT',
   rawInput: 0 | 1 | null,
   systemValue: 0 | 1 | null,
@@ -40,7 +40,7 @@ export type DigitalInputState = {|
 export const DigitalInputStateType = (reify: Type<DigitalInputState>)
 
 export type DigitalOutputState = {|
-  id: number,
+  channelId: string,
   mode: 'DIGITAL_OUTPUT',
   controlMode: ControlMode,
   controlValue: 0 | 1 | null,
@@ -51,7 +51,7 @@ export type DigitalOutputState = {|
 export const DigitalOutputStateType = (reify: Type<DigitalOutputState>)
 
 export type DisabledState = {|
-  id: number,
+  channelId: string,
   mode: 'DISABLED',
 |}
 export const DisabledStateType = (reify: Type<DisabledState>)
@@ -122,7 +122,7 @@ export type Comparison = $Keys<typeof Comparisons>
 
 export type ControlCondition = {
   operation?: LogicOperation,
-  channelId: number,
+  channelId: string,
   comparison: Comparison,
   threshold?: ?number,
 }
@@ -218,6 +218,7 @@ export function validateChannelConfig(config: any): ?Validation {
 export function assertChannelConfig(config: any) {
   const validation: ?Validation = validateChannelConfig(config)
   if (validation) {
+    console.log(validation, validation.errors)
     const error = makeTypeError(validation)
     if (error) throw error
   }

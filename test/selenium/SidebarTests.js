@@ -173,9 +173,8 @@ module.exports = () => describe('Sidebar', function () {
       expect(await browser.isVisible('body #openUserMenuButton')).to.be.false
     })
 
-    it("doesn't show a Local I/O item or channels", async function () {
+    it("doesn't show Local I/O channels", async function () {
       browser.timeouts('implicit', 500)
-      expect(await browser.isVisible('#sidebar li[data-test-title="Local I/O"]')).to.be.false
       expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.false
     })
   })

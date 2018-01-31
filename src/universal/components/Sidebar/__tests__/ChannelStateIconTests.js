@@ -45,7 +45,7 @@ describe('ChannelStateIcon', () => {
     it('renders nothing', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DISABLED',
         },
       })
@@ -64,7 +64,7 @@ describe('ChannelStateIcon', () => {
           max: 10,
         },
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 5,
           systemValue: 5,
@@ -89,7 +89,7 @@ describe('ChannelStateIcon', () => {
           max: 10,
         },
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 5,
           systemValue: 5,
@@ -110,7 +110,7 @@ describe('ChannelStateIcon', () => {
           max: 10,
         },
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: -4,
           systemValue: -4,
@@ -131,7 +131,7 @@ describe('ChannelStateIcon', () => {
           max: 6,
         },
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 4,
           systemValue: 4,
@@ -152,7 +152,7 @@ describe('ChannelStateIcon', () => {
           max: -2,
         },
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: -4,
           systemValue: -4,
@@ -169,7 +169,7 @@ describe('ChannelStateIcon', () => {
     it('renders correct border width', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: 0,
@@ -182,7 +182,7 @@ describe('ChannelStateIcon', () => {
     it('renders missing correctly', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: null,
@@ -196,7 +196,7 @@ describe('ChannelStateIcon', () => {
     it('renders off color correctly', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: 0,
@@ -209,7 +209,7 @@ describe('ChannelStateIcon', () => {
     it('renders on color correctly', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: true,
           rawInput: 0,
@@ -224,7 +224,7 @@ describe('ChannelStateIcon', () => {
     it('renders correct border width', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
           reversePolarity: false,
           safeState: 0,
@@ -239,7 +239,7 @@ describe('ChannelStateIcon', () => {
     it('renders off color correctly', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
           reversePolarity: false,
           safeState: 0,
@@ -254,7 +254,7 @@ describe('ChannelStateIcon', () => {
     it('renders on color correctly', () => {
       const {node} = setup({
         state: {
-          id: 0,
+          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
           reversePolarity: true,
           safeState: 0,

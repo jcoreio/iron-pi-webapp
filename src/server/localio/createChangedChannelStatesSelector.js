@@ -10,7 +10,7 @@ type Options<S> = {
 }
 
 type Action = {
-  payload: Array<$Subtype<{id: number}>>,
+  payload: Array<$Subtype<{channelId: string}>>,
 }
 
 export type ChangedChannelStateSelector<S> = (stateBefore: S, stateAfter: S, action: Action) => Array<ChannelState>
@@ -24,10 +24,10 @@ export default function createChangedChannelStatesSelector<S>({
 
     const dependentChannels = selectDependentChannels(stateAfter)
 
-    const checkedChannelIds: Set<number> = new Set()
+    const checkedChannelIds: Set<string> = new Set()
     const changedChannelStates: Array<ChannelState> = []
 
-    function checkForChanges(channelId: number) {
+    function checkForChanges(channelId: string) {
       if (checkedChannelIds.has(channelId)) return
       checkedChannelIds.add(channelId)
 
@@ -40,7 +40,7 @@ export default function createChangedChannelStatesSelector<S>({
       if (depsForChannel) depsForChannel.forEach(checkForChanges)
     }
 
-    for (let {id} of action.payload) checkForChanges(id)
+    for (let {channelId} of action.payload) checkForChanges(channelId)
 
     return changedChannelStates
   }

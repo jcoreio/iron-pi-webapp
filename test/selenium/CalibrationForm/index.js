@@ -35,7 +35,7 @@ module.exports = () => {
 
     async function init(channel?: Channel = defaultChannel, rawInput?: number | null = null): Promise<void> {
       await graphql({
-        query: `mutation prepareTest($channel: InputChannel!, $channelId: Int!, $rawInput: Float) {
+        query: `mutation prepareTest($channel: InputChannel!, $channelId: String!, $rawInput: Float) {
           updateChannel(channel: $channel) {
             id
           }
@@ -45,7 +45,7 @@ module.exports = () => {
         operationName: 'prepareTest',
         variables: {
           channel,
-          channelId: channel.id,
+          channelId: channel.channelId,
           rawInput,
         }
       })
@@ -112,13 +112,13 @@ module.exports = () => {
 
     async function setRawInput(rawInput: number | null): Promise<void> {
       await graphql({
-        query: `mutation updateValue($channelId: Int!, $rawInput: Float) {
+        query: `mutation updateValue($channelId: String!, $rawInput: Float) {
           setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'updateValue',
         variables: {
-          channelId: 1,
+          channelId: 'channel1',
           rawInput,
         }
       })

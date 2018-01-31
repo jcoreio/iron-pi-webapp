@@ -39,13 +39,14 @@ type Classes = $Call<ExtractClasses, typeof sidebarSectionHeaderStyles>
 
 export type SidebarSectionHeaderProps = {
   classes: Classes,
-  title: React.Node,
+  title: string,
   expanded?: boolean,
   onClick?: (event: MouseEvent) => any,
+  children?: React.Node,
 }
 
 const SidebarSectionHeader = withStyles(sidebarSectionHeaderStyles, {withTheme: true})(
-  ({title, classes, expanded, ...props}: SidebarSectionHeaderProps) => (
+  ({title, classes, expanded, children, ...props}: SidebarSectionHeaderProps) => (
     <ListItem {...props} button className={classes.root} data-test-title={title}>
       <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
         <PlayArrowIcon
@@ -55,6 +56,7 @@ const SidebarSectionHeader = withStyles(sidebarSectionHeaderStyles, {withTheme: 
         />
       </ListItemIcon>
       <ListItemText className={classes.title} disableTypography primary={title} />
+      {children}
     </ListItem>
   )
 )

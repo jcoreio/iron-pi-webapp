@@ -5,9 +5,9 @@ import evaluateControlLogic from '../evaluateControlLogic'
 describe("evaluateControlLogic", () => {
   it("evaluates high and low comparisons", () => {
     let tester = new EvalTester()
-    tester.values = new Map([[1, 5]])
+    tester.values = new Map([['1', 5]])
     let condition = {
-      channelId: 1,
+      channelId: '1',
       comparison: 'GT'
     }
     condition.threshold = 3
@@ -21,9 +21,9 @@ describe("evaluateControlLogic", () => {
   })
   it("returns false when comparing to a NaN value", () => {
     let tester = new EvalTester()
-    tester.values = new Map([[1, NaN]])
+    tester.values = new Map([['1', NaN]])
     let condition = {
-      channelId: 1,
+      channelId: '1',
       threshold: 3
     }
     condition.comparison = 'GT'
@@ -34,9 +34,9 @@ describe("evaluateControlLogic", () => {
 
   it("returns false when using NaN as a comparison threshold", () => {
     let tester = new EvalTester()
-    tester.values = new Map([[1, 5]])
+    tester.values = new Map([['1', 5]])
     let condition = {
-      channelId: 1,
+      channelId: '1',
       threshold: NaN
     }
     condition.comparison = 'GT'
@@ -46,13 +46,13 @@ describe("evaluateControlLogic", () => {
   })
   it("detects unavailable states", () => {
     let tester = new EvalTester()
-    tester.values = new Map([[1, 55]])
+    tester.values = new Map([['1', 55]])
     let condition = {
-      channelId: 1,
+      channelId: '1',
       comparison: 'UNAVAILABLE'
     }
     tester.checkCondition(condition, false)
-    tester.values.set(1, NaN)
+    tester.values.set('1', NaN)
     tester.checkCondition(condition, true)
   })
   // it("detects alarms", () => {
@@ -70,30 +70,30 @@ describe("evaluateControlLogic", () => {
   // })
   it("detects unavailable states", () => {
     let tester = new EvalTester()
-    tester.values = new Map([[1, 55]])
+    tester.values = new Map([['1', 55]])
     let condition = {
-      channelId: 1,
+      channelId: '1',
       comparison: 'UNAVAILABLE'
     }
     tester.checkCondition(condition, false)
-    tester.values.set(1, NaN)
+    tester.values.set('1', NaN)
     tester.checkCondition(condition, true)
   })
 
   it("evaluates 'AND' conditions correctly", () => {
     let tester = new EvalTester()
     tester.values = new Map([
-      [1, 5],
-      [2, 10],
+      ['1', 5],
+      ['2', 10],
     ])
     let conditions = [
       {
-        channelId: 1,
+        channelId: '1',
         comparison: 'GT',
         threshold: 4
       }, {
         operation: 'AND',
-        channelId: 2,
+        channelId: '2',
         comparison: 'GT',
         threshold: 9
       }
@@ -112,17 +112,17 @@ describe("evaluateControlLogic", () => {
   it("evaluates 'OR' conditions correctly", () => {
     let tester = new EvalTester()
     tester.values = new Map([
-      [1, 5],
-      [2, 10],
+      ['1', 5],
+      ['2', 10],
     ])
     let conditions = [
       {
-        channelId: 1,
+        channelId: '1',
         comparison: 'GT',
         threshold: 5
       }, {
         operation: 'OR',
-        channelId: 2,
+        channelId: '2',
         comparison: 'GT',
         threshold: 10
       }

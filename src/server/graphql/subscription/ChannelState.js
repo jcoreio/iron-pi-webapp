@@ -16,15 +16,15 @@ export default function createChannelState({pubsub}: Options): GraphQLFieldConfi
     type: new graphql.GraphQLNonNull(GraphQLJSON),
     description: 'Subscribes to the state of a single channel',
     args: {
-      id: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-        description: 'The id (primary key) of the channel to subscribe to',
+      channelId: {
+        type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+        description: 'The id of the channel to subscribe to',
       },
     },
-    subscribe(doc: any, {id}: {id: number}, context: Context): AsyncIterator<ChannelState> {
+    subscribe(doc: any, {channelId}: {channelId: string}, context: Context): AsyncIterator<ChannelState> {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update Channels')
-      return pubsub.asyncIterator(`ChannelState/${id}`)
+      return pubsub.asyncIterator(`ChannelState/${channelId}`)
     }
   }
 }

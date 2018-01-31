@@ -36,9 +36,9 @@ export default function createSubscribeToChannelStates(
         if (!ChannelStates) return
         let result = prev
         for (let newState of ChannelStates) {
-          if (!newState.id) return prev
+          if (!newState.channelId) return prev
           const Channels = get(prev, channelsPath)
-          const index = Channels.findIndex(channel => channel.id === newState.id)
+          const index = Channels.findIndex(channel => channel.channelId === newState.channelId)
           if (index >= 0) result = setIn(result, [...channelsPath, index, 'state'], newState)
         }
         return result

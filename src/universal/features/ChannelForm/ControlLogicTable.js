@@ -132,7 +132,7 @@ type ExtractFields = <T>(props: {fields: T}) => T
 type Fields = $Call<ExtractFields, FieldArrayProps>
 
 type Channel = {
-  id: number,
+  channelId: string,
   name: string,
 }
 
@@ -222,8 +222,8 @@ class ControlLogicTable extends React.Component<Props> {
                     <MenuItem value="">
                       <span className={classes.selectChannelItem}>Select Channel</span>
                     </MenuItem>
-                    {map(channels, ({id, name}: Channel) => (
-                      <MenuItem key={id} value={id}>{name}</MenuItem>
+                    {map(channels, ({channelId, name}: Channel) => (
+                      <MenuItem key={channelId} value={channelId}>{name}</MenuItem>
                     ))}
                   </Field>
                 </TableCell>

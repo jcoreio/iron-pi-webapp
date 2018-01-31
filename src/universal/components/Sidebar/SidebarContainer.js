@@ -135,6 +135,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
 const query = gql(`{
   Channels {
     id
+    channelId
     name 
     config
     state

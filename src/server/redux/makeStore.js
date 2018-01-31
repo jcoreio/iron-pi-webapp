@@ -48,7 +48,7 @@ export default (options: Options): Store => {
   store.getChannelConfigs = () => selectChannelConfigs(store.getState())
   store.getChannelValues = () => selectChannelValues(store.getState())
   store.getDependentChannels = () => selectDependentChannels(store.getState())
-  store.getChannelState = (channelId: number) => selectChannelState(channelId)(store.getState())
+  store.getChannelState = (channelId: string) => selectChannelState(channelId)(store.getState())
   return store
 }
 

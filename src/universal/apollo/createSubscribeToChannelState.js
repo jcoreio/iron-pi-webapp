@@ -5,8 +5,8 @@ import get from 'lodash.get'
 import {setIn} from '@jcoreio/mutate'
 
 const channelStateSubscription = gql(`
-  subscription ChannelState($id: Int!) {
-    ChannelState(id: $id)
+  subscription ChannelState($channelId: String!) {
+    ChannelState(channelId: $channelId)
   }  
 `)
 
@@ -19,14 +19,14 @@ export default function createSubscribeToChannelState(
     name?: string,
     channelPath?: Iterable<any>,
   } = {}
-): (id: number) => Function {
-  return function subscribeToChannelState(id: number): Function {
+): (channelId: string) => Function {
+  return function subscribeToChannelState(channelId: string): Function {
     const name = options.name || 'data'
     const channelPath = options.channelPath || ['Channel']
     return props[name].subscribeToMore({
       document: channelStateSubscription,
       variables: {
-        id,
+        channelId,
       },
       updateQuery: (prev: Object, update: {subscriptionData: {errors?: Array<Error>}}) => {
         const {subscriptionData: {[name]: data, errors}} = (update: any)
@@ -36,8 +36,8 @@ export default function createSubscribeToChannelState(
         }
         if (!data) return prev
         const {ChannelState: newState} = data
-        if (!newState.id) return prev
-        if (get(prev, [...channelPath, 'id']) !== newState.id) return prev
+        if (!newState.channelId) return prev
+        if (get(prev, [...channelPath, 'channelId']) !== newState.channelId) return prev
         return setIn(prev, [...channelPath, 'state'], newState)
       },
     })

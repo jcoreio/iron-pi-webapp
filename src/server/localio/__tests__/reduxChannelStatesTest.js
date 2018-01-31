@@ -13,16 +13,16 @@ describe('reduxChannelStates', () => {
 
     it('applies configs from setChannelConfigs action', () => {
       expect(channelConfigsReducer(
-        Map().withMutations((configs: ChannelConfigs) => {
-          configs.set(1, {mode: 'DISABLED'})
-          configs.set(3, {mode: 'DISABLED'})
-          configs.set(4, {mode: 'DISABLED'})
-        }),
+        Map([
+          ['1', {mode: 'DISABLED'}],
+          ['3', {mode: 'DISABLED'}],
+          ['4', {mode: 'DISABLED'}],
+        ]),
         setChannelConfigs(
-          {id: 2, config: {mode: 'ANALOG_INPUT', precision: 1, min: 0, max: 5}},
-          {id: 3, config: {mode: 'DIGITAL_INPUT', reversePolarity: true}},
-          {id: 5, config: {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 0, controlMode: 'REMOTE_CONTROL'}},
-          {id: 3, config: {mode: 'DIGITAL_INPUT', reversePolarity: false}},
+          {channelId: '2', config: {mode: 'ANALOG_INPUT', precision: 1, min: 0, max: 5}},
+          {channelId: '3', config: {mode: 'DIGITAL_INPUT', reversePolarity: true}},
+          {channelId: '5', config: {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 0, controlMode: 'REMOTE_CONTROL'}},
+          {channelId: '3', config: {mode: 'DIGITAL_INPUT', reversePolarity: false}},
         )
       ).toJS()).to.deep.equal({
         '1': {mode: 'DISABLED'},
@@ -34,16 +34,16 @@ describe('reduxChannelStates', () => {
     })
     it('rejects invalid configs/ids', () => {
       for (let update: any of [
-        {id: 'a', config: {mode: 'DISABLED'}},
-        {id: {foo: 'bar'}, config: {mode: 'DISABLED'}},
-        {id: null, config: {mode: 'DISABLED'}},
+        {channelId: 1, config: {mode: 'DISABLED'}},
+        {channelId: {foo: 'bar'}, config: {mode: 'DISABLED'}},
+        {channelId: null, config: {mode: 'DISABLED'}},
         {config: {mode: 'DISABLED'}},
-        {id: 1, config: {}},
-        {id: 1, config: {mode: 'blargh'}},
-        {id: 1, config: {mode: 'ANALOG_INPUT'}},
-        {id: 1, config: {mode: 'DIGITAL_INPUT'}},
-        {id: 1, config: {mode: 'DIGITAL_OUTPUT'}},
-        {id: 1, config: {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 1, controlMode: 'LOCAL_CONTROL'}},
+        {channelId: '1', config: {}},
+        {channelId: '1', config: {mode: 'blargh'}},
+        {channelId: '1', config: {mode: 'ANALOG_INPUT'}},
+        {channelId: '1', config: {mode: 'DIGITAL_INPUT'}},
+        {channelId: '1', config: {mode: 'DIGITAL_OUTPUT'}},
+        {channelId: '1', config: {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 1, controlMode: 'LOCAL_CONTROL'}},
       ]) {
         expect(() => channelConfigsReducer(Map(), setChannelConfigs(update))).to.throw(RuntimeTypeError)
       }
@@ -53,35 +53,35 @@ describe('reduxChannelStates', () => {
       try {
         const commonConfig = {mode: 'DIGITAL_OUTPUT', reversePolarity: true, safeState: 0, controlMode: 'LOCAL_CONTROL'}
         channelConfigsReducer(
-          Map().withMutations((configs: ChannelConfigs) => {
-            configs.set(1, {...commonConfig, controlLogic: [
-              {channelId: 2, comparison: 'EQ', threshold: 1},
-              {channelId: 4, comparison: 'EQ', threshold: 1},
-              {channelId: 5, comparison: 'EQ', threshold: 1},
-            ]})
-            configs.set(2, {...commonConfig, controlLogic: [{channelId: 3, comparison: 'EQ', threshold: 1}]})
-            configs.set(3, {...commonConfig, controlLogic: [{channelId: 4, comparison: 'EQ', threshold: 1}]})
-            configs.set(4, {mode: 'DIGITAL_INPUT', reversePolarity: true})
-            configs.set(5, {...commonConfig, controlMode: 'REMOTE_CONTROL'})
-          }),
+          Map([
+            ['1', {...commonConfig, controlLogic: [
+              {channelId: '2', comparison: 'EQ', threshold: 1},
+              {channelId: '4', comparison: 'EQ', threshold: 1},
+              {channelId: '5', comparison: 'EQ', threshold: 1},
+            ]}],
+            ['2', {...commonConfig, controlLogic: [{channelId: '3', comparison: 'EQ', threshold: 1}]}],
+            ['3', {...commonConfig, controlLogic: [{channelId: '4', comparison: 'EQ', threshold: 1}]}],
+            ['4', {mode: 'DIGITAL_INPUT', reversePolarity: true}],
+            ['5', {...commonConfig, controlMode: 'REMOTE_CONTROL'}],
+          ]),
           setChannelConfigs(
-            {id: 3, config: {...commonConfig, controlLogic: [{channelId: 1, comparison: 'EQ', threshold: 1}]}},
-            {id: 4, config: {mode: 'DIGITAL_INPUT', reversePolarity: false}},
-            {id: 5, config: {...commonConfig, controlMode: 'FORCE_ON'}},
+            {channelId: '3', config: {...commonConfig, controlLogic: [{channelId: '1', comparison: 'EQ', threshold: 1}]}},
+            {channelId: '4', config: {mode: 'DIGITAL_INPUT', reversePolarity: false}},
+            {channelId: '5', config: {...commonConfig, controlMode: 'FORCE_ON'}},
           )
         )
       } catch (err) {
         error = err
       }
       if (!error) throw new Error('expected channelConfigsReducer to throw an error')
-      expect(error.cycle).to.deep.equal([3, 1, 2])
+      expect(error.cycle).to.deep.equal(['3', '1', '2'])
     })
     it('rejects setChannelValues actions for unconfigured channels', () => {
-      expect(() => channelConfigsReducer(Map(), setChannelValues({id: 1, value: {rawAnalogInput: 1}}))).to.throw(Error)
+      expect(() => channelConfigsReducer(Map(), setChannelValues({channelId: '1', value: {rawAnalogInput: 1}}))).to.throw(Error)
     })
     it("rejects setChannelValues actions that don't match current mode", () => {
-      const id = 1
-      const initState = (config: ChannelConfig): ChannelConfigs => Map().set(id, config)
+      const channelId = '1'
+      const initState = (config: ChannelConfig): ChannelConfigs => Map([[channelId, config]])
 
       for (let value of [
         {rawAnalogInput: 1.2},
@@ -107,12 +107,12 @@ describe('reduxChannelStates', () => {
             const state = initState(config)
             expect(channelConfigsReducer(
               state,
-              setChannelValues({id, value})
+              setChannelValues({channelId, value})
             )).to.equal(state)
           } else {
             expect(() => channelConfigsReducer(
               initState(config),
-              setChannelValues({id, value})
+              setChannelValues({channelId, value})
             )).to.throw(Error)
           }
         }
@@ -122,12 +122,12 @@ describe('reduxChannelStates', () => {
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'FORCE_OFF'},
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'FORCE_ON'},
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'LOCAL_CONTROL', controlLogic: [
-            {channelId: id + 1, comparison: 'GTE', threshold: 2},
+            {channelId: '2', comparison: 'GTE', threshold: 2},
           ]},
         ]) {
           expect(() => channelConfigsReducer(
             initState(config),
-            setChannelValues({id, value})
+            setChannelValues({channelId, value})
           )).to.throw(Error)
         }
       }
@@ -138,16 +138,16 @@ describe('reduxChannelStates', () => {
 
     it('sets values from setChannelValues action', () => {
       expect(channelValuesReducer(
-        Map().withMutations((values: ChannelValues) => {
-          values.set(1, {rawAnalogInput: 1})
-          values.set(3, {rawDigitalInput: 0})
-          values.set(4, {controlValue: 0})
-        }),
+        Map([
+          ['1', {rawAnalogInput: 1}],
+          ['3', {rawDigitalInput: 0}],
+          ['4', {controlValue: 0}],
+        ]),
         setChannelValues(
-          {id: 2, value: {rawAnalogInput: 0.2}},
-          {id: 3, value: {rawDigitalInput: 1}},
-          {id: 5, value: {controlValue: 1}},
-          {id: 3, value: {controlValue: null}},
+          {channelId: '2', value: {rawAnalogInput: 0.2}},
+          {channelId: '3', value: {rawDigitalInput: 1}},
+          {channelId: '5', value: {controlValue: 1}},
+          {channelId: '3', value: {controlValue: null}},
         )
       ).toJS()).to.deep.equal({
         '1': {rawAnalogInput: 1},
@@ -159,24 +159,24 @@ describe('reduxChannelStates', () => {
     })
     it('sets values from setChannelConfigs action', () => {
       expect(channelValuesReducer(
-        Map().withMutations((values: ChannelValues) => {
-          values.set(1, {rawAnalogInput: 1})
-          values.set(3, {rawDigitalInput: 0})
-          values.set(4, {controlValue: 0})
-          values.set(11, {controlValue: 0})
-        }),
+        Map([
+          ['1', {rawAnalogInput: 1}],
+          ['3', {rawDigitalInput: 0}],
+          ['4', {controlValue: 0}],
+          ['11', {controlValue: 0}],
+        ]),
         setChannelConfigs(
-          {id: 2, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 0.2}},
-          {id: 3, config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: 1}},
-          {id: 5, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}, value: {controlValue: 1}},
-          {id: 3, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}, value: {controlValue: null}},
-          {id: 6, config: {mode: 'ANALOG_INPUT'}},
-          {id: 7, config: {mode: 'DIGITAL_INPUT'}},
-          {id: 8, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'FORCE_OFF'}},
-          {id: 9, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'FORCE_ON'}},
-          {id: 4, config: {mode: 'DISABLED'}},
-          {id: 10, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}},
-          {id: 11, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'LOCAL_CONTROL'}}
+          {channelId: '2', config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 0.2}},
+          {channelId: '3', config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: 1}},
+          {channelId: '5', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}, value: {controlValue: 1}},
+          {channelId: '3', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}, value: {controlValue: null}},
+          {channelId: '6', config: {mode: 'ANALOG_INPUT'}},
+          {channelId: '7', config: {mode: 'DIGITAL_INPUT'}},
+          {channelId: '8', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'FORCE_OFF'}},
+          {channelId: '9', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'FORCE_ON'}},
+          {channelId: '4', config: {mode: 'DISABLED'}},
+          {channelId: '10', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}},
+          {channelId: '11', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'LOCAL_CONTROL'}}
         )
       ).toJS()).to.deep.equal({
         '1': {rawAnalogInput: 1},
@@ -193,14 +193,14 @@ describe('reduxChannelStates', () => {
     it("doesn't clear current value if mode remains the same", () => {
       expect(channelValuesReducer(
         Map([
-          [1, {rawAnalogInput: 1}],
-          [2, {rawDigitalInput: 0}],
-          [3, {controlValue: 0}],
+          ['1', {rawAnalogInput: 1}],
+          ['2', {rawDigitalInput: 0}],
+          ['3', {controlValue: 0}],
         ]),
         setChannelConfigs(
-          {id: 1, config: {mode: 'ANALOG_INPUT'}},
-          {id: 2, config: {mode: 'DIGITAL_INPUT'}},
-          {id: 3, config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}},
+          {channelId: '1', config: {mode: 'ANALOG_INPUT'}},
+          {channelId: '2', config: {mode: 'DIGITAL_INPUT'}},
+          {channelId: '3', config: {mode: 'DIGITAL_OUTPUT', controlMode: 'REMOTE_CONTROL'}},
         )
       ).toJS()).to.deep.equal({
         '1': {rawAnalogInput: 1},
@@ -210,37 +210,37 @@ describe('reduxChannelStates', () => {
     })
     it('rejects invalid values/ids', () => {
       for (let update: any of [
-        {id: 'a', value: {rawAnalogInput: 1}},
-        {id: {foo: 'bar'}, value: {rawAnalogInput: 1}},
-        {id: null, value: {rawAnalogInput: 1}},
+        {channelId: 1, value: {rawAnalogInput: 1}},
+        {channelId: {foo: 'bar'}, value: {rawAnalogInput: 1}},
+        {channelId: null, value: {rawAnalogInput: 1}},
         {value: {rawAnalogInput: 1}},
-        {id: 1, value: {}},
-        {id: 1, value: {mode: 'blargh'}},
-        {id: 1, value: {rawDigitalInput: 1.5}},
-        {id: 1, value: {rawDigitalInput: undefined}},
-        {id: 1, value: {controlValue: 1.5}},
-        {id: 1, value: {controlValue: undefined}},
+        {channelId: '1', value: {}},
+        {channelId: '1', value: {mode: 'blargh'}},
+        {channelId: '1', value: {rawDigitalInput: 1.5}},
+        {channelId: '1', value: {rawDigitalInput: undefined}},
+        {channelId: '1', value: {controlValue: 1.5}},
+        {channelId: '1', value: {controlValue: undefined}},
       ]) {
         expect(() => channelValuesReducer(Map(), setChannelValues(update))).to.throw(RuntimeTypeError)
       }
       for (let update: any of [
-        {id: 'a', config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
-        {id: {foo: 'bar'}, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
-        {id: null, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
+        {channelId: 1, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
+        {channelId: {foo: 'bar'}, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
+        {channelId: null, config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
         {config: {mode: 'ANALOG_INPUT'}, value: {rawAnalogInput: 1}},
-        {id: 1, config: {mode: 'ANALOG_INPUT'}, value: {}},
-        {id: 1, config: {mode: 'ANALOG_INPUT'}, value: {mode: 'blargh'}},
-        {id: 1, config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: 1.5}},
-        {id: 1, config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: undefined}},
-        {id: 1, config: {mode: 'DIGITAL_OUTPUT'}, value: {controlValue: 1.5}},
-        {id: 1, config: {mode: 'DIGITAL_OUTPUT'}, value: {controlValue: undefined}},
+        {channelId: '1', config: {mode: 'ANALOG_INPUT'}, value: {}},
+        {channelId: '1', config: {mode: 'ANALOG_INPUT'}, value: {mode: 'blargh'}},
+        {channelId: '1', config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: 1.5}},
+        {channelId: '1', config: {mode: 'DIGITAL_INPUT'}, value: {rawDigitalInput: undefined}},
+        {channelId: '1', config: {mode: 'DIGITAL_OUTPUT'}, value: {controlValue: 1.5}},
+        {channelId: '1', config: {mode: 'DIGITAL_OUTPUT'}, value: {controlValue: undefined}},
       ]) {
         expect(() => channelValuesReducer(Map(), setChannelConfigs(update))).to.throw(RuntimeTypeError)
       }
     })
     it('rejects mismatched configs/values', () => {
-      const id = 1
-      const initState = (value: ChannelValue): ChannelValues => Map().set(id, value)
+      const channelId = '1'
+      const initState = (value: ChannelValue): ChannelValues => Map([[channelId, value]])
 
       for (let value of [
         {rawAnalogInput: 1.2},
@@ -266,12 +266,12 @@ describe('reduxChannelStates', () => {
             const state = initState(value)
             channelValuesReducer(
               state,
-              setChannelConfigs({id, config, value})
+              setChannelConfigs({channelId, config, value})
             )
           } else {
             expect(() => channelValuesReducer(
               initState(value),
-              setChannelConfigs({id, config, value})
+              setChannelConfigs({channelId, config, value})
             )).to.throw(Error)
           }
         }
@@ -281,12 +281,12 @@ describe('reduxChannelStates', () => {
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'FORCE_OFF'},
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'FORCE_ON'},
           {mode: 'DIGITAL_OUTPUT', reversePolarity: false, safeState: 0, controlMode: 'LOCAL_CONTROL', controlLogic: [
-            {channelId: id + 1, comparison: 'GTE', threshold: 2},
+            {channelId: '2', comparison: 'GTE', threshold: 2},
           ]},
         ]) {
           expect(() => channelValuesReducer(
             initState(value),
-            setChannelConfigs({id, config, value})
+            setChannelConfigs({channelId, config, value})
           )).to.throw(Error)
         }
       }

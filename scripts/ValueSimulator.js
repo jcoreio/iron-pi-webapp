@@ -25,6 +25,7 @@ type Options = {
 const CHANNEL_STATES_QUERY = gql(`query {
   Channels {
     id
+    channelId
     state
   }
 }`)
@@ -106,17 +107,17 @@ class ValueSimulator {
 
     const values = []
 
-    for (let {id, state} of Channels) {
+    for (let {channelId, state} of Channels) {
       switch (state.mode) {
       case 'ANALOG_INPUT':
-        values.push({id, value: {rawAnalogInput: Math.random()}})
+        values.push({channelId, value: {rawAnalogInput: Math.random()}})
         break
       case 'DIGITAL_INPUT':
-        values.push({id, value: {rawDigitalInput: Math.random() > 0.5 ? 1 : 0}})
+        values.push({channelId, value: {rawDigitalInput: Math.random() > 0.5 ? 1 : 0}})
         break
       case 'DIGITAL_OUTPUT': {
         if (state.controlMode === 'REMOTE_CONTROL') {
-          values.push({id, value: {controlValue: Math.random() > 0.5 ? 1 : 0}})
+          values.push({channelId, value: {controlValue: Math.random() > 0.5 ? 1 : 0}})
         }
         break
       }

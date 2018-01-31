@@ -21,8 +21,8 @@ export type ChannelAttributes = ChannelInitAttributes & {
 }
 
 export function updateChannelState(store: Store, channel: Channel) {
-  const {id, config} = channel
-  store.dispatch(setChannelConfigs({id, config}))
+  const {channelId, config} = channel
+  store.dispatch(setChannelConfigs({channelId, config}))
 }
 
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
@@ -78,7 +78,7 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
     })
 
     function updateChannelStateHook(channel: Channel) {
-      if (store && channel.changed('config')) {
+      if (store && (channel.changed('config') || channel.changed('channelId'))) {
         updateChannelState(store, channel)
       }
     }

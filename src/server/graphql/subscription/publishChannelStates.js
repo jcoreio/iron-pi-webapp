@@ -9,7 +9,7 @@ interface PubSub {
 export default function publishChannelStates(pubsub: PubSub, channelStates: Array<ChannelState>) {
   pubsub.publish('ChannelStates', {ChannelStates: channelStates})
   for (let state of channelStates) {
-    pubsub.publish(`ChannelState/${state.id}`, {ChannelState: state})
+    pubsub.publish(`ChannelState/${state.channelId}`, {ChannelState: state})
   }
 }
 

@@ -150,7 +150,7 @@ export type Props = {
     Channels?: Array<Channel>,
     loading?: boolean,
   },
-  subscribeToChannelState?: (id: number) => Function,
+  subscribeToChannelState?: (channelId: string) => Function,
   handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
   mutate: (options: {variables: {channel: FullChannel}}) => Promise<void>,
 }
@@ -166,7 +166,7 @@ class ChannelForm extends React.Component<Props> {
     if (Channel) {
       this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
       if (subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
+        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.channelId)
       }
     }
   }
@@ -183,7 +183,7 @@ class ChannelForm extends React.Component<Props> {
         }
         const {subscribeToChannelState} = nextProps
         if (subscribeToChannelState) {
-          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
+          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.channelId)
         }
       }
     }

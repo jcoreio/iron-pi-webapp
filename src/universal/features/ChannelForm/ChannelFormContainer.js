@@ -17,6 +17,7 @@ const channelQuery = gql(`query Channels($id: Int!) {
   }
   Channels {
     id
+    channelId
     name
   }
 }

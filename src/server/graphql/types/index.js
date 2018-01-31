@@ -42,7 +42,7 @@ export default function createTypes(options: Options): {
         type: GraphQLJSON,
         description: 'the state of this channel',
         resolve(source: ChannelAttributes): ?ChannelState {
-          return store.getChannelState(source.id)
+          return store.getChannelState(source.channelId)
         },
       },
     },
