@@ -7,6 +7,7 @@ import type {GraphQLSchema} from 'graphql'
 import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import defaults from 'lodash.defaults'
+import logger from 'log4jcore'
 
 import type {$Request, $Response} from 'express'
 
@@ -18,7 +19,6 @@ import createSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
 import {setChannelConfigs, setChannelValues} from './redux'
 
-import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
 import login from './express/login'
