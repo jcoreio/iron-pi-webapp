@@ -4,8 +4,7 @@ import path from 'path'
 
 import Sequelize from 'sequelize'
 import Umzug from 'umzug'
-
-import logger from '../../universal/logger'
+import logger from 'log4jcore'
 
 const log = logger('sequelize:migrate')
 

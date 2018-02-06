@@ -3,15 +3,13 @@
 import assert from 'assert'
 import EventEmitter from 'events'
 import _ from 'lodash'
+import logger from 'log4jcore'
 
 import type {DataPlugin, DispatchEvent, TimestampedValuesMap, TimestampedDispatchEvent} from './DataRouterTypes'
-
-import logger from '../../universal/logger'
 
 const log = logger('DataRouter')
 
 export default class DataRouter extends EventEmitter {
-
   _plugins: Array<DataPlugin> = [];
   _dispatchInProgress: boolean = false;
   _dispatchEventsQueue: Array<TimestampedDispatchEvent> = [];
