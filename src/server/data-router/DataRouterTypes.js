@@ -1,5 +1,10 @@
 // @flow
 
+import type {MappingProblem} from '../../universal/data-router/TagMappingTypes'
+
+/**
+ * Information about a single mapping into or out of a plugin
+ */
 export type DataPluginMapping = {
   id: string, // Unique ID, e.g. "local1"
   name: string, // Descriptive name for this input or output, e.g. "Local 1". This is distinct from the user settable metadata name, e. g. "Pump 1".
@@ -7,8 +12,12 @@ export type DataPluginMapping = {
   tagFromPlugin?: ?string, // Can be null if this is an output that does not publish a tag back to the tag map
 }
 
+
 export interface DataPlugin {
-  pluginId(): string;
+  pluginType(): string; // Name of plugin type, e.g. "Local IO", "MQTT"
+  pluginInstanceId(): string; // Unique ID for this plugin, e.g. "localIO", "mqtt0"
+  pluginInstanceName(): string; // User supplied name for this plugin instance, e.g. "Motor Drive Modbus Connection"
+
   inputsChanged(): void;
   updateCycleDone(didInputsChange: boolean): void;
   getMappings(): Array<DataPluginMapping>;
@@ -42,9 +51,22 @@ export type TimestampedDispatchEvent = {
   timestampedValues: TimestampedValuesMap,
 }
 
-export class DataPluginManager {
-  pluginConfigChanged() {
-  }
-  dispatch() {
-  }
+
+/**
+ * Information about a single plugin and all of its mappings
+ */
+export type PluginAndMappingsInfo = {
+  pluginType: string,
+  pluginInstanceId: string,
+  pluginInstanceName: string,
+  mappings: Array<DataPluginMapping>,
+}
+
+/**
+ * Information on all mappings across all plugins
+ */
+export type SystemMappingInfo = {
+  tagsToPluginInstanceIds: Map<string, string>,
+  duplicateTags: Set<string>,
+  mappingProblems: Array<MappingProblem>,
 }
