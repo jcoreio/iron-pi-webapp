@@ -23,12 +23,23 @@ export type TimestampedValuesMap = {[tag: string]: TimeValuePair}
 
 export type ValuesMap = {[tag: string]: any}
 
+/**
+ * Raw dispatch event, which may contain non-timestamped data
+ */
 export type DispatchEvent = {
   pluginId: string,
   // The caller can either provide `values` and allow the system to timestamp everything with the current time,
   // or the caller can provide `timestampedValues` if the data has already been timestamped upstream.
   values?: ?ValuesMap,
   timestampedValues?: ?TimestampedValuesMap,
+}
+
+/**
+ * Dispatch event with only timestamped data
+ */
+export type TimestampedDispatchEvent = {
+  pluginId: string,
+  timestampedValues: TimestampedValuesMap,
 }
 
 export class DataPluginManager {
