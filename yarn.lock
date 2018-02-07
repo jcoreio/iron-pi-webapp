@@ -5063,6 +5063,12 @@ log-symbols@^2.1.0:
   dependencies:
     chalk "^2.0.1"
 
+log4jcore@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/log4jcore/-/log4jcore-0.0.1.tgz#0c3a4fa330044a439d75861a7c49d8149de5ff98"
+  dependencies:
+    lodash "^4.17.4"
+
 loglevelnext@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/loglevelnext/-/loglevelnext-1.0.2.tgz#eb81a7ac45ca5749ee0e40d75c5d3d2f7cb7705d"
