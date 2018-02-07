@@ -27,8 +27,8 @@ export interface DataPlugin {
   pluginInstanceName(): string; // User supplied name for this plugin instance, e.g. "Motor Drive Modbus Connection"
 
   inputsChanged(event: InputChangeEvent): void;
-  updateCycleDone(event: CycleDoneEvent): void;
-  getMappings(): Array<DataPluginMapping>;
+  digestCycleDone(event: CycleDoneEvent): void;
+  ioMappings(): Array<DataPluginMapping>;
 }
 
 export type TimeValuePair = {
@@ -74,7 +74,8 @@ export type PluginAndMappingsInfo = {
  * Information on all mappings across all plugins
  */
 export type SystemMappingInfo = {
-  tagsToPluginInstanceIds: Map<string, string>,
+  tagsToProviderPluginIds: Map<string, string>,
+  tagsToDestinationPluginIds: Map<string, Set<string>>,
   duplicateTags: Set<string>,
   mappingProblems: Array<MappingProblem>,
 }
