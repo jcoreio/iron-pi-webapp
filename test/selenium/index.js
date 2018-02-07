@@ -10,17 +10,20 @@ import poll from '@jcoreio/poll'
 import promisify from 'es6-promisify'
 import glob from 'glob'
 import mergeCoverage from './util/mergeCoverage'
+const {reporters: {Base}} = require('mocha')
 
 const root = path.resolve(__dirname, '..', '..')
 const errorShots = path.resolve(root, 'errorShots')
 
 let {
   NO_HEADLESS,
+  NO_INLINE_ERRORS,
   PIPE_SELENIUM_LOG,
   CHROMEDRIVER_VERBOSE,
   GECKODRIVER_LOG_LEVEL,
   WDIO_LOG_LEVEL,
   LOG_EVERYTHING,
+  SELENIUM_BROWSERS,
 } = process.env
 
 if (LOG_EVERYTHING) {
@@ -30,7 +33,7 @@ if (LOG_EVERYTHING) {
   if (!WDIO_LOG_LEVEL) WDIO_LOG_LEVEL = 'verbose'
 }
 
-const seleniumConfigs = [
+let seleniumConfigs = [
   {
     desiredCapabilities: {
       browserName: 'chrome',
@@ -56,6 +59,11 @@ const seleniumConfigs = [
     },
   },
 ]
+
+if (SELENIUM_BROWSERS) {
+  const browserSet = new Set(SELENIUM_BROWSERS.split(/\s+|\s*,\s*/g))
+  seleniumConfigs = seleniumConfigs.filter(config => browserSet.has(config.desiredCapabilities.browserName))
+}
 
 describe('selenium tests', function () {
   this.timeout(30000)
@@ -111,21 +119,35 @@ describe('selenium tests', function () {
 
       afterEach(async function () {
         const {state, title} = this.currentTest
-        const filePrefix = path.join(errorShots, `ERROR_${browserName}_${title.replace(/[^a-z0-9 ]/ig, '_')}`)
+        const filePrefix = path.join(errorShots, `ERROR_${browserName}_${title.replace(/[^a-z0-9]/ig, '_')}`)
         if (state === 'failed') {
+          if (!NO_INLINE_ERRORS) Base.list([this.currentTest])
+
           await fs.mkdirs(errorShots)
-          const screenshotFile = `${filePrefix}_${new Date().toISOString()}.png`
+          const screenshotFile = `${filePrefix}.png`
           await browser.saveScreenshot(screenshotFile)
           console.log('Saved screenshot to', screenshotFile) // eslint-disable-line no-console
 
           await fs.mkdirs(errorShots)
-          const logFile = `${filePrefix}_${new Date().toISOString()}.log`
+          const logFile = `${filePrefix}.log`
+          const logs = [new Date().toLocaleString()]
           try {
-            const logs = (await browser.log('browser')).value
-            await fs.writeFile(logFile, logs.map(({message}) => message).join('\n'), 'utf8')
+            logs.push(...(await browser.log('browser')).value.map(({message}) => message))
           } catch (error) {
             console.error(error.stack) // eslint-disable-line no-console
           }
+          const {err} = this.currentTest
+          let message
+          if (err.message && typeof err.message.toString === 'function') {
+            message = err.message + ''
+          } else if (typeof err.inspect === 'function') {
+            message = err.inspect() + ''
+          } else {
+            message = ''
+          }
+          const stack = err.stack || message
+          logs.push(stack)
+          await fs.writeFile(logFile, logs.join('\n'), 'utf8')
         } else {
           const files = await promisify(glob)(filePrefix + '*')
           files.forEach(file => fs.remove(file)) // no need to wait for promise
