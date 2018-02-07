@@ -250,24 +250,22 @@ rule(seleniumServer, () => promisify(cb => require('selenium-standalone').instal
 function testRecipe(options /* : {
   unit?: boolean,
   selenium?: boolean,
-  integration?: boolean,
   coverage?: boolean,
   watch?: boolean,
   debug?: boolean,
 } */) /* : (rule: {args: Array<string>}) => Promise<void> */ {
-  const {unit, selenium, integration, coverage, watch, debug} = options
+  const {unit, selenium, coverage, watch, debug} = options
   const args = [
     '-r', 'babel-core/register',
     '-r', './test/configureChai',
   ]
-  if (unit || integration) args.push(
+  if (unit) args.push(
     '-r', 'jsdom-global/register',
     '-r', './test/configureEnzyme',
   )
   if (watch) args.push('./test/clearConsole.js')
 
   if (unit) args.push('./src/**/__tests__/**/*.js')
-  if (integration) args.push('./test/integration/index.js')
   if (selenium) args.push('./test/selenium/index.js')
   if (watch) args.push('--watch')
   if (debug) args.push('--inspect-brk')
