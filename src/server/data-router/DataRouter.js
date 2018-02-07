@@ -19,6 +19,7 @@ const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 export default class DataRouter extends EventEmitter {
   _plugins: Array<DataPlugin> = [];
   _dispatchInProgress: boolean = false;
+  _dispatchTime: number = 0;
   _dispatchEventsQueue: Array<TimestampedDispatchEvent> = [];
   _lastDispatchOk: boolean = true;
 
@@ -49,18 +50,19 @@ export default class DataRouter extends EventEmitter {
 
   dispatch(event: DispatchEvent) {
     assert(event)
-    this._dispatchEventsQueue.push(timestampDispatchData(event))
+    const time = this._dispatchInProgress ? this._dispatchTime : Date.now()
+    this._dispatchEventsQueue.push(timestampDispatchData({event, time}))
     // If a dispatch is already in progress,
     if (!this._dispatchInProgress) {
       const minIngestTime = this._lastIngestTime + MIN_INGEST_INTERVAL_MILLIS
-      const requiredWaitTime = minIngestTime - Date.now()
+      const requiredWaitTime = minIngestTime - time
       if (requiredWaitTime <= 0) {
-        this._runDispatchQueue()
+        this._runDispatchQueue(time)
       } else if (!this._ingestRateLimitTimeout) {
         // Schedule a delayed ingest, if one isn't already scheduled
         this._ingestRateLimitTimeout = setTimeout(() => {
           this._ingestRateLimitTimeout = undefined
-          this._runDispatchQueue()
+          this._runDispatchQueue(Date.now())
         }, Math.min(requiredWaitTime, MIN_INGEST_INTERVAL_MILLIS))
       }
     }
@@ -70,9 +72,9 @@ export default class DataRouter extends EventEmitter {
 
   }
 
-  _runDispatchQueue() {
+  _runDispatchQueue(time: number) {
     try {
-      this._lastIngestTime = Date.now()
+      this._lastIngestTime = this._dispatchTime = time
       this._dispatchInProgress = true
       // let sanityCount = 50
       // do {
@@ -101,10 +103,10 @@ export default class DataRouter extends EventEmitter {
   }
 }
 
-export function timestampDispatchData(event: DispatchEvent): TimestampedDispatchEvent {
-  const now = Date.now()
+export function timestampDispatchData(args: {event: DispatchEvent, time: number}): TimestampedDispatchEvent {
+  const {event, time} = args
   // Apply timestamps to any data that came in without timestamps
-  const valuesWithTimestamps: TimestampedValuesMap = _.mapValues(event.values || {}, (entry: any) => ({t: now, v: entry}))
+  const valuesWithTimestamps: TimestampedValuesMap = _.mapValues(event.values || {}, (entry: any) => ({t: time, v: entry}))
   // Merge with any data that came in with timestamps
   const timestampedValues: TimestampedValuesMap = {...valuesWithTimestamps, ...(event.timestampedValues || {})}
   return {pluginId: event.pluginId, timestampedValues}

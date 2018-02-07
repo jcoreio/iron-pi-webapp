@@ -12,14 +12,22 @@ export type DataPluginMapping = {
   tagFromPlugin?: ?string, // Can be null if this is an output that does not publish a tag back to the tag map
 }
 
+export type InputChangeEvent = {
+  time: number,
+  changedTags: Set<string>,
+}
+
+export type CycleDoneEvent = InputChangeEvent & {
+  didInputsChange: boolean,
+}
 
 export interface DataPlugin {
   pluginType(): string; // Name of plugin type, e.g. "Local IO", "MQTT"
   pluginInstanceId(): string; // Unique ID for this plugin, e.g. "localIO", "mqtt0"
   pluginInstanceName(): string; // User supplied name for this plugin instance, e.g. "Motor Drive Modbus Connection"
 
-  inputsChanged(): void;
-  updateCycleDone(didInputsChange: boolean): void;
+  inputsChanged(event: InputChangeEvent): void;
+  updateCycleDone(event: CycleDoneEvent): void;
   getMappings(): Array<DataPluginMapping>;
 }
 
