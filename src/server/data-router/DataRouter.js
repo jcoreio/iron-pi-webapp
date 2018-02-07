@@ -115,7 +115,7 @@ export default class DataRouter extends EventEmitter {
     try {
       this._lastIngestTime = this._dispatchTime = time
       this._dispatchInProgress = true
-      let sanityCount = 100
+      let sanityCount = 50
       const tagsChangedThisPass: Set<string> = new Set()
       const tagsChangedThisCycle: Set<string> = new Set()
       const pluginsChangedThisPass: Set<string> = new Set()
@@ -125,9 +125,10 @@ export default class DataRouter extends EventEmitter {
           throw Error(`DataRouter detected an infinite loop in the digest cycle`)
         tagsChangedThisPass.clear()
         pluginsChangedThisPass.clear()
-        const event: ?TimestampedDispatchEvent = this._dispatchEventsQueue[0]
-        if (event) {
-          this._dispatchEventsQueue.splice(0, 1) // pop the event from the front of the queue
+
+        const events: Array<TimestampedDispatchEvent> = this._dispatchEventsQueue.slice(0)
+        this._dispatchEventsQueue = []
+        events.forEach((event: TimestampedDispatchEvent) => {
           const {timestampedValues} = event
           _.forOwn(timestampedValues, (pair: TimeValuePair, tag: string) => {
             const existPair: ?TimeValuePair = this._tagMap[tag]
@@ -135,37 +136,37 @@ export default class DataRouter extends EventEmitter {
               tagsChangedThisPass.add(tag)
             this._tagMap[tag] = pair
           })
+        })
 
-          tagsChangedThisPass.forEach((tag: string) => {
-            tagsChangedThisCycle.add(tag)
-            const pluginIdsForTag: ?Set<string> = this._tagsToDestinationPluginIds.get(tag)
-            if (pluginIdsForTag) {
-              pluginIdsForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
-            }
-          })
+        tagsChangedThisPass.forEach((tag: string) => {
+          tagsChangedThisCycle.add(tag)
+          const pluginIdsForTag: ?Set<string> = this._tagsToDestinationPluginIds.get(tag)
+          if (pluginIdsForTag) {
+            pluginIdsForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
+          }
+        })
 
-          pluginsChangedThisPass.forEach((pluginId: string) => {
-            const plugin = this._pluginsById.get(pluginId)
-            if (plugin) {
-              pluginsChangedThisCycle.add(pluginId)
-              try {
-                plugin.inputsChanged({time, changedTags: tagsChangedThisPass})
-              } catch (err) {
-                const warningKey = `inputsChangedError-${pluginId}`
-                if (!this._printedWarningKeys.has(warningKey)) {
-                  this._printedWarningKeys.add(warningKey)
-                  log.error('caught error during dispatch', err.stack || err)
-                }
-              }
-            } else {
-              const warningKey = `missingPlugin-${pluginId}`
+        pluginsChangedThisPass.forEach((pluginId: string) => {
+          const plugin = this._pluginsById.get(pluginId)
+          if (plugin) {
+            pluginsChangedThisCycle.add(pluginId)
+            try {
+              plugin.inputsChanged({time, changedTags: tagsChangedThisPass})
+            } catch (err) {
+              const warningKey = `inputsChangedError-${pluginId}`
               if (!this._printedWarningKeys.has(warningKey)) {
                 this._printedWarningKeys.add(warningKey)
-                log.error(Error(`could not find plugin with ID ${pluginId}`).stack)
+                log.error('caught error during dispatch', err.stack || err)
               }
             }
-          })
-        }
+          } else {
+            const warningKey = `missingPlugin-${pluginId}`
+            if (!this._printedWarningKeys.has(warningKey)) {
+              this._printedWarningKeys.add(warningKey)
+              log.error(Error(`could not find plugin with ID ${pluginId}`).stack)
+            }
+          }
+        })
       } while (pluginsChangedThisPass.size)
 
       // Call digestCycleDone on each plugin
