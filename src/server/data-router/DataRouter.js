@@ -169,19 +169,19 @@ export default class DataRouter extends EventEmitter {
         })
       } while (pluginsChangedThisPass.size)
 
-      // Call digestCycleDone on each plugin
+      // Call dispatchCycleDone on each plugin
       this._plugins.forEach((plugin: DataPlugin) => {
         try {
-          plugin.digestCycleDone({
+          plugin.dispatchCycleDone({
             time,
             changedTags: tagsChangedThisCycle,
             didInputsChange: pluginsChangedThisCycle.has(plugin.pluginInstanceId())
           })
         } catch (err) {
-          const warningKey = `digestCycleDoneError-${plugin.pluginInstanceId()}`
+          const warningKey = `dispatchCycleDoneError-${plugin.pluginInstanceId()}`
           if (!this._printedWarningKeys.has(warningKey)) {
             this._printedWarningKeys.add(warningKey)
-            log.error('caught error during digestCycleDone', err.stack || err)
+            log.error('caught error during dispatchCycleDone', err.stack || err)
           }
         }
       })

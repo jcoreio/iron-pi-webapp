@@ -27,7 +27,7 @@ export interface DataPlugin {
   pluginInstanceName(): string; // User supplied name for this plugin instance, e.g. "Motor Drive Modbus Connection"
 
   inputsChanged(event: InputChangeEvent): void;
-  digestCycleDone(event: CycleDoneEvent): void;
+  dispatchCycleDone(event: CycleDoneEvent): void;
   ioMappings(): Array<DataPluginMapping>;
 }
 
