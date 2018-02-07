@@ -3,7 +3,7 @@
 import {expect} from 'chai'
 import {Map} from 'immutable'
 import createChannelStateSelector from '../createChannelStateSelector'
-import type {ChannelConfigs, ChannelValues} from '../reduxChannelStates'
+import type {ChannelConfigs} from '../reduxChannelStates'
 
 describe('createChannelStateSelector', () => {
   const selectChannelState = createChannelStateSelector({
