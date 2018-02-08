@@ -110,6 +110,10 @@
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jcoreio/require-env/-/require-env-1.0.0.tgz#ea476bb5498a49e65040ea5a7011a96f5ef712ba"
 
+"@jcoreio/typed-event-emitter@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@jcoreio/typed-event-emitter/-/typed-event-emitter-1.0.0.tgz#6ebd3e0c1a6423a77ad9964e779cf156ae65c992"
+
 "@jedwards1211/eslint-config-flow@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@jedwards1211/eslint-config-flow/-/eslint-config-flow-1.0.0.tgz#306baa90573f772342f53bef67ef4f2fe3f7cb8c"
