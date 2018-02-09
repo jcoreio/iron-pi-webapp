@@ -3,19 +3,25 @@
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
 import {defaultArgs, resolver} from 'graphql-sequelize'
+import type {SyncHook} from 'tapable'
 
 import requireUserId from '../requireUserId'
 import type {Context} from '../Context'
 import User from '../../models/User'
-import Channel from '../../models/Channel'
+import type DataRouter from '../../data-router/DataRouter'
+
 
 type Options = {
   sequelize: Sequelize,
+  dataRouter: DataRouter,
   types: {[name: string]: graphql.GraphQLOutputType},
+  hooks: {
+    addQueryFields: SyncHook,
+  },
 }
 
 export default function createQuery(options: Options): graphql.GraphQLObjectType {
-  const {sequelize, types} = options
+  const {sequelize, types, dataRouter, hooks: {addQueryFields}} = options
   const models = {...sequelize.models}
 
   const queryFields = {
@@ -55,6 +61,8 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       resolve: resolver(model, {before: requireUserId}),
     }
   }
+
+  addQueryFields.call({sequelize, types, dataRouter, queryFields})
 
   const query = new graphql.GraphQLObjectType({
     name: 'Query',

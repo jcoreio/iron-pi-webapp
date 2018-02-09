@@ -18,6 +18,7 @@ import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import pubsub from './graphql/pubsub'
 import {setChannelConfigs, setChannelValues} from './redux'
+import DataRouter from './data-router/DataRouter'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -35,6 +36,8 @@ import type {Store} from './redux/types'
 import makeStore from './redux/makeStore'
 import type {ChannelState} from '../universal/types/Channel'
 import publishChannelStates from './graphql/subscription/publishChannelStates'
+
+import {SyncHook, AsyncSeriesHook} from 'tapable'
 
 const log = logger('Server')
 
@@ -60,6 +63,18 @@ export default class Server {
   umzug: ?Umzug
   graphqlSchema: ?GraphQLSchema
   store: ?Store
+  dataRouter: ?DataRouter
+  hooks = {
+    sequelizeInit: new AsyncSeriesHook(['sequelize']),
+    graphql: {
+      addTypes: new SyncHook(['options']),
+      addInputTypes: new SyncHook(['options']),
+      addQueryFields: new SyncHook(['options']),
+      addMutationFields: new SyncHook(['options']),
+      addSubscriptionFields: new SyncHook(['options']),
+    },
+    addExpressRoutes: new SyncHook(['options']),
+  }
 
   constructor(options?: $Shape<DbConnectionParams & {port: number}> = {}) {
     this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
@@ -75,6 +90,8 @@ export default class Server {
       const store = this.store = makeStore({
         publishChannelStates: (channelStates: Array<ChannelState>) => publishChannelStates(pubsub, channelStates),
       })
+      const dataRouter = this.dataRouter = new DataRouter()
+      this._devGlobals.dataRouter = dataRouter
       this._devGlobals.store = store
       this._devGlobals.dispatch = store.dispatch
       this._devGlobals.getState = store.getState
@@ -83,16 +100,21 @@ export default class Server {
         databaseReady(),
       ])
 
-      const sequelize = this.sequelize = this._devGlobals.sequelize = createSequelize({
+      const sequelize = this.sequelize = createSequelize({
         params: this.dbConnectionParams,
         store,
       })
+      this._devGlobals.sequelize = sequelize
+      await this.hooks.sequelizeInit.promise(sequelize)
+
       Object.assign(this._devGlobals, sequelize.models)
       const umzug = this.umzug = this._devGlobals.umzug = createUmzug({sequelize})
 
       const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
         sequelize,
         store,
+        dataRouter,
+        hooks: this.hooks.graphql,
       })
 
       const forceMigrate = 'production' !== process.env.NODE_ENV
@@ -155,6 +177,8 @@ export default class Server {
         if (__coverage__) res.json(__coverage__)
         else res.status(404).end()
       })
+
+      this.hooks.addExpressRoutes.call({app, sequelize, graphqlSchema, store})
 
       // server-side rendering
       app.get('*', (req: $Request, res: $Response) => {

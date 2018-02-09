@@ -13,17 +13,25 @@ import Channel from '../../models/Channel'
 import type {ChannelState} from '../../../universal/types/Channel'
 import defaultInputType from './defaultInputType'
 import type {Store} from '../../redux/types'
+import type DataRouter from '../../data-router/DataRouter'
+
+import type {SyncHook} from 'tapable'
 
 export type Options = {
   sequelize: Sequelize,
   store: Store,
+  dataRouter: DataRouter,
+  hooks: {
+    addTypes: SyncHook,
+    addInputTypes: SyncHook,
+  },
 }
 
 export default function createTypes(options: Options): {
   types: {[name: string]: GraphQLOutputType},
   inputTypes: {[name: string]: GraphQLInputType},
 } {
-  const {sequelize, store} = options
+  const {sequelize, store, dataRouter, hooks: {addTypes, addInputTypes}} = options
   const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
@@ -58,8 +66,10 @@ export default function createTypes(options: Options): {
       ...extraFields[model.name] || {},
     })
   }))
+  addTypes.call({sequelize, store, dataRouter, types})
 
   const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
+  addInputTypes.call({sequelize, store, dataRouter, types})
 
   return {types, inputTypes}
 }
