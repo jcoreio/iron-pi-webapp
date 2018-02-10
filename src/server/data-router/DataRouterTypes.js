@@ -18,7 +18,7 @@ export type InputChangeEvent = {
 }
 
 export type CycleDoneEvent = InputChangeEvent & {
-  didInputsChange: boolean,
+  inputsChanged: boolean,
 }
 
 export interface DataPlugin {

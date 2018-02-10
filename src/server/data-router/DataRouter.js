@@ -21,7 +21,7 @@ const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 export default class DataRouter extends EventEmitter {
   _tagMap: TimestampedValuesMap = {}
 
-  _plugins: Array<DataPlugin> = [];
+  _plugins: Array<DataPlugin>;
   _pluginsById: Map<string, DataPlugin> = new Map()
 
   _dispatchInProgress: boolean = false;
@@ -40,8 +40,10 @@ export default class DataRouter extends EventEmitter {
 
   _printedWarningKeys: Set<string> = new Set();
 
-  constructor() {
+  constructor(args: {plugins?: Array<DataPlugin>} = {}) {
     super()
+    this._plugins = args.plugins || []
+    this.pluginsChanged()
   }
 
   stop() {
@@ -63,7 +65,6 @@ export default class DataRouter extends EventEmitter {
       }
     }
     this._plugins.push(plugin)
-    this._pluginsById.set(plugin.pluginInstanceId(), plugin)
     this.pluginsChanged()
   }
 
@@ -116,15 +117,15 @@ export default class DataRouter extends EventEmitter {
       this._lastIngestTime = this._dispatchTime = time
       this._dispatchInProgress = true
       let sanityCount = 50
-      const tagsChangedThisPass: Set<string> = new Set()
+      let tagsChangedThisPass: Set<string> = new Set()
       const tagsChangedThisCycle: Set<string> = new Set()
-      const pluginsChangedThisPass: Set<string> = new Set()
+      let pluginsChangedThisPass: Set<string> = new Set()
       const pluginsChangedThisCycle: Set<string> = new Set()
       do {
         if (--sanityCount <= 0)
           throw Error(`DataRouter detected an infinite loop in the digest cycle`)
-        tagsChangedThisPass.clear()
-        pluginsChangedThisPass.clear()
+        tagsChangedThisPass = new Set()
+        pluginsChangedThisPass = new Set()
 
         const events: Array<TimestampedDispatchEvent> = this._dispatchEventsQueue.slice(0)
         this._dispatchEventsQueue = []
@@ -175,7 +176,7 @@ export default class DataRouter extends EventEmitter {
           plugin.dispatchCycleDone({
             time,
             changedTags: tagsChangedThisCycle,
-            didInputsChange: pluginsChangedThisCycle.has(plugin.pluginInstanceId())
+            inputsChanged: pluginsChangedThisCycle.has(plugin.pluginInstanceId())
           })
         } catch (err) {
           const warningKey = `dispatchCycleDoneError-${plugin.pluginInstanceId()}`
@@ -198,6 +199,9 @@ export default class DataRouter extends EventEmitter {
   }
 
   pluginsChanged() {
+    this._pluginsById.clear()
+    this._plugins.forEach((plugin: DataPlugin) => this._pluginsById.set(plugin.pluginInstanceId(), plugin))
+
     const pluginMappings: Array<PluginAndMappingsInfo> = this._plugins.map((plugin: DataPlugin) => ({
       pluginType: plugin.pluginType(),
       pluginInstanceId: plugin.pluginInstanceId(),
