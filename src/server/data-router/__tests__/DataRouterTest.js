@@ -1,5 +1,7 @@
 import {expect} from 'chai'
 
+import EventEmitter from 'events'
+
 import DataRouter, {timestampDispatchData} from '../DataRouter'
 import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping} from '../DataRouterTypes'
 
@@ -7,16 +9,20 @@ const EVENT_INPUTS_CHANGED = 'INPUTS_CHANGED'
 const EVENT_DISPATCH_CYCLE_DONE = 'DISPATCH_CYCLE_DONE'
 
 type MockPluginEvent = {
+  plugin: MockPlugin,
   type: string,
-  payload: Object
+  time: number,
+  changedTags: Array<string>,
 }
 
-class MockPlugin implements DataPlugin {
+class MockPlugin extends EventEmitter implements DataPlugin {
+  _events: Array<MockPluginEvent>;
   _magic: number;
   _mappings: Array<DataPluginMapping>;
-  _events: Array<MockPluginEvent> = [];
 
-  constructor(args: {magic: number, mappings: Array<DataPluginMapping>}) {
+  constructor(args: {events: Array<MockPluginEvent>, magic: number, mappings: Array<DataPluginMapping>}) {
+    super()
+    this._events = args.events
     this._magic = args.magic
     this._mappings = args.mappings
   }
@@ -24,51 +30,58 @@ class MockPlugin implements DataPlugin {
   pluginInstanceId(): string { return this._magic }
   pluginInstanceName(): string { return `instance${this._magic}` }
   inputsChanged(event: InputChangeEvent): void {
-    this._events.push({type: EVENT_INPUTS_CHANGED, payload: event})
+    this._events.push({
+      ...event,
+      plugin: this,
+      type: EVENT_INPUTS_CHANGED,
+      changedTags: Array.from(event.changedTags).sort()
+    })
   }
   dispatchCycleDone(event: CycleDoneEvent): void {
-    this._events.push({type: EVENT_DISPATCH_CYCLE_DONE, payload: event})
+    this._events.push({
+      ...event,
+      plugin: this,
+      type: EVENT_DISPATCH_CYCLE_DONE,
+      changedTags: Array.from(event.changedTags).sort()
+    })
   }
   ioMappings(): Array<DataPluginMapping> { return this._mappings }
-
-  popEvents(): Array<MockPluginEvent> {
-    const events = this._events
-    this._events = []
-    return events
-  }
 }
 
 describe('DataRouter', () => {
   it('notifies plugins when their inputs change', () => {
-    const plugin1 = new MockPlugin({magic: 1, mappings: [
+    let events: Array<MockPluginEvent> = []
+    const popEvents = () => {
+      const _events = events.slice(0)
+      events.splice(0, events.length)
+      return _events
+    }
+
+    const plugin1 = new MockPlugin({events, magic: 1, mappings: [
       {id: 'output1', name: 'Output 1', tagFromPlugin: 'a'},
       {id: 'output2', name: 'Output 2', tagFromPlugin: 'b'}
     ]})
-    const plugin2 = new MockPlugin({magic: 2, mappings: [
+    const plugin2 = new MockPlugin({events, magic: 2, mappings: [
       {id: 'input1', name: 'Input 1', tagsToPlugin: ['a']},
       {id: 'input2', name: 'Input 2', tagsToPlugin: ['b']}
     ]})
+
+    let time = 100
     const router: DataRouter = new DataRouter({plugins: [plugin1, plugin2]})
-    expect(plugin1.popEvents()).to.be.empty
-    expect(plugin2.popEvents()).to.be.empty
+    router._getTime = () => time
+
+    expect(popEvents()).to.be.empty
 
     router.dispatch({pluginId: plugin1.pluginInstanceId(), timestampedValues: {
       a: {t: 100, v: 200},
       b: {t: 300, v: 400}
     }})
-    const plugin1Events = plugin1.popEvents()
-    expect(plugin1Events.length).to.equal(1)
-    expect(plugin1Events[0].type).to.equal(EVENT_DISPATCH_CYCLE_DONE)
-    expect(plugin1Events[0].payload.inputsChanged).to.equal(false)
 
-    const plugin2Events = plugin2.popEvents()
-    expect(plugin2Events.length).to.equal(2)
-
-    expect(plugin2Events[0].type).to.equal(EVENT_INPUTS_CHANGED)
-    expect(Array.from(plugin2Events[0].payload.changedTags).sort()).to.deep.equal(['a', 'b'])
-
-    expect(plugin2Events[1].type).to.equal(EVENT_DISPATCH_CYCLE_DONE)
-    expect(plugin2Events[1].payload.inputsChanged).to.equal(true)
+    expect(popEvents()).to.deep.equal([
+      {plugin: plugin2, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
+      {plugin: plugin1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: plugin2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true}
+    ])
   })
 
   describe('timestampDispatchData', () => {
