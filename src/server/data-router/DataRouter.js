@@ -53,6 +53,8 @@ export default class DataRouter extends EventEmitter {
     this.setPlugins(args.plugins || [])
   }
 
+  tagMap(): TimestampedValuesMap { return this._tagMap }
+
   stop() {
     if (this._ingestRateLimitTimeout) {
       clearTimeout(this._ingestRateLimitTimeout)

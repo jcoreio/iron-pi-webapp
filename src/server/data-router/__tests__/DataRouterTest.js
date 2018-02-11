@@ -69,7 +69,7 @@ class AdderPlugin extends MockPlugin {
   inputsChanged(event: InputChangeEvent) {
     super.inputsChanged(event)
     const srcValuePair: ?TimeValuePair = event.tagMap[this._sourceTag]
-    this.emit('data', {[this._destTag]: srcValuePair ? srcValuePair.v + 1 : NaN})
+    this.emit('data', {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
   }
 }
 
@@ -107,6 +107,11 @@ describe('DataRouter', () => {
       {plugin: plugin1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
       {plugin: plugin2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true}
     ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 100, v: 200},
+      b: {t: 300, v: 400}
+    })
   })
 
   it('handles cascading updates', () => {
@@ -124,14 +129,16 @@ describe('DataRouter', () => {
     const adder1 = new AdderPlugin({
       events,
       magic: 2,
-      sourceTag: 'a',
-      destTag: 'c'
+      sourceTag: 'b',
+      destTag: 'c',
+      amount: 2
     })
     const adder2 = new AdderPlugin({
       events,
       magic: 3,
       sourceTag: 'c',
-      destTag: 'd'
+      destTag: 'd',
+      amount: 3
     })
 
     let time = 100
@@ -149,6 +156,66 @@ describe('DataRouter', () => {
       {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true},
       {plugin: adder2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true}
     ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 100, v: 2},
+      b: {t: 100, v: 3},
+      c: {t: 100, v: 5}, // adder1 outputs b + 2
+      d: {t: 100, v: 8} // adder2 outputs c + 3
+    })
+  })
+
+  it('handles spontaneously emitted plugin data', () => {
+    const events: Array<MockPluginEvent> = []
+    const popEvents = () => {
+      const _events = events.slice(0)
+      events.splice(0, events.length)
+      return _events
+    }
+
+    const sourcePlugin = new MockPlugin({events, magic: 1, mappings: [
+      {id: 'output1', name: 'Output 1', tagFromPlugin: 'a'},
+    ]})
+    const adder1 = new AdderPlugin({
+      events,
+      magic: 2,
+      sourceTag: 'a',
+      destTag: 'b',
+      amount: 2
+    })
+
+    let time = 100
+    const router: DataRouter = new DataRouter({plugins: [sourcePlugin, adder1]})
+    router._getTime = () => time
+
+    expect(popEvents()).to.be.empty
+
+    sourcePlugin.emit('data', {a: 2})
+
+    expect(popEvents()).to.deep.equal([
+      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+    ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 100, v: 2},
+      b: {t: 100, v: 4}
+    })
+
+    time = 300
+    sourcePlugin.emit('data', {a: 5})
+
+    expect(popEvents()).to.deep.equal([
+      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+    ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 300, v: 5},
+      b: {t: 300, v: 7}
+    })
   })
 
   describe('timestampDispatchData', () => {
