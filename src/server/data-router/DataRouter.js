@@ -24,13 +24,17 @@ export const PLUGIN_EVENT_TIMESTAMPED_DATA = 'timestampedData'
 type PluginDataListener = (data: ValuesMap) => void
 type PluginTimestampedDataListener = (data: TimestampedValuesMap) => void
 
+type ListenersForPlugin = {
+  dataListener: PluginDataListener,
+  timestampedDataListener: PluginTimestampedDataListener,
+}
+
 export default class DataRouter extends EventEmitter {
   _tagMap: TimestampedValuesMap = {}
 
   _plugins: Array<DataPlugin> = []
   _pluginsById: Map<string, DataPlugin> = new Map()
-  _pluginDataListeners: Map<string, PluginDataListener> = new Map()
-  _pluginTimestampedDataListeners: Map<string, PluginDataListener> = new Map()
+  _pluginListeners: Map<string, ListenersForPlugin> = new Map()
 
   _dispatchInProgress: boolean = false;
   _dispatchTime: number = 0;
@@ -233,14 +237,13 @@ export default class DataRouter extends EventEmitter {
       // If the plugin is an EventEmitter, listen to its 'data' event
       const instanceId = plugin.pluginInstanceId()
       if (_.isFunction((plugin: any).on)) {
-        const pluginDataListener : PluginDataListener = (data: ValuesMap) =>
+        const dataListener : PluginDataListener = (data: ValuesMap) =>
           this.dispatch({pluginId: instanceId, values: data})
-        const pluginTimestampedDataListener : PluginTimestampedDataListener = (data: TimestampedValuesMap) =>
+        const timestampedDataListener : PluginTimestampedDataListener = (data: TimestampedValuesMap) =>
           this.dispatch({pluginId: instanceId, timestampedValues: data})
-        ;(plugin: any).on(PLUGIN_EVENT_DATA, pluginDataListener)
-        ;(plugin: any).on(PLUGIN_EVENT_TIMESTAMPED_DATA, pluginTimestampedDataListener)
-        this._pluginDataListeners.set(instanceId, pluginDataListener)
-        this._pluginTimestampedDataListeners.set(instanceId, pluginTimestampedDataListener)
+        ;(plugin: any).on(PLUGIN_EVENT_DATA, dataListener)
+        ;(plugin: any).on(PLUGIN_EVENT_TIMESTAMPED_DATA, timestampedDataListener)
+        this._pluginListeners.set(instanceId, {dataListener, timestampedDataListener})
       }
     })
 
@@ -264,18 +267,14 @@ export default class DataRouter extends EventEmitter {
 
   _removePluginListeners() {
     // call removeListener on all existing plugin listeners
-    this._pluginDataListeners.forEach((listener: PluginDataListener, pluginId: string) => {
+    this._pluginListeners.forEach((listeners: ListenersForPlugin, pluginId: string) => {
       const plugin: ?DataPlugin = this._pluginsById.get(pluginId)
-      if (plugin && _.isFunction((plugin: any).removeListener))
-        ;(plugin: any).removeListener(PLUGIN_EVENT_DATA, listener)
+      if (plugin && _.isFunction((plugin: any).removeListener)) {
+        (plugin: any).removeListener(PLUGIN_EVENT_DATA, listeners.dataListener)
+        ;(plugin: any).removeListener(PLUGIN_EVENT_TIMESTAMPED_DATA, listeners.timestampedDataListener)
+      }
     })
-    this._pluginTimestampedDataListeners.forEach((listener: PluginTimestampedDataListener, pluginId: string) => {
-      const plugin: ?DataPlugin = this._pluginsById.get(pluginId)
-      if (plugin && _.isFunction((plugin: any).removeListener))
-        ;(plugin: any).removeListener(PLUGIN_EVENT_TIMESTAMPED_DATA, listener)
-    })
-    this._pluginDataListeners.clear()
-    this._pluginTimestampedDataListeners.clear()
+    this._pluginListeners.clear()
   }
 }
 

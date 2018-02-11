@@ -271,6 +271,22 @@ describe('DataRouter', () => {
     })
   })
 
+  it('removes listeners when removing plugins', () => {
+    const plugin = new MockPlugin({events: [], magic: 1, mappings: [
+      {id: 'output1', name: 'Output 1', tagFromPlugin: 'a'},
+    ]})
+
+    const router: DataRouter = new DataRouter({plugins: [plugin]})
+
+    expect(plugin.listenerCount(PLUGIN_EVENT_DATA)).to.equal(1)
+    expect(plugin.listenerCount(PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(1)
+
+    router.setPlugins([])
+
+    expect(plugin.listenerCount(PLUGIN_EVENT_DATA)).to.equal(0)
+    expect(plugin.listenerCount(PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(0)
+  })
+
   describe('timestampDispatchData', () => {
     const PLUGIN_ID = 'testPluginId'
 
