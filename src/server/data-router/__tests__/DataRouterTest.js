@@ -1,9 +1,12 @@
+// @flow
+
 import {expect} from 'chai'
 
 import EventEmitter from 'events'
+import _ from 'lodash'
 
 import DataRouter, {timestampDispatchData} from '../DataRouter'
-import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping} from '../DataRouterTypes'
+import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../DataRouterTypes'
 
 const EVENT_INPUTS_CHANGED = 'INPUTS_CHANGED'
 const EVENT_DISPATCH_CYCLE_DONE = 'DISPATCH_CYCLE_DONE'
@@ -15,42 +18,64 @@ type MockPluginEvent = {
   changedTags: Array<string>,
 }
 
+type MockPluginArgs = {events: Array<MockPluginEvent>, magic: number, mappings: Array<DataPluginMapping>}
+
 class MockPlugin extends EventEmitter implements DataPlugin {
-  _events: Array<MockPluginEvent>;
+  _rxEvents: Array<MockPluginEvent>;
   _magic: number;
   _mappings: Array<DataPluginMapping>;
 
-  constructor(args: {events: Array<MockPluginEvent>, magic: number, mappings: Array<DataPluginMapping>}) {
+  constructor(args: MockPluginArgs) {
     super()
-    this._events = args.events
+    this._rxEvents = args.events
     this._magic = args.magic
     this._mappings = args.mappings
   }
   pluginType(): string { return 'MockPlugin' }
-  pluginInstanceId(): string { return this._magic }
-  pluginInstanceName(): string { return `instance${this._magic}` }
-  inputsChanged(event: InputChangeEvent): void {
-    this._events.push({
-      ...event,
-      plugin: this,
-      type: EVENT_INPUTS_CHANGED,
-      changedTags: Array.from(event.changedTags).sort()
-    })
+  pluginInstanceId(): string { return `mockPlugin${this._magic}` }
+  pluginInstanceName(): string { return `Mock Plugin ${this._magic}` }
+  inputsChanged(event: InputChangeEvent) {
+    this._pushEvent({event, type: EVENT_INPUTS_CHANGED})
   }
-  dispatchCycleDone(event: CycleDoneEvent): void {
-    this._events.push({
-      ...event,
+  dispatchCycleDone(event: CycleDoneEvent) {
+    this._pushEvent({event, type: EVENT_DISPATCH_CYCLE_DONE})
+  }
+  _pushEvent(args: {event: InputChangeEvent, type: string}) {
+    // make events easier to deep compare by omitting tagMap and converting changedTags into a sorted array
+    this._rxEvents.push({
+      ...(_.omit(args.event, 'tagMap')),
       plugin: this,
-      type: EVENT_DISPATCH_CYCLE_DONE,
-      changedTags: Array.from(event.changedTags).sort()
+      type: args.type,
+      changedTags: Array.from(args.event.changedTags).sort()
     })
   }
   ioMappings(): Array<DataPluginMapping> { return this._mappings }
 }
 
+class AdderPlugin extends MockPlugin {
+  _sourceTag: string;
+  _destTag: string;
+  _amount: number;
+  constructor(args: {events: Array<MockPluginEvent>, magic: number,
+      sourceTag: string, destTag: string, amount?: number}) {
+    super({events: args.events, magic: args.magic, mappings: [
+      {id: 'adderInput', name: 'Adder Input', tagsToPlugin: [args.sourceTag]},
+      {id: 'adderOutput', name: 'Adder Output', tagFromPlugin: args.destTag}
+    ]})
+    this._sourceTag = args.sourceTag
+    this._destTag = args.destTag
+    this._amount = args.amount === undefined ? 1 : args.amount
+  }
+  inputsChanged(event: InputChangeEvent) {
+    super.inputsChanged(event)
+    const srcValuePair: ?TimeValuePair = event.tagMap[this._sourceTag]
+    this.emit('data', {[this._destTag]: srcValuePair ? srcValuePair.v + 1 : NaN})
+  }
+}
+
 describe('DataRouter', () => {
   it('notifies plugins when their inputs change', () => {
-    let events: Array<MockPluginEvent> = []
+    const events: Array<MockPluginEvent> = []
     const popEvents = () => {
       const _events = events.slice(0)
       events.splice(0, events.length)
@@ -81,6 +106,48 @@ describe('DataRouter', () => {
       {plugin: plugin2, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
       {plugin: plugin1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
       {plugin: plugin2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true}
+    ])
+  })
+
+  it('handles cascading updates', () => {
+    const events: Array<MockPluginEvent> = []
+    const popEvents = () => {
+      const _events = events.slice(0)
+      events.splice(0, events.length)
+      return _events
+    }
+
+    const sourcePlugin = new MockPlugin({events, magic: 1, mappings: [
+      {id: 'output1', name: 'Output 1', tagFromPlugin: 'a'},
+      {id: 'output2', name: 'Output 2', tagFromPlugin: 'b'}
+    ]})
+    const adder1 = new AdderPlugin({
+      events,
+      magic: 2,
+      sourceTag: 'a',
+      destTag: 'c'
+    })
+    const adder2 = new AdderPlugin({
+      events,
+      magic: 3,
+      sourceTag: 'c',
+      destTag: 'd'
+    })
+
+    let time = 100
+    const router: DataRouter = new DataRouter({plugins: [sourcePlugin, adder1, adder2]})
+    router._getTime = () => time
+
+    expect(popEvents()).to.be.empty
+
+    router.dispatch({pluginId: sourcePlugin.pluginInstanceId(), values: {a: 2, b: 3}})
+
+    expect(popEvents()).to.deep.equal([
+      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
+      {plugin: adder2, type: EVENT_INPUTS_CHANGED, time, changedTags: ['c']},
+      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: false},
+      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true},
+      {plugin: adder2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true}
     ])
   })
 

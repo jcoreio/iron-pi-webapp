@@ -15,6 +15,7 @@ export type DataPluginMapping = {
 export type InputChangeEvent = {
   time: number,
   changedTags: Set<string>,
+  tagMap: TimestampedValuesMap,
 }
 
 export type CycleDoneEvent = InputChangeEvent & {
@@ -24,7 +25,7 @@ export type CycleDoneEvent = InputChangeEvent & {
 /**
  * Interface for a plugin that can send and receive data.
  * DataPlugins may optionally extend EventEmitter, in which case they can
- * dispatch PluginDataEvents by calling this.emit('data', event)
+ * emit data by calling this.emit('data', {tag1: value1, tag2: value2})
  */
 export interface DataPlugin {
   pluginType(): string; // Name of plugin type, e.g. "Local IO", "MQTT"
@@ -46,23 +47,16 @@ export type TimestampedValuesMap = {[tag: string]: TimeValuePair}
 export type ValuesMap = {[tag: string]: any}
 
 /**
- * Event that can be dispatched by an EventEmitter plugin calling
- * this.emit('data', {values: {}})
- */
-export type PluginDataEvent = {
-  // The caller can either provide `values` and allow the system to timestamp everything with the current time,
-  // or the caller can provide `timestampedValues` if the data has already been timestamped upstream.
-  values?: ?ValuesMap,
-  timestampedValues?: ?TimestampedValuesMap,
-}
-
-/**
  * Event that can be fired by calling dataRouter.dispatch(event)
  * Since it is not emitted from a plugin, it must contain the pluginId of the
  * source plugin.
  */
-export type DispatchEvent = PluginDataEvent & {
+export type DispatchEvent = {
   pluginId: string,
+  // The caller can either provide `values` and allow the system to timestamp everything with the current time,
+  // or the caller can provide `timestampedValues` if the data has already been timestamped upstream.
+  values?: ?ValuesMap,
+  timestampedValues?: ?TimestampedValuesMap,
 }
 
 /**

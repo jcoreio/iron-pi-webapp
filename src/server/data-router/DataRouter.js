@@ -7,7 +7,7 @@ import logger from 'log4jcore'
 
 import calculateMappingInfo from './calculateMappingInfo'
 import type {
-  DataPlugin, PluginDataEvent, DispatchEvent, TimestampedValuesMap, TimestampedDispatchEvent,
+  DataPlugin, DispatchEvent, ValuesMap, TimestampedValuesMap, TimestampedDispatchEvent,
   PluginAndMappingsInfo, TimeValuePair
 } from './DataRouterTypes'
 import type {MappingProblem} from '../../universal/data-router/TagMappingTypes'
@@ -20,7 +20,7 @@ const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 
 const PLUGIN_EVENT_DATA = 'data'
 
-type PluginDataListener = (event: PluginDataEvent) => void
+type PluginDataListener = (data: ValuesMap) => void
 
 export default class DataRouter extends EventEmitter {
   _tagMap: TimestampedValuesMap = {}
@@ -171,7 +171,11 @@ export default class DataRouter extends EventEmitter {
           if (plugin) {
             pluginsChangedThisCycle.add(pluginId)
             try {
-              plugin.inputsChanged({time, changedTags: tagsChangedThisPass})
+              plugin.inputsChanged({
+                time,
+                changedTags: tagsChangedThisPass,
+                tagMap: this._tagMap
+              })
             } catch (err) {
               const warningKey = `inputsChangedError-${pluginId}`
               if (!this._printedWarningKeys.has(warningKey)) {
@@ -195,7 +199,8 @@ export default class DataRouter extends EventEmitter {
           plugin.dispatchCycleDone({
             time,
             changedTags: tagsChangedThisCycle,
-            inputsChanged: pluginsChangedThisCycle.has(plugin.pluginInstanceId())
+            inputsChanged: pluginsChangedThisCycle.has(plugin.pluginInstanceId()),
+            tagMap: this._tagMap
           })
         } catch (err) {
           const warningKey = `dispatchCycleDoneError-${plugin.pluginInstanceId()}`
@@ -221,11 +226,12 @@ export default class DataRouter extends EventEmitter {
     this._removePluginListeners()
     this._plugins.forEach((plugin: DataPlugin) => {
       // If the plugin is an EventEmitter, listen to its 'data' event
+      const instanceId = plugin.pluginInstanceId()
       if (_.isFunction((plugin: any).on)) {
-        const listener : PluginDataListener = (event: PluginDataEvent) =>
-          this.dispatch({...event, pluginId: plugin.pluginInstanceId()})
+        const listener : PluginDataListener = (data: ValuesMap) =>
+          this.dispatch({pluginId: instanceId, values: data})
         ;(plugin: any).on(PLUGIN_EVENT_DATA, listener)
-        this._pluginListeners.set(plugin.pluginInstanceId(), listener)
+        this._pluginListeners.set(instanceId, listener)
       }
     })
 
