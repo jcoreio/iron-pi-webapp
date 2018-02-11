@@ -5,7 +5,7 @@ import {expect} from 'chai'
 import EventEmitter from 'events'
 import _ from 'lodash'
 
-import DataRouter, {timestampDispatchData} from '../DataRouter'
+import DataRouter, {timestampDispatchData, PLUGIN_EVENT_DATA, PLUGIN_EVENT_TIMESTAMPED_DATA} from '../DataRouter'
 import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../DataRouterTypes'
 
 const EVENT_INPUTS_CHANGED = 'INPUTS_CHANGED'
@@ -69,7 +69,7 @@ class AdderPlugin extends MockPlugin {
   inputsChanged(event: InputChangeEvent) {
     super.inputsChanged(event)
     const srcValuePair: ?TimeValuePair = event.tagMap[this._sourceTag]
-    this.emit('data', {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
+    this.emit(PLUGIN_EVENT_DATA, {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
   }
 }
 
@@ -190,7 +190,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    sourcePlugin.emit('data', {a: 2})
+    sourcePlugin.emit(PLUGIN_EVENT_DATA, {a: 2})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
@@ -204,7 +204,7 @@ describe('DataRouter', () => {
     })
 
     time = 300
-    sourcePlugin.emit('data', {a: 5})
+    sourcePlugin.emit(PLUGIN_EVENT_DATA, {a: 5})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
@@ -215,6 +215,59 @@ describe('DataRouter', () => {
     expect(router.tagMap()).to.deep.equal({
       a: {t: 300, v: 5},
       b: {t: 300, v: 7}
+    })
+  })
+
+  it('handles spontaneously emitted timestamped plugin data', () => {
+    const events: Array<MockPluginEvent> = []
+    const popEvents = () => {
+      const _events = events.slice(0)
+      events.splice(0, events.length)
+      return _events
+    }
+
+    const sourcePlugin = new MockPlugin({events, magic: 1, mappings: [
+      {id: 'output1', name: 'Output 1', tagFromPlugin: 'a'},
+    ]})
+    const adder1 = new AdderPlugin({
+      events,
+      magic: 2,
+      sourceTag: 'a',
+      destTag: 'b',
+      amount: 2
+    })
+
+    let time = 1400
+    const router: DataRouter = new DataRouter({plugins: [sourcePlugin, adder1]})
+    router._getTime = () => time
+
+    expect(popEvents()).to.be.empty
+
+    sourcePlugin.emit(PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 500, v: 2}})
+
+    expect(popEvents()).to.deep.equal([
+      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+    ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 500, v: 2},
+      b: {t: 1400, v: 4}
+    })
+
+    time = 2500
+    sourcePlugin.emit(PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 2000, v: 5}})
+
+    expect(popEvents()).to.deep.equal([
+      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+    ])
+
+    expect(router.tagMap()).to.deep.equal({
+      a: {t: 2000, v: 5},
+      b: {t: 2500, v: 7}
     })
   })
 

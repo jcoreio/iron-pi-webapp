@@ -18,16 +18,19 @@ const MIN_INGEST_INTERVAL_MILLIS = 50
 
 const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 
-const PLUGIN_EVENT_DATA = 'data'
+export const PLUGIN_EVENT_DATA = 'data'
+export const PLUGIN_EVENT_TIMESTAMPED_DATA = 'timestampedData'
 
 type PluginDataListener = (data: ValuesMap) => void
+type PluginTimestampedDataListener = (data: TimestampedValuesMap) => void
 
 export default class DataRouter extends EventEmitter {
   _tagMap: TimestampedValuesMap = {}
 
   _plugins: Array<DataPlugin> = []
   _pluginsById: Map<string, DataPlugin> = new Map()
-  _pluginListeners: Map<string, PluginDataListener> = new Map()
+  _pluginDataListeners: Map<string, PluginDataListener> = new Map()
+  _pluginTimestampedDataListeners: Map<string, PluginDataListener> = new Map()
 
   _dispatchInProgress: boolean = false;
   _dispatchTime: number = 0;
@@ -230,10 +233,14 @@ export default class DataRouter extends EventEmitter {
       // If the plugin is an EventEmitter, listen to its 'data' event
       const instanceId = plugin.pluginInstanceId()
       if (_.isFunction((plugin: any).on)) {
-        const listener : PluginDataListener = (data: ValuesMap) =>
+        const pluginDataListener : PluginDataListener = (data: ValuesMap) =>
           this.dispatch({pluginId: instanceId, values: data})
-        ;(plugin: any).on(PLUGIN_EVENT_DATA, listener)
-        this._pluginListeners.set(instanceId, listener)
+        const pluginTimestampedDataListener : PluginTimestampedDataListener = (data: TimestampedValuesMap) =>
+          this.dispatch({pluginId: instanceId, timestampedValues: data})
+        ;(plugin: any).on(PLUGIN_EVENT_DATA, pluginDataListener)
+        ;(plugin: any).on(PLUGIN_EVENT_TIMESTAMPED_DATA, pluginTimestampedDataListener)
+        this._pluginDataListeners.set(instanceId, pluginDataListener)
+        this._pluginTimestampedDataListeners.set(instanceId, pluginTimestampedDataListener)
       }
     })
 
@@ -257,12 +264,18 @@ export default class DataRouter extends EventEmitter {
 
   _removePluginListeners() {
     // call removeListener on all existing plugin listeners
-    this._pluginListeners.forEach((listener: PluginDataListener, pluginId: string) => {
+    this._pluginDataListeners.forEach((listener: PluginDataListener, pluginId: string) => {
       const plugin: ?DataPlugin = this._pluginsById.get(pluginId)
       if (plugin && _.isFunction((plugin: any).removeListener))
         ;(plugin: any).removeListener(PLUGIN_EVENT_DATA, listener)
     })
-    this._pluginListeners.clear()
+    this._pluginTimestampedDataListeners.forEach((listener: PluginTimestampedDataListener, pluginId: string) => {
+      const plugin: ?DataPlugin = this._pluginsById.get(pluginId)
+      if (plugin && _.isFunction((plugin: any).removeListener))
+        ;(plugin: any).removeListener(PLUGIN_EVENT_TIMESTAMPED_DATA, listener)
+    })
+    this._pluginDataListeners.clear()
+    this._pluginTimestampedDataListeners.clear()
   }
 }
 
