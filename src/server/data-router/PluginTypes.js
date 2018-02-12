@@ -96,6 +96,8 @@ export type PluginAndMappingsInfo = {
 export type SystemMappingInfo = {
   tagsToProviderPluginIds: Map<string, string>,
   tagsToDestinationPluginIds: Map<string, Set<string>>,
+  tags: Array<string>,
+  publicTags: Array<string>,
   duplicateTags: Set<string>,
   mappingProblems: Array<MappingProblem>,
 }

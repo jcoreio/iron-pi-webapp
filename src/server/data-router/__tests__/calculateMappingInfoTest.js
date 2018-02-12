@@ -82,8 +82,12 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    const expectedTags = ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+    expect(tags).to.deep.equal(expectedTags)
+    expect(publicTags).to.deep.equal(expectedTags)
 
     ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
     ;['tag3', 'tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
@@ -153,8 +157,12 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    const expectedTags = ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+    expect(tags).to.deep.equal(expectedTags)
+    expect(publicTags).to.deep.equal(expectedTags)
 
     ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
     ;['tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
@@ -254,8 +262,12 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    const expectedTags = ['tag1', 'tag5']
+    expect(tags).to.deep.equal(expectedTags)
+    expect(publicTags).to.deep.equal(expectedTags)
 
     ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
     ;['tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
@@ -301,5 +313,33 @@ describe('calculateMappingInfo', () => {
         problem: MAPPING_PROBLEM_NO_SOURCE
       })
     })
+  })
+
+  it('filters non public tags', () => {
+    const mappingsForAllPlugins: Array<Array<DataPluginMapping>> = [
+      [ // Plugin 1: Local IO
+        {
+          id: 'local1',
+          name: 'Local 1',
+          tagFromPlugin: 'tag1'
+        },
+        {
+          id: 'local2',
+          name: 'Local 2',
+          tagFromPlugin: '_internal/tag2'
+        }
+      ],
+      [ // Plugin 2: MQTT
+        {
+          id: 'mqtt3',
+          name: 'MQTT 3',
+          tagFromPlugin: 'tag3'
+        }
+      ]
+    ]
+    const {tags, publicTags} = calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    expect(tags).to.deep.equal(['_internal/tag2', 'tag1', 'tag3'])
+    expect(publicTags).to.deep.equal(['tag1', 'tag3'])
   })
 })

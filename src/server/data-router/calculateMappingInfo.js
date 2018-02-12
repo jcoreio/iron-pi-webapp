@@ -2,11 +2,12 @@
 
 import _ from 'lodash'
 
-import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
+import {INTERNAL_TAG_PREFIX, MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
 import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
 
 export default function calculateMappingInfo(allPluginMappings: Array<PluginAndMappingsInfo>): SystemMappingInfo {
+  const allTags: Set<string> = new Set()
   const tagsToProviderPluginIds: Map<string, string> = new Map()
   const tagsToDestinationPluginIds: Map<string, Set<string>> = new Map()
   const duplicateTags: Set<string> = new Set()
@@ -18,6 +19,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
     for (let mapping: DataPluginMapping of mappings) {
       const {tagFromPlugin, tagsToPlugin} = mapping
       if (tagFromPlugin) {
+        allTags.add(tagFromPlugin)
         if (tagsToProviderPluginIds.has(tagFromPlugin)) {
           // Multiple sources
           duplicateTags.add(tagFromPlugin)
@@ -82,5 +84,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
     })
   })
 
-  return {tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems}
+  const tags: Array<string> = Array.from(allTags).sort()
+  const publicTags = tags.filter(tag => !tag.startsWith(INTERNAL_TAG_PREFIX))
+  return {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems}
 }

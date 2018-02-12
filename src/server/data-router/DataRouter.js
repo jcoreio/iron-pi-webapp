@@ -31,6 +31,8 @@ type ListenersForPlugin = {
 
 export default class DataRouter extends EventEmitter {
   _tagMap: TimestampedValuesMap = {}
+  _tags: Array<string> = []
+  _publicTags: Array<string> = []
 
   _plugins: Array<DataPlugin> = []
   _pluginsById: Map<string, DataPlugin> = new Map()
@@ -61,6 +63,8 @@ export default class DataRouter extends EventEmitter {
   }
 
   tagMap(): TimestampedValuesMap { return this._tagMap }
+  tags(): Array<string> { return this._tags }
+  publicTags(): Array<string> { return this._publicTags }
 
   stop() {
     if (this._ingestRateLimitTimeout) {
@@ -254,8 +258,10 @@ export default class DataRouter extends EventEmitter {
       mappings: plugin.ioMappings()
     }))
 
-    const {tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(pluginMappings)
+    this._tags = tags
+    this._publicTags = publicTags
     this._tagsToProviderPluginIds = tagsToProviderPluginIds
     this._tagsToDestinationPluginIds = tagsToDestinationPluginIds
     this._duplicateTags = duplicateTags
