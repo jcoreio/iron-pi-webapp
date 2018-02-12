@@ -1,6 +1,7 @@
 // @flow
 
-import type {MappingProblem} from '../../universal/data-router/TagMappingTypes'
+import type PluginResources from './PluginResources'
+import type {PluginConfig, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 
 /**
  * Information about a single mapping into or out of a plugin
@@ -28,14 +29,25 @@ export type CycleDoneEvent = InputChangeEvent & {
  * emit data by calling this.emit('data', {tag1: value1, tag2: value2})
  */
 export interface DataPlugin {
-  pluginType(): string; // Name of plugin type, e.g. "Local IO", "MQTT"
-  pluginInstanceId(): string; // Unique ID for this plugin, e.g. "localIO", "mqtt0"
-  pluginInstanceName(): string; // User supplied name for this plugin instance, e.g. "Motor Drive Modbus Connection"
+  config(): PluginConfig;
+  setConfig(config: PluginConfig): void;
+  ioMappings(): Array<DataPluginMapping>;
+
+  /** Called after all plugins have been instantiated and declared their output tags */
+  start(): void;
 
   inputsChanged(event: InputChangeEvent): void;
   dispatchCycleDone(event: CycleDoneEvent): void;
-  ioMappings(): Array<DataPluginMapping>;
+
+  destroy(): void;
 }
+
+export type CreatePluginArgs = {
+  config: PluginConfig,
+  resources: PluginResources,
+}
+
+export type CreatePluginFunction = (args: CreatePluginArgs) => DataPlugin
 
 export type TimeValuePair = {
   t: number,

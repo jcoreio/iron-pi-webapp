@@ -5,8 +5,10 @@ import {expect} from 'chai'
 import EventEmitter from 'events'
 import _ from 'lodash'
 
+import type {PluginConfig} from '../../../universal/data-router/PluginConfigTypes'
+
 import DataRouter, {timestampDispatchData, PLUGIN_EVENT_DATA, PLUGIN_EVENT_TIMESTAMPED_DATA} from '../DataRouter'
-import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../DataRouterTypes'
+import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../PluginTypes'
 
 const EVENT_INPUTS_CHANGED = 'INPUTS_CHANGED'
 const EVENT_DISPATCH_CYCLE_DONE = 'DISPATCH_CYCLE_DONE'
@@ -31,9 +33,17 @@ class MockPlugin extends EventEmitter implements DataPlugin {
     this._magic = args.magic
     this._mappings = args.mappings
   }
-  pluginType(): string { return 'MockPlugin' }
-  pluginInstanceId(): string { return `mockPlugin${this._magic}` }
-  pluginInstanceName(): string { return `Mock Plugin ${this._magic}` }
+  start() { }
+  config(): PluginConfig {
+    return {
+      pluginType: 'mockPlugin',
+      pluginInstanceId: `mockPlugin${this._magic}`,
+      pluginInstanceName: `Mock Plugin ${this._magic}`
+    }
+  }
+  setConfig(config: PluginConfig) {
+
+  }
   inputsChanged(event: InputChangeEvent) {
     this._pushEvent({event, type: EVENT_INPUTS_CHANGED})
   }
@@ -97,7 +107,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: plugin1.pluginInstanceId(), timestampedValues: {
+    router.dispatch({pluginId: plugin1.config().pluginInstanceId, timestampedValues: {
       a: {t: 100, v: 200},
       b: {t: 300, v: 400}
     }})
@@ -147,7 +157,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: sourcePlugin.pluginInstanceId(), values: {a: 2, b: 3}})
+    router.dispatch({pluginId: sourcePlugin.config().pluginInstanceId, values: {a: 2, b: 3}})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},

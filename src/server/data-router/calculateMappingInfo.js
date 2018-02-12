@@ -2,9 +2,9 @@
 
 import _ from 'lodash'
 
-import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/TagMappingTypes'
-import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/TagMappingTypes'
-import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './DataRouterTypes'
+import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
+import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
 
 export default function calculateMappingInfo(allPluginMappings: Array<PluginAndMappingsInfo>): SystemMappingInfo {
   const tagsToProviderPluginIds: Map<string, string> = new Map()

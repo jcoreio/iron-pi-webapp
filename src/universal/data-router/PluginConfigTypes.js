@@ -1,4 +1,12 @@
+// @flow
 
+export const INTERNAL_TAG_PREFIX = '_internal/'
+
+export type PluginConfig = {
+  pluginType: string,
+  pluginInstanceId: string,
+  pluginInstanceName: string,
+}
 
 /**
  * Information about one location where the user has incorrectly mapped something.
@@ -26,3 +34,14 @@ export type MappingProblem = {
   // Additional places where this tag is sourced, if this is a multipleSources problem
   additionalSources?: Array<MappingLocationInfo>,
 }
+
+export type TagMetadata = {
+  name: string,
+  units: string,
+  min: number,
+  max: number,
+  displayPrecision: number,
+  storagePrecision: number,
+}
+
+export type TagMetadataMap = {[tag: string]: TagMetadata}

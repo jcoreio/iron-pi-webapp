@@ -3,11 +3,11 @@ import {expect} from 'chai'
 import _ from 'lodash'
 
 import calculateMappingInfo from '../calculateMappingInfo'
-import type {DataPluginMapping} from '../DataRouterTypes'
+import type {DataPluginMapping} from '../PluginTypes'
 import {
   MAPPING_PROBLEM_MULTIPLE_SOURCES,
   MAPPING_PROBLEM_NO_SOURCE
-} from "../../../universal/data-router/TagMappingTypes"
+} from '../../../universal/data-router/PluginConfigTypes'
 
 const toPluginInstanceId = magic => `pluginInstanceId${magic}`
 
