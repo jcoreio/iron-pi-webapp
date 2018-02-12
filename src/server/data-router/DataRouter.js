@@ -183,17 +183,19 @@ export default class DataRouter extends EventEmitter {
           const plugin = this._pluginsById.get(pluginId)
           if (plugin) {
             pluginsChangedThisCycle.add(pluginId)
-            try {
-              plugin.inputsChanged({
-                time,
-                changedTags: tagsChangedThisPass,
-                tagMap: this._tagMap
-              })
-            } catch (err) {
-              const warningKey = `inputsChangedError-${pluginId}`
-              if (!this._printedWarningKeys.has(warningKey)) {
-                this._printedWarningKeys.add(warningKey)
-                log.error('caught error during dispatch', err.stack || err)
+            if (plugin.inputsChanged) {
+              try {
+                plugin.inputsChanged({
+                  time,
+                  changedTags: tagsChangedThisPass,
+                  tagMap: this._tagMap
+                })
+              } catch (err) {
+                const warningKey = `inputsChangedError-${pluginId}`
+                if (!this._printedWarningKeys.has(warningKey)) {
+                  this._printedWarningKeys.add(warningKey)
+                  log.error('caught error during dispatch', err.stack || err)
+                }
               }
             }
           } else {
@@ -208,18 +210,20 @@ export default class DataRouter extends EventEmitter {
 
       // Call dispatchCycleDone on each plugin
       this._plugins.forEach((plugin: DataPlugin) => {
-        try {
-          plugin.dispatchCycleDone({
-            time,
-            changedTags: tagsChangedThisCycle,
-            inputsChanged: pluginsChangedThisCycle.has(plugin.config().pluginInstanceId),
-            tagMap: this._tagMap
-          })
-        } catch (err) {
-          const warningKey = `dispatchCycleDoneError-${plugin.config().pluginInstanceId}`
-          if (!this._printedWarningKeys.has(warningKey)) {
-            this._printedWarningKeys.add(warningKey)
-            log.error('caught error during dispatchCycleDone', err.stack || err)
+        if (plugin.dispatchCycleDone) {
+          try {
+            (plugin: any).dispatchCycleDone({
+              time,
+              changedTags: tagsChangedThisCycle,
+              inputsChanged: pluginsChangedThisCycle.has(plugin.config().pluginInstanceId),
+              tagMap: this._tagMap
+            })
+          } catch (err) {
+            const warningKey = `dispatchCycleDoneError-${plugin.config().pluginInstanceId}`
+            if (!this._printedWarningKeys.has(warningKey)) {
+              this._printedWarningKeys.add(warningKey)
+              log.error('caught error during dispatchCycleDone', err.stack || err)
+            }
           }
         }
       })

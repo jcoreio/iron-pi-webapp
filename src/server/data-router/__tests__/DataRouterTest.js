@@ -33,16 +33,12 @@ class MockPlugin extends EventEmitter implements DataPlugin {
     this._magic = args.magic
     this._mappings = args.mappings
   }
-  start() { }
   config(): PluginConfig {
     return {
       pluginType: 'mockPlugin',
       pluginInstanceId: `mockPlugin${this._magic}`,
       pluginInstanceName: `Mock Plugin ${this._magic}`
     }
-  }
-  setConfig(config: PluginConfig) {
-
   }
   inputsChanged(event: InputChangeEvent) {
     this._pushEvent({event, type: EVENT_INPUTS_CHANGED})

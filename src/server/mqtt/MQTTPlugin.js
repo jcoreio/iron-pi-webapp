@@ -53,8 +53,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEvents> implement
     return []
   }
 
-  inputsChanged(event: InputChangeEvent) { } // Respond in dispatchCycleDone
-
   dispatchCycleDone(event: CycleDoneEvent) {
     // if (event.inputsChanged) {
     //

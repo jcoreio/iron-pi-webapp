@@ -34,12 +34,12 @@ export interface DataPlugin {
   ioMappings(): Array<DataPluginMapping>;
 
   /** Called after all plugins have been instantiated and declared their output tags */
-  start(): void;
+  +start?: () => void;
 
-  inputsChanged(event: InputChangeEvent): void;
-  dispatchCycleDone(event: CycleDoneEvent): void;
+  +inputsChanged?: (event: InputChangeEvent) => void;
+  +dispatchCycleDone?: (event: CycleDoneEvent) => void;
 
-  destroy(): void;
+  +destroy?: () => void;
 }
 
 export type CreatePluginArgs = {
