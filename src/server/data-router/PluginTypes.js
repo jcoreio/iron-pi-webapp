@@ -68,15 +68,15 @@ export type DataPluginResources = {
  * when DataPlugin instances are added or removed
  */
 export interface Feature {
-  +createDataPluginInstances?: () => Promise<void>,
-  +getDataPluginInstances?: () => $ReadOnlyArray<DataPlugin>,
+  +createDataPlugins?: () => Promise<void>,
+  +getDataPlugins?: () => $ReadOnlyArray<DataPlugin>,
 }
 
 // Events emitted by Features
-export const FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE = 'dataPluginInstancesChange'
+export const FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE = 'dataPluginsChange'
 
 export type FeatureEmittedEvents = {
-  dataPluginInstancesChange: [],
+  dataPluginsChange: [],
 }
 
 export type TimeValuePair = {
@@ -115,8 +115,8 @@ export type TimestampedDispatchEvent = {
  */
 export type PluginAndMappingsInfo = {
   pluginType: string,
-  pluginInstanceId: string,
-  pluginInstanceName: string,
+  pluginId: string,
+  pluginName: string,
   mappings: Array<DataPluginMapping>,
 }
 

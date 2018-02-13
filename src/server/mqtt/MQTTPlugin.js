@@ -19,10 +19,10 @@ class MQTTPluginFeature extends EventEmitter<FeatureEmittedEvents> implements Fe
   constructor() {
     super()
   }
-  async createDataPluginInstances(): Promise<void> {
+  async createDataPlugins(): Promise<void> {
     // Read from Sequelize model and populate _instances array
   }
-  getDataPluginInstances(): $ReadOnlyArray<DataPlugin> { return _instances }
+  getDataPlugins(): $ReadOnlyArray<DataPlugin> { return _instances }
 }
 
 export const mqttPluginFeature = new MQTTPluginFeature()

@@ -78,7 +78,7 @@ export default class DataRouter extends EventEmitter {
     removedPlugins.forEach((plugin: DataPlugin) => {
       const eventEmitterPlugin: any = (plugin: any)
       if (_.isFunction(eventEmitterPlugin.removeListener)) {
-        const instanceId = plugin.config().pluginInstanceId
+        const instanceId = plugin.config().pluginId
         const listeners: ?ListenersForPlugin = this._pluginListeners.get(instanceId)
         if (listeners) {
           eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_DATA, listeners.dataListener)
@@ -94,16 +94,16 @@ export default class DataRouter extends EventEmitter {
     plugins.forEach((plugin: DataPlugin) => {
       try {
         assert(plugin)
-        const existPlugin = this._pluginsById.get(plugin.config().pluginInstanceId)
+        const existPlugin = this._pluginsById.get(plugin.config().pluginId)
         if (existPlugin) {
           if (existPlugin === plugin) {
-            throw Error(`attempted to add plugin twice: ${plugin.config().pluginInstanceId}`)
+            throw Error(`attempted to add plugin twice: ${plugin.config().pluginId}`)
           } else {
-            throw Error(`there is already a different plugin with the unique ID: ${plugin.config().pluginInstanceId}`)
+            throw Error(`there is already a different plugin with the unique ID: ${plugin.config().pluginId}`)
           }
         }
         this._plugins.push(plugin)
-        this._pluginsById.set(plugin.config().pluginInstanceId, plugin)
+        this._pluginsById.set(plugin.config().pluginId, plugin)
       } catch (err) {
         log.error(`DataRouter could not add DataPlugin instance: ${err.stack}`)
       }
@@ -112,7 +112,7 @@ export default class DataRouter extends EventEmitter {
     const addedPlugins: Array<DataPlugin> = _.difference(this._plugins, prevPlugins)
     addedPlugins.forEach((plugin: DataPlugin) => {
       // If the plugin is an EventEmitter, listen to its 'data' event
-      const instanceId = plugin.config().pluginInstanceId
+      const instanceId = plugin.config().pluginId
       const eventEmitterPlugin: any = (plugin: any)
       if (_.isFunction(eventEmitterPlugin.on)) {
         const dataListener : DataPluginDataListener = (data: ValuesMap) =>
@@ -245,11 +245,11 @@ export default class DataRouter extends EventEmitter {
             (plugin: any).dispatchCycleDone({
               time,
               changedTags: tagsChangedThisCycle,
-              inputsChanged: pluginsChangedThisCycle.has(plugin.config().pluginInstanceId),
+              inputsChanged: pluginsChangedThisCycle.has(plugin.config().pluginId),
               tagMap: this._tagMap
             })
           } catch (err) {
-            const warningKey = `dispatchCycleDoneError-${plugin.config().pluginInstanceId}`
+            const warningKey = `dispatchCycleDoneError-${plugin.config().pluginId}`
             if (!this._printedWarningKeys.has(warningKey)) {
               this._printedWarningKeys.add(warningKey)
               log.error('caught error during dispatchCycleDone', err.stack || err)
@@ -272,8 +272,8 @@ export default class DataRouter extends EventEmitter {
   _pluginIOsChanged() {
     const pluginMappings: Array<PluginAndMappingsInfo> = this._plugins.map((plugin: DataPlugin) => ({
       pluginType: plugin.config().pluginType,
-      pluginInstanceId: plugin.config().pluginInstanceId,
-      pluginInstanceName: plugin.config().pluginInstanceName,
+      pluginId: plugin.config().pluginId,
+      pluginName: plugin.config().pluginName,
       mappings: plugin.ioMappings()
     }))
 

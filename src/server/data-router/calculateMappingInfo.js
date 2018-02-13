@@ -15,7 +15,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
 
   // Pass 1: Build mapping from tag to source plugin ID, and identify duplicate tags
   for (let mappingsForPlugin: PluginAndMappingsInfo of allPluginMappings) {
-    const {pluginInstanceId, mappings} = mappingsForPlugin
+    const {pluginId, mappings} = mappingsForPlugin
     for (let mapping: DataPluginMapping of mappings) {
       const {tagFromPlugin, tagsToPlugin} = mapping
       if (tagFromPlugin) {
@@ -24,7 +24,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
           // Multiple sources
           duplicateTags.add(tagFromPlugin)
         } else {
-          tagsToProviderPluginIds.set(tagFromPlugin, pluginInstanceId)
+          tagsToProviderPluginIds.set(tagFromPlugin, pluginId)
         }
       }
       (tagsToPlugin || []).forEach((tag: string) => {
@@ -33,7 +33,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
           pluginIdsForTag = new Set()
           tagsToDestinationPluginIds.set(tag, pluginIdsForTag)
         }
-        pluginIdsForTag.add(pluginInstanceId)
+        pluginIdsForTag.add(pluginId)
       })
     }
   }
@@ -43,11 +43,11 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
   // info for all missing tags
   const duplicateTagsToLocations: Map<string, Array<MappingLocationInfo>> = new Map()
   for (let mappingsForPlugin: PluginAndMappingsInfo of allPluginMappings) {
-    const {pluginType, pluginInstanceId, pluginInstanceName, mappings} = mappingsForPlugin
+    const {pluginType, pluginId, pluginName, mappings} = mappingsForPlugin
     for (let mapping: DataPluginMapping of mappings) {
       const {id: channelId, name: channelName, tagsToPlugin, tagFromPlugin} = mapping
       const mappingLocation: MappingLocationInfo = {
-        pluginType, pluginInstanceId, pluginInstanceName, channelId, channelName
+        pluginType, pluginId, pluginName, channelId, channelName
       }
       // Build up arrays of duplicate sources
       if (tagFromPlugin && duplicateTags.has(tagFromPlugin)) {

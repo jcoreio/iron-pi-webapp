@@ -38,8 +38,8 @@ class MockPlugin extends EventEmitter implements DataPlugin {
   config(): PluginConfig {
     return {
       pluginType: 'mockPlugin',
-      pluginInstanceId: `mockPlugin${this._magic}`,
-      pluginInstanceName: `Mock Plugin ${this._magic}`
+      pluginId: `mockPlugin${this._magic}`,
+      pluginName: `Mock Plugin ${this._magic}`
     }
   }
   inputsChanged(event: InputChangeEvent) {
@@ -105,7 +105,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: plugin1.config().pluginInstanceId, timestampedValues: {
+    router.dispatch({pluginId: plugin1.config().pluginId, timestampedValues: {
       a: {t: 100, v: 200},
       b: {t: 300, v: 400}
     }})
@@ -155,7 +155,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: sourcePlugin.config().pluginInstanceId, values: {a: 2, b: 3}})
+    router.dispatch({pluginId: sourcePlugin.config().pluginId, values: {a: 2, b: 3}})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},

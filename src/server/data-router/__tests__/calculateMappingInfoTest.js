@@ -9,12 +9,12 @@ import {
   MAPPING_PROBLEM_NO_SOURCE
 } from '../../../universal/data-router/PluginConfigTypes'
 
-const toPluginInstanceId = magic => `pluginInstanceId${magic}`
+const toPluginId = magic => `pluginId${magic}`
 
 const infoForPlugin = (magic: number) => ({
   pluginType: `pluginType${magic}`,
-  pluginInstanceId: toPluginInstanceId(magic),
-  pluginInstanceName: `Plugin Instance Name ${magic}`
+  pluginId: toPluginId(magic),
+  pluginName: `Plugin Instance Name ${magic}`
 })
 
 const toPluginAndMappingsInfo = (mappingsForAllPlugins: Array<Array<DataPluginMapping>>) =>
@@ -25,7 +25,7 @@ function checkDestinations(actual, expected) {
   expect(actual.size).to.equal(Object.keys(expected).length)
   _.forOwn(expected, (expectedPluginIndices: Array<number>, tag: string) => {
     const pluginIds = Array.from(actual.get(tag) || new Set()).sort()
-    expect(pluginIds).to.deep.equal(expectedPluginIndices.map(toPluginInstanceId))
+    expect(pluginIds).to.deep.equal(expectedPluginIndices.map(toPluginId))
   })
 }
 
@@ -89,8 +89,8 @@ describe('calculateMappingInfo', () => {
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
-    ;['tag3', 'tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
+    ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
+    ;['tag3', 'tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
 
     checkDestinations(tagsToDestinationPluginIds, {
       tag1: [1],
@@ -164,8 +164,8 @@ describe('calculateMappingInfo', () => {
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
-    ;['tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
+    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
+    ;['tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
     // Duplicate tags shouldn't have any plugin identified as the source
     ;['tag2', 'tag3'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal(undefined))
 
@@ -269,8 +269,8 @@ describe('calculateMappingInfo', () => {
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId0'))
-    ;['tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginInstanceId1'))
+    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
+    ;['tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
 
     checkDestinations(tagsToDestinationPluginIds, {
       tag1: [1],

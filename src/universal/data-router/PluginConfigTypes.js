@@ -4,8 +4,8 @@ export const INTERNAL_TAG_PREFIX = '_internal/'
 
 export type PluginConfig = {
   pluginType: string,
-  pluginInstanceId: string,
-  pluginInstanceName: string,
+  pluginId: string,
+  pluginName: string,
 }
 
 /**
@@ -13,8 +13,8 @@ export type PluginConfig = {
  */
 export type MappingLocationInfo = {
   pluginType: string,
-  pluginInstanceId: string,
-  pluginInstanceName: string,
+  pluginId: string,
+  pluginName: string,
   channelId: string,
   channelName: string,
 }
