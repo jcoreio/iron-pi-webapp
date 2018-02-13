@@ -5,25 +5,35 @@ import {isEqual} from 'lodash'
 import sparkplug from 'sparkplug-client'
 
 import type {PluginConfig, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
-import {registerPluginType} from '../data-router/PluginsRegistry'
-import type PluginResources from '../data-router/PluginResources'
 import {validateMQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTConfig} from '../../universal/mqtt/MQTTConfig'
-import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, ValuesMap, CreatePluginArgs} from '../data-router/PluginTypes'
+import {FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE} from '../data-router/PluginTypes'
+import type {DataPlugin, DataPluginEmittedEvents, DataPluginResources, CycleDoneEvent,
+  DataPluginMapping, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type {MetadataChangeEvent} from '../metadata/MetadataHandler'
 
-type MQTTPluginEvents = {
-  data: [ValuesMap],
+const _instances: Array<MQTTPlugin> = []
+
+class MQTTPluginFeature extends EventEmitter<FeatureEmittedEvents> implements Feature {
+  constructor() {
+    super()
+  }
+  async createDataPluginInstances(): Promise<void> {
+    // Read from Sequelize model and populate _instances array
+  }
+  getDataPluginInstances(): $ReadOnlyArray<DataPlugin> { return _instances }
 }
 
-export const PLUGIN_TYPE_MQTT = 'mqtt'
+export const mqttPluginFeature = new MQTTPluginFeature()
 
-registerPluginType(PLUGIN_TYPE_MQTT, (args: CreatePluginArgs) => new MQTTPlugin(args))
+function onSequelizeInstanceAddHook() { // eslint-disable-line no-unused-vars
+  mqttPluginFeature.emit(FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE)
+}
 
-export default class MQTTPlugin extends EventEmitter<MQTTPluginEvents> implements DataPlugin {
+export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
   _config: MQTTConfig;
-  _resources: PluginResources;
+  _resources: DataPluginResources;
 
   _metadataListener: (event: MetadataChangeEvent) => void;
 
@@ -32,7 +42,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEvents> implement
 
   _sparkplug: Object;
 
-  constructor(args: {config: PluginConfig, resources: PluginResources}) {
+  constructor(args: {config: PluginConfig, resources: DataPluginResources}) {
     super()
     this._config = validateMQTTConfig(args.config)
     this._resources = args.resources

@@ -1,7 +1,6 @@
 // @flow
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
-import {isEqual} from 'lodash'
 
 import type {TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 
@@ -21,13 +20,6 @@ export class MetadataHandler extends EventEmitter<MetadataHandlerEvents> {
   }
 
   metadata(): TagMetadataMap { return this._metadata }
-
-  setMetadata(metadata: TagMetadataMap) {
-    if (!isEqual(metadata, this._metadata)) {
-      this._metadata = metadata
-      this.emit(EVENT_METADATA_CHANGE, {metadata: this._metadata})
-    }
-  }
 }
 
 export const metadataHandler = new MetadataHandler()

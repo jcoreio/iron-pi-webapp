@@ -1,7 +1,6 @@
 // @flow
 
-import type PluginResources from './PluginResources'
-import type {PluginConfig, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
+import type {PluginConfig, MappingProblem, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 
 /**
  * Information about a single mapping into or out of a plugin
@@ -42,12 +41,43 @@ export interface DataPlugin {
   +destroy?: () => void;
 }
 
-export type CreatePluginArgs = {
-  config: PluginConfig,
-  resources: PluginResources,
+// Events emitted by DataPlugins
+export const DATA_PLUGIN_EVENT_DATA = 'data'
+export const DATA_PLUGIN_EVENT_TIMESTAMPED_DATA = 'timestampedData'
+// Emitted by a DataPlugin when it has changed which tags it reads from or writes to
+export const DATA_PLUGIN_EVENT_IOS_CHANGED = 'iosChanged'
+
+export type DataPluginEmittedEvents = {
+  data: [ValuesMap],
+  timestampedData: [TimestampedValuesMap],
+  iosChanged: [],
 }
 
-export type CreatePluginFunction = (args: CreatePluginArgs) => DataPlugin
+/**
+ * Declares which resources are made available to DataPlugins
+ */
+export type DataPluginResources = {
+  tagMap: () => TimestampedValuesMap,
+  tags: () => Array<string>,
+  publicTags: () => Array<string>,
+  metadata: () => TagMetadataMap,
+}
+
+/**
+ * Feature can optionally extend EventEmitter and emit FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE
+ * when DataPlugin instances are added or removed
+ */
+export interface Feature {
+  +createDataPluginInstances?: () => Promise<void>,
+  +getDataPluginInstances?: () => $ReadOnlyArray<DataPlugin>,
+}
+
+// Events emitted by Features
+export const FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE = 'dataPluginInstancesChange'
+
+export type FeatureEmittedEvents = {
+  dataPluginInstancesChange: [],
+}
 
 export type TimeValuePair = {
   t: number,

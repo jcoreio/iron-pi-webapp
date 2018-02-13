@@ -6,10 +6,10 @@ import _ from 'lodash'
 import logger from 'log4jcore'
 
 import calculateMappingInfo from './calculateMappingInfo'
+import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, DATA_PLUGIN_EVENT_IOS_CHANGED} from './PluginTypes'
 import type {
   DataPlugin, DispatchEvent, ValuesMap, TimestampedValuesMap, TimestampedDispatchEvent,
-  PluginAndMappingsInfo, TimeValuePair
-} from './PluginTypes'
+  PluginAndMappingsInfo, TimeValuePair} from './PluginTypes'
 import type {MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 
 const log = logger('DataRouter')
@@ -18,15 +18,12 @@ const MIN_INGEST_INTERVAL_MILLIS = 50
 
 const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 
-export const PLUGIN_EVENT_DATA = 'data'
-export const PLUGIN_EVENT_TIMESTAMPED_DATA = 'timestampedData'
-
-type PluginDataListener = (data: ValuesMap) => void
-type PluginTimestampedDataListener = (data: TimestampedValuesMap) => void
+type DataPluginDataListener = (data: ValuesMap) => void
+type DataPluginTimestampedDataListener = (data: TimestampedValuesMap) => void
 
 type ListenersForPlugin = {
-  dataListener: PluginDataListener,
-  timestampedDataListener: PluginTimestampedDataListener,
+  dataListener: DataPluginDataListener,
+  timestampedDataListener: DataPluginTimestampedDataListener,
 }
 
 export default class DataRouter extends EventEmitter {
@@ -37,6 +34,7 @@ export default class DataRouter extends EventEmitter {
   _plugins: Array<DataPlugin> = []
   _pluginsById: Map<string, DataPlugin> = new Map()
   _pluginListeners: Map<string, ListenersForPlugin> = new Map()
+  _pluginIOsChangedListener = () => this._pluginIOsChanged()
 
   _dispatchInProgress: boolean = false;
   _dispatchTime: number = 0;
@@ -74,30 +72,62 @@ export default class DataRouter extends EventEmitter {
   }
 
   setPlugins(plugins: Array<DataPlugin>) {
-    this._removePluginListeners()
+    const prevPlugins = this._plugins.slice(0)
+
+    const removedPlugins: Array<DataPlugin> = _.difference(this._plugins, plugins)
+    removedPlugins.forEach((plugin: DataPlugin) => {
+      const eventEmitterPlugin: any = (plugin: any)
+      if (_.isFunction(eventEmitterPlugin.removeListener)) {
+        const instanceId = plugin.config().pluginInstanceId
+        const listeners: ?ListenersForPlugin = this._pluginListeners.get(instanceId)
+        if (listeners) {
+          eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_DATA, listeners.dataListener)
+          eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, listeners.timestampedDataListener)
+          this._pluginListeners.delete(instanceId)
+        }
+        eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_IOS_CHANGED, this._pluginIOsChangedListener)
+      }
+    })
+
     this._plugins = []
     this._pluginsById.clear()
-    plugins.forEach((plugin: DataPlugin) => this._addPlugin(plugin))
-    this.pluginsChanged()
-  }
-
-  addPlugin(plugin: DataPlugin) {
-    this._addPlugin(plugin)
-    this.pluginsChanged()
-  }
-
-  _addPlugin(plugin: DataPlugin) {
-    assert(plugin)
-    const existPlugin = this._pluginsById.get(plugin.config().pluginInstanceId)
-    if (existPlugin) {
-      if (existPlugin === plugin) {
-        throw Error(`attempted to add plugin twice: ${plugin.config().pluginInstanceId}`)
-      } else {
-        throw Error(`there is already a different plugin with the unique ID: ${plugin.config().pluginInstanceId}`)
+    plugins.forEach((plugin: DataPlugin) => {
+      try {
+        assert(plugin)
+        const existPlugin = this._pluginsById.get(plugin.config().pluginInstanceId)
+        if (existPlugin) {
+          if (existPlugin === plugin) {
+            throw Error(`attempted to add plugin twice: ${plugin.config().pluginInstanceId}`)
+          } else {
+            throw Error(`there is already a different plugin with the unique ID: ${plugin.config().pluginInstanceId}`)
+          }
+        }
+        this._plugins.push(plugin)
+        this._pluginsById.set(plugin.config().pluginInstanceId, plugin)
+      } catch (err) {
+        log.error(`DataRouter could not add DataPlugin instance: ${err.stack}`)
       }
-    }
-    this._plugins.push(plugin)
-    this._pluginsById.set(plugin.config().pluginInstanceId, plugin)
+    })
+
+    const addedPlugins: Array<DataPlugin> = _.difference(this._plugins, prevPlugins)
+    addedPlugins.forEach((plugin: DataPlugin) => {
+      // If the plugin is an EventEmitter, listen to its 'data' event
+      const instanceId = plugin.config().pluginInstanceId
+      const eventEmitterPlugin: any = (plugin: any)
+      if (_.isFunction(eventEmitterPlugin.on)) {
+        const dataListener : DataPluginDataListener = (data: ValuesMap) =>
+          this.dispatch({pluginId: instanceId, values: data})
+        const timestampedDataListener : DataPluginTimestampedDataListener = (data: TimestampedValuesMap) =>
+          this.dispatch({pluginId: instanceId, timestampedValues: data})
+        eventEmitterPlugin.on(DATA_PLUGIN_EVENT_DATA, dataListener)
+        eventEmitterPlugin.on(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, timestampedDataListener)
+        // The pluginIOsChanged listener is the same for all plugins
+        eventEmitterPlugin.on(DATA_PLUGIN_EVENT_IOS_CHANGED, this._pluginIOsChangedListener)
+        this._pluginListeners.set(instanceId, {dataListener, timestampedDataListener})
+      }
+    })
+
+    this._pluginIOsChanged()
   }
 
   dispatch(event: DispatchEvent) {
@@ -239,22 +269,7 @@ export default class DataRouter extends EventEmitter {
     }
   }
 
-  pluginsChanged() {
-    this._removePluginListeners()
-    this._plugins.forEach((plugin: DataPlugin) => {
-      // If the plugin is an EventEmitter, listen to its 'data' event
-      const instanceId = plugin.config().pluginInstanceId
-      if (_.isFunction((plugin: any).on)) {
-        const dataListener : PluginDataListener = (data: ValuesMap) =>
-          this.dispatch({pluginId: instanceId, values: data})
-        const timestampedDataListener : PluginTimestampedDataListener = (data: TimestampedValuesMap) =>
-          this.dispatch({pluginId: instanceId, timestampedValues: data})
-        ;(plugin: any).on(PLUGIN_EVENT_DATA, dataListener)
-        ;(plugin: any).on(PLUGIN_EVENT_TIMESTAMPED_DATA, timestampedDataListener)
-        this._pluginListeners.set(instanceId, {dataListener, timestampedDataListener})
-      }
-    })
-
+  _pluginIOsChanged() {
     const pluginMappings: Array<PluginAndMappingsInfo> = this._plugins.map((plugin: DataPlugin) => ({
       pluginType: plugin.config().pluginType,
       pluginInstanceId: plugin.config().pluginInstanceId,
@@ -273,18 +288,6 @@ export default class DataRouter extends EventEmitter {
       this._mappingProblems = mappingProblems
       this.emit(EVENT_MAPPING_PROBLEMS_CHANGED, mappingProblems)
     }
-  }
-
-  _removePluginListeners() {
-    // call removeListener on all existing plugin listeners
-    this._pluginListeners.forEach((listeners: ListenersForPlugin, pluginId: string) => {
-      const plugin: ?DataPlugin = this._pluginsById.get(pluginId)
-      if (plugin && _.isFunction((plugin: any).removeListener)) {
-        (plugin: any).removeListener(PLUGIN_EVENT_DATA, listeners.dataListener)
-        ;(plugin: any).removeListener(PLUGIN_EVENT_TIMESTAMPED_DATA, listeners.timestampedDataListener)
-      }
-    })
-    this._pluginListeners.clear()
   }
 }
 

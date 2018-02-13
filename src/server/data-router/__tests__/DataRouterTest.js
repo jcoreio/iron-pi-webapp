@@ -7,11 +7,13 @@ import _ from 'lodash'
 
 import type {PluginConfig} from '../../../universal/data-router/PluginConfigTypes'
 
-import DataRouter, {timestampDispatchData, PLUGIN_EVENT_DATA, PLUGIN_EVENT_TIMESTAMPED_DATA} from '../DataRouter'
+import DataRouter, {timestampDispatchData} from '../DataRouter'
+import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA,
+  DATA_PLUGIN_EVENT_IOS_CHANGED} from '../PluginTypes'
 import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../PluginTypes'
 
-const EVENT_INPUTS_CHANGED = 'INPUTS_CHANGED'
-const EVENT_DISPATCH_CYCLE_DONE = 'DISPATCH_CYCLE_DONE'
+const TEST_EVENT_INPUTS_CHANGED = 'inputsChanged'
+const TEST_EVENT_DISPATCH_CYCLE_DONE = 'dispatchCycleDone'
 
 type MockPluginEvent = {
   plugin: MockPlugin,
@@ -41,10 +43,10 @@ class MockPlugin extends EventEmitter implements DataPlugin {
     }
   }
   inputsChanged(event: InputChangeEvent) {
-    this._pushEvent({event, type: EVENT_INPUTS_CHANGED})
+    this._pushEvent({event, type: TEST_EVENT_INPUTS_CHANGED})
   }
   dispatchCycleDone(event: CycleDoneEvent) {
-    this._pushEvent({event, type: EVENT_DISPATCH_CYCLE_DONE})
+    this._pushEvent({event, type: TEST_EVENT_DISPATCH_CYCLE_DONE})
   }
   _pushEvent(args: {event: InputChangeEvent, type: string}) {
     // make events easier to deep compare by omitting tagMap and converting changedTags into a sorted array
@@ -75,7 +77,7 @@ class AdderPlugin extends MockPlugin {
   inputsChanged(event: InputChangeEvent) {
     super.inputsChanged(event)
     const srcValuePair: ?TimeValuePair = event.tagMap[this._sourceTag]
-    this.emit(PLUGIN_EVENT_DATA, {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
+    this.emit(DATA_PLUGIN_EVENT_DATA, {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
   }
 }
 
@@ -109,9 +111,9 @@ describe('DataRouter', () => {
     }})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: plugin2, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
-      {plugin: plugin1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
-      {plugin: plugin2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true}
+      {plugin: plugin2, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
+      {plugin: plugin1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: plugin2, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true}
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -156,11 +158,11 @@ describe('DataRouter', () => {
     router.dispatch({pluginId: sourcePlugin.config().pluginInstanceId, values: {a: 2, b: 3}})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
-      {plugin: adder2, type: EVENT_INPUTS_CHANGED, time, changedTags: ['c']},
-      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: false},
-      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true},
-      {plugin: adder2, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true}
+      {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
+      {plugin: adder2, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['c']},
+      {plugin: sourcePlugin, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: false},
+      {plugin: adder1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true},
+      {plugin: adder2, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b', 'c', 'd'], inputsChanged: true}
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -196,12 +198,12 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    sourcePlugin.emit(PLUGIN_EVENT_DATA, {a: 2})
+    sourcePlugin.emit(DATA_PLUGIN_EVENT_DATA, {a: 2})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
-      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
-      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+      {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -210,12 +212,12 @@ describe('DataRouter', () => {
     })
 
     time = 300
-    sourcePlugin.emit(PLUGIN_EVENT_DATA, {a: 5})
+    sourcePlugin.emit(DATA_PLUGIN_EVENT_DATA, {a: 5})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
-      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
-      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+      {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -249,12 +251,12 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    sourcePlugin.emit(PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 500, v: 2}})
+    sourcePlugin.emit(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 500, v: 2}})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
-      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
-      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+      {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -263,12 +265,12 @@ describe('DataRouter', () => {
     })
 
     time = 2500
-    sourcePlugin.emit(PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 2000, v: 5}})
+    sourcePlugin.emit(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, {a: {t: 2000, v: 5}})
 
     expect(popEvents()).to.deep.equal([
-      {plugin: adder1, type: EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
-      {plugin: sourcePlugin, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
-      {plugin: adder1, type: EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
+      {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a']},
+      {plugin: sourcePlugin, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: false},
+      {plugin: adder1, type: TEST_EVENT_DISPATCH_CYCLE_DONE, time, changedTags: ['a', 'b'], inputsChanged: true},
     ])
 
     expect(router.tagMap()).to.deep.equal({
@@ -284,13 +286,15 @@ describe('DataRouter', () => {
 
     const router: DataRouter = new DataRouter({plugins: [plugin]})
 
-    expect(plugin.listenerCount(PLUGIN_EVENT_DATA)).to.equal(1)
-    expect(plugin.listenerCount(PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(1)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_DATA)).to.equal(1)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(1)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_IOS_CHANGED)).to.equal(1)
 
     router.setPlugins([])
 
-    expect(plugin.listenerCount(PLUGIN_EVENT_DATA)).to.equal(0)
-    expect(plugin.listenerCount(PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(0)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_DATA)).to.equal(0)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(0)
+    expect(plugin.listenerCount(DATA_PLUGIN_EVENT_IOS_CHANGED)).to.equal(0)
   })
 
   describe('timestampDispatchData', () => {
