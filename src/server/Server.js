@@ -99,7 +99,7 @@ export default class Server {
       const dataPlugins: Array<DataPlugin> = [].concat(...await Promise.all(
         features.map(async (feature: ServerFeature): Promise<$ReadOnlyArray<DataPlugin>> => {
           if (feature.createDataPlugins) await feature.createDataPlugins()
-          if (feature instanceof EventEmitter) {
+          if (feature.getDataPlugins && feature instanceof EventEmitter) {
             feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
           }
           return feature.getDataPlugins ? feature.getDataPlugins() : []
@@ -225,7 +225,7 @@ export default class Server {
     const {_features} = this
     if (_features) {
       for (let feature of _features) {
-        if (feature instanceof EventEmitter) {
+        if (feature.getDataPlugins && feature instanceof EventEmitter) {
           feature.removeListener(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
         }
       }
