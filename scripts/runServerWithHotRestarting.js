@@ -50,7 +50,7 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
       const Server = require(serverModule).default
       server = new Server()
       await server.start()
-      umzugWatcher = watchMigrations(server.umzug)
+      umzugWatcher = watchMigrations(server._umzug)
     } catch (error) {
       console.error(error.stack)
     }

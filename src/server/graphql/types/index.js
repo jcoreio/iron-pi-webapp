@@ -6,32 +6,20 @@ import type Sequelize, {Model} from 'sequelize'
 import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
-import GraphQLJSON from 'graphql-type-json'
 
-import type {ChannelAttributes} from '../../models/Channel'
-import Channel from '../../models/Channel'
-import type {ChannelState} from '../../../universal/types/Channel'
 import defaultInputType from './defaultInputType'
-import type {Store} from '../../redux/types'
-import type DataRouter from '../../data-router/DataRouter'
-
-import type {SyncHook} from 'tapable'
+import type {GraphQLFeature} from '../GraphQLFeature'
 
 export type Options = {
   sequelize: Sequelize,
-  store: Store,
-  dataRouter: DataRouter,
-  hooks: {
-    addTypes: SyncHook,
-    addInputTypes: SyncHook,
-  },
+  features: Array<$Subtype<GraphQLFeature>>,
 }
 
 export default function createTypes(options: Options): {
   types: {[name: string]: GraphQLOutputType},
   inputTypes: {[name: string]: GraphQLInputType},
 } {
-  const {sequelize, store, dataRouter, hooks: {addTypes, addInputTypes}} = options
+  const {sequelize, features} = options
   const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
@@ -45,15 +33,6 @@ export default function createTypes(options: Options): {
   }
 
   const extraFields = {
-    [Channel.name]: {
-      state: {
-        type: GraphQLJSON,
-        description: 'the state of this channel',
-        resolve(source: ChannelAttributes): ?ChannelState {
-          return store.getChannelState(source.id)
-        },
-      },
-    },
   }
 
   const attributeFieldsCache = {}
@@ -66,10 +45,12 @@ export default function createTypes(options: Options): {
       ...extraFields[model.name] || {},
     })
   }))
-  addTypes.call({sequelize, store, dataRouter, types})
 
   const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
-  addInputTypes.call({sequelize, store, dataRouter, types})
+
+  for (let feature of features) {
+    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes})
+  }
 
   return {types, inputTypes}
 }

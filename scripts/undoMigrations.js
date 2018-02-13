@@ -1,15 +1,15 @@
 // @flow
 /* eslint-disable flowtype/require-return-type, flowtype/require-parameter-type */
 
-const inquirer = require('inquirer')
+import initDatabase from '../src/server/initDatabase'
+import inquirer from 'inquirer'
 
-async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<any> */ {
+async function undoMigrations(rule: {args: Array<string>}): Promise<any> {
   let migrationsToUndo = rule.args.filter(arg => arg[0] !== '-')
 
   require('defaultenv')(['env/local.js'])
   require('babel-register')
-  const sequelize = require('../src/server/sequelize').default()
-  const umzug = require('../src/server/sequelize/umzug').default({sequelize})
+  const {sequelize, umzug} = await initDatabase()
 
   if (!migrationsToUndo.length) {
     migrationsToUndo = (await inquirer.prompt([
@@ -17,7 +17,7 @@ async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<a
         message: 'Select migrations to undo',
         type: 'checkbox',
         name: 'migrationsToUndo',
-        choices: (await umzug.executed()).map(migration => migration.name)
+        choices: (await umzug.executed()).map(migration => migration.name || migration.file)
       }
     ])).migrationsToUndo
   }
@@ -28,6 +28,7 @@ async function undoMigrations(rule /* : {args: Array<string>} */) /* : Promise<a
   }
 
   await umzug.down({migrations: migrationsToUndo})
+  await sequelize.close()
 }
 
 module.exports = undoMigrations

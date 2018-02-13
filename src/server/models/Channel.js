@@ -4,8 +4,6 @@ import Sequelize, {Model} from 'sequelize'
 import type {ChannelConfig, ChannelMode} from '../../universal/types/Channel'
 import {channelIdPattern, validateChannelConfig} from '../../universal/types/Channel'
 import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
-import type {Store} from '../redux/types'
-import {setChannelConfigs} from '../redux'
 
 export type ChannelInitAttributes = {
   name: string;
@@ -20,11 +18,6 @@ export type ChannelAttributes = ChannelInitAttributes & {
   config: ChannelConfig;
 }
 
-export function updateChannelState(store: Store, channel: Channel) {
-  const {id, config} = channel
-  store.dispatch(setChannelConfigs({channelId: id, config}))
-}
-
 export default class Channel extends Model<ChannelAttributes, ChannelInitAttributes> {
   physicalChannelId: ?number;
   name: string;
@@ -34,8 +27,8 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
   createdAt: Date;
   updatedAt: Date;
 
-  static initAttributes(options: {sequelize: Sequelize, store?: Store}) {
-    const {sequelize, store} = options
+  static initAttributes(options: {sequelize: Sequelize}) {
+    const {sequelize} = options
     super.init({
       id: {
         type: Sequelize.STRING,
@@ -77,15 +70,6 @@ export default class Channel extends Model<ChannelAttributes, ChannelInitAttribu
     }, {
       sequelize,
     })
-
-    function updateChannelStateHook(channel: Channel) {
-      if (store && (channel.changed('config') || channel.changed('id'))) {
-        updateChannelState(store, channel)
-      }
-    }
-
-    this.afterCreate(updateChannelStateHook)
-    this.afterUpdate(updateChannelStateHook)
   }
 
   static initAssociations() {

@@ -2,31 +2,26 @@
 
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
-import type {PubSubEngine} from 'graphql-subscriptions'
-import type {SyncHook} from 'tapable'
-
-import type DataRouter from '../../data-router/DataRouter'
 
 import createChannelState from './ChannelState'
 import createChannelStates from './ChannelStates'
+import type {GraphQLFeature} from '../GraphQLFeature'
 
 type Options = {
-  pubsub: PubSubEngine,
   sequelize: Sequelize,
-  store: Store,
-  dataRouter: DataRouter,
-  hooks: {
-    addSubscriptionFields: SyncHook,
-  },
+  types: {[name: string]: graphql.GraphQLOutputType},
+  features: Array<$Subtype<GraphQLFeature>>,
 }
 
 export default function createSubscription(options: Options): graphql.GraphQLObjectType {
-  const {pubsub, sequelize, store, dataRouter, hooks: {addSubscriptionFields}} = options
+  const {sequelize, types, features} = options
   const subscriptionFields = {
-    ChannelState: createChannelState({pubsub}),
-    ChannelStates: createChannelStates({pubsub}),
+    ChannelState: createChannelState(),
+    ChannelStates: createChannelStates(),
   }
-  addSubscriptionFields.call({pubsub, sequelize, store, dataRouter, subscriptionFields})
+  for (let feature of features) {
+    if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types})
+  }
   return new graphql.GraphQLObjectType({
     name: 'Subscription',
     fields: subscriptionFields,
