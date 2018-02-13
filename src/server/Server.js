@@ -1,6 +1,7 @@
 // @flow
 
 import path from 'path'
+import EventEmitter from 'events'
 import express from 'express'
 import bodyParser from 'body-parser'
 import type {GraphQLSchema} from 'graphql'
@@ -17,6 +18,7 @@ import {defaultDbConnectionParams} from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import DataRouter from './data-router/DataRouter'
+import type {DataPlugin} from './data-router/PluginTypes'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -34,6 +36,7 @@ import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'
 import initDatabase from './initDatabase'
 import getFeatures from './getFeatures'
+import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 
 const log = logger('Server')
 
@@ -86,15 +89,25 @@ export default class Server {
 
       this._devGlobals.sequelize = sequelize
 
-      const dataRouter = this.dataRouter = new DataRouter()
-      this._devGlobals.dataRouter = dataRouter
-
       createModels(sequelize)
       for (let feature of features) {
         if (feature.addSequelizeModels) feature.addSequelizeModels({sequelize})
       }
 
       Object.assign(this._devGlobals, sequelize.models)
+
+      const dataPlugins: Array<DataPlugin> = [].concat(...await Promise.all(
+        features.map(async (feature: ServerFeature): Promise<$ReadOnlyArray<DataPlugin>> => {
+          if (feature.createDataPlugins) await feature.createDataPlugins()
+          if (feature instanceof EventEmitter) {
+            feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
+          }
+          return feature.getDataPlugins ? feature.getDataPlugins() : []
+        })
+      ))
+
+      const dataRouter = this.dataRouter = new DataRouter({plugins: dataPlugins})
+      this._devGlobals.dataRouter = dataRouter
 
       const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
         sequelize,
@@ -195,10 +208,28 @@ export default class Server {
     }
   }
 
+  _onFeatureDataPluginsChange = () => {
+    const {_features, dataRouter} = this
+    if (!_features || !dataRouter) return
+    const dataPlugins: Array<DataPlugin> = [].concat(..._features.map(feature =>
+      feature.getDataPlugins ? feature.getDataPlugins() : []
+    ))
+    dataRouter.setPlugins(dataPlugins)
+  }
+
   // istanbul ignore next
   async stop(): Promise<void> {
     if (!this._running) return
     this._running = false
+
+    const {_features} = this
+    if (_features) {
+      for (let feature of _features) {
+        if (feature instanceof EventEmitter) {
+          feature.removeListener(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
+        }
+      }
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       for (let key in this._devGlobals) delete global[key]
