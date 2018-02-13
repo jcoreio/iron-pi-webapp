@@ -2,46 +2,27 @@
 
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
-import type {SyncHook} from 'tapable'
 
-import pubsub from './pubsub'
 import createTypes from './types'
 import createQuery from './query'
 import createMutation from './mutation'
 import createSubscription from './subscription'
-import type DataRouter from '../data-router/DataRouter'
+import type {GraphQLFeature} from './GraphQLFeature'
 
 export type Options = {
   sequelize: Sequelize,
-  dataRouter: DataRouter,
-  hooks: {
-    addTypes: SyncHook,
-    addInputTypes: SyncHook,
-    addQueryFields: SyncHook,
-    addMutationFields: SyncHook,
-    addSubscriptionFields: SyncHook,
-  },
+  features: Array<$Subtype<GraphQLFeature>>,
 }
 
 export default function createSchema(options: Options): graphql.GraphQLSchema {
-  const {
-    sequelize,
-    dataRouter,
-    hooks: {
-      addTypes,
-      addInputTypes,
-      addQueryFields,
-      addMutationFields,
-      addSubscriptionFields,
-    }
-  } = options
+  const {sequelize, features} = options
 
-  const {types, inputTypes} = createTypes({sequelize, dataRouter, hooks: {addTypes, addInputTypes}})
+  const {types, inputTypes} = createTypes({sequelize, features})
 
   return new graphql.GraphQLSchema({
-    query: createQuery({sequelize, types, dataRouter, hooks: {addQueryFields}}),
-    mutation: createMutation({sequelize, types, dataRouter, inputTypes, hooks: {addMutationFields}}),
-    subscription: createSubscription({sequelize, types, dataRouter, pubsub, hooks: {addSubscriptionFields}}),
+    query: createQuery({sequelize, types, features}),
+    mutation: createMutation({sequelize, types, inputTypes, features}),
+    subscription: createSubscription({sequelize, types, features}),
   })
 }
 

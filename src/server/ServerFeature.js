@@ -1,9 +1,21 @@
 // @flow
 
 import type Sequelize from 'sequelize'
+import type {$Application} from 'express'
+import type {GraphQLSchema} from 'graphql'
+import type DataRouter from './data-router/DataRouter'
+import type {GraphQLFeature} from './graphql/GraphQLFeature'
 
 export type ServerFeature = {
   getMigrations?: () => Promise<Array<string>>,
-  createSequelizeModels?: (sequelize: Sequelize) => any,
-}
+  addSequelizeModels?: (options: {
+    sequelize: Sequelize,
+  }) => any,
+  addExpressRoutes?: (options: {
+    express: $Application,
+    graphqlSchema: GraphQLSchema,
+    dataRouter: DataRouter,
+    sequelize: Sequelize,
+  }) => any,
+} & GraphQLFeature
 

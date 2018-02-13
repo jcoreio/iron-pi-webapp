@@ -111,7 +111,6 @@
     "superagent": "^3.6.0",
     "superagent-logger": "^1.1.0",
     "superagent-use": "^0.1.0",
-    "tapable": "^1.0.0-beta",
     "umzug": "^2.1.0",
     "url-parse": "^1.1.7"
   },

@@ -4,17 +4,18 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import type {GraphQLSchema} from 'graphql'
+import {PubSub} from 'graphql-subscriptions'
+import type {PubSubEngine} from 'graphql-subscriptions'
 import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import defaults from 'lodash.defaults'
 import logger from 'log4jcore'
 
-import type {$Request, $Response} from 'express'
+import type {$Request, $Response, $Application} from 'express'
 
 import {defaultDbConnectionParams} from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
-import pubsub from './graphql/pubsub'
 import DataRouter from './data-router/DataRouter'
 
 import requireEnv from '@jcoreio/require-env'
@@ -29,7 +30,6 @@ import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
 import createSubscriptionServer from './express/subscriptionServer'
 
-import {SyncHook, AsyncSeriesHook} from 'tapable'
 import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'
 import initDatabase from './initDatabase'
@@ -51,34 +51,24 @@ export default class Server {
   _running: boolean = false
   _devGlobals: Object = {
     Sequelize,
-    pubsub,
     authorize,
     createToken,
     verifyToken,
   }
   _port: number
-  dbConnectionParams: DbConnectionParams
+  _dbConnectionParams: DbConnectionParams
+  _features: ?Array<ServerFeature>
+  _umzug: ?Umzug
   sequelize: ?Sequelize
-  umzug: ?Umzug
-  graphqlSchema: ?GraphQLSchema
   dataRouter: ?DataRouter
-  features: ?Array<ServerFeature>
-  hooks = {
-    createModels: new AsyncSeriesHook(['sequelize']),
-    graphql: {
-      addTypes: new SyncHook(['options']),
-      addInputTypes: new SyncHook(['options']),
-      addQueryFields: new SyncHook(['options']),
-      addMutationFields: new SyncHook(['options']),
-      addSubscriptionFields: new SyncHook(['options']),
-    },
-    addExpressRoutes: new SyncHook(['options']),
-  }
+  graphqlSchema: ?GraphQLSchema
+  pubsub: ?PubSubEngine
+  express: ?$Application
 
   constructor(options?: Options = {}) {
     this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
     const {host, user, database, password} = defaults(options, defaultDbConnectionParams())
-    this.dbConnectionParams = {host, user, database, password}
+    this._dbConnectionParams = {host, user, database, password}
   }
 
   async start(): Promise<void> {
@@ -86,13 +76,10 @@ export default class Server {
 
     log.info('Starting webapp server...')
     try {
-      this.features = await getFeatures()
-      // for (let feature of this.features) {
-      //   feature.install(this.hooks)
-      // }
-      const {sequelize, umzug} = await initDatabase(this.dbConnectionParams)
+      const features = this._features = await getFeatures()
+      const {sequelize, umzug} = await initDatabase(this._dbConnectionParams)
       this._devGlobals.sequelize = this.sequelize = sequelize
-      this._devGlobals.umzug = this.umzug = umzug
+      this._devGlobals.umzug = this._umzug = umzug
 
       const forceMigrate = 'production' !== process.env.NODE_ENV
       if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate({sequelize, umzug})
@@ -103,17 +90,21 @@ export default class Server {
       this._devGlobals.dataRouter = dataRouter
 
       createModels(sequelize)
-      await this.hooks.createModels.promise(sequelize)
+      for (let feature of features) {
+        if (feature.addSequelizeModels) feature.addSequelizeModels({sequelize})
+      }
 
       Object.assign(this._devGlobals, sequelize.models)
 
       const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
         sequelize,
-        dataRouter,
-        hooks: this.hooks.graphql,
+        features,
       })
 
-      const app = express()
+      const pubsub = this.pubsub = new PubSub()
+      this._devGlobals.pubsub = pubsub
+
+      const app = this.express = express()
 
       app.use((req: Object, res: Object, next: Function) => {
         if (/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)) {
@@ -139,7 +130,12 @@ export default class Server {
       }
 
       const GRAPHQL_PATH = '/graphql'
-      app.use(GRAPHQL_PATH, parseAuthHeader, bodyParser.json(), handleGraphql({sequelize, schema: graphqlSchema}))
+      app.use(GRAPHQL_PATH, parseAuthHeader, bodyParser.json(), handleGraphql({
+        schema: graphqlSchema,
+        sequelize,
+        dataRouter,
+        pubsub,
+      }))
       app.use(GRAPHQL_PATH, (error: ?Error, req: $Request, res: $Response, next: Function) => {
         if (error) {
           res.status((error: any).statusCode || 500).send({error: error.message})
@@ -165,7 +161,14 @@ export default class Server {
         else res.status(404).end()
       })
 
-      this.hooks.addExpressRoutes.call({app, sequelize, graphqlSchema})
+      for (let feature of features) {
+        if (feature.addExpressRoutes) feature.addExpressRoutes({
+          express: app,
+          sequelize,
+          graphqlSchema,
+          dataRouter,
+        })
+      }
 
       // server-side rendering
       app.get('*', (req: $Request, res: $Response) => {

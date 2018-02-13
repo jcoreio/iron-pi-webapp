@@ -8,24 +8,18 @@ import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 
 import defaultInputType from './defaultInputType'
-import type DataRouter from '../../data-router/DataRouter'
-
-import type {SyncHook} from 'tapable'
+import type {GraphQLFeature} from '../GraphQLFeature'
 
 export type Options = {
   sequelize: Sequelize,
-  dataRouter: DataRouter,
-  hooks: {
-    addTypes: SyncHook,
-    addInputTypes: SyncHook,
-  },
+  features: Array<$Subtype<GraphQLFeature>>,
 }
 
 export default function createTypes(options: Options): {
   types: {[name: string]: GraphQLOutputType},
   inputTypes: {[name: string]: GraphQLInputType},
 } {
-  const {sequelize, dataRouter, hooks: {addTypes, addInputTypes}} = options
+  const {sequelize, features} = options
   const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
@@ -51,10 +45,12 @@ export default function createTypes(options: Options): {
       ...extraFields[model.name] || {},
     })
   }))
-  addTypes.call({sequelize, dataRouter, types})
 
   const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
-  addInputTypes.call({sequelize, dataRouter, types})
+
+  for (let feature of features) {
+    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes})
+  }
 
   return {types, inputTypes}
 }
