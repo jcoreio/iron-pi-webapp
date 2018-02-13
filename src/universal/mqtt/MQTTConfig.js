@@ -15,6 +15,9 @@ export type MQTTConfig = PluginConfig & {
   password: string,
   groupdId: string,
   nodeId: string,
+
+  minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
+
   /**
    * If true, plugin will automatically publish all public tags and metadata in addition
    * to any channels defined in channelsToMQTT.

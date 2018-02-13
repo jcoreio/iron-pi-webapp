@@ -12,6 +12,8 @@ import type {DataPlugin, DataPluginEmittedEvents, DataPluginResources, CycleDone
   DataPluginMapping, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type {MetadataChangeEvent} from '../metadata/MetadataHandler'
+import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
+import type {SparkPlugClient, SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
 
 const _instances: Array<MQTTPlugin> = []
 
@@ -31,6 +33,13 @@ function onSequelizeInstanceAddHook() { // eslint-disable-line no-unused-vars
   mqttPluginFeature.emit(FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE)
 }
 
+type ToMQTTChannelState = {
+  sentValue: any,
+  curValue: any,
+  txDelayed: boolean,
+  txTime: number,
+}
+
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
   _config: MQTTConfig;
   _resources: DataPluginResources;
@@ -40,14 +49,24 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _metadataToMQTT: TagMetadataMap = {}
   _tagsToMQTT: Array<string> = []
 
-  _sparkplug: Object;
+  _client: SparkPlugClient;
+
+  _toMQTTChannelStates: Array<ToMQTTChannelState> = []
 
   constructor(args: {config: PluginConfig, resources: DataPluginResources}) {
     super()
     this._config = validateMQTTConfig(args.config)
     this._resources = args.resources
 
-    this._sparkplug = sparkplug.newClient()
+    this._client = (sparkplug: SparkPlugPackage).newClient({
+      serverUrl: 'tcp://192.168.1.72:1883',
+      username: 'username',
+      password: 'password',
+      groupId: 'testGroupId',
+      edgeNode: 'testNodeId',
+      clientId: 'testClientId',
+      version: SPARKPLUG_VERSION_B_1_0,
+    })
 
     this._metadataListener = (event: MetadataChangeEvent) => this._metadataChanged()
     metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
@@ -93,6 +112,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
         metadataToMQTT[tag] = metadataForTag
     })
     return metadataToMQTT
+  }
+
+  _generateDataMessage(): Array<SparkPlugDataMertic> {
+    return []
   }
 
   /**
