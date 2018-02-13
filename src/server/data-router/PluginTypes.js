@@ -64,7 +64,7 @@ export type DataPluginResources = {
 }
 
 /**
- * Feature can optionally extend EventEmitter and emit FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE
+ * Feature can optionally extend EventEmitter and emit FEATURE_EVENT_DATA_PLUGINS_CHANGE
  * when DataPlugin instances are added or removed
  */
 export interface Feature {
@@ -73,7 +73,7 @@ export interface Feature {
 }
 
 // Events emitted by Features
-export const FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE = 'dataPluginsChange'
+export const FEATURE_EVENT_DATA_PLUGINS_CHANGE = 'dataPluginsChange'
 
 export type FeatureEmittedEvents = {
   dataPluginsChange: [],

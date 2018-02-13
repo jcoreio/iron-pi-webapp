@@ -7,7 +7,7 @@ import sparkplug from 'sparkplug-client'
 import type {PluginConfig, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 import {validateMQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTConfig} from '../../universal/mqtt/MQTTConfig'
-import {FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE} from '../data-router/PluginTypes'
+import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
 import type {DataPlugin, DataPluginEmittedEvents, DataPluginResources, CycleDoneEvent,
   DataPluginMapping, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
@@ -30,7 +30,7 @@ class MQTTPluginFeature extends EventEmitter<FeatureEmittedEvents> implements Fe
 export const mqttPluginFeature = new MQTTPluginFeature()
 
 function onSequelizeInstanceAddHook() { // eslint-disable-line no-unused-vars
-  mqttPluginFeature.emit(FEATURE_EVENT_DATA_PLUGIN_INSTANCES_CHANGE)
+  mqttPluginFeature.emit(FEATURE_EVENT_DATA_PLUGINS_CHANGE)
 }
 
 type ToMQTTChannelState = {
