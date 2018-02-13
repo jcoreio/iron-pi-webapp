@@ -1,20 +1,17 @@
 // @flow
 
-import path from 'path'
-
 import Sequelize from 'sequelize'
 import Umzug from 'umzug'
 import logger from 'log4jcore'
 
 const log = logger('sequelize:migrate')
 
-const migrationsDir = path.resolve(__dirname, 'migrations')
-
 type Options = {
   sequelize: Sequelize,
+  migrationsDir: string,
 }
 
-export default function createUmzug({sequelize}: Options): Umzug {
+export default function createUmzug({sequelize, migrationsDir}: Options): Umzug {
   return new Umzug({
     logging: log.info.bind(log),
     storage: 'sequelize',

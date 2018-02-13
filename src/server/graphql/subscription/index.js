@@ -13,7 +13,6 @@ import createChannelStates from './ChannelStates'
 type Options = {
   pubsub: PubSubEngine,
   sequelize: Sequelize,
-  store: Store,
   dataRouter: DataRouter,
   hooks: {
     addSubscriptionFields: SyncHook,
@@ -21,12 +20,12 @@ type Options = {
 }
 
 export default function createSubscription(options: Options): graphql.GraphQLObjectType {
-  const {pubsub, sequelize, store, dataRouter, hooks: {addSubscriptionFields}} = options
+  const {pubsub, sequelize, dataRouter, hooks: {addSubscriptionFields}} = options
   const subscriptionFields = {
     ChannelState: createChannelState({pubsub}),
     ChannelStates: createChannelStates({pubsub}),
   }
-  addSubscriptionFields.call({pubsub, sequelize, store, dataRouter, subscriptionFields})
+  addSubscriptionFields.call({pubsub, sequelize, dataRouter, subscriptionFields})
   return new graphql.GraphQLObjectType({
     name: 'Subscription',
     fields: subscriptionFields,

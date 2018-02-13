@@ -9,12 +9,10 @@ import createTypes from './types'
 import createQuery from './query'
 import createMutation from './mutation'
 import createSubscription from './subscription'
-import type {Store} from '../redux/types'
 import type DataRouter from '../data-router/DataRouter'
 
 export type Options = {
   sequelize: Sequelize,
-  store: Store,
   dataRouter: DataRouter,
   hooks: {
     addTypes: SyncHook,
@@ -28,7 +26,6 @@ export type Options = {
 export default function createSchema(options: Options): graphql.GraphQLSchema {
   const {
     sequelize,
-    store,
     dataRouter,
     hooks: {
       addTypes,
@@ -39,12 +36,12 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
     }
   } = options
 
-  const {types, inputTypes} = createTypes({sequelize, store, dataRouter, hooks: {addTypes, addInputTypes}})
+  const {types, inputTypes} = createTypes({sequelize, dataRouter, hooks: {addTypes, addInputTypes}})
 
   return new graphql.GraphQLSchema({
-    query: createQuery({sequelize, types, store, dataRouter, hooks: {addQueryFields}}),
-    mutation: createMutation({sequelize, types, store, dataRouter, inputTypes, hooks: {addMutationFields}}),
-    subscription: createSubscription({sequelize, types, store, dataRouter, pubsub, hooks: {addSubscriptionFields}}),
+    query: createQuery({sequelize, types, dataRouter, hooks: {addQueryFields}}),
+    mutation: createMutation({sequelize, types, dataRouter, inputTypes, hooks: {addMutationFields}}),
+    subscription: createSubscription({sequelize, types, dataRouter, pubsub, hooks: {addSubscriptionFields}}),
   })
 }
 
