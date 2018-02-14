@@ -4,11 +4,9 @@ import {Client} from 'pg'
 import type Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import promisify from 'es6-promisify'
-import range from 'lodash.range'
 import requireEnv from '@jcoreio/require-env'
 import logger from 'log4jcore'
 
-import Channel from '../models/Channel'
 import User from '../models/User'
 import Scope from '../models/Scope'
 
@@ -49,14 +47,6 @@ export default async function migrate(options: Options): Promise<void> {
     }
   } finally {
     client.end()
-  }
-
-  if (!(await Channel.findOne())) {
-    await Channel.bulkCreate(range(1, 9).map(id => ({
-      id,
-      channelId: `channel${id}`,
-      name: `Channel ${id}`,
-    })))
   }
 
   if (process.env.BABEL_ENV === 'test') {
