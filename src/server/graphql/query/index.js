@@ -8,6 +8,7 @@ import requireUserId from '../requireUserId'
 import type {Context} from '../Context'
 import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
+import models from '../../models'
 
 type Options = {
   sequelize: Sequelize,
@@ -17,7 +18,6 @@ type Options = {
 
 export default function createQuery(options: Options): graphql.GraphQLObjectType {
   const {sequelize, types, features} = options
-  const models = {...sequelize.models}
 
   const queryFields = {
     currentUser: {

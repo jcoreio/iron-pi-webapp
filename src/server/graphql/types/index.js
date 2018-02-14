@@ -6,6 +6,7 @@ import type Sequelize, {Model} from 'sequelize'
 import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
+import models from '../../models'
 
 import TimeValuePair from './TimeValuePair'
 import TaggedTimeValuePair from './TaggedTimeValuePair'
@@ -22,7 +23,6 @@ export default function createTypes(options: Options): {
   inputTypes: {[name: string]: GraphQLInputType},
 } {
   const {sequelize, features} = options
-  const models = {...sequelize.models}
 
   const args = mapValues(models, model => defaultArgs(model))
 
@@ -59,7 +59,7 @@ export default function createTypes(options: Options): {
   const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
 
   for (let feature of features) {
-    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes})
+    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes, attributeFieldsCache})
   }
 
   return {types, inputTypes}
