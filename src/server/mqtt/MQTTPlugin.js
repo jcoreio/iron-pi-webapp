@@ -4,9 +4,7 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
 import sparkplug from 'sparkplug-client'
 
-import type {PluginConfig, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
-import {validateMQTTConfig} from '../../universal/mqtt/MQTTConfig'
-import type {MQTTConfig} from '../../universal/mqtt/MQTTConfig'
+import type {PluginInfo, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
 import type {DataPlugin, DataPluginEmittedEvents, DataPluginResources, CycleDoneEvent,
   DataPluginMapping, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
@@ -41,7 +39,7 @@ type ToMQTTChannelState = {
 }
 
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
-  _config: MQTTConfig;
+  _pluginInfo: PluginInfo;
   _resources: DataPluginResources;
 
   _metadataListener: (event: MetadataChangeEvent) => void;
@@ -53,9 +51,9 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
 
   _toMQTTChannelStates: Array<ToMQTTChannelState> = []
 
-  constructor(args: {config: PluginConfig, resources: DataPluginResources}) {
+  constructor(args: {pluginInfo: PluginInfo, resources: DataPluginResources}) {
     super()
-    this._config = validateMQTTConfig(args.config)
+    this._pluginInfo = args.pluginInfo
     this._resources = args.resources
 
     this._client = (sparkplug: SparkPlugPackage).newClient({
@@ -72,11 +70,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
 
-  config(): PluginConfig { return this._config }
-
-  setConfig(config: PluginConfig) {
-    this._config = validateMQTTConfig(config)
-  }
+  pluginInfo(): PluginInfo { return this._pluginInfo }
 
   ioMappings(): Array<DataPluginMapping> {
     return []
@@ -114,7 +108,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     return metadataToMQTT
   }
 
-  _generateDataMessage(): Array<SparkPlugDataMertic> {
+  _generateDataMessage(opts: {sendAll?: ?boolean} = {}): Array<SparkPlugDataMertic> {
     return []
   }
 

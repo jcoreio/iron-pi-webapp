@@ -5,7 +5,7 @@ import {expect} from 'chai'
 import EventEmitter from 'events'
 import _ from 'lodash'
 
-import type {PluginConfig} from '../../../universal/data-router/PluginConfigTypes'
+import type {PluginInfo} from '../../../universal/data-router/PluginConfigTypes'
 
 import DataRouter, {timestampDispatchData} from '../DataRouter'
 import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA,
@@ -35,7 +35,7 @@ class MockPlugin extends EventEmitter implements DataPlugin {
     this._magic = args.magic
     this._mappings = args.mappings
   }
-  config(): PluginConfig {
+  pluginInfo(): PluginInfo {
     return {
       pluginType: 'mockPlugin',
       pluginId: `mockPlugin${this._magic}`,
@@ -105,7 +105,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: plugin1.config().pluginId, timestampedValues: {
+    router.dispatch({pluginId: plugin1.pluginInfo().pluginId, timestampedValues: {
       a: {t: 100, v: 200},
       b: {t: 300, v: 400}
     }})
@@ -155,7 +155,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: sourcePlugin.config().pluginId, values: {a: 2, b: 3}})
+    router.dispatch({pluginId: sourcePlugin.pluginInfo().pluginId, values: {a: 2, b: 3}})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},

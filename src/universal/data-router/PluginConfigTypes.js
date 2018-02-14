@@ -2,7 +2,7 @@
 
 export const INTERNAL_TAG_PREFIX = '_internal/'
 
-export type PluginConfig = {
+export type PluginInfo = {
   pluginType: string,
   pluginId: string,
   pluginName: string,

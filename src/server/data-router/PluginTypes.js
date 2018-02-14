@@ -1,6 +1,6 @@
 // @flow
 
-import type {PluginConfig, MappingProblem, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
+import type {PluginInfo, MappingProblem, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 
 /**
  * Information about a single mapping into or out of a plugin
@@ -28,8 +28,7 @@ export type CycleDoneEvent = InputChangeEvent & {
  * emit data by calling this.emit('data', {tag1: value1, tag2: value2})
  */
 export interface DataPlugin {
-  config(): PluginConfig;
-  setConfig(config: PluginConfig): void;
+  pluginInfo(): PluginInfo;
   ioMappings(): Array<DataPluginMapping>;
 
   /** Called after all plugins have been instantiated and declared their output tags */

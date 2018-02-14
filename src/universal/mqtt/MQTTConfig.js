@@ -1,6 +1,6 @@
 // @flow
 
-import type {PluginConfig} from '../data-router/PluginConfigTypes'
+import type {PluginInfo} from '../data-router/PluginConfigTypes'
 
 export type MQTTChannelConfig = {
   internalTag: string,
@@ -9,7 +9,7 @@ export type MQTTChannelConfig = {
   offset: number,
 }
 
-export type MQTTConfig = PluginConfig & {
+export type MQTTConfig = PluginInfo & {
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
   username: string,
   password: string,
@@ -27,7 +27,12 @@ export type MQTTConfig = PluginConfig & {
   channelsFromMQTT: Array<MQTTChannelConfig>,
 }
 
-export function validateMQTTConfig(config: PluginConfig): MQTTConfig {
-  // TODO: Validate
-  return (config: any)
+/**
+ * Convert any arbitrary JSON into a valid MQTTConfig
+ * @param config config from JSON
+ * @returns {MQTTConfig} valid MQTTConfig
+ */
+export function cleanMQTTConfig(config: MQTTConfig): MQTTConfig {
+  // TODO: Clean
+  return config
 }
