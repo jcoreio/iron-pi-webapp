@@ -16,13 +16,18 @@ export type SparkPlugDataMessage = {
   metrics: Array<SparkPlugDataMertic>,
 }
 
+export type SparkplugTypedValue = {
+  type: string,
+  value: any,
+}
+
 /** Metric sent during a NBIRTH message */
 export type SparkPlugBirthMetric = SparkPlugDataMertic & {
   properties: {
-    longName: string,
-    min: any,
-    max: any,
-    units: string,
+    longName: SparkplugTypedValue,
+    min?: ?SparkplugTypedValue,
+    max?: ?SparkplugTypedValue,
+    units?: ?SparkplugTypedValue,
   },
 }
 

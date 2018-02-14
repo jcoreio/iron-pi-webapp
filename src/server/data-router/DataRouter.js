@@ -287,6 +287,7 @@ export default class DataRouter extends EventEmitter {
 
     const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(pluginMappings)
+    const publicTagsChanged = !_.isEqual(publicTags, this._publicTags)
     this._tags = tags
     this._publicTags = publicTags
     this._tagsToProviderPluginIds = tagsToProviderPluginIds
@@ -295,6 +296,12 @@ export default class DataRouter extends EventEmitter {
     if (!_.isEqual(mappingProblems, this._mappingProblems)) {
       this._mappingProblems = mappingProblems
       this.emit(EVENT_MAPPING_PROBLEMS_CHANGED, mappingProblems)
+    }
+    if (publicTagsChanged) {
+      this._plugins.forEach((plugin: DataPlugin) => {
+        if (plugin.tagsChanged)
+          plugin.tagsChanged()
+      })
     }
   }
 }

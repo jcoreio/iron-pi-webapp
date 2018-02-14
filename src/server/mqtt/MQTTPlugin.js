@@ -10,12 +10,14 @@ import type {PluginInfo, TagMetadata, TagMetadataMap} from '../../universal/data
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
-import type {DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
-  DataPluginMapping, Feature, FeatureEmittedEvents, TimestampedValuesMap} from '../data-router/PluginTypes'
+import type {
+  DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
+  DataPluginMapping, Feature, FeatureEmittedEvents, TimestampedValuesMap, TimeValuePair
+} from '../data-router/PluginTypes'
 import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
-import type {MetadataChangeEvent} from '../metadata/MetadataHandler'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
-import type {SparkPlugClient, SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
+import type {SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
+  SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
 
 const _instances: Array<MQTTPlugin> = []
 
@@ -36,10 +38,9 @@ function onSequelizeInstanceAddHook() { // eslint-disable-line no-unused-vars
 }
 
 type ToMQTTChannelState = {
+  config: MQTTChannelConfig,
   sentValue: any,
   curValue: any,
-  txDelayed: boolean,
-  txTime: number,
 }
 
 type MQTTPluginResources = {
@@ -53,14 +54,21 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _pluginInfo: PluginInfo;
   _resources: MQTTPluginResources;
 
-  _metadataListener: (event: MetadataChangeEvent) => void;
-
-  _metadataToMQTT: TagMetadataMap = {}
-  _tagsToMQTT: Array<string> = []
-
   _client: SparkPlugClient;
 
+  _started: boolean = false;
+  _birthPublishDelayed: boolean = false;
+
+  _metadataListener = () => this._metadataChanged();
+  _metadataToMQTT: TagMetadataMap = {}
+
+  /** Configs for enabled channels to MQTT, combined with channels that are being sent
+   * because "publish all" is enabled */
+  _toMQTTEnabledChannelConfigs: Array<MQTTChannelConfig> = [];
+  /** Stored state on the value and TX time sent for each MQTT tag */
   _toMQTTChannelStates: Array<ToMQTTChannelState> = []
+  _lastTxTime: number = 0;
+  _publishDataTimeout: ?number;
 
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
@@ -77,8 +85,8 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       clientId: 'testClientId',
       version: SPARKPLUG_VERSION_B_1_0,
     })
+    this._client.on('birth', () => this._publishNodeBirth())
 
-    this._metadataListener = (event: MetadataChangeEvent) => this._metadataChanged()
     metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
 
@@ -93,16 +101,83 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   }
 
   dispatchCycleDone(event: CycleDoneEvent) {
-    // if (this._config.publishAllPublicTags || event.inputsChanged) {
-    // }
+    const dataMaybeChanged = this._config.publishAllPublicTags || event.inputsChanged
+    // If _publishDataTimeout is set, we're already waiting on a delayed publish, so we can
+    // just let the existing timeout expire
+    if (dataMaybeChanged && !this._publishDataTimeout) {
+      const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
+      if (channelsToSend.length) {
+        const timeSinceLastTx = event.time - this._lastTxTime
+        const minPublishInterval = this._config.minPublishInterval || 0
+        const minWaitTime = minPublishInterval > 0 ? minPublishInterval - timeSinceLastTx : 0
+        if (minWaitTime > 0) {
+          this._publishDataTimeout = setTimeout(() => this._doDelayedPublish(), minWaitTime)
+        } else {
+          this._sendDataMessage({channelsToSend, time: event.time})
+        }
+      }
+    }
+  }
+
+  _doDelayedPublish() {
+    this._publishDataTimeout = undefined
+    const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
+    if (channelsToSend.length)
+      this._sendDataMessage({channelsToSend, time: Date.now()})
+  }
+
+  _sendDataMessage(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
+    const {channelsToSend, time} = args
+    this._client.publishNodeData({
+      timestamp: time,
+      metrics: this._generateDataMessage(channelsToSend)
+    })
+    this._lastTxTime = args.time
+  }
+
+  _getChannelsToSend(opts: {sendAll?: ?boolean} = {}): Array<ToMQTTChannelState> {
+    // Note: This filter() call is intended to mutate _toMQTTChannelStates and return the
+    // ones that need to be sent
+    return this._toMQTTChannelStates.filter((state: ToMQTTChannelState) => {
+      const timeValuePair: ?TimeValuePair = this._resources.tagMap()[state.config.internalTag]
+      state.curValue = timeValuePair ? timeValuePair.v : undefined
+      // Return the filtering result:
+      return opts.sendAll || !_.isEqual(state.curValue, state.sentValue)
+    })
+  }
+
+  _generateDataMessage(channelsToSend: Array<ToMQTTChannelState>): Array<SparkPlugDataMertic> {
+    // Note: this map() call is intended to mutate the states in channelsToSend
+    // and return the resulting SparkPlugDataMetrics
+    return channelsToSend.map((state: ToMQTTChannelState) => {
+      state.sentValue = state.curValue
+      return {
+        ...toSparkPlugMetric(state.curValue),
+        name: state.config.mqttTag
+      }
+    })
   }
 
   start() {
-    // Figure out tags
+    this._started = true
+    this._updateChannelsToMQTT()
+    this._metadataToMQTT = this._calcMetadataToMQTT()
+    if (this._birthPublishDelayed) {
+      this._birthPublishDelayed = false
+      this._publishNodeBirth()
+    }
   }
 
-  _getChannelsToMQTT(): Array<MQTTChannelConfig> {
-    let publishAllChannels: Array<MQTTChannelConfig> = []
+  tagsChanged() {
+    this._updateChannelsToMQTT()
+    this._metadataChanged()
+  }
+
+  // TODO: Ensure this is called whenever channelsToMQTT, channelsFromMQTT, or public tags
+  // may have changed
+  _updateChannelsToMQTT() {
+    // Extra channels that need to be published in cases where publishAllPublicTags is enabled
+    let extraChannelsToPublish: Array<MQTTChannelConfig> = []
     if (this._config.publishAllPublicTags) {
       const enabledChannelsToMQTT: Array<MQTTChannelConfig> = this._config.channelsToMQTT.filter(
         (channel: MQTTChannelConfig) => channel.enabled)
@@ -119,40 +194,53 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       const publicTagsNotFromThisPlugin = _.difference(this._resources.publicTags(), internalTagsFromThisPlugin)
       const unPublishedPublicTags = _.difference(publicTagsNotFromThisPlugin, alreadyPublishedSystemTags)
       // Don't publish tags where the MQTT tag path is already being published to
-      const tagsToPublish = _.difference(unPublishedPublicTags, alreadyPublishedMQTTTags)
-      publishAllChannels = tagsToPublish.map((tag: string) => ({
+      const extraTagsToPublish = _.difference(unPublishedPublicTags, alreadyPublishedMQTTTags)
+      extraChannelsToPublish = extraTagsToPublish.map((tag: string) => ({
         internalTag: tag,
         mqttTag: tag,
         enabled: true
       }))
     }
-    return [...this._config.channelsToMQTT, ...publishAllChannels]
+    // Combine configured channels with channels added due to "publish all" being enabled
+    this._toMQTTEnabledChannelConfigs = [...this._config.channelsToMQTT, ...extraChannelsToPublish]
+      // Filter down to only enabled and mapped channels
+      .filter((channelConfig: MQTTChannelConfig) => channelConfig.enabled && channelConfig.mqttTag && channelConfig.internalTag)
+
+    const prevChannelStates = _.keyBy(this._toMQTTChannelStates, (state: ToMQTTChannelState) => state.config.mqttTag)
+    this._toMQTTChannelStates = this._toMQTTEnabledChannelConfigs.map((config: MQTTChannelConfig) => ({
+      curValue: undefined,
+      sentValue: undefined,
+      // Override curValue and sentValue with previous state, if any
+      ...(prevChannelStates[config.mqttTag] || {}), // Start with the old state, if any
+      // Force config to new config
+      config
+    }))
   }
 
   destroy() {
     metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._metadataListener)
+    if (this._publishDataTimeout) {
+      clearTimeout(this._publishDataTimeout)
+      this._publishDataTimeout = undefined
+    }
   }
 
   _metadataChanged() {
-    const metadataToMQTT = this._calcMetadataToMQTT(this._resources.metadata())
+    const metadataToMQTT = this._calcMetadataToMQTT()
     if (!isEqual(metadataToMQTT, this._metadataToMQTT)) {
       this._metadataToMQTT = metadataToMQTT
       this._publishNodeBirth()
     }
   }
 
-  _calcMetadataToMQTT(metadata: TagMetadataMap): TagMetadataMap {
+  _calcMetadataToMQTT(): TagMetadataMap {
     const metadataToMQTT = {}
-    this._tagsToMQTT.forEach((tag: string) => {
-      const metadataForTag: ? TagMetadata = metadata[tag]
-      if (metadataForTag)
-        metadataToMQTT[tag] = metadataForTag
+    this._toMQTTEnabledChannelConfigs.forEach((channel: MQTTChannelConfig) => {
+      const metadataForTag: ?TagMetadata = this._resources.metadata()[channel.internalTag]
+      if (metadataForTag && metadataToMQTT[channel.mqttTag] === undefined)
+        metadataToMQTT[channel.mqttTag] = metadataForTag
     })
     return metadataToMQTT
-  }
-
-  _generateDataMessage(opts: {sendAll?: ?boolean} = {}): Array<SparkPlugDataMertic> {
-    return []
   }
 
   /**
@@ -160,6 +248,43 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
    * @private
    */
   _publishNodeBirth() {
-
+    if (this._started) {
+      const dataMetrics: Array<SparkPlugDataMertic> = this._generateDataMessage(this._getChannelsToSend({sendAll: true}))
+      const metrics: Array<SparkPlugBirthMetric> = dataMetrics.map((dataMetric: SparkPlugDataMertic) => {
+        const metadata = this._metadataToMQTT[dataMetric.name] || {}
+        const {name, min, max, units} = metadata
+        return {
+          ...dataMetric,
+          properties: {
+            longName: toSparkPlugString(name || dataMetric.name),
+            min: _.isFinite(min) ? toSparkPlugNumber(min) : undefined,
+            max: _.isFinite(max) ? toSparkPlugNumber(max) : undefined,
+            units: units ? toSparkPlugString(units) : undefined
+          }
+        }
+      })
+      this._client.publishNodeBirth({timestamp: Date.now(), metrics})
+      this._lastTxTime = Date.now()
+    } else {
+      this._birthPublishDelayed = true
+    }
   }
+}
+
+function toSparkPlugString(value: any): SparkplugTypedValue {
+  return {
+    type: 'string',
+    value: _.isString(value) ? value : (_.isFinite(value) ? value.toString() : '')
+  }
+}
+
+function toSparkPlugNumber(value: any): SparkplugTypedValue {
+  return {
+    type: 'number',
+    value: _.isFinite(value) ? value : NaN
+  }
+}
+
+function toSparkPlugMetric(value: any): SparkplugTypedValue {
+  return typeof value === 'string' ? toSparkPlugString(value) : toSparkPlugNumber(value)
 }

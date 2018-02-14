@@ -37,6 +37,9 @@ export interface DataPlugin {
   +inputsChanged?: (event: InputChangeEvent) => void;
   +dispatchCycleDone?: (event: CycleDoneEvent) => void;
 
+  /** Called when system tags are added or removed */
+  +tagsChanged?: () => void;
+
   +destroy?: () => void;
 }
 
