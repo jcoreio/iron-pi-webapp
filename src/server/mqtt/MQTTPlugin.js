@@ -1,13 +1,17 @@
 // @flow
 
+import _ from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
 import sparkplug from 'sparkplug-client'
 
+import {toPluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {PluginInfo, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
+import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
+import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
-import type {DataPlugin, DataPluginEmittedEvents, DataPluginResources, CycleDoneEvent,
-  DataPluginMapping, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
+import type {DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
+  DataPluginMapping, Feature, FeatureEmittedEvents, TimestampedValuesMap} from '../data-router/PluginTypes'
 import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type {MetadataChangeEvent} from '../metadata/MetadataHandler'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
@@ -38,9 +42,16 @@ type ToMQTTChannelState = {
   txTime: number,
 }
 
+type MQTTPluginResources = {
+  tagMap: () => TimestampedValuesMap,
+  publicTags: () => Array<string>,
+  metadata: () => TagMetadataMap,
+}
+
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
+  _config: MQTTConfig;
   _pluginInfo: PluginInfo;
-  _resources: DataPluginResources;
+  _resources: MQTTPluginResources;
 
   _metadataListener: (event: MetadataChangeEvent) => void;
 
@@ -51,9 +62,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
 
   _toMQTTChannelStates: Array<ToMQTTChannelState> = []
 
-  constructor(args: {pluginInfo: PluginInfo, resources: DataPluginResources}) {
+  constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
-    this._pluginInfo = args.pluginInfo
+    this._config = cleanMQTTConfig(args.config)
+    this._pluginInfo = toPluginInfo(this._config)
     this._resources = args.resources
 
     this._client = (sparkplug: SparkPlugPackage).newClient({
@@ -73,17 +85,48 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   pluginInfo(): PluginInfo { return this._pluginInfo }
 
   ioMappings(): Array<DataPluginMapping> {
-    return []
+    // Note: In the case where "publish all public tags" is checked, we deliberately don't include
+    // those tags as inputs here for two reasons: we don't know what those tags are until all other
+    // plugins have been created and declared their ioMappings, and we don't need to verify that
+    // those tags are populated.
+    return mqttConfigToDataPluginMappings(this._config)
   }
 
   dispatchCycleDone(event: CycleDoneEvent) {
-    // if (event.inputsChanged) {
-    //
+    // if (this._config.publishAllPublicTags || event.inputsChanged) {
     // }
   }
 
   start() {
     // Figure out tags
+  }
+
+  _getChannelsToMQTT(): Array<MQTTChannelConfig> {
+    let publishAllChannels: Array<MQTTChannelConfig> = []
+    if (this._config.publishAllPublicTags) {
+      const enabledChannelsToMQTT: Array<MQTTChannelConfig> = this._config.channelsToMQTT.filter(
+        (channel: MQTTChannelConfig) => channel.enabled)
+
+      // Start with all public tags, and filter out tags that either come from this plugin,
+      // or are already published by this plugin.
+      const alreadyPublishedSystemTags: Array<string> = enabledChannelsToMQTT
+        .map((channel: MQTTChannelConfig) => channel.internalTag)
+      const alreadyPublishedMQTTTags: Array<string> = enabledChannelsToMQTT
+        .map((channel: MQTTChannelConfig) => channel.mqttTag)
+      const internalTagsFromThisPlugin = this._config.channelsFromMQTT
+        .filter((channel: MQTTChannelConfig) => channel.enabled)
+        .map((channel: MQTTChannelConfig) => channel.internalTag)
+      const publicTagsNotFromThisPlugin = _.difference(this._resources.publicTags(), internalTagsFromThisPlugin)
+      const unPublishedPublicTags = _.difference(publicTagsNotFromThisPlugin, alreadyPublishedSystemTags)
+      // Don't publish tags where the MQTT tag path is already being published to
+      const tagsToPublish = _.difference(unPublishedPublicTags, alreadyPublishedMQTTTags)
+      publishAllChannels = tagsToPublish.map((tag: string) => ({
+        internalTag: tag,
+        mqttTag: tag,
+        enabled: true
+      }))
+    }
+    return [...this._config.channelsToMQTT, ...publishAllChannels]
   }
 
   destroy() {

@@ -9,6 +9,17 @@ export type PluginInfo = {
 }
 
 /**
+ * Extracts PluginInfo out of a config object with additional fields
+ * @param config Plugin config
+ * @returns {{pluginType: string, pluginId: string, pluginName: string}}
+ */
+export const toPluginInfo = (config: PluginInfo) => ({
+  pluginType: config.pluginType,
+  pluginId: config.pluginId,
+  pluginName: config.pluginName,
+})
+
+/**
  * Information about one location where the user has incorrectly mapped something.
  */
 export type MappingLocationInfo = {

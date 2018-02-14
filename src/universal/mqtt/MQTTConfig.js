@@ -1,12 +1,15 @@
 // @flow
 
 import type {PluginInfo} from '../data-router/PluginConfigTypes'
+import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
 
 export type MQTTChannelConfig = {
   internalTag: string,
   mqttTag: string,
-  multiplier: number,
-  offset: number,
+  enabled: boolean,
+  name?: ?string,
+  multiplier?: ?number,
+  offset?: ?number,
 }
 
 export type MQTTConfig = PluginInfo & {
@@ -35,4 +38,36 @@ export type MQTTConfig = PluginInfo & {
 export function cleanMQTTConfig(config: MQTTConfig): MQTTConfig {
   // TODO: Clean
   return config
+}
+
+export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPluginMapping> {
+  const channelsToMQTTMappings: Array<DataPluginMapping> = config.channelsToMQTT
+    // Save the array index before we filter
+    .map((channel: MQTTChannelConfig, index: number) => ({
+      channel,
+      index
+    }))
+    // Filter to only enabled
+    .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
+    // Convert to DataPluginMappings
+    .map((item: {channel: MQTTChannelConfig, index: number}) => ({
+      id: `toMQTT${item.index + 1}`,
+      name: item.channel.name || `To MQTT ${item.index + 1}`,
+      tagsToPlugin: [item.channel.internalTag]
+    }))
+  const channelsFromMQTTMappings: Array<DataPluginMapping> = config.channelsFromMQTT
+    // Save the array index before we filter
+    .map((channel: MQTTChannelConfig, index: number) => ({
+      channel,
+      index
+    }))
+    // Filter to only enabled
+    .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
+    // Convert to DataPluginMappings
+    .map((item: {channel: MQTTChannelConfig, index: number}) => ({
+      id: `fromMQTT${item.index + 1}`,
+      name: item.channel.name || `From MQTT ${item.index + 1}`,
+      tagFromPlugin: item.channel.internalTag
+    }))
+  return [...channelsToMQTTMappings, ...channelsFromMQTTMappings]
 }
