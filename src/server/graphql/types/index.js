@@ -7,6 +7,8 @@ import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 
+import TimeValuePair from './TimeValuePair'
+import TaggedTimeValuePair from './TaggedTimeValuePair'
 import defaultInputType from './defaultInputType'
 import type {GraphQLFeature} from '../GraphQLFeature'
 
@@ -37,14 +39,22 @@ export default function createTypes(options: Options): {
 
   const attributeFieldsCache = {}
 
-  const types = mapValues(models, (model: Class<Model<any>>) => new graphql.GraphQLObjectType({
-    name: model.name,
-    fields: () => ({
-      ...attributeFields(model, {cache: attributeFieldsCache}),
-      ...associationFields(model, {getType, getArgs}),
-      ...extraFields[model.name] || {},
+  const types: {[name: string]: GraphQLOutputType} = {
+    TimeValuePair,
+    TaggedTimeValuePair,
+  }
+
+  for (let key in models) {
+    const model = models[key]
+    types[key] = new graphql.GraphQLObjectType({
+      name: model.name,
+      fields: () => ({
+        ...attributeFields(model, {cache: attributeFieldsCache}),
+        ...associationFields(model, {getType, getArgs}),
+        ...extraFields[model.name] || {},
+      })
     })
-  }))
+  }
 
   const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
 

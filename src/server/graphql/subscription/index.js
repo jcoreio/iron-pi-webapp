@@ -3,9 +3,9 @@
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
 
-import createChannelState from './ChannelState'
-import createChannelStates from './ChannelStates'
 import type {GraphQLFeature} from '../GraphQLFeature'
+import createTagValue from './TagValue'
+import createTagValues from './TagValues'
 
 type Options = {
   sequelize: Sequelize,
@@ -16,8 +16,8 @@ type Options = {
 export default function createSubscription(options: Options): graphql.GraphQLObjectType {
   const {sequelize, types, features} = options
   const subscriptionFields = {
-    ChannelState: createChannelState(),
-    ChannelStates: createChannelStates(),
+    TagValue: createTagValue(),
+    TagValues: createTagValues(),
   }
   for (let feature of features) {
     if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types})

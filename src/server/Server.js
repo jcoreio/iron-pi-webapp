@@ -38,6 +38,7 @@ import initDatabase from './initDatabase'
 import getFeatures from './getFeatures'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 import seedDatabase from './sequelize/seedDatabase'
+import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
 
 const log = logger('Server')
 
@@ -63,20 +64,25 @@ export default class Server {
   _dbConnectionParams: DbConnectionParams
   _features: ?Array<ServerFeature>
   _umzug: ?Umzug
+  _graphqlDataPlugin: GraphQLDataPlugin
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
   graphqlSchema: ?GraphQLSchema
-  pubsub: ?PubSubEngine
+  pubsub: PubSubEngine
   express: ?$Application
 
   constructor(options?: Options = {}) {
     this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
     const {host, user, database, password} = defaults(options, defaultDbConnectionParams())
     this._dbConnectionParams = {host, user, database, password}
+    this.pubsub = new PubSub()
+    this._graphqlDataPlugin = new GraphQLDataPlugin(this.pubsub)
   }
 
   async start(): Promise<void> {
     if (this._running) return
+
+    const {pubsub} = this
 
     log.info('Starting webapp server...')
     try {
@@ -102,26 +108,22 @@ export default class Server {
 
       Object.assign(this._devGlobals, sequelize.models)
 
-      const dataPlugins: Array<DataPlugin> = [].concat(...await Promise.all(
-        features.map(async (feature: ServerFeature): Promise<$ReadOnlyArray<DataPlugin>> => {
-          if (feature.createDataPlugins) await feature.createDataPlugins()
-          if (feature.getDataPlugins && feature instanceof EventEmitter) {
-            feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
-          }
-          return feature.getDataPlugins ? feature.getDataPlugins() : []
-        })
-      ))
+      this._devGlobals.pubsub = this.pubsub
 
-      const dataRouter = this.dataRouter = new DataRouter({plugins: dataPlugins})
+      await Promise.all(features.map(feature => feature.createDataPlugins && feature.createDataPlugins()))
+      for (let feature of features) {
+        if (feature.getDataPlugins && feature instanceof EventEmitter) {
+          feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
+        }
+      }
+
+      const dataRouter = this.dataRouter = new DataRouter({plugins: this._getDataPlugins()})
       this._devGlobals.dataRouter = dataRouter
 
       const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
         sequelize,
         features,
       })
-
-      const pubsub = this.pubsub = new PubSub()
-      this._devGlobals.pubsub = pubsub
 
       const app = this.express = express()
 
@@ -214,13 +216,18 @@ export default class Server {
     }
   }
 
-  _onFeatureDataPluginsChange = () => {
-    const {_features, dataRouter} = this
-    if (!_features || !dataRouter) return
-    const dataPlugins: Array<DataPlugin> = [].concat(..._features.map(feature =>
+  _getDataPlugins(): Array<DataPlugin> {
+    const {_graphqlDataPlugin} = this
+    const features = this._features || []
+    const dataPlugins: Array<DataPlugin> = [_graphqlDataPlugin].concat(...features.map(feature =>
       feature.getDataPlugins ? feature.getDataPlugins() : []
     ))
-    dataRouter.setPlugins(dataPlugins)
+    return dataPlugins
+  }
+
+  _onFeatureDataPluginsChange = () => {
+    const {dataRouter} = this
+    if (dataRouter != null) dataRouter.setPlugins(this._getDataPlugins())
   }
 
   // istanbul ignore next

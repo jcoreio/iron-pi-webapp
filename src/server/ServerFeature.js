@@ -8,14 +8,14 @@ import type {GraphQLFeature} from './graphql/GraphQLFeature'
 import type {Feature as DataPluginFeature} from './data-router/PluginTypes'
 
 export type ServerFeature = {
-  getMigrations?: () => Promise<Array<string>>,
-  addSequelizeModels?: (options: {
+  +getMigrations?: () => Promise<Array<string>>,
+  +addSequelizeModels?: (options: {
     sequelize: Sequelize,
   }) => any,
-  seedDatabase?: (options: {
+  +seedDatabase?: (options: {
     sequelize: Sequelize,
   }) => any,
-  addExpressRoutes?: (options: {
+  +addExpressRoutes?: (options: {
     express: $Application,
     graphqlSchema: GraphQLSchema,
     dataRouter: DataRouter,
