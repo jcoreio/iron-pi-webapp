@@ -8,14 +8,17 @@ import type Sequelize from 'sequelize'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {attributeFields, defaultArgs, resolver} from 'graphql-sequelize'
 import LocalIOChannel from './LocalIOChannel'
+import LocalIODataPlugin from './LocalIODataPlugin'
 
 import defaultInputType from '../graphql/types/defaultInputType'
 import type {Context} from '../graphql/Context'
-import type {FeatureEmittedEvents} from '../data-router/PluginTypes'
+import type {DataPlugin, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import type {ServerFeature} from '../ServerFeature'
 import requireUserId from '../graphql/requireUserId'
 
 export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
+  _plugin: LocalIODataPlugin = new LocalIODataPlugin()
+
   async getMigrations(): Promise<Array<string>> {
     return promisify(glob)(path.join(__dirname, 'migrations', '*.js'))
   }
@@ -55,6 +58,13 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
         resolve: resolver(model, {before: requireUserId}),
       }
     }
+  }
+
+  async createDataPlugins(): Promise<void> {
+    await this._plugin._loadChannels()
+  }
+  getDataPlugins(): $ReadOnlyArray<DataPlugin> {
+    return [this._plugin]
   }
 }
 
