@@ -26,7 +26,7 @@ import Fader from '../../components/Fader'
 import ErrorAlert from '../../components/ErrorAlert'
 import Autocollapse from '../../components/Autocollapse'
 import type {Theme} from '../../theme/index'
-import type {Calibration, Channel as FullChannel} from '../../types/Channel'
+import type {Calibration, LocalIOChannel as FullChannel} from '../../localio/LocalIOChannel'
 import {CALIBRATION_TABLE} from '../../react-router/routePaths'
 import handleError from '../../redux-form/createSubmissionError'
 
@@ -96,7 +96,7 @@ export type Props = {
   subscribeToChannelState?: (id: string) => Function,
   physicalChannelId: number,
   error?: string,
-  mutate: (options: {variables: {id: string, calibration: Calibration}}) => Promise<void>,
+  mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
   data: {
     Channel?: FullChannel,
     loading?: boolean,

@@ -16,8 +16,9 @@ import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
 import ButtonGroupField from '../../components/ButtonGroupField'
 
-import {channelIdPattern, ChannelModesArray, getChannelModeDisplayText} from '../../types/Channel'
-import type {ChannelMode, Channel as FullChannel} from '../../types/Channel'
+import {ChannelModesArray, getChannelModeDisplayText} from '../../localio/LocalIOChannel'
+import {tagPattern} from '../../types/Tag'
+import type {ChannelMode, LocalIOChannel as FullChannel} from '../../localio/LocalIOChannel'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
@@ -152,14 +153,14 @@ export type Props = {
   },
   subscribeToChannelState?: (id: string) => Function,
   handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
-  mutate: (options: {variables: {id?: string, where?: Object, channel: FullChannel}}) => Promise<void>,
+  mutate: (options: {variables: {id?: number, where?: Object, channel: FullChannel}}) => Promise<void>,
 }
 
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
-  pickFormFields = ({physicalChannelId, id, name, config}: FullChannel) => ({physicalChannelId, id, name, config})
+  pickFormFields = ({id, tag, config}: FullChannel) => ({id, tag, config})
 
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
@@ -201,11 +202,11 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate} = this.props
-    const {physicalChannelId, id, name, config} = parseChannelFormValues(channel)
+    const {id, tag, config} = parseChannelFormValues(channel)
     return mutate({
       variables: {
-        where: {physicalChannelId},
-        channel: {id, name, config}
+        where: {id},
+        channel: {id, tag, config}
       }
     }).catch(handleError)
   }
@@ -273,7 +274,7 @@ class ChannelForm extends React.Component<Props> {
               type="text"
               component={TextField}
               className={classes.formControl}
-              validate={[required(), format({with: channelIdPattern, message: 'invalid Channel ID'})]}
+              validate={[required(), format({with: tagPattern, message: 'invalid Channel ID'})]}
               normalize={trim}
             />
           </ControlWithInfo>

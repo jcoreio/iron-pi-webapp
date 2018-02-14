@@ -8,7 +8,7 @@ import delay from 'delay'
 import navigateTo from '../util/navigateTo'
 import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
-import type {Channel} from '../../../src/universal/types/Channel'
+import type {LocalIOChannel} from '../../../src/universal/localio/LocalIOChannel'
 
 module.exports = () => {
   describe('CalibrationForm', function () {
@@ -33,7 +33,7 @@ module.exports = () => {
       },
     }
 
-    async function init(channel?: Channel & {physicalChannelId: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
+    async function init(channel?: LocalIOChannel & {physicalChannelId: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
       await graphql({
         query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float) {
           updateChannel(where: $where, channel: $channel) {

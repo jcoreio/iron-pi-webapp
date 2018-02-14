@@ -10,7 +10,7 @@ import Arrow from 'react-arrow'
 import ValueBlock from '../../components/ValueBlock'
 
 import type {Theme} from '../../theme'
-import type {DigitalOutputState} from '../../types/Channel'
+import type {DigitalOutputState} from '../../localio/LocalIOChannel'
 
 const LeftArrow = withTheme()(({theme: {channelState: {arrow, block}}, controlValue, ...props}: Object) => {
   const {shaftLength, shaftWidth, headLength, headWidth, fill} = arrow

@@ -10,7 +10,7 @@ import Arrow from 'react-arrow'
 import ValueBlock from '../../components/ValueBlock'
 
 import type {Theme} from '../../theme'
-import type {DigitalInputState} from '../../types/Channel'
+import type {DigitalInputState} from '../../localio/LocalIOChannel'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow

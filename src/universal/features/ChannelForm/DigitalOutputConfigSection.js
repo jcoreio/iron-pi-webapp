@@ -6,10 +6,10 @@ import {Field, FieldArray, formValues} from 'redux-form'
 
 import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
-import {ControlModesArray, getControlModeDisplayText} from '../../types/Channel'
+import {ControlModesArray, getControlModeDisplayText} from '../../localio/LocalIOChannel'
 import ControlLogicTable from './ControlLogicTable'
 import {required} from '@jcoreio/redux-form-validators'
-import type {ControlMode} from '../../types/Channel'
+import type {ControlMode} from '../../localio/LocalIOChannel'
 
 type Channel = {
   id: number,

@@ -9,7 +9,7 @@ import poll from '@jcoreio/poll'
 import navigateTo from '../util/navigateTo'
 import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
-import type {Channel} from '../../../src/universal/types/Channel'
+import type {LocalIOChannel} from '../../../src/universal/localio/LocalIOChannel'
 
 module.exports = () => {
   describe('DigitalOutput mode', function () {
@@ -27,7 +27,7 @@ module.exports = () => {
       },
     }
 
-    async function init(channel: Channel & {physicalChannelId: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
+    async function init(channel: LocalIOChannel & {physicalChannelId: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
       const {physicalChannelId} = defaultChannel
       await graphql({
         query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
