@@ -87,6 +87,8 @@ export default class DataRouter extends EventEmitter {
         }
         eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_IOS_CHANGED, this._pluginIOsChangedListener)
       }
+      if (plugin.destroy)
+        plugin.destroy()
     })
 
     this._plugins = []
@@ -128,6 +130,12 @@ export default class DataRouter extends EventEmitter {
     })
 
     this._pluginIOsChanged()
+
+    // Call the start() hook after all plugin IOs have been calculated
+    addedPlugins.forEach((plugin: DataPlugin) => {
+      if (plugin.start)
+        plugin.start()
+    })
   }
 
   dispatch(event: DispatchEvent) {

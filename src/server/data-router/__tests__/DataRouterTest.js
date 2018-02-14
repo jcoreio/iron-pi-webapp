@@ -14,12 +14,14 @@ import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, Ti
 
 const TEST_EVENT_INPUTS_CHANGED = 'inputsChanged'
 const TEST_EVENT_DISPATCH_CYCLE_DONE = 'dispatchCycleDone'
+const TEST_EVENT_START = 'start'
+const TEST_EVENT_DESTROY = 'destroy'
 
 type MockPluginEvent = {
   plugin: MockPlugin,
   type: string,
-  time: number,
-  changedTags: Array<string>,
+  time?: number,
+  changedTags?: Array<string>,
 }
 
 type MockPluginArgs = {events: Array<MockPluginEvent>, magic: number, mappings: Array<DataPluginMapping>}
@@ -78,6 +80,18 @@ class AdderPlugin extends MockPlugin {
     super.inputsChanged(event)
     const srcValuePair: ?TimeValuePair = event.tagMap[this._sourceTag]
     this.emit(DATA_PLUGIN_EVENT_DATA, {[this._destTag]: srcValuePair ? srcValuePair.v + this._amount : NaN})
+  }
+}
+
+class StartDestroyHooksPlugin extends MockPlugin {
+  constructor(args: {events: Array<MockPluginEvent>, magic: number}) {
+    super({...args, mappings: []})
+  }
+  start() {
+    this._rxEvents.push({plugin: this, type: TEST_EVENT_START})
+  }
+  destroy() {
+    this._rxEvents.push({plugin: this, type: TEST_EVENT_DESTROY})
   }
 }
 
@@ -295,6 +309,29 @@ describe('DataRouter', () => {
     expect(plugin.listenerCount(DATA_PLUGIN_EVENT_DATA)).to.equal(0)
     expect(plugin.listenerCount(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA)).to.equal(0)
     expect(plugin.listenerCount(DATA_PLUGIN_EVENT_IOS_CHANGED)).to.equal(0)
+  })
+
+  it('calls start and destroy hooks on plugins with those hooks', () => {
+    const events = []
+    const plugin = new StartDestroyHooksPlugin({events, magic: 1})
+
+    expect(events).to.be.empty
+
+    const router = new DataRouter({plugins: [plugin]})
+
+    expect(events).to.deep.equal([{plugin, type: TEST_EVENT_START}])
+    events.splice(0, events.length)
+
+    router.setPlugins([])
+
+    expect(events).to.deep.equal([{plugin, type: TEST_EVENT_DESTROY}])
+  })
+
+  it('does not call start or destroy hooks on plugins without those hooks', () => {
+    const events = []
+    const plugin = new MockPlugin({events, magic: 1, mappings: []})
+    new DataRouter({plugins: [plugin]})
+    expect(events).to.be.empty
   })
 
   describe('timestampDispatchData', () => {
