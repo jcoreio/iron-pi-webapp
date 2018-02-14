@@ -12,6 +12,9 @@ export type ServerFeature = {
   addSequelizeModels?: (options: {
     sequelize: Sequelize,
   }) => any,
+  seedDatabase?: (options: {
+    sequelize: Sequelize,
+  }) => any,
   addExpressRoutes?: (options: {
     express: $Application,
     graphqlSchema: GraphQLSchema,

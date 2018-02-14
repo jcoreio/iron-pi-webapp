@@ -37,6 +37,7 @@ import type {ServerFeature} from './ServerFeature'
 import initDatabase from './initDatabase'
 import getFeatures from './getFeatures'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
+import seedDatabase from './sequelize/seedDatabase'
 
 const log = logger('Server')
 
@@ -92,6 +93,11 @@ export default class Server {
       createModels(sequelize)
       for (let feature of features) {
         if (feature.addSequelizeModels) feature.addSequelizeModels({sequelize})
+      }
+
+      await seedDatabase()
+      for (let feature of features) {
+        if (feature.seedDatabase) feature.seedDatabase({sequelize})
       }
 
       Object.assign(this._devGlobals, sequelize.models)
