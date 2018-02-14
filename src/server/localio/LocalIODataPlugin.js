@@ -1,14 +1,23 @@
 // @flow
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
+import {createSelector} from 'reselect'
+
 import LocalIOChannel from './LocalIOChannel'
-import type {DataPluginMapping, DataPluginEmittedEvents} from '../data-router/PluginTypes'
+import type {DataPluginMapping, DataPluginEmittedEvents, InputChangeEvent, CycleDoneEvent} from '../data-router/PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import type {LocalControlDigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
+import type {LocalControlDigitalOutputConfig, Calibration, DigitalInputConfig} from '../../universal/localio/LocalIOChannel'
+import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED} from '../data-router/PluginTypes'
+import {INTERNAL} from '../../universal/types/Tag'
+import Calibrator from '../calc/Calibrator'
 
 export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEvents> {
   _channels: Array<LocalIOChannel> = []
+  _selectCalibrator: (channel: LocalIOChannel) => Calibrator = createSelector(
+    (channel: LocalIOChannel) => channel.config.calibration,
+    (calibration: Calibration = {points: []}) => new Calibrator(calibration.points || [])
+  )
 
   async _loadChannels(): Promise<void> {
     this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
@@ -38,9 +47,49 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
     })
   }
 
+  handleDeviceStatus(deviceStatus: DeviceStatus) {
+    const {analogInputLevels, digitalInputLevels, digitalOutputLevels} = deviceStatus
+    const data = {}
+    for (let id = 0; id < analogInputLevels.length; id++) {
+      data[`${INTERNAL}/${id}/rawAnalogInput`] = analogInputLevels[id]
+    }
+    for (let id = 0; id < digitalInputLevels.length; id++) {
+      data[`${INTERNAL}/${id}/rawDigitalInput`] = digitalInputLevels[id] ? 1 : 0
+    }
+    for (let id = 0; id < digitalOutputLevels.length; id++) {
+      data[`${INTERNAL}/${id}/rawOutput`] = digitalOutputLevels[id] ? 1 : 0
+    }
+    for (let id = 0; id < this._channels.length; id++) {
+      const channel = this._channels[id]
+      if (!channel) continue
+      const {tag, config} = channel
+      switch (config.mode) {
+      case 'ANALOG_INPUT': {
+        const calibrator = this._selectCalibrator(channel)
+        data[tag] = calibrator.calibrate(analogInputLevels[id])
+        break
+      }
+      case 'DIGITAL_INPUT': {
+        const {reversePolarity}: DigitalInputConfig = (config: any)
+        const rawInput = digitalInputLevels[id]
+        data[tag] = rawInput !== reversePolarity ? 1 : 0
+        break
+      }
+      }
+    }
+    this.emit('data', data)
+  }
+
   _channelUpdated = (channel: LocalIOChannel) => {
     this._channels[channel.id] = channel
     this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
+  }
+
+  inputsChanged(event: InputChangeEvent) {
+    // TODO update digital output tags
+  }
+  dispatchCycleDone(event: CycleDoneEvent) {
+    // TODO send digital output values
   }
 
   start() {
