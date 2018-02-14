@@ -1,6 +1,6 @@
 /* @flow */
 
-import type {Comparison, ControlCondition, ControlLogic} from '../types/ControlLogic'
+import type {Comparison, ControlCondition, ControlLogic} from '../../universal/types/ControlLogic'
 
 const NUMERIC_COMPARISONS = new Set(['LT', 'LTE', 'GTE', 'GT', 'EQ', 'NE', 'UNAVAILABLE'])
 
