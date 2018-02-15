@@ -9,7 +9,7 @@ import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime
 
 export type LocalIOChannelInitAttributes = {
   id: number;
-  tag: Tag;
+  tag?: Tag;
   config?: LocalIOChannelConfig;
 }
 
@@ -21,7 +21,7 @@ export type LocalIOChannelAttributes = LocalIOChannelInitAttributes & {
 
 export default class LocalIOChannel extends Model<LocalIOChannelAttributes, LocalIOChannelInitAttributes> {
   id: number;
-  tag: Tag;
+  tag: ?Tag;
   config: LocalIOChannelConfig;
   createdAt: Date;
   updatedAt: Date;
@@ -39,7 +39,7 @@ export default class LocalIOChannel extends Model<LocalIOChannelAttributes, Loca
       },
       tag: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
           is: {
             args: tagPattern,

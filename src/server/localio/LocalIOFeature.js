@@ -15,9 +15,12 @@ import type {Context} from '../graphql/Context'
 import type {DataPlugin, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import type {ServerFeature} from '../ServerFeature'
 import requireUserId from '../graphql/requireUserId'
+import SPIHandler from './SPIHandler'
+import SPIHubClient from 'spi-hub-client'
 
 export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
-  _plugin: LocalIODataPlugin = new LocalIODataPlugin()
+  _spiHandler = new SPIHandler(new SPIHubClient({binary: true}))
+  _plugin: LocalIODataPlugin = new LocalIODataPlugin({spiHandler: this._spiHandler})
 
   async getMigrations(): Promise<Array<string>> {
     return promisify(glob)(path.join(__dirname, 'migrations', '*.js'))

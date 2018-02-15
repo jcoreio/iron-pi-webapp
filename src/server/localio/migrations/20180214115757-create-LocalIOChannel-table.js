@@ -14,7 +14,7 @@ module.exports = {
         },
         tag: {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
         config: {
           type: Sequelize.JSON,

@@ -64,6 +64,10 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
     this._running = true
   }
 
+  stop() {
+    this._running = false
+  }
+
   sendDigitalOutputs(values: Array<boolean>) {
     let outputIdx = 0
     SPIDevices.forEach((device: SPIDeviceInfo) => {
