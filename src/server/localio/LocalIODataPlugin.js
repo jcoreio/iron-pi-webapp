@@ -41,7 +41,7 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       }
       if (mode === 'DIGITAL_OUTPUT' && controlMode === 'LOCAL_CONTROL') {
         const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
-        mapping.tagsToPlugin = controlLogic.map(({channelId}) => channelId)
+        mapping.tagsToPlugin = controlLogic.map(({tag}) => tag)
       }
       return mapping
     })
@@ -61,7 +61,6 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
     }
     for (let id = 0; id < this._channels.length; id++) {
       const channel = this._channels[id]
-      if (!channel) continue
       const {tag, config} = channel
       switch (config.mode) {
       case 'ANALOG_INPUT': {
@@ -89,7 +88,12 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
     // TODO update digital output tags
   }
   dispatchCycleDone(event: CycleDoneEvent) {
-    // TODO send digital output values
+    for (let id = 0; id < this._channels.length; id++) {
+      const channel = this._channels[id]
+      const {config} = channel
+      if (config.mode === 'DIGITAL_OUTPUT' && config.controlMode === 'LOCAL_CONTROL') {
+      }
+    }
   }
 
   start() {
