@@ -19,7 +19,7 @@ describe("evaluateControlLogic", () => {
     condition.threshold = 6
     tester.checkCondition(condition, true)
   })
-  it("returns false when comparing to a NaN value", () => {
+  it("returns null when comparing to a NaN value", () => {
     let tester = new EvalTester()
     tester.values = new Map([['1', NaN]])
     let condition = {
@@ -27,12 +27,12 @@ describe("evaluateControlLogic", () => {
       threshold: 3
     }
     condition.comparison = 'GT'
-    tester.checkCondition(condition, false)
+    tester.checkCondition(condition, null)
     condition.comparison = 'LT'
-    tester.checkCondition(condition, false)
+    tester.checkCondition(condition, null)
   })
 
-  it("returns false when using NaN as a comparison threshold", () => {
+  it("returns null when using NaN as a comparison threshold", () => {
     let tester = new EvalTester()
     tester.values = new Map([['1', 5]])
     let condition = {
@@ -40,9 +40,73 @@ describe("evaluateControlLogic", () => {
       threshold: NaN
     }
     condition.comparison = 'GT'
-    tester.checkCondition(condition, false)
+    tester.checkCondition(condition, null)
     condition.comparison = 'LT'
-    tester.checkCondition(condition, false)
+    tester.checkCondition(condition, null)
+  })
+  it("returns true when logic is OR between a true condition and an unknown condition", () => {
+    let tester = new EvalTester()
+    tester.values = new Map([['1', 5], ['2', null]])
+    const condition1 = {
+      channelId: '1',
+      comparison: 'GT',
+      threshold: 1,
+    }
+    const condition2 = {
+      channelId: '2',
+      comparison: 'LT',
+      threshold: 2,
+    }
+    tester.checkCondition([condition1, {operation: 'OR', ...condition2}], true)
+    tester.checkCondition([condition2, {operation: 'OR', ...condition1}], true)
+  })
+  it("returns null when logic is OR between a false condition and an unknown condition", () => {
+    let tester = new EvalTester()
+    tester.values = new Map([['1', 5], ['2', null]])
+    const condition1 = {
+      channelId: '1',
+      comparison: 'LT',
+      threshold: 1,
+    }
+    const condition2 = {
+      channelId: '2',
+      comparison: 'LT',
+      threshold: 2,
+    }
+    tester.checkCondition([condition1, {operation: 'OR', ...condition2}], null)
+    tester.checkCondition([condition2, {operation: 'OR', ...condition1}], null)
+  })
+  it("returns false when logic is AND between a false condition and an unknown condition", () => {
+    let tester = new EvalTester()
+    tester.values = new Map([['1', 5], ['2', null]])
+    const condition1 = {
+      channelId: '1',
+      comparison: 'LT',
+      threshold: 1,
+    }
+    const condition2 = {
+      channelId: '2',
+      comparison: 'LT',
+      threshold: 2,
+    }
+    tester.checkCondition([condition1, {operation: 'AND', ...condition2}], false)
+    tester.checkCondition([condition2, {operation: 'AND', ...condition1}], false)
+  })
+  it("returns null when logic is AND between a true condition and an unknown condition", () => {
+    let tester = new EvalTester()
+    tester.values = new Map([['1', 5], ['2', null]])
+    const condition1 = {
+      channelId: '1',
+      comparison: 'GT',
+      threshold: 1,
+    }
+    const condition2 = {
+      channelId: '2',
+      comparison: 'LT',
+      threshold: 2,
+    }
+    tester.checkCondition([condition1, {operation: 'AND', ...condition2}], null)
+    tester.checkCondition([condition2, {operation: 'AND', ...condition1}], null)
   })
   it("detects unavailable states", () => {
     let tester = new EvalTester()
