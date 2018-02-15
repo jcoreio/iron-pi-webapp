@@ -3,14 +3,14 @@
 import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
 
-export const LogicOperations = {
+export const LogicOperators = {
   AND: {displayText: 'AND'},
   OR: {displayText: 'OR'},
 }
 
-export const LogicOperationsArray = Object.keys(LogicOperations)
+export const LogicOperatorsArray = Object.keys(LogicOperators)
 
-export type LogicOperation = $Keys<typeof LogicOperations>
+export type LogicOperator = $Keys<typeof LogicOperators>
 
 export const Comparisons = {
   GT: {displayText: '>'},
@@ -27,10 +27,10 @@ export const ComparisonsArray = Object.keys(Comparisons)
 export type Comparison = $Keys<typeof Comparisons>
 
 export type ControlCondition = {
-  operation?: LogicOperation,
-  channelId: string,
+  operator?: LogicOperator,
+  tag: string,
   comparison: Comparison,
-  threshold?: ?number,
+  setpoint?: ?number,
 }
 
 export type ControlLogic = Array<ControlCondition>
@@ -38,8 +38,8 @@ export type ControlLogic = Array<ControlCondition>
 export const ControlLogicType = (reify: Type<ControlLogic>)
 ControlLogicType.addConstraint((logic: any) => {
   for (let i = 1; i < logic.length; i++) {
-    if (!logic[i].operation) {
-      return 'all conditions except the first must have an operation'
+    if (!logic[i].operator) {
+      return 'all conditions except the first must have an operator'
     }
   }
 })

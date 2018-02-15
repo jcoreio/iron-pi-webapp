@@ -14,7 +14,7 @@ function isAlarmComparison(comparison: Comparison): boolean {
 }
 
 type EvaluateOptions = {
-  getChannelValue: (channelId: string) => ?number,
+  getChannelValue: (tag: string) => ?number,
 }
 
 function or(a: ?boolean, b: ?boolean): ?boolean {
@@ -34,7 +34,7 @@ export default function evaluateControlLogic(controlLogic: ControlLogic, options
     const conditionResult = evaluateCondition(condition, options)
     result = isFirst
       ? conditionResult
-      : (('OR' === condition.operation)
+      : (('OR' === condition.operator)
         ? or(result, conditionResult)
         : and(result, conditionResult)
       )
@@ -46,23 +46,23 @@ export default function evaluateControlLogic(controlLogic: ControlLogic, options
 function evaluateCondition(condition: ControlCondition, {getChannelValue}: EvaluateOptions): ?boolean {
   if (isAlarmComparison(condition.comparison)) {
     // TODO
-    // return isAlarmTriggered(condition.channelId, condition.comparison)
+    // return isAlarmTriggered(condition.tag, condition.comparison)
   } else if (isNumericComparison(condition.comparison)) {
-    const {threshold, comparison} = condition
-    const value = getChannelValue(condition.channelId)
+    const {setpoint, comparison} = condition
+    const value = getChannelValue(condition.tag)
     if (comparison === 'UNAVAILABLE') {
       return !Number.isFinite(value)
     }
-    if (value == null || !Number.isFinite(value) || threshold == null || !Number.isFinite(threshold)) {
+    if (value == null || !Number.isFinite(value) || setpoint == null || !Number.isFinite(setpoint)) {
       return null
     }
     switch (comparison) {
-    case 'LT': return value < threshold
-    case 'LTE': return value <= threshold
-    case 'GTE': return value >= threshold
-    case 'GT': return value > threshold
-    case 'EQ': return value === threshold
-    case 'NE': return value !== threshold
+    case 'LT': return value < setpoint
+    case 'LTE': return value <= setpoint
+    case 'GTE': return value >= setpoint
+    case 'GT': return value > setpoint
+    case 'EQ': return value === setpoint
+    case 'NE': return value !== setpoint
     }
   }
   return false

@@ -26,34 +26,34 @@ import Table, {
 } from 'material-ui/Table'
 
 import type {Theme} from '../../theme'
-import type {Comparison, ControlCondition, LogicOperation} from '../../types/Channel'
-import {Comparisons, LogicOperations} from '../../types/Channel'
+import type {Comparison, ControlCondition, LogicOperator} from '../../types/ControlLogic'
+import {Comparisons, LogicOperators} from '../../types/ControlLogic'
 
-export type ThresholdFieldProps = {
+export type SetpointFieldProps = {
   condition: string,
   comparison: ?Comparison,
   classes: Classes,
 }
 
-const ThresholdField = ({condition, classes, comparison}: ThresholdFieldProps): React.Node => {
+const SetpointField = ({condition, classes, comparison}: SetpointFieldProps): React.Node => {
   if (comparison === 'UNAVAILABLE') return <span />
   return (
     <NumericField
-      name={`${condition}.threshold`}
+      name={`${condition}.setpoint`}
       type="text"
-      placeholder="Threshold"
+      placeholder="Setpoint"
       component={TextField}
-      className={classes.thresholdField}
+      className={classes.setpointField}
       validate={required()}
     />
   )
 }
 
-const ConnectedThresholdField = formValues(createSelector(
+const ConnectedSetpointField = formValues(createSelector(
   ({condition}) => condition,
   (condition: string) => ({comparison: `${condition}.comparison`})
 ))(
-  ThresholdField
+  SetpointField
 )
 
 const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
@@ -111,7 +111,7 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   deleteButton: {
     marginRight: -spacing.unit * 1.5,
   },
-  thresholdField: {
+  setpointField: {
     width: '100%',
     '& input': {
       textAlign: 'center',
@@ -153,14 +153,14 @@ class ControlLogicTable extends React.Component<Props> {
   handleAddConditionClick = () => {
     const {fields} = this.props
     fields.push(({
-      operation: 'AND',
+      operator: 'AND',
       comparison: 'GT',
     }: $Shape<ControlCondition>))
   }
   handleComparisonChange = (condition: string) => (event: any, newValue: Comparison) => {
     if (newValue === 'UNAVAILABLE') {
       const {change} = this.props
-      change(`${condition}.threshold`, null)
+      change(`${condition}.setpoint`, null)
     }
   }
   render(): React.Node {
@@ -197,21 +197,21 @@ class ControlLogicTable extends React.Component<Props> {
               <TableRow key={index}>
                 <TableCell>
                   <Field
-                    name={`${condition}.operation`}
+                    name={`${condition}.operator`}
                     component={TextField}
                     select
                     props={{onBlur: null}}
                     className={index === 0 ? classes.hidden : undefined}
                     validate={index === 0 ? undefined : required()}
                   >
-                    {map(LogicOperations, ({displayText}: {displayText: string}, value: LogicOperation) => (
+                    {map(LogicOperators, ({displayText}: {displayText: string}, value: LogicOperator) => (
                       <MenuItem key={value} value={value}>{displayText}</MenuItem>
                     ))}
                   </Field>
                 </TableCell>
                 <TableCell>
                   <Field
-                    name={`${condition}.channelId`}
+                    name={`${condition}.tag`}
                     component={TextField}
                     select
                     SelectProps={{displayEmpty: true}}
@@ -243,7 +243,7 @@ class ControlLogicTable extends React.Component<Props> {
                   </Field>
                 </TableCell>
                 <TableCell>
-                  <ConnectedThresholdField condition={condition} classes={classes} />
+                  <ConnectedSetpointField condition={condition} classes={classes} />
                 </TableCell>
                 <TableCell>
                   <IconButton
