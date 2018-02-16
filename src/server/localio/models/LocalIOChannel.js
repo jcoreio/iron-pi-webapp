@@ -1,10 +1,10 @@
 // @flow
 
 import Sequelize, {Model} from 'sequelize'
-import type {LocalIOChannelConfig} from '../../universal/localio/LocalIOChannel'
-import {validateLocalIOChannelConfig} from '../../universal/localio/LocalIOChannel'
-import {tagPattern} from '../../universal/types/Tag'
-import type {Tag} from '../../universal/types/Tag'
+import type {LocalIOChannelConfig} from '../../../universal/localio/LocalIOChannel'
+import {validateLocalIOChannelConfig} from '../../../universal/localio/LocalIOChannel'
+import {tagPattern} from '../../../universal/types/Tag'
+import type {Tag} from '../../../universal/types/Tag'
 import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
 
 export type LocalIOChannelInitAttributes = {

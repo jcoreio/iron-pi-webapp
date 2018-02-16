@@ -4,7 +4,7 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import {createSelector} from 'reselect'
 import memoize from 'lodash.memoize'
 
-import LocalIOChannel from './LocalIOChannel'
+import LocalIOChannel from './models/LocalIOChannel'
 import type {DataPluginMapping, DataPluginEmittedEvents} from '../data-router/PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {LocalControlDigitalOutputConfig, Calibration, DigitalInputConfig, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'

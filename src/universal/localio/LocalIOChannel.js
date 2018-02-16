@@ -30,10 +30,6 @@ export type Calibration = {
 }
 
 export type AnalogInputConfig = {
-  units?: string,
-  precision: number,
-  min: number,
-  max: number,
   calibration?: Calibration,
 }
 export const AnalogInputConfigType = (reify: Type<AnalogInputConfig>)
@@ -86,10 +82,6 @@ export const LocalIOChannelConfigTypes: {[mode: ChannelMode]: Type<any>} = {
 
 export type LocalIOChannelConfig = {|
   mode: ChannelMode,
-  units?: string,
-  precision?: number,
-  min?: number,
-  max?: number,
   calibration?: Calibration,
   controlMode?: ControlMode,
   controlLogic?: ControlLogic,
