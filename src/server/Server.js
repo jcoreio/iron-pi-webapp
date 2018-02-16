@@ -137,6 +137,14 @@ export default class Server {
         features,
       })
 
+      for (let feature of features) {
+        if (feature.addPublications) feature.addPublications({
+          dataRouter,
+          metadataHandler,
+          pubsub,
+        })
+      }
+
       const app = this.express = express()
 
       app.use((req: Object, res: Object, next: Function) => {
