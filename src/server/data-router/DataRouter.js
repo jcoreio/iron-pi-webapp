@@ -64,6 +64,15 @@ export default class DataRouter extends EventEmitter {
   tags(): Array<string> { return this._tags }
   publicTags(): Array<string> { return this._publicTags }
 
+  getTagValue(tag: string): any {
+    const entry = this._tagMap[tag]
+    return entry ? entry.v : null
+  }
+  getTagTimestamp(tag: string): ?number {
+    const entry = this._tagMap[tag]
+    return entry ? entry.t : null
+  }
+
   stop() {
     if (this._ingestRateLimitTimeout) {
       clearTimeout(this._ingestRateLimitTimeout)

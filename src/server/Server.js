@@ -18,7 +18,8 @@ import {defaultDbConnectionParams} from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import DataRouter from './data-router/DataRouter'
-import type {DataPlugin} from './data-router/PluginTypes'
+import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
+import MetadataHandler from './metadata/MetadataHandler'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -67,6 +68,7 @@ export default class Server {
   _graphqlDataPlugin: GraphQLDataPlugin
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
+  metadataHandler: ?MetadataHandler
   graphqlSchema: ?GraphQLSchema
   pubsub: PubSubEngine
   express: ?$Application
@@ -110,14 +112,23 @@ export default class Server {
 
       this._devGlobals.pubsub = this.pubsub
 
-      await Promise.all(features.map(feature => feature.createDataPlugins && feature.createDataPlugins()))
+      const dataRouter = this.dataRouter = new DataRouter()
+      const metadataHandler = this.metadataHandler = new MetadataHandler()
+      const dataPluginResources: DataPluginResources = {
+        getTagValue: (tag: string) => dataRouter.getTagValue(tag),
+        getTagTimestamp: (tag: string) => dataRouter.getTagTimestamp(tag),
+        tags: () => dataRouter.tags(),
+        publicTags: () => dataRouter.publicTags(),
+        metadataHandler,
+      }
+      await Promise.all(features.map(feature => feature.createDataPlugins && feature.createDataPlugins(dataPluginResources)))
+      dataRouter.setPlugins(this._getDataPlugins())
       for (let feature of features) {
         if (feature.getDataPlugins && feature instanceof EventEmitter) {
           feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
         }
       }
 
-      const dataRouter = this.dataRouter = new DataRouter({plugins: this._getDataPlugins()})
       this._devGlobals.dataRouter = dataRouter
 
       const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({

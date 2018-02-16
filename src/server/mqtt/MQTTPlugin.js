@@ -9,33 +9,15 @@ import {toPluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {PluginInfo, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
-import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
 import type {
   DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
-  DataPluginMapping, Feature, FeatureEmittedEvents, TimestampedValuesMap, TimeValuePair
+  DataPluginMapping,
 } from '../data-router/PluginTypes'
-import {metadataHandler, EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
+import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
+import type MetadataHandler from '../metadata/MetadataHandler'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
 import type {SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
   SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
-
-const _instances: Array<MQTTPlugin> = []
-
-class MQTTPluginFeature extends EventEmitter<FeatureEmittedEvents> implements Feature {
-  constructor() {
-    super()
-  }
-  async createDataPlugins(): Promise<void> {
-    // Read from Sequelize model and populate _instances array
-  }
-  getDataPlugins(): $ReadOnlyArray<DataPlugin> { return _instances }
-}
-
-export const mqttPluginFeature = new MQTTPluginFeature()
-
-function onSequelizeInstanceAddHook() { // eslint-disable-line no-unused-vars
-  mqttPluginFeature.emit(FEATURE_EVENT_DATA_PLUGINS_CHANGE)
-}
 
 type ToMQTTChannelState = {
   config: MQTTChannelConfig,
@@ -44,9 +26,9 @@ type ToMQTTChannelState = {
 }
 
 type MQTTPluginResources = {
-  tagMap: () => TimestampedValuesMap,
+  getTagValue: (tag: string) => any,
   publicTags: () => Array<string>,
-  metadata: () => TagMetadataMap,
+  metadataHandler: MetadataHandler,
 }
 
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
@@ -87,7 +69,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     })
     this._client.on('birth', () => this._publishNodeBirth())
 
-    metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
+    this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
 
   pluginInfo(): PluginInfo { return this._pluginInfo }
@@ -139,8 +121,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     // Note: This filter() call is intended to mutate _toMQTTChannelStates and return the
     // ones that need to be sent
     return this._toMQTTChannelStates.filter((state: ToMQTTChannelState) => {
-      const timeValuePair: ?TimeValuePair = this._resources.tagMap()[state.config.internalTag]
-      state.curValue = timeValuePair ? timeValuePair.v : undefined
+      state.curValue = this._resources.getTagValue(state.config.internalTag)
       // Return the filtering result:
       return opts.sendAll || !_.isEqual(state.curValue, state.sentValue)
     })
@@ -218,7 +199,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   }
 
   destroy() {
-    metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._metadataListener)
+    this._resources.metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._metadataListener)
     if (this._publishDataTimeout) {
       clearTimeout(this._publishDataTimeout)
       this._publishDataTimeout = undefined
@@ -236,7 +217,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _calcMetadataToMQTT(): TagMetadataMap {
     const metadataToMQTT = {}
     this._toMQTTEnabledChannelConfigs.forEach((channel: MQTTChannelConfig) => {
-      const metadataForTag: ?TagMetadata = this._resources.metadata()[channel.internalTag]
+      const metadataForTag: ?TagMetadata = this._resources.metadataHandler.getTagMetadata(channel.internalTag)
       if (metadataForTag && metadataToMQTT[channel.mqttTag] === undefined)
         metadataToMQTT[channel.mqttTag] = metadataForTag
     })

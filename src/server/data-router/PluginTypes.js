@@ -1,6 +1,7 @@
 // @flow
 
-import type {PluginInfo, MappingProblem, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
+import type {PluginInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
+import type MetadataHandler from '../metadata/MetadataHandler'
 
 /**
  * Information about a single mapping into or out of a plugin
@@ -59,10 +60,11 @@ export type DataPluginEmittedEvents = {
  * Declares which resources are made available to DataPlugins
  */
 export type DataPluginResources = {
-  tagMap: () => TimestampedValuesMap,
+  getTagValue: (tag: string) => any,
+  getTagTimestamp: (tag: string) => ?number,
   tags: () => Array<string>,
   publicTags: () => Array<string>,
-  metadata: () => TagMetadataMap,
+  metadataHandler: MetadataHandler,
 }
 
 /**
@@ -70,7 +72,7 @@ export type DataPluginResources = {
  * when DataPlugin instances are added or removed
  */
 export interface Feature {
-  +createDataPlugins?: () => Promise<void>,
+  +createDataPlugins?: (resources: DataPluginResources) => Promise<void>,
   +getDataPlugins?: () => $ReadOnlyArray<DataPlugin>,
 }
 

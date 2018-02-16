@@ -2,7 +2,7 @@
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
 
-import type {TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
+import type {TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
 
 export const EVENT_METADATA_CHANGE = 'metadataChange'
 
@@ -12,7 +12,7 @@ export type MetadataHandlerEvents = {
   metadataChange: [MetadataChangeEvent],
 }
 
-export class MetadataHandler extends EventEmitter<MetadataHandlerEvents> {
+export default class MetadataHandler extends EventEmitter<MetadataHandlerEvents> {
   _metadata: TagMetadataMap = {}
 
   constructor() {
@@ -20,6 +20,9 @@ export class MetadataHandler extends EventEmitter<MetadataHandlerEvents> {
   }
 
   metadata(): TagMetadataMap { return this._metadata }
+
+  getTagMetadata(tag: string): ?TagMetadata {
+    return this._metadata[tag]
+  }
 }
 
-export const metadataHandler = new MetadataHandler()

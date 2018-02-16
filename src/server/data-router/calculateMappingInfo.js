@@ -2,7 +2,8 @@
 
 import _ from 'lodash'
 
-import {INTERNAL_TAG_PREFIX, MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
+import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
+import {INTERNAL} from '../../universal/types/Tag'
 import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
 
@@ -85,6 +86,6 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
   })
 
   const tags: Array<string> = Array.from(allTags).sort()
-  const publicTags = tags.filter(tag => !tag.startsWith(INTERNAL_TAG_PREFIX))
+  const publicTags = tags.filter(tag => !tag.startsWith(INTERNAL))
   return {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems}
 }
