@@ -115,9 +115,9 @@ export function validateLocalIOChannelConfig(config: any): ?Validation {
     if (controlMode === 'LOCAL_CONTROL') {
       validation.errors.push(...validate(LocalControlDigitalOutputConfigType, config).errors)
       for (let i = 0; i < controlLogic.length; i++) {
-        const {comparison, threshold} = controlLogic[i]
-        if (comparison !== 'UNAVAILABLE' && typeof threshold !== 'number') {
-          validation.errors.push([['controlLogic', i, 'threshold'], 'must be a number', t.number()])
+        const {comparison, setpoint} = controlLogic[i]
+        if (comparison !== 'UNAVAILABLE' && typeof setpoint !== 'number') {
+          validation.errors.push([['controlLogic', i, 'setpoint'], 'must be a number', t.number()])
         }
       }
     }

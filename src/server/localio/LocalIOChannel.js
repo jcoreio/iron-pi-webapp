@@ -40,6 +40,10 @@ export default class LocalIOChannel extends Model<LocalIOChannelAttributes, Loca
       tag: {
         type: Sequelize.STRING,
         allowNull: true,
+        references: {
+          model: 'Metadata',
+          key: 'tag',
+        },
         validate: {
           is: {
             args: tagPattern,
