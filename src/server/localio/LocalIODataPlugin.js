@@ -59,15 +59,15 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       if (tag) mapping.tagFromPlugin = tag
       switch (mode) {
       case 'ANALOG_INPUT': {
-        mapping.tagsToPlugin = [`${INTERNAL}/localio/${id}/rawAnalogInput`]
+        mapping.tagsToPlugin = [`${INTERNAL}localio/${id}/rawAnalogInput`]
         break
       }
       case 'DIGITAL_INPUT': {
-        mapping.tagsToPlugin = [`${INTERNAL}/localio/${id}/rawDigitalInput`]
+        mapping.tagsToPlugin = [`${INTERNAL}localio/${id}/rawDigitalInput`]
         break
       }
       case 'DIGITAL_OUTPUT': {
-        const tagsToPlugin = mapping.tagsToPlugin = [`${INTERNAL}/localio/${id}/controlValue`]
+        const tagsToPlugin = mapping.tagsToPlugin = [`${INTERNAL}localio/${id}/controlValue`]
         if (controlMode === 'LOCAL_CONTROL') {
           const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
           tagsToPlugin.push(...controlLogic.map(({tag}) => tag))
@@ -81,7 +81,7 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
   }
 
   setRemoteControlValue(id: number, value: ?boolean) {
-    this.emit('data', {[`${INTERNAL}/localio/${id}/controlValue`]: digitize(value)})
+    this.emit('data', {[`${INTERNAL}localio/${id}/controlValue`]: digitize(value)})
   }
 
   _channelUpdated = (channel: LocalIOChannel) => {
@@ -93,10 +93,10 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
     const {analogInputLevels, digitalInputLevels} = deviceStatus
     const data = {}
     for (let id = 0; id < analogInputLevels.length; id++) {
-      data[`${INTERNAL}/localio/${id}/rawAnalogInput`] = analogInputLevels[id]
+      data[`${INTERNAL}localio/${id}/rawAnalogInput`] = analogInputLevels[id]
     }
     for (let id = 0; id < digitalInputLevels.length; id++) {
-      data[`${INTERNAL}/localio/${id}/rawDigitalInput`] = digitize(digitalInputLevels[id])
+      data[`${INTERNAL}localio/${id}/rawDigitalInput`] = digitize(digitalInputLevels[id])
     }
     this.emit('data', data)
   }
@@ -108,7 +108,7 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       const {id, tag, config} = channel
       switch (config.mode) {
       case 'ANALOG_INPUT': {
-        const rawAnalogInputTag = `${INTERNAL}/localio/${id}/rawAnalogInput`
+        const rawAnalogInputTag = `${INTERNAL}localio/${id}/rawAnalogInput`
         if (tag != null && changedTags.has(rawAnalogInputTag)) {
           const entry = tagMap[rawAnalogInputTag]
           const rawAnalogInput = entry ? entry.v : null
@@ -119,7 +119,7 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       }
       case 'DIGITAL_INPUT': {
         const {reversePolarity}: DigitalInputConfig = (config: any)
-        const rawDigitalInputTag = `${INTERNAL}/localio/${id}/rawDigitalInput`
+        const rawDigitalInputTag = `${INTERNAL}localio/${id}/rawDigitalInput`
         if (tag != null && changedTags.has(rawDigitalInputTag)) {
           const entry = tagMap[rawDigitalInputTag]
           const rawDigitalInput = entry ? entry.v : null
