@@ -11,7 +11,7 @@ import {attributeFields, defaultArgs, resolver} from 'graphql-sequelize'
 import LocalIOChannel from './LocalIOChannel'
 import type {LocalIOChannelAttributes} from './LocalIOChannel'
 import LocalIODataPlugin from './LocalIODataPlugin'
-import type {MetadataItem} from '../../universal/types/MetadataItem'
+import MetadataItem from '../graphql/types/MetadataItem'
 
 import defaultInputType from '../graphql/types/defaultInputType'
 import type {Context} from '../graphql/Context'
@@ -46,10 +46,13 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
       fields: () => ({
         ...attributeFields(LocalIOChannel, {cache: attributeFieldsCache}),
         metadataItem: {
-          type: JSONType,
-          description: 'the metadata for this channel',
-          resolve: ({tag}: LocalIOChannel, args: any, {metadataHandler}: Context): ?MetadataItem => {
-            if (tag) return metadataHandler.getTagMetadata(tag)
+          type: MetadataItem,
+          description: 'the metadata item for this channel',
+          resolve: ({tag}: LocalIOChannel, args: any, {metadataHandler}: Context) => {
+            if (tag) {
+              const item = metadataHandler.getTagMetadata(tag)
+              return item ? {...item, tag} : null
+            }
           },
         },
       }),
