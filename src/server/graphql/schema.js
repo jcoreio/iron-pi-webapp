@@ -19,7 +19,11 @@ export default function createSchema(options: Options): graphql.GraphQLSchema {
 
   const {types, inputTypes} = createTypes({sequelize, features})
 
+  const typesArray: Array<graphql.GraphQLNamedType> = []
+  for (let key in types) typesArray.push((types[key]: any))
+
   return new graphql.GraphQLSchema({
+    types: typesArray,
     query: createQuery({sequelize, types, features}),
     mutation: createMutation({sequelize, types, inputTypes, features}),
     subscription: createSubscription({sequelize, types, features}),

@@ -7,6 +7,7 @@ import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import models from '../../models'
+import MetadataItem, {DigitalMetadataItem, NumericMetadataItem, TagDataType} from './MetadataItem'
 
 import TimeValuePair from './TimeValuePair'
 import TaggedTimeValuePair from './TaggedTimeValuePair'
@@ -42,12 +43,17 @@ export default function createTypes(options: Options): {
   const types: {[name: string]: GraphQLOutputType} = {
     TimeValuePair,
     TaggedTimeValuePair,
+    TagDataType,
+    MetadataItem,
+    NumericMetadataItem,
+    DigitalMetadataItem,
   }
   const inputTypes: {[name: string]: GraphQLInputType} = {}
 
   for (let key in models) {
     const model = models[key]
     const name = model.options.name.singular
+    if (types[name]) continue
     types[name] = new graphql.GraphQLObjectType({
       name,
       fields: () => ({

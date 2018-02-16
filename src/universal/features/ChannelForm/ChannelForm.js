@@ -268,8 +268,8 @@ class ChannelForm extends React.Component<Props> {
           </ControlWithInfo>
           <ControlWithInfo info="Unique ID used to link this channel with other system functions">
             <Field
-              name="id"
-              label="Channel ID"
+              name="tag"
+              label="Tag"
               type="text"
               component={TextField}
               className={classes.formControl}

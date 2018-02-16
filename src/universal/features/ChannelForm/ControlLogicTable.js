@@ -120,7 +120,7 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
   hidden: {
     visibility: 'hidden',
   },
-  selectChannelItem: {
+  selectTagItem: {
     color: palette.text.hint,
   },
 })
@@ -131,15 +131,15 @@ type Classes = $Call<ExtractClasses, typeof styles>
 type ExtractFields = <T>(props: {fields: T}) => T
 type Fields = $Call<ExtractFields, FieldArrayProps>
 
-type Channel = {
-  id: string,
+type MetadataItem = {
+  tag: string,
   name: string,
 }
 
 export type Props = {
   classes: Classes,
   fields: Fields,
-  channels?: Array<Channel>,
+  metadata?: Array<MetadataItem>,
   formControlClass?: string,
   meta?: {
     warning?: string,
@@ -164,7 +164,7 @@ class ControlLogicTable extends React.Component<Props> {
     }
   }
   render(): React.Node {
-    const {fields, classes, channels, meta, formControlClass} = this.props
+    const {fields, classes, metadata, meta, formControlClass} = this.props
     const {warning, error, submitFailed} = meta || {}
     const hasError = submitFailed && (error != null || warning != null)
     return (
@@ -220,10 +220,10 @@ class ControlLogicTable extends React.Component<Props> {
                     className={classes.fullWidth}
                   >
                     <MenuItem value="">
-                      <span className={classes.selectChannelItem}>Select Channel</span>
+                      <span className={classes.selectTagItem}>Select Tag</span>
                     </MenuItem>
-                    {map(channels, ({id, name}: Channel) => (
-                      <MenuItem key={id} value={id}>{name}</MenuItem>
+                    {map(metadata, ({tag, name}: MetadataItem) => (
+                      <MenuItem key={tag} value={tag}>{name}</MenuItem>
                     ))}
                   </Field>
                 </TableCell>

@@ -10,6 +10,7 @@ import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'
 import createTagValue from './TagValue'
+import MetadataItem from '../types/MetadataItem'
 
 type Options = {
   sequelize: Sequelize,
@@ -33,6 +34,29 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       },
     },
     TagValue: createTagValue(),
+    MetadataItem: {
+      type: MetadataItem,
+      args: {
+        tag: {
+          type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+        },
+      },
+      resolve: (obj: any, {tag}: {tag: string}, {metadataHandler}: Context) => {
+        const metadata = metadataHandler.getTagMetadata(tag)
+        return metadata ? {...metadata, tag} : null
+      }
+    },
+    Metadata: {
+      type: new graphql.GraphQLList(new graphql.GraphQLNonNull(MetadataItem)),
+      resolve: (obj: any, args: any, {metadataHandler}: Context) => {
+        const metadata = []
+        const map = metadataHandler.metadata()
+        for (let tag in map) {
+          metadata.push({...map[tag], tag})
+        }
+        return metadata
+      }
+    },
   }
 
   for (let name in models) {
@@ -47,12 +71,12 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
 
     const {options}: { options: { name: { singular: string, plural: string } } } = (model: any)
 
-    queryFields[options.name.singular] = {
+    if (!queryFields[options.name.singular]) queryFields[options.name.singular] = {
       type,
       args: defaultArgs(model),
       resolve: resolver(model, {before: requireUserId}),
     }
-    queryFields[options.name.plural] = {
+    if (!queryFields[options.name.plural]) queryFields[options.name.plural] = {
       type: new graphql.GraphQLList(type),
       args: defaultArgs(model),
       resolve: resolver(model, {before: requireUserId}),
