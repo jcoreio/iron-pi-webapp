@@ -13,7 +13,7 @@ export default function defaultInputType(
   options?: Options = {}
 ): graphql.GraphQLInputObjectType {
   return new graphql.GraphQLInputObjectType({
-    name: `Input${model.name}`,
+    name: `Input${model.options.name.singular}`,
     fields: () => ({
       ...attributeFields(model, {
         allowNull: true,

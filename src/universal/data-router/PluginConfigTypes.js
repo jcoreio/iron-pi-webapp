@@ -44,13 +44,3 @@ export type MappingProblem = {
   additionalSources?: Array<MappingLocationInfo>,
 }
 
-export type TagMetadata = {
-  name: string,
-  units: string,
-  min: number,
-  max: number,
-  displayPrecision: number,
-  storagePrecision: number,
-}
-
-export type TagMetadataMap = {[tag: string]: TagMetadata}

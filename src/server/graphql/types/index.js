@@ -43,20 +43,22 @@ export default function createTypes(options: Options): {
     TimeValuePair,
     TaggedTimeValuePair,
   }
+  const inputTypes: {[name: string]: GraphQLInputType} = {}
 
   for (let key in models) {
     const model = models[key]
-    types[key] = new graphql.GraphQLObjectType({
-      name: model.name,
+    const name = model.options.name.singular
+    types[name] = new graphql.GraphQLObjectType({
+      name,
       fields: () => ({
         ...attributeFields(model, {cache: attributeFieldsCache}),
         ...associationFields(model, {getType, getArgs}),
         ...extraFields[model.name] || {},
       })
     })
-  }
 
-  const inputTypes = mapValues(models, model => defaultInputType(model, {cache: attributeFieldsCache}))
+    inputTypes[name] = defaultInputType(model, {cache: attributeFieldsCache})
+  }
 
   for (let feature of features) {
     if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes, attributeFieldsCache})

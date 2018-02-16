@@ -6,7 +6,9 @@ import {isEqual} from 'lodash'
 import sparkplug from 'sparkplug-client'
 
 import {toPluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import type {PluginInfo, TagMetadata, TagMetadataMap} from '../../universal/data-router/PluginConfigTypes'
+import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
+import type {TagMetadataMap} from '../metadata/MetadataHandler'
+import type {MetadataItem, NumericMetadataItem} from '../../universal/types/MetadataItem'
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import type {
@@ -217,7 +219,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _calcMetadataToMQTT(): TagMetadataMap {
     const metadataToMQTT = {}
     this._toMQTTEnabledChannelConfigs.forEach((channel: MQTTChannelConfig) => {
-      const metadataForTag: ?TagMetadata = this._resources.metadataHandler.getTagMetadata(channel.internalTag)
+      const metadataForTag: ?MetadataItem = this._resources.metadataHandler.getTagMetadata(channel.internalTag)
       if (metadataForTag && metadataToMQTT[channel.mqttTag] === undefined)
         metadataToMQTT[channel.mqttTag] = metadataForTag
     })
@@ -233,16 +235,20 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       const dataMetrics: Array<SparkPlugDataMertic> = this._generateDataMessage(this._getChannelsToSend({sendAll: true}))
       const metrics: Array<SparkPlugBirthMetric> = dataMetrics.map((dataMetric: SparkPlugDataMertic) => {
         const metadata = this._metadataToMQTT[dataMetric.name] || {}
-        const {name, min, max, units} = metadata
-        return {
+        const {name, dataType, isDigital} = metadata
+        const metric: SparkPlugBirthMetric = {
           ...dataMetric,
           properties: {
             longName: toSparkPlugString(name || dataMetric.name),
-            min: _.isFinite(min) ? toSparkPlugNumber(min) : undefined,
-            max: _.isFinite(max) ? toSparkPlugNumber(max) : undefined,
-            units: units ? toSparkPlugString(units) : undefined
           }
         }
+        if (dataType === 'number' && isDigital !== true) {
+          const {min, max, units}: NumericMetadataItem = (metadata: any)
+          metric.properties.min = toSparkPlugNumber(min)
+          metric.properties.max = toSparkPlugNumber(max)
+          metric.properties.units = toSparkPlugString(units)
+        }
+        return metric
       })
       this._client.publishNodeBirth({timestamp: Date.now(), metrics})
       this._lastTxTime = Date.now()

@@ -7,16 +7,18 @@ import type Sequelize from 'sequelize'
 import type {GraphQLSchema} from 'graphql'
 import formatError from '../graphql/formatError'
 import type DataRouter from '../data-router/DataRouter'
+import type MetadataHandler from '../metadata/MetadataHandler'
 import type {PubSubEngine} from 'graphql-subscriptions'
 
 type Options = {
   schema: GraphQLSchema,
   sequelize: Sequelize,
   dataRouter: DataRouter,
+  metadataHandler: MetadataHandler,
   pubsub: PubSubEngine,
 }
 
-export default function handleGraphql({schema, sequelize, dataRouter, pubsub}: Options): (req: $Request, res: $Response, next: Function) => any {
+export default function handleGraphql({schema, sequelize, dataRouter, metadataHandler, pubsub}: Options): (req: $Request, res: $Response, next: Function) => any {
   return graphqlExpress((req: $Request) => {
     const {userId, scopes} = (req: Object)
     const context: Context = {
@@ -24,6 +26,7 @@ export default function handleGraphql({schema, sequelize, dataRouter, pubsub}: O
       scopes,
       sequelize,
       dataRouter,
+      metadataHandler,
       pubsub,
     }
     return {

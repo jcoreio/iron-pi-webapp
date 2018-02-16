@@ -9,6 +9,7 @@ import type {Context} from '../Context'
 import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'
+import createTagValue from './TagValue'
 
 type Options = {
   sequelize: Sequelize,
@@ -31,6 +32,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         return null
       },
     },
+    TagValue: createTagValue(),
   }
 
   for (let name in models) {
@@ -40,7 +42,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       continue
     }
     const model = models[name]
-    const type = types[name]
+    const type = types[model.options.name.singular]
     if (!type) continue
 
     const {options}: { options: { name: { singular: string, plural: string } } } = (model: any)

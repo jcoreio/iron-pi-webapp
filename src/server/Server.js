@@ -114,6 +114,7 @@ export default class Server {
 
       const dataRouter = this.dataRouter = new DataRouter()
       const metadataHandler = this.metadataHandler = new MetadataHandler()
+      await metadataHandler.loadMetadata()
       const dataPluginResources: DataPluginResources = {
         getTagValue: (tag: string) => dataRouter.getTagValue(tag),
         getTagTimestamp: (tag: string) => dataRouter.getTagTimestamp(tag),
@@ -166,6 +167,7 @@ export default class Server {
         schema: graphqlSchema,
         sequelize,
         dataRouter,
+        metadataHandler,
         pubsub,
       }))
       app.use(GRAPHQL_PATH, (error: ?Error, req: $Request, res: $Response, next: Function) => {
