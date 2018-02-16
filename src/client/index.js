@@ -15,6 +15,7 @@ import createClient from './apollo/client'
 import theme from '../universal/theme'
 import verifyToken from './auth/verifyToken'
 import {logout} from '../universal/auth/actions'
+import superagent from 'superagent'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -33,7 +34,27 @@ async function bootstrap(): Promise<any> {
     if (store != null) store.dispatch(logout({error}))
   }
 
-  const client = createClient({onForbidden})
+  const {body: {data: introspectionQueryResultData}} = await superagent.post('/graphql')
+    .type('json').accept('json')
+    .send({
+      query: `
+        {
+          __schema {
+            types {
+              kind
+              name
+              possibleTypes {
+                name
+              }
+            }
+          }
+        }
+      `,
+    })
+  const client = createClient({
+    onForbidden,
+    introspectionQueryResultData,
+  })
 
   // the state is serialized to plain JS for sending over the wire, so we have
   // to convert it back hydrate immutables here

@@ -6,11 +6,20 @@ import { HttpLink } from 'apollo-link-http'
 import { RetryLink } from 'apollo-link-retry'
 import { setContext } from 'apollo-link-context'
 import { WebSocketLink } from 'apollo-link-ws'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { getMainDefinition } from 'apollo-utilities'
 
 type Options = {
   onForbidden?: (error: string) => any,
+  introspectionQueryResultData?: {
+    __schema: {
+      types: Array<{
+        kind: string,
+        name: string,
+        possibleTypes: ?Array<{name: string}>,
+      }>,
+    },
+  },
 }
 
 function getMessage(error: Error & {result?: {error?: string}}): string {
@@ -22,7 +31,7 @@ function getMessage(error: Error & {result?: {error?: string}}): string {
 }
 
 export default function createClient(options: Options = {}): ApolloClient {
-  const {onForbidden} = options
+  const {onForbidden, introspectionQueryResultData} = options
   const withRetries = new RetryLink({
     delay: {
       max: 30 * 1000,
@@ -63,7 +72,11 @@ export default function createClient(options: Options = {}): ApolloClient {
     }
   })
 
-  const cache = new InMemoryCache().restore(window.__APOLLO_STATE__)
+  const cacheOptions = {}
+  if (introspectionQueryResultData) cacheOptions.fragmentMatcher = new IntrospectionFragmentMatcher({
+    introspectionQueryResultData
+  })
+  const cache = new InMemoryCache(cacheOptions).restore(window.__APOLLO_STATE__)
 
   return new ApolloClient({
     // By default, this client will send queries to the
