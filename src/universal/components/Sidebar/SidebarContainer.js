@@ -87,7 +87,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
   setSidebarOpen,
 }, dispatch)
 
-
 export default compose(
   withRouter,
   withTheme(),

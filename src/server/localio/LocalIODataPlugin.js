@@ -75,6 +75,12 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
           name: `Local Channel ${id} raw analog input`,
           tagFromPlugin: rawAnalogInputTag,
         })
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        mappings.push({
+          id: systemValueTag,
+          name: `Local Channel ${id} system value`,
+          tagFromPlugin: systemValueTag,
+        })
         mapping.tagsToPlugin = [rawAnalogInputTag]
         break
       }
@@ -85,6 +91,12 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
           name: `Local Channel ${id} raw digital input`,
           tagFromPlugin: rawDigitalInputTag,
         })
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        mappings.push({
+          id: systemValueTag,
+          name: `Local Channel ${id} system value`,
+          tagFromPlugin: systemValueTag,
+        })
         mapping.tagsToPlugin = [rawDigitalInputTag]
         break
       }
@@ -94,6 +106,18 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
           id: controlValueTag,
           name: `Local Channel ${id} control value`,
           tagFromPlugin: controlValueTag,
+        })
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        mappings.push({
+          id: systemValueTag,
+          name: `Local Channel ${id} system value`,
+          tagFromPlugin: systemValueTag,
+        })
+        const rawOutputTag = `${INTERNAL}localio/${id}/rawOutput`
+        mappings.push({
+          id: rawOutputTag,
+          name: `Local Channel ${id} raw output`,
+          tagFromPlugin: rawOutputTag,
         })
         const tagsToPlugin = mapping.tagsToPlugin = [controlValueTag]
         if (controlMode === 'LOCAL_CONTROL') {
@@ -143,28 +167,30 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       switch (config.mode) {
       case 'ANALOG_INPUT': {
         const rawAnalogInputTag = `${INTERNAL}localio/${id}/rawAnalogInput`
-        if (tag != null) {
-          const rawAnalogInput = this._getTagValue(rawAnalogInputTag)
-          const calibrator = this._selectCalibrator(id)(channel)
-          data[tag] = calibrator.calibrate(rawAnalogInput)
-        }
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        const rawAnalogInput = this._getTagValue(rawAnalogInputTag)
+        const calibrator = this._selectCalibrator(id)(channel)
+        data[systemValueTag] = calibrator.calibrate(rawAnalogInput)
+        if (tag) data[tag] = data[systemValueTag]
         break
       }
       case 'DIGITAL_INPUT': {
         const {reversePolarity}: DigitalInputConfig = (config: any)
         const rawDigitalInputTag = `${INTERNAL}localio/${id}/rawDigitalInput`
-        if (tag != null) {
-          const rawDigitalInput = this._getTagValue(rawDigitalInputTag)
-          if (reversePolarity && rawDigitalInput != null) {
-            data[tag] = rawDigitalInput ? 0 : 1
-          } else {
-            data[tag] = rawDigitalInput
-          }
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        const rawDigitalInput = this._getTagValue(rawDigitalInputTag)
+        if (reversePolarity && rawDigitalInput != null) {
+          data[systemValueTag] = rawDigitalInput ? 0 : 1
+        } else {
+          data[systemValueTag] = rawDigitalInput
         }
+        if (tag) data[tag] = data[systemValueTag]
         break
       }
       case 'DIGITAL_OUTPUT': {
         const controlValueTag = `${INTERNAL}localio/${id}/controlValue`
+        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        const rawOutputTag = `${INTERNAL}localio/${id}/rawOutput`
         const {reversePolarity, safeState}: DigitalOutputConfig = (config: any)
         let controlValue
         switch (config.controlMode) {
@@ -188,10 +214,11 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
           break
         }
         }
-        if (tag) {
-          const rawOutput = controlValue != null ? controlValue : Boolean(safeState)
-          data[tag] = digitize(reversePolarity ? !rawOutput : rawOutput)
-        }
+        const systemValue = controlValue != null ? controlValue : Boolean(safeState)
+        const rawOutput = reversePolarity ? !systemValue : systemValue
+        data[systemValueTag] = digitize(systemValue)
+        data[rawOutputTag] = digitize(rawOutput)
+        if (tag) data[tag] = data[systemValueTag]
         break
       }
       }

@@ -17,6 +17,9 @@ export const LocalIOChannelState = new graphql.GraphQLInterfaceType({
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
+    systemValue: {
+      type: graphql.GraphQLFloat,
+    },
   },
   resolveType(value: any): ?graphql.GraphQLObjectType {
     switch (value.mode) {
@@ -45,9 +48,6 @@ export const InputChannelState = new graphql.GraphQLInterfaceType({
   name: 'InputChannelState',
   fields: {
     rawInput: {
-      type: graphql.GraphQLFloat,
-    },
-    systemValue: {
       type: graphql.GraphQLFloat,
     },
   },
@@ -108,7 +108,7 @@ export const DigitalOutputState = new graphql.GraphQLObjectType({
       type: graphql.GraphQLInt,
     },
     systemValue: {
-      type: graphql.GraphQLInt,
+      type: graphql.GraphQLFloat,
     },
     rawOutput: {
       type: graphql.GraphQLInt,
@@ -121,6 +121,9 @@ export const DisabledLocalIOChannelState = new graphql.GraphQLObjectType({
   fields: {
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
+    },
+    systemValue: {
+      type: graphql.GraphQLFloat,
     },
   },
 })
