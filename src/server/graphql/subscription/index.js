@@ -20,7 +20,7 @@ export default function createSubscription(options: Options): graphql.GraphQLObj
     TagValues: createTagValues(),
   }
   for (let feature of features) {
-    if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types})
+    if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types, subscriptionFields})
   }
   return new graphql.GraphQLObjectType({
     name: 'Subscription',

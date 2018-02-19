@@ -26,7 +26,7 @@ export type GraphQLFeature = {
   +addSubscriptionFields?: (options: {
     sequelize: Sequelize,
     types: {[name: string]: graphql.GraphQLOutputType},
-    subscriptionField: {[name: string]: GraphQLFieldConfig<any, Context>},
+    subscriptionFields: {[name: string]: GraphQLFieldConfig<any, Context>},
   }) => any,
 }
 
