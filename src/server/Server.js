@@ -262,6 +262,7 @@ export default class Server {
         if (feature.getDataPlugins && feature instanceof EventEmitter) {
           feature.removeListener(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
         }
+        if (feature.stop) await feature.stop()
       }
     }
 

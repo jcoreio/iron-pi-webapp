@@ -28,5 +28,6 @@ export type ServerFeature = {
     dataRouter: DataRouter,
     sequelize: Sequelize,
   }) => any,
+  +stop?: () => any,
 } & GraphQLFeature & DataPluginFeature
 
