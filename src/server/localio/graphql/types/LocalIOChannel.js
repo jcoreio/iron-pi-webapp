@@ -1,7 +1,8 @@
 // @flow
 
 import {attributeFields} from 'graphql-sequelize'
-import {LocalIOChannelState} from './LocalIOChannelState'
+import {LocalIOChannelState as GraphQLLocalIOChannelState} from './LocalIOChannelState'
+import type {LocalIOChannelState} from '../../../../universal/localio/LocalIOChannel'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import type {Context} from '../../../graphql/Context'
 import * as graphql from 'graphql'
@@ -35,9 +36,9 @@ export default function createLocalIOChannel(options: {
         },
       },
       state: {
-        type: LocalIOChannelState,
+        type: GraphQLLocalIOChannelState,
         description: 'the current state of this channel',
-        resolve: (channel: LocalIOChannel, args: any, {dataRouter}: Context) => {
+        resolve: (channel: LocalIOChannel, args: any, {dataRouter}: Context): ?LocalIOChannelState => {
           return getChannelState(channel, {
             getTagValue: tag => dataRouter.getTagValue(tag),
           })

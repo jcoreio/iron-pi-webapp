@@ -105,13 +105,13 @@ export const DigitalOutputState = new graphql.GraphQLObjectType({
       type: graphql.GraphQLInt,
     },
     safeState: {
-      type: graphql.GraphQLInt,
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
     },
     systemValue: {
       type: graphql.GraphQLFloat,
     },
     rawOutput: {
-      type: graphql.GraphQLInt,
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
     },
   },
 })

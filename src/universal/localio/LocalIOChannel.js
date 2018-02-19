@@ -2,6 +2,7 @@
 
 import t, {reify, validate, makeTypeError} from 'flow-runtime'
 import type {Type, Validation} from 'flow-runtime'
+import type {MetadataItem} from '../types/MetadataItem'
 
 import type {ControlLogic, NonEmptyControlLogic} from '../types/ControlLogic'
 
@@ -130,6 +131,47 @@ export function assertChannelConfig(config: any) {
 export type LocalIOChannel = {
   id: number,
   tag: string,
+  metadataItem?: MetadataItem,
+  name?: string,
   config: LocalIOChannelConfig,
+  state?: LocalIOChannelState,
 }
+
+export type AnalogInputState = {
+  mode: 'ANALOG_INPUT',
+  rawInput: ?number,
+  systemValue: any,
+}
+export const AnalogInputStateType = (reify: Type<AnalogInputState>)
+
+export type DigitalInputState = {
+  mode: 'DIGITAL_INPUT',
+  rawInput: ?number,
+  reversePolarity: boolean,
+  systemValue: any,
+}
+export const DigitalInputStateType = (reify: Type<DigitalInputState>)
+
+export type DigitalOutputState = {
+  mode: 'DIGITAL_OUTPUT',
+  controlValue: ?number,
+  safeState: 0 | 1,
+  reversePolarity: boolean,
+  systemValue: any,
+  rawOutput: number,
+}
+export const DigitalOutputStateType = (reify: Type<DigitalOutputState>)
+
+export type DisabledState = {
+  mode: 'DISABLED',
+  systemValue: null | undefined,
+}
+export const DisabledStateType = (reify: Type<DisabledState>)
+
+export type LocalIOChannelState =
+  AnalogInputState |
+  DigitalInputState |
+  DigitalOutputState |
+  DisabledState
+export const LocalIOChannelStateType = (reify: Type<LocalIOChannelState>)
 

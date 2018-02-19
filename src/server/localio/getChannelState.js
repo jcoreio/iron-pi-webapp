@@ -1,12 +1,13 @@
 // @flow
 
 import type LocalIOChannel from './models/LocalIOChannel'
+import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import type {DigitalInputConfig, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
 import {INTERNAL} from '../../universal/types/Tag'
 
 export default function getChannelState(channel: LocalIOChannel, {getTagValue}: {
   getTagValue: (tag: string) => any,
-}): ChannelState {
+}): ?LocalIOChannelState {
   const {id, config} = channel
   switch (config.mode) {
   case 'ANALOG_INPUT': {
