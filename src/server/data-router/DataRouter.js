@@ -1,7 +1,7 @@
 // @flow
 
 import assert from 'assert'
-import EventEmitter from 'events'
+import EventEmitter from '@jcoreio/typed-event-emitter'
 import _ from 'lodash'
 import logger from 'log4jcore'
 
@@ -26,7 +26,11 @@ type ListenersForPlugin = {
   timestampedDataListener: DataPluginTimestampedDataListener,
 }
 
-export default class DataRouter extends EventEmitter {
+type DataRouterEvents = {
+  mappingProblemsChanged: [Array<MappingProblem>],
+}
+
+export default class DataRouter extends EventEmitter<DataRouterEvents> {
   _tagMap: TimestampedValuesMap = {}
   _tags: Array<string> = []
   _publicTags: Array<string> = []
