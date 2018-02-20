@@ -108,7 +108,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     this._pluginsById.clear()
     plugins.forEach((plugin: DataPlugin) => {
       try {
-        assert(plugin)
+        assert(plugin, 'DataRouter got a null plugin')
         const existPlugin = this._pluginsById.get(plugin.pluginInfo().pluginId)
         if (existPlugin) {
           if (existPlugin === plugin) {
@@ -291,12 +291,19 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   }
 
   _pluginIOsChanged() {
-    const pluginMappings: Array<PluginAndMappingsInfo> = this._plugins.map((plugin: DataPlugin) => ({
-      pluginType: plugin.pluginInfo().pluginType,
-      pluginId: plugin.pluginInfo().pluginId,
-      pluginName: plugin.pluginInfo().pluginName,
-      mappings: plugin.ioMappings()
-    }))
+    const pluginMappings: Array<PluginAndMappingsInfo> = []
+    this._plugins.forEach((plugin: DataPlugin) => {
+      try {
+        pluginMappings.push({
+          pluginType: plugin.pluginInfo().pluginType,
+          pluginId: plugin.pluginInfo().pluginId,
+          pluginName: plugin.pluginInfo().pluginName,
+          mappings: plugin.ioMappings()
+        })
+      } catch (err) {
+        log.error(`Error while getting I/O mappings from plugin: ${err.stack}`)
+      }
+    })
 
     const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
       calculateMappingInfo(pluginMappings)
