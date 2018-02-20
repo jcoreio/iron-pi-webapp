@@ -227,6 +227,10 @@ export default class Server {
         schema: graphqlSchema,
         server: httpServer,
         path: GRAPHQL_PATH,
+        sequelize,
+        dataRouter,
+        metadataHandler,
+        pubsub,
       })
 
       // istanbul ignore next
