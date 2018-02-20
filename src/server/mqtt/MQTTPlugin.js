@@ -5,7 +5,6 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
 import sparkplug from 'sparkplug-client'
 
-import {toPluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {TagMetadataMap} from '../metadata/MetadataHandler'
 import type {MetadataItem, NumericMetadataItem} from '../../universal/types/MetadataItem'
@@ -27,7 +26,7 @@ type ToMQTTChannelState = {
   curValue: any,
 }
 
-type MQTTPluginResources = {
+export type MQTTPluginResources = {
   getTagValue: (tag: string) => any,
   publicTags: () => Array<string>,
   metadataHandler: MetadataHandler,
@@ -54,19 +53,20 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
-  constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
+  constructor(args: {pluginInfo: PluginInfo, config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
     this._config = cleanMQTTConfig(args.config)
-    this._pluginInfo = toPluginInfo(this._config)
+    this._pluginInfo = args.pluginInfo
     this._resources = args.resources
 
+    const {serverURL, username, password, groupId, nodeId} = this._config
     this._client = (sparkplug: SparkPlugPackage).newClient({
-      serverUrl: 'tcp://192.168.1.72:1883',
-      username: 'username',
-      password: 'password',
-      groupId: 'testGroupId',
-      edgeNode: 'testNodeId',
-      clientId: 'testClientId',
+      serverUrl: serverURL,
+      username,
+      password,
+      groupId,
+      edgeNode: nodeId,
+      clientId: `jcore-node-${groupId}/${nodeId}`,
       version: SPARKPLUG_VERSION_B_1_0,
     })
     this._client.on('birth', () => this._publishNodeBirth())
@@ -162,7 +162,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     // Extra channels that need to be published in cases where publishAllPublicTags is enabled
     let extraChannelsToPublish: Array<MQTTChannelConfig> = []
     if (this._config.publishAllPublicTags) {
-      const enabledChannelsToMQTT: Array<MQTTChannelConfig> = this._config.channelsToMQTT.filter(
+      const enabledChannelsToMQTT: Array<MQTTChannelConfig> = (this._config.channelsToMQTT || []).filter(
         (channel: MQTTChannelConfig) => channel.enabled)
 
       // Start with all public tags, and filter out tags that either come from this plugin,
@@ -171,7 +171,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
         .map((channel: MQTTChannelConfig) => channel.internalTag)
       const alreadyPublishedMQTTTags: Array<string> = enabledChannelsToMQTT
         .map((channel: MQTTChannelConfig) => channel.mqttTag)
-      const internalTagsFromThisPlugin = this._config.channelsFromMQTT
+      const internalTagsFromThisPlugin = this._config.channelsFromMQTT || []
         .filter((channel: MQTTChannelConfig) => channel.enabled)
         .map((channel: MQTTChannelConfig) => channel.internalTag)
       const publicTagsNotFromThisPlugin = _.difference(this._resources.publicTags(), internalTagsFromThisPlugin)
@@ -185,7 +185,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       }))
     }
     // Combine configured channels with channels added due to "publish all" being enabled
-    this._toMQTTEnabledChannelConfigs = [...this._config.channelsToMQTT, ...extraChannelsToPublish]
+    this._toMQTTEnabledChannelConfigs = [...(this._config.channelsToMQTT || []), ...extraChannelsToPublish]
       // Filter down to only enabled and mapped channels
       .filter((channelConfig: MQTTChannelConfig) => channelConfig.enabled && channelConfig.mqttTag && channelConfig.internalTag)
 
