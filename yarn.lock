@@ -5605,9 +5605,9 @@ mqtt-packet@^5.4.0:
     process-nextick-args "^1.0.7"
     safe-buffer "^5.1.0"
 
-mqtt@^2.3.0:
-  version "2.15.2"
-  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-2.15.2.tgz#300290945646a4a6f3160b375460a17ade703583"
+mqtt@^2.15.3:
+  version "2.15.3"
+  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-2.15.3.tgz#2735001f5c96e7bc3a7cfc9fa145fbde18ff646b"
   dependencies:
     commist "^1.0.0"
     concat-stream "^1.6.0"
@@ -7915,12 +7915,12 @@ sourcemapped-stacktrace@^1.1.6:
   dependencies:
     source-map "0.5.6"
 
-"sparkplug-client@git://github.com/jcoreio/sparkplug-client-js.git#v3.2.0":
+"sparkplug-client@git://github.com/jcoreio/sparkplug-client-js.git#v3.2.1":
   version "3.2.0"
-  resolved "git://github.com/jcoreio/sparkplug-client-js.git#b0859924fba8b6f9d00bd31f297c43bf048f52d0"
+  resolved "git://github.com/jcoreio/sparkplug-client-js.git#8a689bf16ec0a1fbf892fa52eac19fbda34f8205"
   dependencies:
     lodash "^4.17.4"
-    mqtt "^2.3.0"
+    mqtt "^2.15.3"
     pako "^1.0.4"
     protobufjs "^6.0.0"
     winston "^2.3.1"
