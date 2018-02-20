@@ -1,6 +1,5 @@
 // @flow
 
-import type {PluginInfo} from '../data-router/PluginConfigTypes'
 import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
 
 export type MQTTChannelConfig = {
@@ -12,11 +11,13 @@ export type MQTTChannelConfig = {
   offset?: ?number,
 }
 
-export type MQTTConfig = PluginInfo & {
+export type MQTTConfig = {
+  name?: ?string,
+
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
   username: string,
   password: string,
-  groupdId: string,
+  groupId: string,
   nodeId: string,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
@@ -26,8 +27,8 @@ export type MQTTConfig = PluginInfo & {
    * to any channels defined in channelsToMQTT.
    */
   publishAllPublicTags?: ?boolean,
-  channelsToMQTT: Array<MQTTChannelConfig>,
-  channelsFromMQTT: Array<MQTTChannelConfig>,
+  channelsToMQTT?: ?Array<MQTTChannelConfig>,
+  channelsFromMQTT?: ?Array<MQTTChannelConfig>,
 }
 
 /**
@@ -41,7 +42,7 @@ export function cleanMQTTConfig(config: MQTTConfig): MQTTConfig {
 }
 
 export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPluginMapping> {
-  const channelsToMQTTMappings: Array<DataPluginMapping> = config.channelsToMQTT
+  const channelsToMQTTMappings: Array<DataPluginMapping> = (config.channelsToMQTT || [])
     // Save the array index before we filter
     .map((channel: MQTTChannelConfig, index: number) => ({
       channel,
@@ -55,7 +56,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
       name: item.channel.name || `To MQTT ${item.index + 1}`,
       tagsToPlugin: [item.channel.internalTag]
     }))
-  const channelsFromMQTTMappings: Array<DataPluginMapping> = config.channelsFromMQTT
+  const channelsFromMQTTMappings: Array<DataPluginMapping> = (config.channelsFromMQTT || [])
     // Save the array index before we filter
     .map((channel: MQTTChannelConfig, index: number) => ({
       channel,
