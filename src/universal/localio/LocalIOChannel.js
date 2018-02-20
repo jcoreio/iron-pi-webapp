@@ -164,7 +164,7 @@ export const DigitalOutputStateType = (reify: Type<DigitalOutputState>)
 
 export type DisabledState = {
   mode: 'DISABLED',
-  systemValue: null | undefined,
+  systemValue: null | typeof undefined,
 }
 export const DisabledStateType = (reify: Type<DisabledState>)
 

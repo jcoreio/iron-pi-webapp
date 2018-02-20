@@ -128,3 +128,15 @@ export const DisabledLocalIOChannelState = new graphql.GraphQLObjectType({
   },
 })
 
+export const LocalIOChannelIdAndState = new graphql.GraphQLObjectType({
+  name: 'LocalIOChannelIdAndState',
+  fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
+    state: {
+      type: new graphql.GraphQLNonNull(LocalIOChannelState),
+    },
+  },
+})
+

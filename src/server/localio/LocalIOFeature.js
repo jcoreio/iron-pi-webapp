@@ -12,6 +12,8 @@ import addTypes from './graphql/types/addTypes'
 import addQueryFields from './graphql/query/addQueryFields'
 import addMutationFields from './graphql/mutation/addMutationFields'
 import addSubscriptionFields from './graphql/subscription/addSubscriptionFields'
+import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
+import {EVENT_CHANNEL_STATES} from './LocalIODataPlugin'
 
 import type {DataPlugin, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import type {ServerFeature} from '../ServerFeature'
@@ -37,17 +39,25 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
   addQueryFields = addQueryFields
   addMutationFields = addMutationFields
   addSubscriptionFields = addSubscriptionFields
-  addPublications = ({pubsub}: {pubsub: PubSubEngine}) => {
-    LocalIOChannel.addHook('afterUpdate', 'LocalIOFeature_afterChannelUpdate', (channel: LocalIOChannel) => {
-
+  addPublications = ({pubsub}: {
+    pubsub: PubSubEngine,
+  }) => {
+    this._plugin.on(EVENT_CHANNEL_STATES, (states: Array<{id: number, state: LocalIOChannelState}>) => {
+      pubsub.publish(`LocalIOChannelStates`, {LocalIOChannelStates: states})
+      states.forEach(({id, state}: {id: number, state: LocalIOChannelState}) => {
+        pubsub.publish(`LocalIOChannelState/${id}`, {LocalIOChannelState: state})
+      })
     })
   }
   stop = () => {
-    LocalIOChannel.removeHook('afterUpdate', 'LocalIOFeature_afterChannelUpdate')
+    this._plugin.removeAllListeners(EVENT_CHANNEL_STATES)
   }
 
   async createDataPlugins({getTagValue}: Resources): Promise<void> {
-    this._plugin = new LocalIODataPlugin({spiHandler: this._spiHandler, getTagValue})
+    this._plugin = new LocalIODataPlugin({
+      spiHandler: this._spiHandler,
+      getTagValue,
+    })
     await this._plugin._loadChannels()
   }
   getDataPlugins(): $ReadOnlyArray<DataPlugin> {

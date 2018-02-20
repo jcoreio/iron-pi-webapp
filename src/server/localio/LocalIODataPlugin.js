@@ -16,6 +16,8 @@ import type SPIHandler from './SPIHandler'
 import {CM_NUM_IO} from './SPIDevicesInfo'
 import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
+import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
+import getChannelState from './getChannelState'
 
 type Options = {
   spiHandler: SPIHandler,
@@ -27,7 +29,13 @@ function digitize(value: ?boolean): 1 | 0 | null {
   return value ? 1 : 0
 }
 
-export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEvents> {
+export const EVENT_CHANNEL_STATES = 'channelStates'
+
+type Events = {
+  channelStates: [Array<{id: number, state: LocalIOChannelState}>],
+} & DataPluginEmittedEvents
+
+export default class LocalIODataPlugin extends EventEmitter<Events> {
   _spiHandler: SPIHandler
   _getTagValue: (tag: string) => any
   _channels: Array<LocalIOChannel> = []
@@ -143,9 +151,12 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
   }
 
   _channelUpdated = (channel: LocalIOChannel) => {
-    this._channels[channel.id] = channel
+    const {id} = channel
+    this._channels[id] = channel
     this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
     this._updateData()
+    const state = getChannelState(channel, {getTagValue: this._getTagValue})
+    this.emit(EVENT_CHANNEL_STATES, [{id, state}])
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
@@ -232,6 +243,7 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
 
   dispatchCycleDone() {
     const outputValues: Array<boolean> = []
+    const states: Array<{id: number, state: LocalIOChannelState}> = []
     for (let channel of this._channels) {
       const {id, config} = channel
       if (config.mode === 'DIGITAL_OUTPUT') {
@@ -242,8 +254,11 @@ export default class LocalIODataPlugin extends EventEmitter<DataPluginEmittedEve
       } else {
         outputValues[id] = false
       }
+      const state = getChannelState(channel, {getTagValue: this._getTagValue})
+      states.push({id, state})
     }
     this._spiHandler.sendDigitalOutputs(outputValues)
+    this.emit(EVENT_CHANNEL_STATES, states)
   }
 
   start() {

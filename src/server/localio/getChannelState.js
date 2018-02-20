@@ -7,7 +7,7 @@ import {INTERNAL} from '../../universal/types/Tag'
 
 export default function getChannelState(channel: LocalIOChannel, {getTagValue}: {
   getTagValue: (tag: string) => any,
-}): ?LocalIOChannelState {
+}): LocalIOChannelState {
   const {id, config} = channel
   switch (config.mode) {
   case 'ANALOG_INPUT': {
@@ -41,5 +41,6 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
     return {mode: 'DISABLED', systemValue: null}
   }
   }
+  throw new Error('Unknown channel mode: ' + config.mode)
 }
 

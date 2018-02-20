@@ -14,7 +14,7 @@ import {getMainDefinition} from 'apollo-utilities'
 import superagent from 'superagent'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
-import createSubscribeToChannelStates from '../src/universal/apollo/createSubscribeToChannelStates'
+import createSubscribeToChannelStates from '../src/universal/localio/apollo/createSubscribeToChannelStates'
 
 type Options = {
   rootUrl: string,

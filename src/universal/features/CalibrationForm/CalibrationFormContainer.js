@@ -5,7 +5,7 @@ import {compose} from 'redux'
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import CalibrationForm from './CalibrationForm'
-import createSubscribeToChannelState from '../../apollo/createSubscribeToChannelState'
+import createSubscribeToChannelState from '../../localio/apollo/createSubscribeToChannelState'
 
 const channelQuery = gql(`query Channels($where: SequelizeJSON) {
   Channel(where: $where) {

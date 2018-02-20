@@ -2,7 +2,7 @@
 
 import {
   AnalogInputState, DigitalChannelState, DigitalInputState, DigitalOutputState, DisabledLocalIOChannelState,
-  LocalIOChannelState
+  LocalIOChannelState, LocalIOChannelIdAndState
 } from './LocalIOChannelState'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import defaultInputType from '../../../graphql/types/defaultInputType'
@@ -18,6 +18,7 @@ export default function addTypes({types, inputTypes, attributeFieldsCache}: {
     LocalIOChannelState, DigitalChannelState,
     AnalogInputState, DigitalInputState, DigitalOutputState,
     DisabledLocalIOChannelState,
+    LocalIOChannelIdAndState,
   ]) {
     types[type.name] = type
   }
