@@ -36,7 +36,7 @@ import createSubscriptionServer from './express/subscriptionServer'
 import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'
 import initDatabase from './initDatabase'
-import getFeatures from './getFeatures'
+import createFeatures from './createFeatures'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 import seedDatabase from './sequelize/seedDatabase'
 import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
@@ -88,8 +88,11 @@ export default class Server {
 
     log.info('Starting webapp server...')
     try {
-      const features = this._features = await getFeatures()
-      const {sequelize, umzug} = await initDatabase(this._dbConnectionParams)
+      const features = this._features = await createFeatures()
+      const {sequelize, umzug} = await initDatabase({
+        connectionParams: this._dbConnectionParams,
+        features
+      })
       this._devGlobals.sequelize = this.sequelize = sequelize
       this._devGlobals.umzug = this._umzug = umzug
 

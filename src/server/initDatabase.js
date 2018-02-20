@@ -4,23 +4,26 @@ import fs from 'fs-extra'
 import path from 'path'
 import type Sequelize from 'sequelize'
 import type Umzug from 'umzug'
+import createFeatures from './createFeatures'
 import createSequelize from './sequelize/index'
 import databaseReady from './sequelize/databaseReady'
 import createUmzug from './sequelize/umzug'
-import getFeatures from './getFeatures'
 import type {DbConnectionParams} from './sequelize'
 import {defaultDbConnectionParams} from './sequelize'
 import copyIfNewer from './util/copyIfNewer'
+import type {ServerFeature} from './ServerFeature'
 
-export default async function initDatabase(params: DbConnectionParams = defaultDbConnectionParams()): Promise<{
+export default async function initDatabase(args: {
+  connectionParams?: ?DbConnectionParams,
+  features?: ?Array<ServerFeature>,
+} = {}): Promise<{
   sequelize: Sequelize,
   umzug: Umzug,
 }> {
-  const features = await getFeatures()
-
+  const connectionParams: DbConnectionParams = args.connectionParams || defaultDbConnectionParams()
+  const features: Array<ServerFeature> = args.features || (await createFeatures())
   await databaseReady()
-
-  const sequelize = createSequelize(params)
+  const sequelize = createSequelize(connectionParams || defaultDbConnectionParams())
   const featureMigrations = [].concat(
     ...await Promise.all(features.map(feature => feature.getMigrations ? feature.getMigrations() : []))
   )

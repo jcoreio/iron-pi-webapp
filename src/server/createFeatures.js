@@ -2,7 +2,7 @@
 
 import type {ServerFeature} from './ServerFeature'
 
-export default async function getFeatures(): Promise<Array<ServerFeature>> {
+export default async function createFeatures(): Promise<Array<ServerFeature>> {
   return [
   ]
 }
