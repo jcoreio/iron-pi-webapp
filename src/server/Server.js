@@ -119,6 +119,7 @@ export default class Server {
       const metadataHandler = this.metadataHandler = new MetadataHandler()
       await metadataHandler.loadMetadata()
       const dataPluginResources: DataPluginResources = {
+        pubsub,
         getTagValue: (tag: string) => dataRouter.getTagValue(tag),
         getTagTimestamp: (tag: string) => dataRouter.getTagTimestamp(tag),
         tags: () => dataRouter.tags(),

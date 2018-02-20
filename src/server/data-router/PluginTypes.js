@@ -2,6 +2,7 @@
 
 import type {PluginInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import type MetadataHandler from '../metadata/MetadataHandler'
+import type {PubSubEngine} from 'graphql-subscriptions'
 
 /**
  * Information about a single mapping into or out of a plugin
@@ -60,6 +61,7 @@ export type DataPluginEmittedEvents = {
  * Declares which resources are made available to DataPlugins
  */
 export type DataPluginResources = {
+  pubsub: PubSubEngine,
   getTagValue: (tag: string) => any,
   getTagTimestamp: (tag: string) => ?number,
   tags: () => Array<string>,
