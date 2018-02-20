@@ -4,6 +4,7 @@ import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
 
 export type DigitalMetadataItem = {
+  tag: string,
   name: string,
   dataType: 'number',
   isDigital: true,
@@ -12,6 +13,7 @@ export type DigitalMetadataItem = {
 export const DigitalMetadataItemType = (reify: Type<DigitalMetadataItem>)
 
 export type NumericMetadataItem = {
+  tag: string,
   name: string,
   dataType: 'number',
   isDigital?: false,

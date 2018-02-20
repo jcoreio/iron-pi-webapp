@@ -8,6 +8,7 @@ import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import models from '../../models'
 import MetadataItem, {DigitalMetadataItem, NumericMetadataItem, TagDataType} from './MetadataItem'
+import InputMetadataItem from './InputMetadataItem'
 
 import TimeValuePair from './TimeValuePair'
 import TaggedTimeValuePair from './TaggedTimeValuePair'
@@ -48,7 +49,9 @@ export default function createTypes(options: Options): {
     NumericMetadataItem,
     DigitalMetadataItem,
   }
-  const inputTypes: {[name: string]: GraphQLInputType} = {}
+  const inputTypes: {[name: string]: GraphQLInputType} = {
+    InputMetadataItem,
+  }
 
   for (let key in models) {
     const model = models[key]

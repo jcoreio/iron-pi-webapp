@@ -19,8 +19,8 @@ export default function createMutation(options: Options): graphql.GraphQLObjectT
   const {sequelize, types, inputTypes, features} = options
   const mutationFields = {
     setUsername: setUsername({types}),
-    createMetadataItem: createMetadataItem({types, inputTypes}),
-    updateMetadataItem: updateMetadataItem({types, inputTypes}),
+    createMetadataItem: createMetadataItem(),
+    updateMetadataItem: updateMetadataItem(),
   }
   for (let feature of features) {
     if (feature.addMutationFields) feature.addMutationFields({sequelize, types, inputTypes, mutationFields})
