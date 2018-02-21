@@ -11,7 +11,7 @@ import MetadataItemFields from './MetadataItemFields'
 
 export type Props = {
   tag: ?string,
-  data: {
+  data?: {
     metadataItem?: MetadataItem,
     loading: boolean,
   },
@@ -44,6 +44,10 @@ type Context = {
   },
 }
 
+function getMetadataItem(props: Props): ?MetadataItem {
+  return props.data && props.data.metadataItem
+}
+
 class MetadataItemFieldsContainer extends React.Component<Props> {
   static contextTypes = {
     _reduxForm: PropTypes.shape({
@@ -62,13 +66,13 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
   }
 
   componentDidMount() {
-    const {data: {metadataItem}} = this.props
+    const metadataItem = getMetadataItem(this.props)
     if (metadataItem) this._updateFields(metadataItem)
   }
 
   componentWillReceiveProps(nextProps: Props, nextContext: Context) {
-    const prevMetadataItem = this.props.data.metadataItem
-    const nextMetadataItem = nextProps.data.metadataItem
+    const prevMetadataItem = getMetadataItem(this.props)
+    const nextMetadataItem = getMetadataItem(nextProps)
     if (nextMetadataItem && nextMetadataItem !== prevMetadataItem) {
       this._updateFields(nextMetadataItem, nextContext)
     }
@@ -90,6 +94,7 @@ export default compose(
       variables: {tag},
       errorPolicy: 'all',
     }),
+    skip: ({tag}: Props) => !tag,
   })
 )(MetadataItemFieldsContainer)
 
