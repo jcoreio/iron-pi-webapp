@@ -13,6 +13,9 @@ export const TagDataType = new graphql.GraphQLEnumType({
 const MetadataItem = new graphql.GraphQLInterfaceType({
   name: 'MetadataItem',
   fields: {
+    _id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
     tag: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
     },
@@ -37,6 +40,9 @@ export const NumericMetadataItem = new graphql.GraphQLObjectType({
   name: 'NumericMetadataItem',
   interfaces: [MetadataItem],
   fields: {
+    _id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
     tag: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
     },
@@ -68,6 +74,9 @@ export const DigitalMetadataItem = new graphql.GraphQLObjectType({
   name: 'DigitalMetadataItem',
   interfaces: [MetadataItem],
   fields: {
+    _id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
     tag: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
     },

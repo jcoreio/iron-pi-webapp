@@ -43,7 +43,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       },
       resolve: (obj: any, {tag}: {tag: string}, {metadataHandler}: Context) => {
         const metadata = metadataHandler.getTagMetadata(tag)
-        return metadata ? {...metadata, tag} : null
+        return metadata ? {...metadata, tag, _id: tag} : null
       }
     },
     Metadata: {
@@ -52,7 +52,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         const metadata = []
         const map = metadataHandler.metadata()
         for (let tag in map) {
-          metadata.push({...map[tag], tag})
+          metadata.push({...map[tag], tag, _id: tag})
         }
         return metadata
       }
