@@ -27,7 +27,7 @@ import ErrorAlert from '../../components/ErrorAlert'
 import Autocollapse from '../../components/Autocollapse'
 import type {Theme} from '../../theme/index'
 import type {Calibration, LocalIOChannel as FullChannel} from '../../localio/LocalIOChannel'
-import {CALIBRATION_TABLE} from '../../react-router/routePaths'
+import {CALIBRATION_TABLE} from '../localio/routePaths'
 import handleError from '../../redux-form/createSubmissionError'
 
 const styles = ({spacing, calibration}: Theme) => ({

@@ -1,8 +1,9 @@
 // @flow
 
 import * as React from 'react'
+import type {Feature} from '../Feature'
 
-const calibrationFormFeature = {
+const calibrationFormFeature: Feature = {
   load: async () => {
     return {
       ...calibrationFormFeature,

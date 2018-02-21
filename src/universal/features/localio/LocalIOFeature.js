@@ -3,15 +3,19 @@
 import * as React from 'react'
 import {Route, Link} from 'react-router-dom'
 import type {ContextRouter, Match} from 'react-router-dom'
+import Drilldown from 'react-router-drilldown/lib/withTransitionContext'
+import type {Feature} from '../Feature'
 import featureLoader from '../../components/featureLoader'
-import {channelForm, calibrationForm, CALIBRATION} from '../../react-router/routePaths'
+import {channelForm, calibrationForm, CALIBRATION} from './routePaths'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
-import Drilldown from 'react-router-drilldown/lib/withTransitionContext'
+import LocalIOSidebarSectionContainer from './LocalIOSidebarSectionContainer'
+
+export const FEATURE_ID = 'localio'
 
 const ChannelFormContainer = featureLoader({
-  featureId: 'channelForm',
-  featureName: 'Channel Form',
+  featureId: FEATURE_ID,
+  featureName: 'Local I/O',
   getComponent: feature => (feature: any).ChannelFormContainer,
 })
 
@@ -21,7 +25,7 @@ const CalibrationFormContainer = featureLoader({
   getComponent: feature => (feature: any).CalibrationFormContainer,
 })
 
-const channelFormFeature = {
+const LocalIOFeature: Feature = {
   navbarRoutes: [
     <Route
       key={channelForm((':id': any))}
@@ -68,13 +72,17 @@ const channelFormFeature = {
       }}
     />,
   ],
+  sidebarSections: [
+    LocalIOSidebarSectionContainer,
+  ],
+  sidebarSectionsOrder: 500,
   load: async () => {
     return {
-      ...channelFormFeature,
+      ...LocalIOFeature,
       ChannelFormContainer: (await import('./ChannelFormContainer')).default,
     }
   }
 }
 
-export default channelFormFeature
+export default LocalIOFeature
 

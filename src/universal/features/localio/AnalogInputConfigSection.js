@@ -5,7 +5,7 @@ import {withRouter, Link} from 'react-router-dom'
 
 import ControlWithInfo from '../../components/ControlWithInfo'
 import DrilldownButton from '../../components/DrilldownButton'
-import {CALIBRATION} from '../../react-router/routePaths'
+import {CALIBRATION} from './routePaths'
 
 export type Props = {
   formControlClass: string,
