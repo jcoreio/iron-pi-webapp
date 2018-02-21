@@ -5,9 +5,9 @@ import {
   LocalIOChannelState, LocalIOChannelIdAndState
 } from './LocalIOChannelState'
 import LocalIOChannel from '../../models/LocalIOChannel'
-import defaultInputType from '../../../graphql/types/defaultInputType'
 import * as graphql from 'graphql'
 import createLocalIOChannelType from './LocalIOChannel'
+import createInputLocalIOChannel from './InputLocalIOChannel'
 
 export default function addTypes({types, inputTypes, attributeFieldsCache}: {
   types: {[name: string]: graphql.GraphQLOutputType},
@@ -23,6 +23,6 @@ export default function addTypes({types, inputTypes, attributeFieldsCache}: {
     types[type.name] = type
   }
   types[LocalIOChannel.options.name.singular] = createLocalIOChannelType({attributeFieldsCache})
-  inputTypes.LocalIOChannel = defaultInputType(LocalIOChannel, {cache: attributeFieldsCache})
+  inputTypes.LocalIOChannel = createInputLocalIOChannel({attributeFieldsCache})
 }
 

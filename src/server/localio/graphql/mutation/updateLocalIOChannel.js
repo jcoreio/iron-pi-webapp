@@ -2,9 +2,18 @@
 
 import * as graphql from 'graphql'
 import LocalIOChannel from '../../models/LocalIOChannel'
+import type {LocalIOChannelConfig} from '../../../../universal/localio/LocalIOChannel'
+import type {MetadataItem} from '../../../../universal/types/MetadataItem'
+import SequelizeMetadataItem from '../../../models/MetadataItem'
 import JSONType from 'graphql-type-json'
 import type {Context} from '../../../graphql/Context'
-import type {LocalIOChannelAttributes} from '../../models/LocalIOChannel'
+
+type InputChannel = {
+  id?: number,
+  tag?: string,
+  config?: LocalIOChannelConfig,
+  metadataItem?: MetadataItem,
+}
 
 export default function updateLocalIOChannel({types, inputTypes}: {
   types: {[name: string]: graphql.GraphQLOutputType},
@@ -26,15 +35,24 @@ export default function updateLocalIOChannel({types, inputTypes}: {
         description: 'The fields to update',
       }
     },
-    resolve: async (doc: any, {id, where, channel}: {id: ?number, where: ?Object, channel: $Shape<LocalIOChannelAttributes>}, context: Context): Promise<any> => {
+    resolve: async (doc: any, {id, where, channel}: {id: ?number, where: ?Object, channel: InputChannel}, context: Context): Promise<any> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
-      if (!where) where = {id: id != null ? id : channel.id}
+      if (!where) {
+        if (id) where = {id}
+        else if (channel.id) where = {id: channel.id}
+        else throw new Error('id or channel.id must be provided')
+      }
 
-      const {
-        createdAt, updatedAt, // eslint-disable-line no-unused-vars
-        ...updates
-      } = channel
+      const {metadataItem, ...updates} = channel
+
+      if (metadataItem) {
+        const {tag} = metadataItem
+        updates.tag = tag
+        const [numUpdated] = await SequelizeMetadataItem.update({item: metadataItem}, {where: {tag}, individualHooks: true})
+        if (!numUpdated) await SequelizeMetadataItem.create({tag, item: metadataItem})
+      }
+
       await LocalIOChannel.update(updates, {where, individualHooks: true})
       const result = await LocalIOChannel.findOne({where})
       if (!result) throw new graphql.GraphQLError('Failed to find updated LocalIOChannel')

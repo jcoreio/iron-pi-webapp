@@ -22,7 +22,7 @@ export default function createLocalIOChannel(options: {
         resolve: ({tag}: LocalIOChannel, args: any, {metadataHandler}: Context) => {
           if (tag) {
             const item = metadataHandler.getTagMetadata(tag)
-            return item ? {...item, tag} : null
+            return item ? {...item, tag, _id: tag} : null
           }
         },
       },
