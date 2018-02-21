@@ -91,16 +91,21 @@ export type Props = {
   classes: Classes,
   className?: string,
   channel?: {
-    config: LocalIOChannelConfig,
+    metadataItem?: {
+      units?: string,
+      displayPrecision?: number,
+    },
     state?: AnalogInputState,
   },
 }
 
 const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
   ({classes, className, channel}: Props) => {
-    const {config, state} = channel || {config: {}, state: null}
-    const {units} = config
-    const precision = config.precision || 0
+    const finalChannel = channel || {}
+    const metadataItem = finalChannel.metadataItem || {}
+    const {state} = finalChannel
+    const {units} = metadataItem
+    const precision = metadataItem.displayPrecision || 0
     const {rawInput, systemValue} = state || {}
     return (
       <div className={classNames(classes.root, className)} data-component="AnalogInputStateWidget">

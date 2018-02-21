@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {Route, Link} from 'react-router-dom'
-import type {ContextRouter} from 'react-router-dom'
+import type {ContextRouter, Match} from 'react-router-dom'
 import featureLoader from '../../components/featureLoader'
 import {channelForm, calibrationForm, CALIBRATION} from '../../react-router/routePaths'
 import Title from '../../components/Navbar/Title'
@@ -24,14 +24,14 @@ const CalibrationFormContainer = featureLoader({
 const channelFormFeature = {
   navbarRoutes: [
     <Route
-      key={channelForm((':physicalChannelId': any))}
-      path={channelForm((':physicalChannelId': any))}
+      key={channelForm((':id': any))}
+      path={channelForm((':id': any))}
       render={({match}) => (
         <Title>
           Local I/O
           <ChevronRight />
           <Link to={match.url} data-test-name="channelFormLink">
-            Channel {match.params.physicalChannelId}
+            Channel {match.params.id}
           </Link>
           <Route
             path={`${match.url}/${CALIBRATION}`}
@@ -48,21 +48,24 @@ const channelFormFeature = {
   ],
   bodyRoutes: [
     <Route
-      key={channelForm((':physicalChannelId': any))}
-      path={channelForm((':physicalChannelId': any))}
-      render={({match: {params: {physicalChannelId}}}) => (
-        <Drilldown animateHeight={false}>
-          <Route
-            path={channelForm((':physicalChannelId': any))}
-            exact
-            render={() => <ChannelFormContainer physicalChannelId={parseInt(physicalChannelId)} />}
-          />
-          <Route
-            path={calibrationForm((':physicalChannelId': any))}
-            render={(props: ContextRouter) => <CalibrationFormContainer physicalChannelId={parseInt(physicalChannelId)} {...props} />}
-          />
-        </Drilldown>
-      )}
+      key={channelForm((':id': any))}
+      path={channelForm((':id': any))}
+      render={({match}: {match: Match}): React.Node => {
+        const id = parseInt(match.params.id) - 1
+        return (
+          <Drilldown animateHeight={false}>
+            <Route
+              path={channelForm((':id': any))}
+              exact
+              render={() => <ChannelFormContainer id={id} />}
+            />
+            <Route
+              path={calibrationForm((':id': any))}
+              render={(props: ContextRouter) => <CalibrationFormContainer id={id} {...props} />}
+            />
+          </Drilldown>
+        )
+      }}
     />,
   ],
   load: async () => {

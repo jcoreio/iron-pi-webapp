@@ -2,23 +2,23 @@
 
 import * as React from 'react'
 import Paper from 'material-ui/Paper'
-import {formValues} from 'redux-form'
+import {FormSection} from 'redux-form'
 import {Field} from 'redux-form-normalize-on-blur'
-import TextField from '../../components/TextField'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
-import {required, format} from '@jcoreio/redux-form-validators'
+import {required} from '@jcoreio/redux-form-validators'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
+import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsContainer'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
 import ButtonGroupField from '../../components/ButtonGroupField'
 
 import {ChannelModesArray, getChannelModeDisplayText} from '../../localio/LocalIOChannel'
-import {tagPattern} from '../../types/Tag'
-import type {ChannelMode, LocalIOChannel as FullChannel} from '../../localio/LocalIOChannel'
+import type {ChannelMode, LocalIOChannelConfig, LocalIOChannelState} from '../../localio/LocalIOChannel'
+import type {MetadataItem} from '../../types/MetadataItem'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
@@ -67,8 +67,6 @@ const styles = ({spacing}: Theme) => ({
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
-const trim = (value: ?string) => value && value.trim()
-
 const Empty = () => <div />
 
 const ConfigComponents: {[mode: ChannelMode]: React.ComponentType<any> | string} = {
@@ -78,8 +76,8 @@ const ConfigComponents: {[mode: ChannelMode]: React.ComponentType<any> | string}
   DISABLED: Empty,
 }
 
-type Channel = {
-  id: number,
+type ControlLogicMetadataItem = {
+  tag: string,
   name: string,
 }
 
@@ -91,10 +89,10 @@ export type ConfigSectionProps = {
   firstControlClass: string,
   lastControlClass: string,
   tallButtonClass: string,
-  channels?: Array<Channel>,
+  metadata?: Array<ControlLogicMetadataItem>,
 }
 
-const ConfigSection = formValues('config')(
+const ConfigSection = (
   ({config, ...props}: ConfigSectionProps): React.Node => {
     const mode = config && config.mode || 'DISABLED'
     return (
@@ -136,6 +134,13 @@ const channelStateInfo: {[name: ChannelMode]: React.Node} = {
   )
 }
 
+type FullChannel = {
+  id: number,
+  config: LocalIOChannelConfig,
+  state?: LocalIOChannelState,
+  metadataItem?: MetadataItem,
+}
+
 export type Props = {
   classes: Classes,
   initialize: (values: FullChannel) => any,
@@ -146,12 +151,15 @@ export type Props = {
   pristine?: boolean,
   error?: string,
   change?: (field: string, newValue: any) => any,
+  config?: {
+    mode: ChannelMode,
+  },
   data: {
     Channel?: FullChannel,
-    Channels?: Array<Channel>,
+    Metadata?: Array<ControlLogicMetadataItem>,
     loading?: boolean,
   },
-  subscribeToChannelState?: (id: string) => Function,
+  subscribeToChannelState?: (id: number) => Function,
   handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
   mutate: (options: {variables: {id?: number, where?: Object, channel: FullChannel}}) => Promise<void>,
 }
@@ -160,7 +168,7 @@ class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
-  pickFormFields = ({id, tag, config}: FullChannel) => ({id, tag, config})
+  pickFormFields = ({id, metadataItem, config}: FullChannel) => ({id, metadataItem, config})
 
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
@@ -176,15 +184,21 @@ class ChannelForm extends React.Component<Props> {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 
+    function getId(channel: ?{ id: number }): ?number {
+      return channel ? channel.id : null
+    }
+
     if (nextChannel !== prevChannel) {
-      if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
-      if (nextChannel) {
-        if (nextProps.pristine) {
-          this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
-        }
-        const {subscribeToChannelState} = nextProps
-        if (subscribeToChannelState) {
-          this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
+      if (nextChannel && nextProps.pristine) {
+        this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
+      }
+      if (getId(nextChannel) !== getId(prevChannel)) {
+        if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
+        if (nextChannel) {
+          const {subscribeToChannelState} = nextProps
+          if (subscribeToChannelState) {
+            this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
+          }
         }
       }
     }
@@ -202,21 +216,22 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate} = this.props
-    const {id, tag, config} = parseChannelFormValues(channel)
+    const {id, config, metadataItem} = parseChannelFormValues(channel)
     return mutate({
       variables: {
         where: {id},
-        channel: {id, tag, config}
+        channel: {id, config, metadataItem}
       }
     }).catch(handleError)
   }
 
   render(): React.Node {
     const {
-      classes, data: {Channels, Channel, loading}, initialized, pristine,
+      classes, data: {Metadata, Channel, loading}, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
       handleSubmit, change,
     } = this.props
+    const config = this.props.config || {mode: 'DISABLED', systemValue: null}
     if (loading || !initialized) {
       return (
         <div className={classes.form}>
@@ -256,34 +271,22 @@ class ChannelForm extends React.Component<Props> {
               validate={required()}
             />
           </ControlWithInfo>
-          <ControlWithInfo info="Display name for this channel">
-            <Field
-              name="name"
-              label="Channel Name"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-              validate={required()}
-              normalizeOnBlur={trim}
+          <FormSection name="metadataItem">
+            <MetadataItemFieldsContainer
+              formControlClass={classes.formControl}
+              mode={{
+                dataType: 'number',
+                isDigital: config ? config.mode !== 'ANALOG_INPUT' : true,
+              }}
             />
-          </ControlWithInfo>
-          <ControlWithInfo info="Unique ID used to link this channel with other system functions">
-            <Field
-              name="tag"
-              label="Tag"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-              validate={[required(), format({with: tagPattern, message: 'invalid Channel ID'})]}
-              normalize={trim}
-            />
-          </ControlWithInfo>
+          </FormSection>
           <ConfigSection
+            config={config}
             formControlClass={classes.formControl}
             firstControlClass={classes.firstFaderChild}
             lastControlClass={classes.lastFaderChild}
             tallButtonClass={classes.tallButton}
-            channels={Channels}
+            metadata={Metadata}
             change={change}
           />
           <SubmitStatus

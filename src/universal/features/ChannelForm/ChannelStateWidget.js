@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import type {LocalIOChannelConfig, ChannelMode, ChannelState} from '../../localio/LocalIOChannel'
+import type {LocalIOChannelConfig, ChannelMode, LocalIOChannelState} from '../../localio/LocalIOChannel'
 
 import Spinner from '../../components/Spinner'
 import TextStateWidget from './TextStateWidget'
@@ -14,7 +14,7 @@ export type Props = {
   className?: string,
   channel: {
     config: LocalIOChannelConfig,
-    state?: ChannelState,
+    state?: LocalIOChannelState,
   },
 }
 

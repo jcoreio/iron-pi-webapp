@@ -11,8 +11,8 @@ import ControlLogicTable from './ControlLogicTable'
 import {required} from '@jcoreio/redux-form-validators'
 import type {ControlMode} from '../../localio/LocalIOChannel'
 
-type Channel = {
-  id: number,
+type MetadataItem = {
+  tag: string,
   name: string,
 }
 
@@ -22,7 +22,7 @@ export type Props = {
   lastControlClass: string,
   tallButtonClass: string,
   "config.controlMode"?: ControlMode,
-  channels?: Array<Channel>,
+  metadata?: Array<MetadataItem>,
   change: (field: string, newValue: any) => any,
 }
 
@@ -59,7 +59,7 @@ const PolarityAndSafeStateInfo = ({controlMode}: {controlMode?: ControlMode}) =>
 
 const DigitalOutputConfigSection = (
   ({
-    formControlClass, firstControlClass, lastControlClass, tallButtonClass, channels, change,
+    formControlClass, firstControlClass, lastControlClass, tallButtonClass, metadata, change,
     "config.controlMode": controlMode
   }: Props) => (
     <React.Fragment>
@@ -78,7 +78,7 @@ const DigitalOutputConfigSection = (
         <FieldArray
           name="config.controlLogic"
           component={ControlLogicTable}
-          channels={channels}
+          metadata={metadata}
           change={change}
           formControlClass={formControlClass}
           validate={required()}
