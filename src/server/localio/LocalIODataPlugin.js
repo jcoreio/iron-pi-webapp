@@ -262,6 +262,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   start() {
+    this._updateData()
     this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
     this._spiHandler.start()
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
