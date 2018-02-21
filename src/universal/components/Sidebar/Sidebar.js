@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {Link} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom'
 import sortBy from 'lodash.sortby'
 import {featureComponents} from 'react-redux-features'
 import {withStyles} from 'material-ui/styles'
@@ -83,10 +83,10 @@ export type Props = {
   onClose?: () => any,
 }
 
-const SidebarSections = featureComponents({
+const SidebarSections = withRouter(featureComponents({
   getComponents: feature => (feature: any).sidebarSections,
   sortFeatures: features => sortBy(features, feature => feature.sidebarSectionsOrder),
-})
+}))
 
 class Sidebar extends React.Component<Props> {
   static defaultProps: {
