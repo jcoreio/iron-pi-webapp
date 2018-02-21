@@ -1,0 +1,95 @@
+// @flow
+
+import * as React from 'react'
+import PropTypes from 'prop-types'
+import {compose} from 'redux'
+import {formValues} from 'redux-form'
+import gql from 'graphql-tag'
+import {graphql} from 'react-apollo'
+import type {MetadataItem} from '../types/MetadataItem'
+import MetadataItemFields from './MetadataItemFields'
+
+export type Props = {
+  tag: ?string,
+  data: {
+    metadataItem?: MetadataItem,
+    loading: boolean,
+  },
+}
+
+const metadataItemQuery = gql(`query MetadataItem($tag: String!) {
+  metadataItem: MetadataItem(tag: $tag) {
+    _id
+    tag
+    name
+    dataType
+    ... on NumericMetadataItem {
+      min
+      max
+      units
+      storagePrecision
+      displayPrecision
+    }
+    ... on DigitalMetadataItem {
+      isDigital
+    }
+  }
+}`)
+
+type Context = {
+  _reduxForm: {
+    sectionPrefix?: ?string,
+    change: (field: string, newValue: any) => any,
+    dispatch: (action: any) => any,
+  },
+}
+
+class MetadataItemFieldsContainer extends React.Component<Props> {
+  static contextTypes = {
+    _reduxForm: PropTypes.shape({
+      sectionPrefix: PropTypes.string,
+      change: PropTypes.func.isRequired,
+      dispatch: PropTypes.func.isRequired,
+    }),
+  }
+
+  _updateFields = (metadataItem: MetadataItem, context: Context = this.context) => {
+    const {_reduxForm: {sectionPrefix, change, dispatch}} = context
+    for (let key in metadataItem) {
+      const field = sectionPrefix ? `${sectionPrefix}.${key}` : key
+      dispatch(change(field, metadataItem[key]))
+    }
+  }
+
+  componentDidMount() {
+    const {data: {metadataItem}} = this.props
+    if (metadataItem) this._updateFields(metadataItem)
+  }
+
+  componentWillReceiveProps(nextProps: Props, nextContext: Context) {
+    const prevMetadataItem = this.props.data.metadataItem
+    const nextMetadataItem = nextProps.data.metadataItem
+    if (nextMetadataItem && nextMetadataItem !== prevMetadataItem) {
+      this._updateFields(nextMetadataItem, nextContext)
+    }
+  }
+
+  render(): ?React.Node {
+    const {
+      tag, data, // eslint-disable-line no-unused-vars
+      ...props
+    } = this.props
+    return <MetadataItemFields {...props} />
+  }
+}
+
+export default compose(
+  formValues('tag'),
+  graphql(metadataItemQuery, {
+    options: ({tag}: Props) => ({
+      variables: {tag},
+      errorPolicy: 'all',
+    }),
+  })
+)(MetadataItemFieldsContainer)
+
