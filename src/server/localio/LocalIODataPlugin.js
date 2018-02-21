@@ -181,7 +181,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
         const rawAnalogInput = this._getTagValue(rawAnalogInputTag)
         const calibrator = this._selectCalibrator(id)(channel)
-        data[systemValueTag] = calibrator.calibrate(rawAnalogInput)
+        data[systemValueTag] = rawAnalogInput == null ? null : calibrator.calibrate(rawAnalogInput)
         if (tag) data[tag] = data[systemValueTag]
         break
       }
@@ -215,7 +215,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         }
         case 'LOCAL_CONTROL': {
           const {controlLogic}: LocalControlDigitalOutputConfig = (config: any)
-          controlValue = evaluateControlLogic(controlLogic, {
+          controlValue = data[controlValueTag] = evaluateControlLogic(controlLogic, {
             getChannelValue: this._getTagValue,
           })
           break
