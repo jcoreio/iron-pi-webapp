@@ -143,7 +143,7 @@ type FullChannel = {
 
 export type Props = {
   classes: Classes,
-  initialize: (values: FullChannel) => any,
+  initialize: (values: FullChannel, keepDirty?: boolean, otherMeta?: {keepSubmitSucceeded?: boolean}) => any,
   initialized?: boolean,
   submitting?: boolean,
   submitSucceeded?: boolean,
@@ -161,7 +161,9 @@ export type Props = {
   },
   subscribeToChannelState?: (id: number) => Function,
   handleSubmit: (onSubmit: (values: FullChannel) => any) => (event: Event) => any,
-  mutate: (options: {variables: {id?: number, where?: Object, channel: FullChannel}}) => Promise<void>,
+  mutate: (options: {variables: {id?: number, where?: Object, channel: FullChannel}}) => Promise<{
+    data: {Channel: FullChannel},
+  }>,
 }
 
 class ChannelForm extends React.Component<Props> {
@@ -215,13 +217,15 @@ class ChannelForm extends React.Component<Props> {
   }
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
-    const {mutate} = this.props
+    const {mutate, initialize} = this.props
     const {id, config, metadataItem} = parseChannelFormValues(channel)
     return mutate({
       variables: {
         where: {id},
         channel: {id, config, metadataItem}
       }
+    }).then(({data: {Channel}}: {data: {Channel: FullChannel}}) => {
+      initialize(this.pickFormFields(Channel), false, {keepSubmitSucceeded: true})
     }).catch(handleError)
   }
 

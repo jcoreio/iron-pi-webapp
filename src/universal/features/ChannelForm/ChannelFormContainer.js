@@ -57,7 +57,7 @@ const channelQuery = gql(`query Channels($where: SequelizeJSON!) {
 
 const mutationQuery = gql(`
 mutation updateChannel($id: Int, $where: JSON, $channel: InputLocalIOChannel!) {
-  updateLocalIOChannel(id: $id, where: $where, channel: $channel) {
+  Channel: updateLocalIOChannel(id: $id, where: $where, channel: $channel) {
     id
     tag
     name
