@@ -15,7 +15,7 @@ import type {Theme} from '../../theme'
 import {channelForm} from '../../react-router/routePaths'
 
 export type Channel = {
-  physicalChannelId: number,
+  id: number,
   name: string,
   config?: {
     mode: ChannelMode,
@@ -52,8 +52,8 @@ export type ChannelStateProps = {
 
 const ChannelStateItem = withStyles(channelStateStyles, {withTheme: true})(
   ({channel, classes}: ChannelStateProps): React.Node => (
-    <SidebarItem component={NavLink} to={channelForm(channel.physicalChannelId)} data-component="ChannelStateItem">
-      <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.physicalChannelId)} />
+    <SidebarItem component={NavLink} to={channelForm(channel.id + 1)} data-component="ChannelStateItem">
+      <SidebarItemText data-test-name="id" className={classes.id} primary={String(channel.id + 1)} />
       <SidebarItemText data-test-name="name" disableTypography primary={channel.name} className={classes.name} />
       <ListItemSecondaryAction className={classes.secondaryAction}>
         <ChannelStateIcon channel={channel} />
