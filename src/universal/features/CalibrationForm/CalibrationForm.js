@@ -94,7 +94,7 @@ export type Props = {
   initialize: (values: Calibration) => any,
   change: (field: string, newValue: any) => void,
   subscribeToChannelState?: (id: string) => Function,
-  physicalChannelId: number,
+  id: number,
   error?: string,
   mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
   data: {
