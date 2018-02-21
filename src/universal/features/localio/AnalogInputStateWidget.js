@@ -9,7 +9,7 @@ import ValueBlock from '../../components/ValueBlock'
 
 import type {Theme} from '../../theme'
 import CalibrationIcon from '../../components/icons/CalibrationIcon'
-import type {AnalogInputState, LocalIOChannelConfig} from '../../localio/LocalIOChannel'
+import type {AnalogInputState} from '../../localio/LocalIOChannel'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
