@@ -7,6 +7,10 @@ import {setIn} from '@jcoreio/mutate'
 
 import {MODE_AND_SYSTEM_VALUE_SELECTION} from './createSubscribeToChannelState'
 
+function getAlias(selection: {alias?: ?graphql.NameNode}): ?string {
+  return selection.alias ? selection.alias.value : null
+}
+
 /**
  * Creates a function that initiates a subscription to all Channel States
  */
@@ -16,10 +20,10 @@ export default function createSubscribeToChannelStates(
     name?: string,
     channelsPath?: Iterable<any>,
     selection?: string,
-    query?: DocumentNode,
+    query?: graphql.DocumentNode,
     aliases?: {
-      id?: string,
-      state?: string,
+      id?: ?string,
+      state?: ?string,
     },
   } = {}
 ): () => Function {
@@ -30,22 +34,20 @@ export default function createSubscribeToChannelStates(
     const {definitions} = options.query
     for (let definition of definitions) {
       if (definition.kind !== 'OperationDefinition' || definition.operation !== 'query') continue
-      let channelsNode = definition
+      let channelsNode: Object = definition
       for (let key of channelsPath) {
         if (!channelsNode || !channelsNode.selectionSet) break
-        channelsNode = channelsNode.selectionSet.selections.find(selection => (selection.alias || selection.name.value) === key)
+        channelsNode = channelsNode.selectionSet.selections.find(selection => (getAlias(selection) || selection.name.value) === key)
       }
       if (!channelsNode || !channelsNode.selectionSet) break
-      options.name = channelsNode.alias
 
-      if (!channelsNode.selectionSet) continue
       const {selectionSet: {selections: fields}} = channelsNode
       const idSelection = fields.find(selection => selection.name.value === 'id')
       const stateSelection = fields.find(selection => selection.name.value === 'state')
       if (!idSelection || !stateSelection) continue
       const aliases = options.aliases || (options.aliases = {})
-      aliases.id = idSelection.alias
-      aliases.state = stateSelection.alias
+      aliases.id = getAlias(idSelection)
+      aliases.state = getAlias(stateSelection)
       options.selection = graphql.print(stateSelection.selectionSet)
     }
   }
