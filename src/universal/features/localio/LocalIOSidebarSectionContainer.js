@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import {withRouter} from 'react-router-dom'
-import type {Location} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
 import {compose} from 'redux'
