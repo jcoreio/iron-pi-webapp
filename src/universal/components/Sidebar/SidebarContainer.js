@@ -4,7 +4,7 @@ import * as React from 'react'
 import {withRouter} from 'react-router-dom'
 import type {Location} from 'react-router-dom'
 import {connect} from 'react-redux'
-import {createSelector, createStructuredSelector} from 'reselect'
+import {createStructuredSelector} from 'reselect'
 import {compose, bindActionCreators} from 'redux'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
@@ -13,8 +13,7 @@ import throttle from 'lodash.throttle'
 
 import Sidebar from './Sidebar'
 import type {Action, Dispatch, State} from '../../redux/types'
-import {setSidebarOpen, setSectionExpanded} from '../../redux/sidebar'
-import type {SectionName} from '../../redux/sidebar'
+import {setSidebarOpen} from '../../redux/sidebar'
 import type {Theme} from '../../theme'
 import createSubscribeToChannelStates from '../../apollo/createSubscribeToChannelStates'
 
@@ -47,16 +46,11 @@ type PropsFromApollo = {
 
 type PropsFromState = {
   open: ?boolean,
-  localIO?: {
-    expanded?: boolean,
-    channels: Array<Channel>,
-  },
 }
 
 type PropsFromDispatch = {
   dispatch: Dispatch,
   setSidebarOpen: (open: ?boolean) => Action,
-  setSectionExpanded: (section: SectionName, expanded: boolean) => Action,
 }
 
 type Props = PropsFromState & PropsFromRouter & PropsFromTheme & PropsFromDispatch & PropsFromApollo
@@ -98,13 +92,11 @@ class SidebarContainer extends React.Component<Props> {
   }
 
   render(): ?React.Node {
-    const {open, localIO, setSectionExpanded} = this.props
+    const {open} = this.props
     return (
       <Sidebar
         open={open}
         onClose={this.handleSidebarClose}
-        onSectionExpandedChange={setSectionExpanded}
-        localIO={localIO}
       />
     )
   }
@@ -112,24 +104,10 @@ class SidebarContainer extends React.Component<Props> {
 
 const mapStateToProps: (state: State, props: PropsFromApollo) => PropsFromState = createStructuredSelector({
   open: (state: State) => state.sidebar.open,
-  localIO: createSelector(
-    (state: State) => state.sidebar.expandedSections.get('localIO', true),
-    (state, {data: {Channels}}: PropsFromApollo): ?Array<Channel> => Channels,
-    (state, {data: {loading}}: PropsFromApollo): boolean => loading,
-    (expanded: boolean, Channels: ?Array<Channel>, loading: boolean) => {
-      if (!Channels) return {loading}
-      return {
-        loading: false,
-        expanded,
-        channels: Channels,
-      }
-    }
-  ),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({
   setSidebarOpen,
-  setSectionExpanded,
 }, dispatch)
 
 // use {gt: 0} instead of {not: null} because apollo doesn't seem to support inline null

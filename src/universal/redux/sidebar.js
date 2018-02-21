@@ -4,16 +4,14 @@ import {Map} from 'immutable'
 import {combineReducers} from 'redux'
 import {createReducer} from 'mindfront-redux-utils'
 
-export type SectionName = 'localIO'
-
 export type SidebarState = {
   open: ?boolean,
-  expandedSections: Map<SectionName, boolean>,
+  expandedSections: Map<string, boolean>,
 }
 
 export type SidebarStateJSON = {
   open: ?boolean,
-  expandedSections: {[section: SectionName]: boolean},
+  expandedSections: {[section: string]: boolean},
 }
 
 export function parseSidebarState({expandedSections, ...rest}: SidebarStateJSON): SidebarState {
@@ -38,10 +36,10 @@ export function setSidebarOpen(open: ?boolean): {type: string, payload: ?boolean
 type SetSectionExpandedAction = {
   type: string,
   payload: boolean,
-  meta: {section: SectionName},
+  meta: {section: string},
 }
 
-export function setSectionExpanded(section: SectionName, expanded: boolean): SetSectionExpandedAction {
+export function setSectionExpanded(section: string, expanded: boolean): SetSectionExpandedAction {
   return {
     type: SET_SECTION_EXPANDED,
     payload: expanded,

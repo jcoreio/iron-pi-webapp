@@ -3,16 +3,15 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {Link} from 'react-router-dom'
+import sortBy from 'lodash.sortby'
+import {featureComponents} from 'react-redux-features'
 import {withStyles} from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
 import List from 'material-ui/List'
 
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
-import type {SectionName} from '../../redux/sidebar'
 
 import SidebarSectionHeader from './SidebarSectionHeader'
-import LocalIOSection from './LocalIOSection'
-import type {Channel} from './ChannelStateItem'
 import type {Theme} from '../../theme'
 
 const styles = ({palette: {background, secondary}, sidebar, jcoreLogo, ironPiLogo, zIndex}: Theme) => ({
@@ -81,25 +80,23 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   open: ?boolean,
   classes: Classes,
-  localIO?: {
-    expanded?: boolean,
-    channels: Array<Channel>,
-  },
   onClose?: () => any,
-  onSectionExpandedChange: (section: SectionName, expanded: boolean) => any,
 }
+
+const SidebarSections = featureComponents({
+  getComponents: feature => (feature: any).sidebarSections,
+  sortFeatures: features => sortBy(features, feature => feature.sidebarSectionsOrder),
+})
 
 class Sidebar extends React.Component<Props> {
   static defaultProps: {
     open: boolean,
-    onSectionExpandedChange: (section: SectionName, expanded: boolean) => any,
   } = {
     open: false,
-    onSectionExpandedChange: () => {},
   }
 
   render(): ?React.Node {
-    const {open, onClose, onSectionExpandedChange, classes, localIO} = this.props
+    const {open, onClose, classes} = this.props
     return (
       <div
         id="sidebar"
@@ -122,7 +119,7 @@ class Sidebar extends React.Component<Props> {
         </div>
         <List className={classes.sidebarBody}>
           <SidebarSectionHeader title="Status" />
-          <LocalIOSection {...localIO || {}} onSectionExpandedChange={onSectionExpandedChange} />
+          <SidebarSections />
         </List>
       </div>
     )
