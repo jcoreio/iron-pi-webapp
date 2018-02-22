@@ -7,6 +7,7 @@ const prefix = require('superagent-prefix')
 const requireEnv = require('@jcoreio/require-env')
 
 superagent.use(prefix(requireEnv('ROOT_URL')))
+superagent.use(require('superagent-verbose-errors'))
 if (process.env.SUPERAGENT_LOGGER) superagent.use(require('superagent-logger')({outgoing: true}))
 
 module.exports = superagent
