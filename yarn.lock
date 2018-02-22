@@ -8099,6 +8099,10 @@ superagent-use@^0.1.0:
     extend "^3.0.0"
     methods "~1.1.2"
 
+superagent-verbose-errors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/superagent-verbose-errors/-/superagent-verbose-errors-1.0.0.tgz#c19678b7fc63d1d13a4465852c8c2231573c9960"
+
 superagent@^3.6.0:
   version "3.8.2"
   resolved "https://registry.npmjs.org/superagent/-/superagent-3.8.2.tgz#e4a11b9d047f7d3efeb3bbe536d9ec0021d16403"
