@@ -5,11 +5,12 @@ import {defaultArgs, resolver} from 'graphql-sequelize'
 import requireUserId from '../../../graphql/requireUserId'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import type {Context} from '../../../graphql/Context'
+import type {LocalIOFeature} from '../../LocalIOFeature'
 
-export default function addQueryFields({types, queryFields}: {
+const addQueryFields = (feature: LocalIOFeature) => ({types, queryFields}: {
   types: {[name: string]: graphql.GraphQLOutputType},
   queryFields: {[name: string]: graphql.GraphQLFieldConfig<any, Context>},
-}) {
+}) => {
   for (let model of [LocalIOChannel]) {
     const {options} = model
     const type = types[options.name.singular]
@@ -26,4 +27,4 @@ export default function addQueryFields({types, queryFields}: {
     }
   }
 }
-
+export default addQueryFields

@@ -6,6 +6,8 @@ import promisify from 'es6-promisify'
 import type Sequelize from 'sequelize'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import type {PubSubEngine} from 'graphql-subscriptions'
+import User from '../models/User'
+import Scope from '../models/Scope'
 import LocalIOChannel from './models/LocalIOChannel'
 import LocalIODataPlugin from './LocalIODataPlugin'
 import addTypes from './graphql/types/addTypes'
@@ -35,10 +37,26 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
     LocalIOChannel.initAttributes({sequelize})
     LocalIOChannel.initAssociations()
   }
-  addTypes = addTypes
-  addQueryFields = addQueryFields
-  addMutationFields = addMutationFields
-  addSubscriptionFields = addSubscriptionFields
+  async seedDatabase(): Promise<void> {
+    if (process.env.BABEL_ENV === 'test') {
+      const testUser = await User.findOne({where: {username: 'test'}})
+      if (testUser) {
+        // $FlowFixMe
+        await testUser.addScopes(await Scope.findAll({
+          where: {
+            id: [
+              'localio:setRemoteControlValues',
+              'localio:test:setRawInputs',
+            ]
+          }
+        }))
+      }
+    }
+  }
+  addTypes = addTypes(this)
+  addQueryFields = addQueryFields(this)
+  addMutationFields = addMutationFields(this)
+  addSubscriptionFields = addSubscriptionFields(this)
   addPublications = ({pubsub}: {
     pubsub: PubSubEngine,
   }) => {

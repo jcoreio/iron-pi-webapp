@@ -18,6 +18,7 @@ import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
+import {SPIDevices} from './SPIDevicesInfo'
 
 type Options = {
   spiHandler: SPIHandler,
@@ -169,6 +170,35 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       data[`${INTERNAL}localio/${id}/rawDigitalInput`] = digitize(digitalInputLevels[id])
     }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
+  }
+
+  /**
+   * For testing purposes only!
+   */
+  _setRawInputValues = ({id, rawAnalogInput, rawDigitalInput}: {
+    id: number,
+    rawAnalogInput?: ?number,
+    rawDigitalInput?: ?boolean,
+  }) => {
+    const digitalInputLevels: Array<boolean> = []
+    const digitalInputEventCounts: Array<number> = []
+    const digitalOutputLevels: Array<boolean> = []
+    const analogInputLevels: Array<number> = []
+    for (let channel of this._channels) {
+      analogInputLevels[channel.id] = this._getTagValue(`${INTERNAL}localio/${id}/rawAnalogInput`) || 0
+      digitalInputLevels[channel.id] = this._getTagValue(`${INTERNAL}localio/${id}/rawDigitalInput`) || false
+      digitalInputEventCounts[channel.id] = 0
+      digitalOutputLevels[channel.id] = false
+    }
+    if (rawAnalogInput != null) analogInputLevels[id] = rawAnalogInput
+    if (rawDigitalInput != null) digitalInputLevels[id] = rawDigitalInput
+    this._spiHandler.emit('deviceStatus', {
+      deviceId: SPIDevices[0].deviceId,
+      digitalInputLevels,
+      digitalInputEventCounts,
+      digitalOutputLevels,
+      analogInputLevels,
+    })
   }
 
   _updateData() {

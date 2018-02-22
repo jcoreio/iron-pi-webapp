@@ -18,10 +18,15 @@ export default function setLocalChannelRemoteControlValue({plugin}: {
         type: graphql.GraphQLInt,
       },
     },
-    resolve: (doc: any, args: {id: number, controlValue: ?number}, context: Context): boolean => {
+    resolve: (doc: any, args: {id: number, controlValue: ?number}, context: Context): ?boolean => {
+      const {userId, scopes} = context
+      if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
+      if (!scopes.has('localio:setRemoteControlValues')) {
+        throw new graphql.GraphQLError('You do not have permission to set remote control values')
+      }
+
       const {id, controlValue} = args
       plugin.setRemoteControlValue(id, controlValue == null ? null : Boolean(controlValue))
-      return true
     },
   }
 }
