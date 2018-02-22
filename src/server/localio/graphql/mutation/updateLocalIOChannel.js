@@ -39,7 +39,7 @@ export default function updateLocalIOChannel({types, inputTypes}: {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!where) {
-        if (id) where = {id}
+        if (id != null) where = {id}
         else if (channel.id) where = {id: channel.id}
         else throw new Error('id or channel.id must be provided')
       }
