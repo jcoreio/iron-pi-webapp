@@ -8100,8 +8100,8 @@ superagent-use@^0.1.0:
     methods "~1.1.2"
 
 superagent-verbose-errors@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/superagent-verbose-errors/-/superagent-verbose-errors-1.0.0.tgz#c19678b7fc63d1d13a4465852c8c2231573c9960"
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/superagent-verbose-errors/-/superagent-verbose-errors-1.0.1.tgz#eb885d5bd00dc31f3f000f2cd0f6519f0dd4b97c"
 
 superagent@^3.6.0:
   version "3.8.2"

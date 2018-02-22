@@ -5,7 +5,6 @@ import requireEnv from '@jcoreio/require-env'
 import {parse} from 'graphql'
 import type {DocumentNode} from 'graphql'
 import getOnlyOperationName from './getOnlyOperationName'
-import getOperationByName from './getOperationByName'
 
 const TEST_USERNAME = requireEnv('TEST_USERNAME')
 const TEST_PASSWORD = requireEnv('TEST_PASSWORD')
@@ -37,21 +36,12 @@ export default function createGraphql<T>(superagent: Superagent): (options: Opti
         .send({username: TEST_USERNAME, password: TEST_PASSWORD})
     ).body.token
 
-    const operation = operationName ? getOperationByName(doc, operationName) : null
-
-    const isMutation = operation && operation.operation === 'mutation'
-
-    const request = isMutation
-      ? superagent.post('/graphql')
-      : superagent.get('/graphql')
+    const request = superagent.post('/graphql')
     if (token && withToken !== false) {
       request.set('authorization', `bearer ${token}`)
     }
     request.type('json').accept('json')
-    const {body} = await (isMutation
-      ? request.send({query, variables, operationName})
-      : request.query({query}).send({variables, operationName})
-    )
+    const {body} = await request.send({query, variables, operationName})
 
     return (body: any)
   }
