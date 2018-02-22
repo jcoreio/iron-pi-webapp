@@ -251,30 +251,80 @@ module.exports = () => {
       })
       it('validates logic correctly', async () => {
         const {id} = defaultChannel
-        await graphql({
-          query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
-            updateLocalIOChannel(id: $id, channel: $channel) {
-              id
+        await Promise.all([
+          await graphql({
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
+                id
+              }
             }
-          }
-          `,
-          operationName: 'prepareTest',
-          variables: {
-            id,
-            channel: {
-              metadataItem: {
-                tag: 'channel1',
-                name: 'Channel 1',
-                dataType: 'number',
-                isDigital: true,
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              id,
+              channel: {
+                metadataItem: {
+                  tag: 'channel1',
+                  name: 'Channel 1',
+                  dataType: 'number',
+                  isDigital: true,
+                },
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
               },
-              config: {
-                mode: 'DISABLED',
-                controlLogic: [],
+            }
+          }),
+          graphql({
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
+                id
+              }
+            }
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              id: 2,
+              channel: {
+                metadataItem: {
+                  tag: 'channel2',
+                  name: 'Channel 2',
+                  dataType: 'number',
+                  isDigital: true,
+                },
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
               },
-            },
-          }
-        })
+            }
+          }),
+          graphql({
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
+                id
+              }
+            }
+            `,
+            operationName: 'prepareTest',
+            variables: {
+              id: 3,
+              channel: {
+                metadataItem: {
+                  tag: 'channel3',
+                  name: 'Channel 3',
+                  dataType: 'number',
+                  isDigital: true,
+                },
+                config: {
+                  mode: 'DISABLED',
+                  controlLogic: [],
+                },
+              },
+            }
+          })
+        ])
         await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
