@@ -16,8 +16,14 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 1,
-      name: 'Channel 1',
+      id: 0,
+      tag: 'channel1',
+      metadataItem: {
+        tag: 'channel1',
+        name: 'Channel 1',
+        dataType: 'number',
+        isDigital: true,
+      },
       config: {
         mode: 'DIGITAL_OUTPUT',
         safeState: 0,
@@ -26,33 +32,33 @@ module.exports = () => {
       },
     }
 
-    async function init(channel: LocalIOChannel & {id: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
-      const {id} = defaultChannel
+    async function init(channel: LocalIOChannel = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
+      const {id} = channel
       await graphql({
-        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-          updateChannel(where: $where, channel: $channel) {
+        query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+          updateLocalIOChannel(id: $id, channel: $channel) {
             id
           }
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {id},
+          id,
           channel: defaultChannel,
         }
       })
       await graphql({
-        query: `mutation prepareTest($channelId: String!, $controlValue: Int) {
-          setLocalChannelRawInput(id: $id, controlValue: $controlValue)
+        query: `mutation prepareTest($id: Int!, $controlValue: Int) {
+          setLocalChannelRemoteControlValue(id: $id, controlValue: $controlValue)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          channelId: channel.id,
+          id,
           controlValue,
         }
       })
-      await navigateTo(`/channel/${channel.id}`)
+      await navigateTo(`/channel/${id + 1}`)
       await loginIfNecessary()
       browser.timeouts('implicit', 5000)
     }
@@ -68,24 +74,27 @@ module.exports = () => {
       expect(await browser.getAttribute('#channelForm [name="config.safeState"]', 'data-value')).to.equal('0')
       expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
       expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('REMOTE_CONTROL')
-      expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
     })
 
     it('displays updated values', async () => {
       await init()
 
+      const {id} = defaultChannel
+
       await graphql({
-        query: `mutation update($channel: InputChannel!, $channelId: String!, $controlValue: Int) {
-          updateChannel(id: $channelId, channel: $channel) {
+        query: `mutation update($channel: InputLocalIOChannel!, $id: Int!, $controlValue: Int) {
+          updateLocalIOChannel(id: $id, channel: $channel) {
             id
           }
-          setLocalChannelRawInput(id: $id, controlValue: $controlValue)
+          setLocalChannelRemoteControlValue(id: $id, controlValue: $controlValue)
         }`,
         operationName: 'update',
         variables: {
+          id,
           channel: {
-            id: 1,
+            id,
             config: {
               mode: 'DIGITAL_OUTPUT',
               safeState: 0,
@@ -96,6 +105,8 @@ module.exports = () => {
           controlValue: 1,
         }
       })
+      await delay(500)
+      await graphql({query: `mutation { updateRawOutputs }`})
 
       browser.timeouts('implicit', 100)
       await poll(
@@ -116,6 +127,7 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
+      await graphql({query: `mutation { updateRawOutputs }`})
       await poll(
         async () => {
           expect(await browser.getText('[data-component="DigitalOutputStateWidget"] [data-component="ValueBlock"][data-test-name="controlValue"] [data-test-name="value"]')).to.equal('1')
@@ -134,6 +146,7 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
+      await graphql({query: `mutation { updateRawOutputs }`})
       await poll(
         async () => {
           expect(await browser.getText('[data-component="DigitalOutputStateWidget"] [data-component="ValueBlock"][data-test-name="controlValue"] [data-test-name="value"]')).to.equal('0')
@@ -152,6 +165,7 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
+      await graphql({query: `mutation { updateRawOutputs }`})
 
       await poll(
         async () => {
@@ -172,6 +186,7 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
+      await graphql({query: `mutation { updateRawOutputs }`})
 
       await poll(
         async () => {
@@ -185,61 +200,74 @@ module.exports = () => {
 
     describe('local control mode', () => {
       it('displays the correct initial values for local control', async () => {
+        const {id} = defaultChannel
         await graphql({
-          query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-            updateChannel(where: $where, channel: $channel) {
+          query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+            updateLocalIOChannel(id: $id, channel: $channel) {
               id
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
-            where: {id: 1},
+            id,
             channel: {
-              name: 'Channel 1',
+              id,
+              metadataItem: {
+                tag: 'channel1',
+                name: 'Channel 1',
+                dataType: 'number',
+                isDigital: true,
+              },
               config: {
                 mode: 'DIGITAL_OUTPUT',
                 safeState: 0,
                 reversePolarity: false,
                 controlMode: 'LOCAL_CONTROL',
                 controlLogic: [
-                  {channelId: 'channel2', comparison: 'GTE', threshold: 2.3},
-                  {operation: 'OR', channelId: 'channel3', comparison: 'EQ', threshold: 1.5},
+                  {tag: 'channel2', comparison: 'GTE', setpoint: 2.3},
+                  {operator: 'OR', tag: 'channel3', comparison: 'EQ', setpoint: 1.5},
                 ]
               },
             },
           }
         })
-        await navigateTo('/channel/1')
+        await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
         expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('DIGITAL_OUTPUT')
         expect(await browser.getAttribute('#channelForm [name="config.safeState"]', 'data-value')).to.equal('0')
         expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
         expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('LOCAL_CONTROL')
-        expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-        expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
-        expect(await browser.getValue('#channelForm [name="config.controlLogic[0].channelId"]')).to.equal('channel2')
+        expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
+        expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
+        expect(await browser.getValue('#channelForm [name="config.controlLogic[0].tag"]')).to.equal('channel2')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].comparison"]')).to.equal('GTE')
-        expect(await browser.getValue('#channelForm [name="config.controlLogic[0].threshold"]')).to.equal('2.3')
-        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].operation"]')).to.equal('OR')
-        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].channelId"]')).to.equal('channel3')
+        expect(await browser.getValue('#channelForm [name="config.controlLogic[0].setpoint"]')).to.equal('2.3')
+        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].operator"]')).to.equal('OR')
+        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].tag"]')).to.equal('channel3')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[1].comparison"]')).to.equal('EQ')
-        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].threshold"]')).to.equal('1.5')
+        expect(await browser.getValue('#channelForm [name="config.controlLogic[1].setpoint"]')).to.equal('1.5')
       })
       it('validates logic correctly', async () => {
+        const {id} = defaultChannel
         await graphql({
-          query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-            updateChannel(where: $where, channel: $channel) {
+          query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+            updateLocalIOChannel(id: $id, channel: $channel) {
               id
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
-            where: {id: 1},
+            id,
             channel: {
-              name: 'Channel 1',
+              metadataItem: {
+                tag: 'channel1',
+                name: 'Channel 1',
+                dataType: 'number',
+                isDigital: true,
+              },
               config: {
                 mode: 'DISABLED',
                 controlLogic: [],
@@ -247,8 +275,7 @@ module.exports = () => {
             },
           }
         })
-        await navigateTo('/channel/1')
-        await navigateTo('/channel/1')
+        await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
         await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
@@ -266,57 +293,63 @@ module.exports = () => {
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].comparison"]')).to.equal('GT')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[1].comparison"]')).to.equal('GT')
         await browser.click('#channelForm [type="submit"]')
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].channelId"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].tag"] [data-component="FormHelperText"]')).to.equal(
           'is required'
         )
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].channelId"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].tag"] [data-component="FormHelperText"]')).to.equal(
           'is required'
         )
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].threshold"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].setpoint"] [data-component="FormHelperText"]')).to.equal(
           'is required'
         )
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].threshold"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].setpoint"] [data-component="FormHelperText"]')).to.equal(
           'is required'
         )
 
-        await browser.click('#channelForm [data-name="config.controlLogic[0].channelId"]')
+        await browser.click('#channelForm [data-name="config.controlLogic[0].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[0].channelId"] [value="channel2"]')
+        await browser.click('[id="menu-config.controlLogic[0].tag"] [value="channel2"]')
         await delay(300)
 
-        await browser.click('#channelForm [data-name="config.controlLogic[1].channelId"]')
+        await browser.click('#channelForm [data-name="config.controlLogic[1].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].channelId"] [value="channel3"]')
+        await browser.click('[id="menu-config.controlLogic[1].tag"] [value="channel3"]')
         await delay(300)
 
-        await browser.setValue('#channelForm [name="config.controlLogic[0].threshold"]', ' 23a')
-        await browser.setValue('#channelForm [name="config.controlLogic[1].threshold"]', ' .')
+        await browser.setValue('#channelForm [name="config.controlLogic[0].setpoint"]', ' 23a')
+        await browser.setValue('#channelForm [name="config.controlLogic[1].setpoint"]', ' .')
 
         await browser.click('#channelForm [type="submit"]')
 
-        expect(await browser.isVisible('#channelForm [data-name="config.controlLogic[0].channelId"] [data-component="FormHelperText"]')).to.be.false
-        expect(await browser.isVisible('#channelForm [data-name="config.controlLogic[1].channelId"] [data-component="FormHelperText"]')).to.be.false
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].threshold"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.isVisible('#channelForm [data-name="config.controlLogic[0].tag"] [data-component="FormHelperText"]')).to.be.false
+        expect(await browser.isVisible('#channelForm [data-name="config.controlLogic[1].tag"] [data-component="FormHelperText"]')).to.be.false
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[0].setpoint"] [data-component="FormHelperText"]')).to.equal(
           'must be a number'
         )
-        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].threshold"] [data-component="FormHelperText"]')).to.equal(
+        expect(await browser.getText('#channelForm [data-name="config.controlLogic[1].setpoint"] [data-component="FormHelperText"]')).to.equal(
           'must be a number'
         )
       })
       it('saves control logic changes', async () => {
+        const {id} = defaultChannel
         await Promise.all([
           graphql({
-            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-              updateChannel(where: $where, channel: $channel) {
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
                 id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {id: 1},
+              id,
               channel: {
-                name: 'Channel 1',
+                metadataItem: {
+                  tag: 'channel1',
+                  name: 'Channel 1',
+                  dataType: 'number',
+                  isDigital: true,
+                },
                 config: {
                   mode: 'DISABLED',
                   controlLogic: [],
@@ -325,17 +358,22 @@ module.exports = () => {
             }
           }),
           graphql({
-            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-              updateChannel(where: $where, channel: $channel) {
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
                 id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {id: 2},
+              id: 2,
               channel: {
-                name: 'Channel 2',
+                metadataItem: {
+                  tag: 'channel2',
+                  name: 'Channel 2',
+                  dataType: 'number',
+                  isDigital: true,
+                },
                 config: {
                   mode: 'DISABLED',
                   controlLogic: [],
@@ -344,17 +382,22 @@ module.exports = () => {
             }
           }),
           graphql({
-            query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
-              updateChannel(where: $where, channel: $channel) {
+            query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!) {
+              updateLocalIOChannel(id: $id, channel: $channel) {
                 id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {id: 3},
+              id: 3,
               channel: {
-                name: 'Channel 3',
+                metadataItem: {
+                  tag: 'channel3',
+                  name: 'Channel 3',
+                  dataType: 'number',
+                  isDigital: true,
+                },
                 config: {
                   mode: 'DISABLED',
                   controlLogic: [],
@@ -363,8 +406,7 @@ module.exports = () => {
             }
           })
         ])
-        await navigateTo('/channel/1')
-        await navigateTo('/channel/1')
+        await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
         await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
@@ -380,9 +422,9 @@ module.exports = () => {
         await browser.click('#channelForm [data-component="ControlLogicTable"] [data-test-name="addConditionButton"]')
         await browser.click('#channelForm [data-component="ControlLogicTable"] [data-test-name="addConditionButton"]')
 
-        await browser.click('#channelForm [data-name="config.controlLogic[0].channelId"]')
+        await browser.click('#channelForm [data-name="config.controlLogic[0].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[0].channelId"] [value="channel2"]')
+        await browser.click('[id="menu-config.controlLogic[0].tag"] [value="channel2"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[0].comparison"]')
@@ -390,16 +432,16 @@ module.exports = () => {
         await browser.click('[id="menu-config.controlLogic[0].comparison"] [value="EQ"]')
         await delay(300)
 
-        await browser.setValue('#channelForm [name="config.controlLogic[0].threshold"]', ' 23')
+        await browser.setValue('#channelForm [name="config.controlLogic[0].setpoint"]', ' 23')
 
-        await browser.click('#channelForm [data-name="config.controlLogic[1].operation"]')
+        await browser.click('#channelForm [data-name="config.controlLogic[1].operator"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].operation"] [value="OR"]')
+        await browser.click('[id="menu-config.controlLogic[1].operator"] [value="OR"]')
         await delay(300)
 
-        await browser.click('#channelForm [data-name="config.controlLogic[1].channelId"]')
+        await browser.click('#channelForm [data-name="config.controlLogic[1].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].channelId"] [value="channel3"]')
+        await browser.click('[id="menu-config.controlLogic[1].tag"] [value="channel3"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[1].comparison"]')
@@ -407,17 +449,18 @@ module.exports = () => {
         await browser.click('[id="menu-config.controlLogic[1].comparison"] [value="LT"]')
         await delay(300)
 
-        await browser.setValue('#channelForm [name="config.controlLogic[1].threshold"]', ' 5.6')
+        await browser.setValue('#channelForm [name="config.controlLogic[1].setpoint"]', ' 5.6')
 
         await browser.click('#channelForm [type="submit"]')
         await delay(500)
 
         const {data: {Channel: {config}}} = await graphql({
-          query: `query {
-            Channel(where: {id: 1}) {
+          query: `query blah($id: Int!) {
+            Channel: LocalIOChannel(id: $id) {
               config
             }
-          }`
+          }`,
+          variables: {id},
         })
 
         expect(config).to.containSubset({
@@ -426,8 +469,8 @@ module.exports = () => {
           reversePolarity: false,
           controlMode: 'LOCAL_CONTROL',
           controlLogic: [
-            {channelId: 'channel2', comparison: 'EQ', threshold: 23},
-            {operation: 'OR', channelId: 'channel3', comparison: 'LT', threshold: 5.6},
+            {tag: 'channel2', comparison: 'EQ', setpoint: 23},
+            {operator: 'OR', tag: 'channel3', comparison: 'LT', setpoint: 5.6},
           ]
         })
       })

@@ -20,8 +20,11 @@ export default function setLocalChannelRawInput({plugin}: {
       rawDigitalInput: {
         type: graphql.GraphQLBoolean,
       },
+      rawOutput: {
+        type: graphql.GraphQLBoolean,
+      },
     },
-    resolve: (doc: any, args: {id: number, rawAnalogInput?: ?number, rawDigitalInput?: ?boolean}, context: Context): ?boolean => {
+    resolve: (doc: any, args: {id: number, rawAnalogInput?: ?number, rawDigitalInput?: ?boolean, rawOutput?: ?boolean}, context: Context): ?boolean => {
       const {userId, scopes} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!scopes.has('localio:test:setRawInputs')) {

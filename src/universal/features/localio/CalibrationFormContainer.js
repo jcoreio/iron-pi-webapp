@@ -7,12 +7,13 @@ import {compose} from 'redux'
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import CalibrationForm from '../../components/CalibrationForm'
-import createSubscribeToChannelState from '../../localio/apollo/createSubscribeToChannelState'
 import type {Calibration} from '../../localio/LocalIOChannel'
+import * as LocalIOTags from '../../localio/LocalIOTags'
 import {dirname} from "path"
 import handleError from '../../redux-form/createSubmissionError'
+import createSubscribeToTagValue from '../../apollo/createSubscribeToTagValue'
 
-const channelQuery = gql(`query Channels($id: Int!) {
+const channelQuery = gql(`query Channels($id: Int!, $rawInputTag: String!) {
   Channel: LocalIOChannel(id: $id) {
     id
     name
@@ -23,13 +24,8 @@ const channelQuery = gql(`query Channels($id: Int!) {
         units
       }
     }
-    state {
-      id
-      ... on InputChannelState {
-        rawInput
-      }
-    }
   }
+  rawInput: TagValue(tag: $rawInputTag)
 }
 `)
 
@@ -81,6 +77,7 @@ type PropsFromApollo = {
         calibration?: Calibration,
       },
     },
+    rawInput?: ?number,
   },
 }
 
@@ -130,14 +127,14 @@ class CalibrationFormContainer extends React.Component<Props> {
   }
   render(): React.Node {
     const {id,
-      data: {loading, Channel},
-      subscribeToChannelState, // eslint-disable-line no-unused-vars
+      data: {loading, Channel, rawInput},
       ...props
     } = this.props
     return (
       <CalibrationForm
         name={`Channel ${id + 1}`}
         loading={loading}
+        rawInput={rawInput}
         rawInputUnits="V"
         rawInputPrecision={2}
         units={Channel && Channel.metadataItem && Channel.metadataItem.units}
@@ -153,16 +150,18 @@ export default compose(
   graphql(mutationQuery),
   graphql(channelQuery, {
     options: ({id}: InputProps) => ({
-      variables: {id},
+      variables: {
+        id,
+        rawInputTag: LocalIOTags.rawAnalogInput(id),
+      },
       errorPolicy: 'all',
     }),
     props: props => ({
       ...props,
-      subscribeToChannelState: createSubscribeToChannelState(props, {
-        query: channelQuery,
-        channelPath: ['Channel'],
-      }),
-    })
+      subscribeToChannelState: (id: number) => createSubscribeToTagValue(props, {
+        tagValuePath: ['rawInput'],
+      })(LocalIOTags.rawAnalogInput(id))
+    }),
   }),
   reduxForm({
     form: 'Calibration',

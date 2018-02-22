@@ -5,7 +5,6 @@ import * as graphql from 'graphql'
 
 import type {GraphQLFeature} from '../GraphQLFeature'
 import createTagValue from './TagValue'
-import createTagValues from './TagValues'
 
 type Options = {
   sequelize: Sequelize,
@@ -17,7 +16,6 @@ export default function createSubscription(options: Options): graphql.GraphQLObj
   const {sequelize, types, features} = options
   const subscriptionFields = {
     TagValue: createTagValue(),
-    TagValues: createTagValues(),
   }
   for (let feature of features) {
     if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types, subscriptionFields})

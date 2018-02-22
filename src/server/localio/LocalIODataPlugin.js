@@ -10,7 +10,6 @@ import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {LocalControlDigitalOutputConfig, Calibration, DigitalInputConfig, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
 import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
-import {INTERNAL} from '../../universal/types/Tag'
 import Calibrator from '../calc/Calibrator'
 import type SPIHandler from './SPIHandler'
 import {CM_NUM_IO} from './SPIDevicesInfo'
@@ -19,6 +18,7 @@ import evaluateControlLogic from '../calc/evaluateControlLogic'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
 import {SPIDevices} from './SPIDevicesInfo'
+import * as LocalIOTags from '../../universal/localio/LocalIOTags'
 
 type Options = {
   spiHandler: SPIHandler,
@@ -76,57 +76,45 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         name: `Local Channel ${id}`,
       }
       if (tag) mapping.tagFromPlugin = tag
+      const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
+      mappings.push({
+        id: rawAnalogInputTag,
+        name: `Local Channel ${id} raw analog input`,
+        tagFromPlugin: rawAnalogInputTag,
+      })
+      const rawDigitalInputTag = LocalIOTags.rawDigitalInput(id)
+      mappings.push({
+        id: rawDigitalInputTag,
+        name: `Local Channel ${id} raw digital input`,
+        tagFromPlugin: rawDigitalInputTag,
+      })
+      const systemValueTag = LocalIOTags.systemValue(id)
+      mappings.push({
+        id: systemValueTag,
+        name: `Local Channel ${id} system value`,
+        tagFromPlugin: systemValueTag,
+      })
+      const rawOutputTag = LocalIOTags.rawOutput(id)
+      mappings.push({
+        id: rawOutputTag,
+        name: `Local Channel ${id} raw output`,
+        tagFromPlugin: rawOutputTag,
+      })
       switch (mode) {
       case 'ANALOG_INPUT': {
-        const rawAnalogInputTag = `${INTERNAL}localio/${id}/rawAnalogInput`
-        mappings.push({
-          id: rawAnalogInputTag,
-          name: `Local Channel ${id} raw analog input`,
-          tagFromPlugin: rawAnalogInputTag,
-        })
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
-        mappings.push({
-          id: systemValueTag,
-          name: `Local Channel ${id} system value`,
-          tagFromPlugin: systemValueTag,
-        })
         mapping.tagsToPlugin = [rawAnalogInputTag]
         break
       }
       case 'DIGITAL_INPUT': {
-        const rawDigitalInputTag = `${INTERNAL}localio/${id}/rawDigitalInput`
-        mappings.push({
-          id: rawDigitalInputTag,
-          name: `Local Channel ${id} raw digital input`,
-          tagFromPlugin: rawDigitalInputTag,
-        })
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
-        mappings.push({
-          id: systemValueTag,
-          name: `Local Channel ${id} system value`,
-          tagFromPlugin: systemValueTag,
-        })
         mapping.tagsToPlugin = [rawDigitalInputTag]
         break
       }
       case 'DIGITAL_OUTPUT': {
-        const controlValueTag = `${INTERNAL}localio/${id}/controlValue`
+        const controlValueTag = LocalIOTags.controlValue(id)
         mappings.push({
           id: controlValueTag,
           name: `Local Channel ${id} control value`,
           tagFromPlugin: controlValueTag,
-        })
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
-        mappings.push({
-          id: systemValueTag,
-          name: `Local Channel ${id} system value`,
-          tagFromPlugin: systemValueTag,
-        })
-        const rawOutputTag = `${INTERNAL}localio/${id}/rawOutput`
-        mappings.push({
-          id: rawOutputTag,
-          name: `Local Channel ${id} raw output`,
-          tagFromPlugin: rawOutputTag,
         })
         const tagsToPlugin = mapping.tagsToPlugin = [controlValueTag]
         if (controlMode === 'LOCAL_CONTROL') {
@@ -148,7 +136,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     if (config.mode !== 'DIGITAL_OUTPUT' || config.controlMode !== 'REMOTE_CONTROL') {
       throw new Error('Channel must be in remote control digital output mode to set its control value')
     }
-    this.emit(DATA_PLUGIN_EVENT_DATA, {[`${INTERNAL}localio/${id}/controlValue`]: digitize(value)})
+    this.emit(DATA_PLUGIN_EVENT_DATA, {[LocalIOTags.controlValue(id)]: digitize(value)})
   }
 
   _channelUpdated = (channel: LocalIOChannel) => {
@@ -161,13 +149,16 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
-    const {analogInputLevels, digitalInputLevels} = deviceStatus
+    const {analogInputLevels, digitalInputLevels, digitalOutputLevels} = deviceStatus
     const data = {}
     for (let id = 0; id < analogInputLevels.length; id++) {
-      data[`${INTERNAL}localio/${id}/rawAnalogInput`] = analogInputLevels[id]
+      data[LocalIOTags.rawAnalogInput(id)] = analogInputLevels[id]
     }
     for (let id = 0; id < digitalInputLevels.length; id++) {
-      data[`${INTERNAL}localio/${id}/rawDigitalInput`] = digitize(digitalInputLevels[id])
+      data[LocalIOTags.rawDigitalInput(id)] = digitize(digitalInputLevels[id])
+    }
+    for (let id = 0; id < digitalOutputLevels.length; id++) {
+      data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
     }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
@@ -175,23 +166,27 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   /**
    * For testing purposes only!
    */
-  _setRawInputValues = ({id, rawAnalogInput, rawDigitalInput}: {
+  _setRawInputValues = ({id, rawAnalogInput, rawDigitalInput, rawOutput}: {
     id: number,
     rawAnalogInput?: ?number,
     rawDigitalInput?: ?boolean,
+    rawOutput?: ?boolean,
   }) => {
     const digitalInputLevels: Array<boolean> = []
     const digitalInputEventCounts: Array<number> = []
     const digitalOutputLevels: Array<boolean> = []
     const analogInputLevels: Array<number> = []
     for (let channel of this._channels) {
-      analogInputLevels[channel.id] = this._getTagValue(`${INTERNAL}localio/${id}/rawAnalogInput`) || 0
-      digitalInputLevels[channel.id] = this._getTagValue(`${INTERNAL}localio/${id}/rawDigitalInput`) || false
+      analogInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawAnalogInput(channel.id)) || 0
+      digitalInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawDigitalInput(channel.id)) || false
       digitalInputEventCounts[channel.id] = 0
-      digitalOutputLevels[channel.id] = false
+      digitalOutputLevels[channel.id] = this._getTagValue(LocalIOTags.rawOutput(channel.id)) || false
     }
-    if (rawAnalogInput != null) analogInputLevels[id] = rawAnalogInput
-    if (rawDigitalInput != null) digitalInputLevels[id] = rawDigitalInput
+    // note: the hardware may not support null values here, but testing kind of needs to set the values
+    // to null, and nulls flow through the system just fine when there's no hardware...
+    if (rawAnalogInput !== undefined) analogInputLevels[id] = (rawAnalogInput: any)
+    if (rawDigitalInput !== undefined) digitalInputLevels[id] = (rawDigitalInput: any)
+    if (rawOutput !== undefined) digitalOutputLevels[id] = (rawOutput: any)
     this._spiHandler.emit('deviceStatus', {
       deviceId: SPIDevices[0].deviceId,
       digitalInputLevels,
@@ -207,8 +202,8 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       const {id, tag, config} = channel
       switch (config.mode) {
       case 'ANALOG_INPUT': {
-        const rawAnalogInputTag = `${INTERNAL}localio/${id}/rawAnalogInput`
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
+        const systemValueTag = LocalIOTags.systemValue(id)
         const rawAnalogInput = this._getTagValue(rawAnalogInputTag)
         const calibrator = this._selectCalibrator(id)(channel)
         data[systemValueTag] = rawAnalogInput == null ? null : calibrator.calibrate(rawAnalogInput)
@@ -217,8 +212,8 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       }
       case 'DIGITAL_INPUT': {
         const {reversePolarity}: DigitalInputConfig = (config: any)
-        const rawDigitalInputTag = `${INTERNAL}localio/${id}/rawDigitalInput`
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
+        const rawDigitalInputTag = LocalIOTags.rawDigitalInput(id)
+        const systemValueTag = LocalIOTags.systemValue(id)
         const rawDigitalInput = this._getTagValue(rawDigitalInputTag)
         if (reversePolarity && rawDigitalInput != null) {
           data[systemValueTag] = rawDigitalInput ? 0 : 1
@@ -229,10 +224,9 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         break
       }
       case 'DIGITAL_OUTPUT': {
-        const controlValueTag = `${INTERNAL}localio/${id}/controlValue`
-        const systemValueTag = `${INTERNAL}localio/${id}/systemValue`
-        const rawOutputTag = `${INTERNAL}localio/${id}/rawOutput`
-        const {reversePolarity, safeState}: DigitalOutputConfig = (config: any)
+        const controlValueTag = LocalIOTags.controlValue(id)
+        const systemValueTag = LocalIOTags.systemValue(id)
+        const {safeState}: DigitalOutputConfig = (config: any)
         let controlValue
         switch (config.controlMode) {
         case 'FORCE_OFF': {
@@ -256,9 +250,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         }
         }
         const systemValue = controlValue != null ? controlValue : Boolean(safeState)
-        const rawOutput = reversePolarity ? !systemValue : systemValue
         data[systemValueTag] = digitize(systemValue)
-        data[rawOutputTag] = digitize(rawOutput)
         if (tag) data[tag] = data[systemValueTag]
         break
       }
@@ -271,6 +263,34 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this._updateData()
   }
 
+  _lastOutputValues: ?Array<boolean>
+
+  /**
+   * To be as truthful as possible, we pass the digitalOutputLevels coming directly from SPI into the
+   * rawOutput internal tags.  But without any actual hardware in test mode, this doesn't happen automatically,
+   * so this method mocks that process manually.
+   */
+  _updateRawOutputsForTest = process.env.BABEL_ENV === 'test' ? () => {
+    const {_lastOutputValues} = this
+    if (!_lastOutputValues) return
+    const digitalInputLevels: Array<boolean> = []
+    const digitalInputEventCounts: Array<number> = []
+    const digitalOutputLevels: Array<boolean> = [..._lastOutputValues]
+    const analogInputLevels: Array<number> = []
+    for (let channel of this._channels) {
+      analogInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawAnalogInput(channel.id)) || 0
+      digitalInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawDigitalInput(channel.id)) || false
+      digitalInputEventCounts[channel.id] = 0
+    }
+    this._spiHandler.emit('deviceStatus', {
+      deviceId: SPIDevices[0].deviceId,
+      digitalInputLevels,
+      digitalInputEventCounts,
+      digitalOutputLevels,
+      analogInputLevels,
+    })
+  } : () => {}
+
   dispatchCycleDone() {
     const outputValues: Array<boolean> = []
     const states: Array<LocalIOChannelState> = []
@@ -278,7 +298,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       const {id, config} = channel
       if (config.mode === 'DIGITAL_OUTPUT') {
         const {reversePolarity, safeState}: DigitalOutputConfig = (config: any)
-        const controlValue = this._getTagValue(`${INTERNAL}localio/${id}/controlValue`)
+        const controlValue = this._getTagValue(LocalIOTags.controlValue(id))
         outputValues[id] = controlValue != null ? Boolean(controlValue) : Boolean(safeState)
         if (reversePolarity) outputValues[id] = !outputValues[id]
       } else {
@@ -289,6 +309,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     }
     this._spiHandler.sendDigitalOutputs(outputValues)
     this.emit(EVENT_CHANNEL_STATES, states)
+    if (process.env.BABEL_ENV === 'test') this._lastOutputValues = outputValues
   }
 
   start() {

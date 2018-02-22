@@ -37,7 +37,7 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
       safeState,
       controlValue: getTagValue(`${INTERNAL}localio/${id}/controlValue`),
       systemValue: getTagValue(`${INTERNAL}localio/${id}/systemValue`),
-      rawOutput: getTagValue(`${INTERNAL}localio/${id}/rawOutput`),
+      rawOutput: getTagValue(`${INTERNAL}localio/${id}/rawOutput`) || 0,
     }
   }
   case 'DISABLED': {

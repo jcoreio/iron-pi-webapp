@@ -15,14 +15,20 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 1,
-      name: 'Channel 1',
-      config: {
-        mode: 'ANALOG_INPUT',
+      id: 0,
+      tag: 'channel1',
+      metadataItem: {
+        tag: 'channel1',
+        name: 'Channel 1',
+        dataType: 'number',
         units: 'gal',
-        precision: 1,
+        storagePrecision: 1,
+        displayPrecision: 1,
         min: 0.5,
         max: 2.5,
+      },
+      config: {
+        mode: 'ANALOG_INPUT',
         calibration: {
           points: [
             {x: 0, y: 0},
@@ -32,10 +38,11 @@ module.exports = () => {
       },
     }
 
-    async function init(channel?: LocalIOChannel & {id: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
+    async function init(channel?: LocalIOChannel = defaultChannel, rawInput?: number | null = null): Promise<void> {
+      const {id} = channel
       await graphql({
-        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float) {
-          updateChannel(where: $where, channel: $channel) {
+        query: `mutation prepareTest($id: Int!, $channel: InputLocalIOChannel!, $rawInput: Float) {
+          updateLocalIOChannel(id: $id, channel: $channel) {
             id
           }
           setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
@@ -43,13 +50,12 @@ module.exports = () => {
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {id: channel.id},
+          id,
           channel,
-          channelId: channel.id,
           rawInput,
         }
       })
-      await navigateTo(`/channel/${channel.id}/calibration`)
+      await navigateTo(`/channel/${id + 1}/calibration`)
       await loginIfNecessary()
       browser.timeouts('implicit', 7000)
     }
@@ -75,10 +81,11 @@ module.exports = () => {
         expect(await browser.isEnabled('#calibrationForm [data-test-name="nextButton"]')).to.be.true
       })
       it('Calibration Table button goes straight to Calibration Table', async () => {
+        const {id} = defaultChannel
         await init()
         await browser.click('#calibrationForm [data-test-name="calibrationTableButton"]')
         await delay(700)
-        expect(await browser.getText('[data-test-name="calibrationFormTitle"]')).to.equal('Channel 1 Calibration')
+        expect(await browser.getText('[data-test-name="calibrationFormTitle"]')).to.equal(`Channel ${id + 1} Calibration`)
       })
       it('validates fields correctly', async () => {
         await init()
@@ -111,13 +118,15 @@ module.exports = () => {
     })
 
     async function setRawInput(rawInput: number | null): Promise<void> {
+      const {id} = defaultChannel
       await graphql({
-        query: `mutation updateValue($channelId: String!, $rawInput: Float) {
+        query: `mutation updateValue($id: Int!, $rawInput: Float) {
           setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'updateValue',
         variables: {
+          id,
           rawInput,
         }
       })
@@ -125,6 +134,7 @@ module.exports = () => {
 
     it('wizard flow works', async () => {
       await init()
+      const {id} = defaultChannel
       await browser.setValue('#calibrationForm [name="numPoints"]', '  2')
 
       await browser.click('#calibrationForm [data-test-name="nextButton"]')
@@ -156,11 +166,12 @@ module.exports = () => {
       expect(await browser.getUrl()).to.match(/\/channel\/1$/)
 
       const {data: {Channel: {config: {calibration}}}} = await graphql({
-        query: `query {
-          Channel(where: {id: 1}) {
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
             config
           }
-        }`
+        }`,
+        variables: {id},
       })
 
       expect(calibration.points).to.deep.equal([
@@ -240,9 +251,10 @@ module.exports = () => {
     describe('CalibrationTable', () => {
       it('displays the correct initial values', async () => {
         await init(undefined, 0.7)
-        await navigateTo('/channel/1/calibration/table')
+        const {id} = defaultChannel
+        await navigateTo(`/channel/${id + 1}/calibration/table`)
 
-        expect(await browser.getText('[data-test-name="calibrationFormTitle"]')).to.equal('Channel 1 Calibration')
+        expect(await browser.getText('[data-test-name="calibrationFormTitle"]')).to.equal(`Channel ${id + 1} Calibration`)
         expect(await browser.getValue('#calibrationForm [name="points[0].x"]')).to.equal('0')
         expect(await browser.getValue('#calibrationForm [name="points[0].y"]')).to.equal('0')
         expect(await browser.getValue('#calibrationForm [name="points[1].x"]')).to.equal('1')
@@ -253,7 +265,8 @@ module.exports = () => {
       })
       it('performs correct validation', async () => {
         await init()
-        await navigateTo('/channel/1/calibration/table')
+        const {id} = defaultChannel
+        await navigateTo(`/channel/${id + 1}/calibration/table`)
         const fields = ['points[0].x', 'points[0].y', 'points[1].x', 'points[1].y']
         for (let field of fields) {
           await browser.setValue(`[data-component="CalibrationTable"] [name="${field}"]`, '')
