@@ -58,9 +58,6 @@ module.exports = {
       queryInterface.sequelize.query(`INSERT INTO "Scopes" (id, description, "createdAt", "updatedAt") VALUES (?, ?, ?, ?)`, {
         replacements: ['test:create:token', 'allows a user to create a token for testing purposes', new Date(), new Date()],
       }),
-      queryInterface.sequelize.query(`INSERT INTO "Scopes" (id, description, "createdAt", "updatedAt") VALUES (?, ?, ?, ?)`, {
-        replacements: ['test:update:channelStates', 'allows a user update channel states for testing purposes', new Date(), new Date()],
-      }),
     ])
   },
   async down(queryInterface: QueryInterface, Sequelize: Class<SequelizeClass>): Promise<void> {

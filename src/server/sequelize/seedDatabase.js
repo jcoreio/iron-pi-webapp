@@ -9,11 +9,16 @@ export default async function seedDatabase(): Promise<void> {
     const username = requireEnv('TEST_USERNAME')
     const password = requireEnv('TEST_PASSWORD')
     if (!(await User.findOne({where: {username}}))) {
-      const testUser = await User.create({username, password})
-      // $FlowFixMe
-      await testUser.addScopes(await Scope.findAll({where: {id: ['test:create:token', 'test:update:channelStates']}}))
+      await User.create({username, password})
     } else {
       await User.update({password}, {where: {username}, individualHooks: true})
+    }
+    const testUser = await User.findOne({where: {username}})
+    if (testUser) {
+      // $FlowFixMe
+      await testUser.addScopes(await Scope.findAll({where: {id: [
+        'test:create:token',
+      ]}}))
     }
 
     if (!(await User.findOne({where: {username: 'root'}}))) {
