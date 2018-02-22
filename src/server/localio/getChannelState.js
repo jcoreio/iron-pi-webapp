@@ -12,6 +12,7 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
   switch (config.mode) {
   case 'ANALOG_INPUT': {
     return {
+      id,
       mode: 'ANALOG_INPUT',
       rawInput: getTagValue(`${INTERNAL}localio/${id}/rawAnalogInput`),
       systemValue: getTagValue(`${INTERNAL}localio/${id}/systemValue`),
@@ -20,6 +21,7 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
   case 'DIGITAL_INPUT': {
     const {reversePolarity}: DigitalInputConfig = (config: any)
     return {
+      id,
       mode: 'DIGITAL_INPUT',
       reversePolarity,
       rawInput: getTagValue(`${INTERNAL}localio/${id}/rawDigitalInput`),
@@ -29,6 +31,7 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
   case 'DIGITAL_OUTPUT': {
     const {reversePolarity, safeState}: DigitalOutputConfig = (config: any)
     return {
+      id,
       mode: 'DIGITAL_OUTPUT',
       reversePolarity,
       safeState,
@@ -38,7 +41,7 @@ export default function getChannelState(channel: LocalIOChannel, {getTagValue}: 
     }
   }
   case 'DISABLED': {
-    return {mode: 'DISABLED', systemValue: null}
+    return {id, mode: 'DISABLED', systemValue: null}
   }
   }
   throw new Error('Unknown channel mode: ' + config.mode)

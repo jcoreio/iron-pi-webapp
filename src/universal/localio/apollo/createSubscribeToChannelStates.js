@@ -58,10 +58,7 @@ export default function createSubscribeToChannelStates(
   const selection = options.selection || MODE_AND_SYSTEM_VALUE_SELECTION
   const channelStatesSubscription = gql(`
     subscription LocalIOChannelStates {
-      LocalIOChannelStates {
-        id
-        state ${selection}
-      }
+      states: LocalIOChannelStates ${selection}
     }  
   `)
 
@@ -76,12 +73,12 @@ export default function createSubscribeToChannelStates(
           return prev
         }
         if (!data) return prev
-        const {LocalIOChannelStates} = data
-        if (!Array.isArray(LocalIOChannelStates)) return
+        const {states} = data
+        if (!Array.isArray(states)) return
         let result = prev
-        for (let {id, state} of LocalIOChannelStates) {
+        for (let state of states) {
           const Channels = get(prev, channelsPath)
-          const index = Channels.findIndex(channel => channel[aliases.id] === id)
+          const index = Channels.findIndex(channel => channel[aliases.id] === state.id)
           if (index >= 0) result = setIn(result, [...channelsPath, index, aliases.state], state)
         }
         return result

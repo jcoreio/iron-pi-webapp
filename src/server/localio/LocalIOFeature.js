@@ -60,11 +60,11 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
   addPublications = ({pubsub}: {
     pubsub: PubSubEngine,
   }) => {
-    this._plugin.on(EVENT_CHANNEL_STATES, (states: Array<{id: number, state: LocalIOChannelState}>) => {
-      pubsub.publish(`LocalIOChannelStates`, {LocalIOChannelStates: states})
-      states.forEach(({id, state}: {id: number, state: LocalIOChannelState}) => {
-        pubsub.publish(`LocalIOChannelState/${id}`, {LocalIOChannelState: state})
+    this._plugin.on(EVENT_CHANNEL_STATES, (states: Array<LocalIOChannelState>) => {
+      states.forEach((state: LocalIOChannelState) => {
+        pubsub.publish(`LocalIOChannelState/${state.id}`, {LocalIOChannelState: state})
       })
+      pubsub.publish(`LocalIOChannelStates`, {LocalIOChannelStates: states})
     })
   }
   stop = () => {

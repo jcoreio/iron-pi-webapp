@@ -33,7 +33,7 @@ function digitize(value: ?boolean): 1 | 0 | null {
 export const EVENT_CHANNEL_STATES = 'channelStates'
 
 type Events = {
-  channelStates: [Array<{id: number, state: LocalIOChannelState}>],
+  channelStates: [Array<LocalIOChannelState>],
 } & DataPluginEmittedEvents
 
 export default class LocalIODataPlugin extends EventEmitter<Events> {
@@ -157,7 +157,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
     this._updateData()
     const state = getChannelState(channel, {getTagValue: this._getTagValue})
-    this.emit(EVENT_CHANNEL_STATES, [{id, state}])
+    this.emit(EVENT_CHANNEL_STATES, [state])
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
@@ -273,7 +273,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   dispatchCycleDone() {
     const outputValues: Array<boolean> = []
-    const states: Array<{id: number, state: LocalIOChannelState}> = []
+    const states: Array<LocalIOChannelState> = []
     for (let channel of this._channels) {
       const {id, config} = channel
       if (config.mode === 'DIGITAL_OUTPUT') {
@@ -285,7 +285,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         outputValues[id] = false
       }
       const state = getChannelState(channel, {getTagValue: this._getTagValue})
-      states.push({id, state})
+      states.push(state)
     }
     this._spiHandler.sendDigitalOutputs(outputValues)
     this.emit(EVENT_CHANNEL_STATES, states)

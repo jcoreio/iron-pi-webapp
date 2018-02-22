@@ -6,6 +6,7 @@ import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import ChannelForm from './ChannelForm'
 import createSubscribeToChannelState from '../../localio/apollo/createSubscribeToChannelState'
+import {ALL_FIELDS_SELECTION as ALL_STATE_FIELDS} from '../../localio/apollo/createSubscribeToChannelState'
 
 const metadataItemSelection = `
 metadataItem {
@@ -26,25 +27,11 @@ metadataItem {
 }
 `
 
-const channelQuery = gql(`query Channels($where: SequelizeJSON!) {
-  Channel: LocalIOChannel(where: $where) {
+const channelQuery = gql(`query Channels($id: Int!) {
+  Channel: LocalIOChannel(id: $id) {
     id
     config
-    state {
-      mode
-      systemValue
-      ... on InputChannelState {
-        rawInput
-      }
-      ... on DigitalChannelState {
-        reversePolarity
-      }
-      ... on DigitalOutputState {
-        safeState
-        controlValue
-        rawOutput
-      }
-    }
+    state ${ALL_STATE_FIELDS}
     ${metadataItemSelection}
   }
   Metadata {
@@ -75,9 +62,7 @@ export default compose(
   graphql(mutationQuery),
   graphql(channelQuery, {
     options: ({id}: Props) => ({
-      variables: {
-        where: {id}
-      },
+      variables: {id},
       errorPolicy: 'all',
     }),
     props: props => ({

@@ -5,11 +5,13 @@ import gql from 'graphql-tag'
 import {setIn} from '@jcoreio/mutate'
 
 export const MODE_AND_SYSTEM_VALUE_SELECTION = `{
+  id
   mode
   systemValue 
 }`
 
 export const ALL_FIELDS_SELECTION = `{
+  id
   mode
   systemValue
   ... on InputChannelState {

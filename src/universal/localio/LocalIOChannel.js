@@ -138,6 +138,7 @@ export type LocalIOChannel = {
 }
 
 export type AnalogInputState = {
+  id: number,
   mode: 'ANALOG_INPUT',
   rawInput: ?number,
   systemValue: any,
@@ -145,6 +146,7 @@ export type AnalogInputState = {
 export const AnalogInputStateType = (reify: Type<AnalogInputState>)
 
 export type DigitalInputState = {
+  id: number,
   mode: 'DIGITAL_INPUT',
   rawInput: ?number,
   reversePolarity: boolean,
@@ -153,6 +155,7 @@ export type DigitalInputState = {
 export const DigitalInputStateType = (reify: Type<DigitalInputState>)
 
 export type DigitalOutputState = {
+  id: number,
   mode: 'DIGITAL_OUTPUT',
   controlValue: ?number,
   safeState: 0 | 1,
@@ -163,6 +166,7 @@ export type DigitalOutputState = {
 export const DigitalOutputStateType = (reify: Type<DigitalOutputState>)
 
 export type DisabledState = {
+  id: number,
   mode: 'DISABLED',
   systemValue: null | typeof undefined,
 }

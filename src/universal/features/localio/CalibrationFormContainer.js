@@ -24,6 +24,7 @@ const channelQuery = gql(`query Channels($id: Int!) {
       }
     }
     state {
+      id
       ... on InputChannelState {
         rawInput
       }

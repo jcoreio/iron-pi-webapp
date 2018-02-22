@@ -14,6 +14,9 @@ export const LocalIOChannelMode = new graphql.GraphQLEnumType({
 export const LocalIOChannelState = new graphql.GraphQLInterfaceType({
   name: 'LocalIOChannelState',
   fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
@@ -62,6 +65,9 @@ export const AnalogInputState = new graphql.GraphQLObjectType({
   name: 'AnalogInputState',
   interfaces: [LocalIOChannelState, InputChannelState],
   fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
@@ -77,6 +83,9 @@ export const DigitalInputState = new graphql.GraphQLObjectType({
   name: 'DigitalInputState',
   interfaces: [LocalIOChannelState, DigitalChannelState, InputChannelState],
   fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
@@ -95,6 +104,9 @@ export const DigitalOutputState = new graphql.GraphQLObjectType({
   name: 'DigitalOutputState',
   interfaces: [LocalIOChannelState, DigitalChannelState],
   fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
@@ -119,23 +131,14 @@ export const DisabledLocalIOChannelState = new graphql.GraphQLObjectType({
   name: 'DisabledLocalIOChannelState',
   interfaces: [LocalIOChannelState],
   fields: {
+    id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+    },
     mode: {
       type: new graphql.GraphQLNonNull(LocalIOChannelMode),
     },
     systemValue: {
       type: graphql.GraphQLFloat,
-    },
-  },
-})
-
-export const LocalIOChannelIdAndState = new graphql.GraphQLObjectType({
-  name: 'LocalIOChannelIdAndState',
-  fields: {
-    id: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-    },
-    state: {
-      type: new graphql.GraphQLNonNull(LocalIOChannelState),
     },
   },
 })

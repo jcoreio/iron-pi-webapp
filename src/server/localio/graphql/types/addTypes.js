@@ -2,7 +2,7 @@
 
 import {
   AnalogInputState, DigitalChannelState, DigitalInputState, DigitalOutputState, DisabledLocalIOChannelState,
-  LocalIOChannelState, LocalIOChannelIdAndState
+  LocalIOChannelState
 } from './LocalIOChannelState'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import * as graphql from 'graphql'
@@ -19,7 +19,6 @@ const addTypes = (feature: LocalIOFeature) => ({types, inputTypes, attributeFiel
     LocalIOChannelState, DigitalChannelState,
     AnalogInputState, DigitalInputState, DigitalOutputState,
     DisabledLocalIOChannelState,
-    LocalIOChannelIdAndState,
   ]) {
     types[type.name] = type
   }

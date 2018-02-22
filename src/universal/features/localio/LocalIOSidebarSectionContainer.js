@@ -14,6 +14,7 @@ import type {Action, Dispatch, State} from '../../redux/types'
 import {setSectionExpanded} from '../../redux/sidebar'
 import type {Theme} from '../../theme'
 import createSubscribeToChannelStates from '../../localio/apollo/createSubscribeToChannelStates'
+import {ALL_FIELDS_SELECTION as ALL_STATE_FIELDS} from '../../localio/apollo/createSubscribeToChannelState'
 
 export const LOCAL_IO_SECTION = 'localio'
 
@@ -93,10 +94,7 @@ const query = gql(`{
         max
       }
     } 
-    state {
-      mode
-      systemValue
-    }
+    state ${ALL_STATE_FIELDS}
   }  
 }`)
 
