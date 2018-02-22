@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import TextField from './TextField'
-import {Field} from 'redux-form'
+import {Field, formValues} from 'redux-form'
 
 import ControlWithInfo from './ControlWithInfo'
 import {NumericField} from 'redux-form-numeric-field'
@@ -12,6 +12,8 @@ export type Props = {
   formControlClass?: string,
   firstControlClass?: string,
   lastControlClass?: string,
+  min: ?number,
+  max: ?number,
 }
 
 const unitsAndConfigInfo = (
@@ -21,7 +23,7 @@ const unitsAndConfigInfo = (
   </span>
 )
 
-const NumericMetadataItemFields = ({formControlClass, firstControlClass, lastControlClass}: Props) => (
+const NumericMetadataItemFields = ({formControlClass, firstControlClass, lastControlClass, min, max}: Props) => (
   <React.Fragment>
     <ControlWithInfo info={unitsAndConfigInfo} className={firstControlClass}>
       <Field
@@ -55,7 +57,7 @@ const NumericMetadataItemFields = ({formControlClass, firstControlClass, lastCon
         type="text"
         component={TextField}
         className={formControlClass}
-        validate={[required(), (value, {config: {max}}) => value >= max ? 'must be < max' : undefined]}
+        validate={[required(), (value) => value >= max ? 'must be < max' : undefined]}
       />
       <NumericField
         name="max"
@@ -63,11 +65,11 @@ const NumericMetadataItemFields = ({formControlClass, firstControlClass, lastCon
         type="text"
         component={TextField}
         className={formControlClass}
-        validate={[required(), (value, {config: {min}}) => value <= min ? 'must be > min' : undefined]}
+        validate={[required(), (value) => value <= min ? 'must be > min' : undefined]}
       />
     </ControlWithInfo>
   </React.Fragment>
 )
 
-export default NumericMetadataItemFields
+export default formValues('min', 'max')(NumericMetadataItemFields)
 
