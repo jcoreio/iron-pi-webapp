@@ -142,6 +142,8 @@ type FullChannel = {
 }
 
 export type Props = {
+  id: number,
+  loadedId: number,
   classes: Classes,
   initialize: (values: FullChannel, keepDirty?: boolean, otherMeta?: {keepSubmitSucceeded?: boolean}) => any,
   initialized?: boolean,
@@ -166,16 +168,22 @@ export type Props = {
   }>,
 }
 
+function _shouldInitialize({data: {Channel}, id, loadedId, pristine}: Props): boolean {
+  return Channel != null && Channel.id === id && (pristine || loadedId !== Channel.id)
+}
+
+const pickFormFields = ({id, metadataItem, config}: FullChannel) => ({id, metadataItem, config})
+
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
-  pickFormFields = ({id, metadataItem, config}: FullChannel) => ({id, metadataItem, config})
-
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props
     if (Channel) {
-      this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
+      if (_shouldInitialize(this.props)) {
+        this.initializeTimeout = setTimeout(() => initialize(pickFormFields(Channel)), 0)
+      }
       if (subscribeToChannelState) {
         this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
       }
@@ -191,8 +199,8 @@ class ChannelForm extends React.Component<Props> {
     }
 
     if (nextChannel !== prevChannel) {
-      if (nextChannel && nextProps.pristine) {
-        this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
+      if (nextChannel && _shouldInitialize(nextProps)) {
+        this.initializeTimeout = setTimeout(() => nextProps.initialize(pickFormFields(nextChannel)), 0)
       }
       if (getId(nextChannel) !== getId(prevChannel)) {
         if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
@@ -213,7 +221,7 @@ class ChannelForm extends React.Component<Props> {
 
   handleCancel = () => {
     const {data: {Channel}, initialize} = this.props
-    if (Channel) initialize(this.pickFormFields(Channel))
+    if (Channel) initialize(pickFormFields(Channel))
   }
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
@@ -225,7 +233,7 @@ class ChannelForm extends React.Component<Props> {
         channel: {id, config, metadataItem}
       }
     }).then(({data: {Channel}}: {data: {Channel: FullChannel}}) => {
-      initialize(this.pickFormFields(Channel), false, {keepSubmitSucceeded: true})
+      initialize(pickFormFields(Channel), false, {keepSubmitSucceeded: true})
     }).catch(handleError)
   }
 
@@ -233,10 +241,10 @@ class ChannelForm extends React.Component<Props> {
     const {
       classes, data: {Metadata, Channel, loading}, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
-      handleSubmit, change,
+      handleSubmit, change, loadedId, id,
     } = this.props
     const config = this.props.config || {mode: 'DISABLED', systemValue: null}
-    if (loading || !initialized) {
+    if (loading || !initialized || loadedId !== id) {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>

@@ -74,8 +74,12 @@ export default compose(
     })
   }),
   reduxForm({
-    form: 'Channel',
+    form: 'LocalIOChannel',
+    destroyOnUnmount: false,
   }),
-  formValues('config')
+  formValues({
+    config: 'config',
+    loadedId: 'id',
+  })
 )(ChannelForm)
 
