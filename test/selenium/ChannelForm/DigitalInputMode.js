@@ -10,8 +10,13 @@ import graphql from '../util/graphql'
 import poll from '@jcoreio/poll/lib/index'
 
 const defaultChannel = {
-  id: 1,
-  name: 'Channel 1',
+  id: 0,
+  metadataItem: {
+    tag: 'channel1',
+    name: 'Channel 1',
+    dataType: 'number',
+    isDigital: true,
+  },
   config: {
     mode: 'DIGITAL_INPUT',
     reversePolarity: true,
@@ -24,8 +29,8 @@ module.exports = () => {
     beforeEach(async () => {
       const {id} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Int!) {
-          updateChannel(where: $where, channel: $channel) {
+        query: `mutation prepareTest($channel: InputLocalIOChannel!, $id: Int!, $rawInput: Boolean!) {
+          updateLocalIOChannel(id: $id, channel: $channel) {
             id
           }
           setLocalChannelRawInput(id: $id, rawDigitalInput: $rawInput)
@@ -33,13 +38,12 @@ module.exports = () => {
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {id},
+          id,
           channel: defaultChannel,
-          channelId: id,
-          rawInput: 0,
+          rawInput: false,
         }
       })
-      await navigateTo('/channel/1')
+      await navigateTo(`/channel/${id + 1}`)
       await loginIfNecessary()
       browser.timeouts('implicit', 5000)
     })
@@ -51,21 +55,21 @@ module.exports = () => {
     it('displays the correct initial values', async () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('DIGITAL_INPUT')
       expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('true')
-      expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
 
       expect(await browser.getText('[data-component="DigitalInputStateWidget"] [data-component="ValueBlock"][data-test-name="rawInput"] [data-test-name="value"]')).to.equal('0')
       expect(await browser.getText('[data-component="DigitalInputStateWidget"] [data-component="ValueBlock"][data-test-name="systemValue"] [data-test-name="value"]')).to.equal('1')
     })
-
     it('displays updated values', async () => {
       await graphql({
-        query: `mutation update($channelId: String!, $rawInput: Int!) {
+        query: `mutation update($id: Int!, $rawInput: Boolean!) {
           setLocalChannelRawInput(id: $id, rawDigitalInput: $rawInput)
         }`,
         operationName: 'update',
         variables: {
-          rawInput: 1,
+          id: defaultChannel.id,
+          rawInput: true,
         }
       })
 
@@ -80,7 +84,7 @@ module.exports = () => {
     })
 
     it('displays required validation errors', async () => {
-      const fields = ['name', 'id']
+      const fields = ['metadataItem.name', 'metadataItem.tag']
       for (let field of fields) {
         await browser.setValue(`#channelForm [name="${field}"]`, '')
       }
@@ -91,30 +95,12 @@ module.exports = () => {
           'is required'
         )
       }
-
-      expect(await browser.isVisible(`#channelForm [data-name="config.units"] [data-component="FormHelperText"]`)).to.be.false
-    })
-
-    it('displays other validation errors', async () => {
-      const values = {
-      }
-      const errors = {
-      }
-      for (let name in values) {
-        await browser.setValue(`#channelForm [name="${name}"]`, values[name])
-      }
-      await browser.click('#channelForm [type="submit"]')
-
-      for (let name in errors) {
-        expect(await browser.getText(`#channelForm [data-name="${name}"] [data-component="FormHelperText"]`)).to.equal(
-          errors[name]
-        )
-      }
     })
 
     it('saves normalized values', async () => {
       const values = {
-        name: '  Pump Pressure  ',
+        'metadataItem.tag': 'pumpPress',
+        'metadataItem.name': '  Pump Pressure  ',
       }
 
       for (let name in values) {
@@ -126,17 +112,23 @@ module.exports = () => {
       await browser.waitForVisible('div=Your changes have been saved!', 5000)
 
       const {data: {Channel}} = await graphql({
-        query: `query {
-          Channel(where: {id: 1}) {
-            name
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
             id
+            metadataItem {
+              tag
+              name
+            } 
             config
           }
-        }`
+        }`,
+        variables: {id: defaultChannel.id},
       })
       expect(Channel).to.containSubset({
-        name: values.name.trim(),
-        id: values.id.trim(),
+        metadataItem: {
+          tag: values['metadataItem.tag'].trim(),
+          name: values['metadataItem.name'].trim(),
+        },
         config: {
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
