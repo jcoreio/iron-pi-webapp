@@ -10,8 +10,7 @@ import graphql from '../util/graphql'
 import poll from '@jcoreio/poll/lib/index'
 
 const defaultChannel = {
-  id: 'channel1',
-  physicalChannelId: 1,
+    id: 1,
   name: 'Channel 1',
   config: {
     mode: 'DIGITAL_INPUT',
@@ -23,18 +22,18 @@ module.exports = () => {
   describe('DigitalInput mode', function () {
     this.timeout(60000)
     beforeEach(async () => {
-      const {id, physicalChannelId} = defaultChannel
+      const {id} = defaultChannel
       await graphql({
         query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Int!) {
           updateChannel(where: $where, channel: $channel) {
-            physicalChannelId
+            id
           }
-          setChannelValue(channelId: $channelId, rawDigitalInput: $rawInput)
+          setLocalChannelRawInput(id: $id, rawDigitalInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {physicalChannelId},
+          where: {id},
           channel: defaultChannel,
           channelId: id,
           rawInput: 0,
@@ -62,12 +61,11 @@ module.exports = () => {
     it('displays updated values', async () => {
       await graphql({
         query: `mutation update($channelId: String!, $rawInput: Int!) {
-          setChannelValue(channelId: $channelId, rawDigitalInput: $rawInput)
+          setLocalChannelRawInput(id: $id, rawDigitalInput: $rawInput)
         }`,
         operationName: 'update',
         variables: {
-          channelId: 'channel1',
-          rawInput: 1,
+                    rawInput: 1,
         }
       })
 
@@ -99,11 +97,9 @@ module.exports = () => {
 
     it('displays other validation errors', async () => {
       const values = {
-        id: '1channel',
-      }
+              }
       const errors = {
-        id: 'invalid Channel ID',
-      }
+              }
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
       }
@@ -119,8 +115,7 @@ module.exports = () => {
     it('saves normalized values', async () => {
       const values = {
         name: '  Pump Pressure  ',
-        id: '  pump/pressure  ',
-      }
+              }
 
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
@@ -132,7 +127,7 @@ module.exports = () => {
 
       const {data: {Channel}} = await graphql({
         query: `query {
-          Channel(where: {physicalChannelId: 1}) {
+          Channel(where: {id: 1}) {
             name
             id
             config

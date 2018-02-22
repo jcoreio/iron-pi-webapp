@@ -15,8 +15,7 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 'channel1',
-      physicalChannelId: 1,
+      id: 1,
       name: 'Channel 1',
       config: {
         mode: 'ANALOG_INPUT',
@@ -33,24 +32,24 @@ module.exports = () => {
       },
     }
 
-    async function init(channel?: LocalIOChannel & {physicalChannelId: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
+    async function init(channel?: LocalIOChannel & {id: number} = defaultChannel, rawInput?: number | null = null): Promise<void> {
       await graphql({
         query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float) {
           updateChannel(where: $where, channel: $channel) {
             id
           }
-          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
+          setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {physicalChannelId: channel.physicalChannelId},
+          where: {id: channel.id},
           channel,
           channelId: channel.id,
           rawInput,
         }
       })
-      await navigateTo(`/channel/${channel.physicalChannelId}/calibration`)
+      await navigateTo(`/channel/${channel.id}/calibration`)
       await loginIfNecessary()
       browser.timeouts('implicit', 7000)
     }
@@ -114,13 +113,12 @@ module.exports = () => {
     async function setRawInput(rawInput: number | null): Promise<void> {
       await graphql({
         query: `mutation updateValue($channelId: String!, $rawInput: Float) {
-          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
+          setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'updateValue',
         variables: {
-          channelId: 'channel1',
-          rawInput,
+                    rawInput,
         }
       })
     }
@@ -159,7 +157,7 @@ module.exports = () => {
 
       const {data: {Channel: {config: {calibration}}}} = await graphql({
         query: `query {
-          Channel(where: {physicalChannelId: 1}) {
+          Channel(where: {id: 1}) {
             config
           }
         }`

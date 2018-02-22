@@ -16,8 +16,7 @@ module.exports = () => {
     this.timeout(60000)
 
     const defaultChannel = {
-      id: 'channel1',
-      physicalChannelId: 1,
+      id: 1,
       name: 'Channel 1',
       config: {
         mode: 'DIGITAL_OUTPUT',
@@ -27,24 +26,24 @@ module.exports = () => {
       },
     }
 
-    async function init(channel: LocalIOChannel & {physicalChannelId: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
-      const {physicalChannelId} = defaultChannel
+    async function init(channel: LocalIOChannel & {id: number} = defaultChannel, controlValue: 0 | 1 | null = null): Promise<void> {
+      const {id} = defaultChannel
       await graphql({
         query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
           updateChannel(where: $where, channel: $channel) {
-            physicalChannelId
+            id
           }
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {physicalChannelId},
+          where: {id},
           channel: defaultChannel,
         }
       })
       await graphql({
         query: `mutation prepareTest($channelId: String!, $controlValue: Int) {
-          setChannelValue(channelId: $channelId, controlValue: $controlValue)
+          setLocalChannelRawInput(id: $id, controlValue: $controlValue)
         }
         `,
         operationName: 'prepareTest',
@@ -53,7 +52,7 @@ module.exports = () => {
           controlValue,
         }
       })
-      await navigateTo(`/channel/${channel.physicalChannelId}`)
+      await navigateTo(`/channel/${channel.id}`)
       await loginIfNecessary()
       browser.timeouts('implicit', 5000)
     }
@@ -79,14 +78,14 @@ module.exports = () => {
       await graphql({
         query: `mutation update($channel: InputChannel!, $channelId: String!, $controlValue: Int) {
           updateChannel(id: $channelId, channel: $channel) {
-            physicalChannelId
+            id
           }
-          setChannelValue(channelId: $channelId, controlValue: $controlValue)
+          setLocalChannelRawInput(id: $id, controlValue: $controlValue)
         }`,
         operationName: 'update',
         variables: {
           channel: {
-            physicalChannelId: 1,
+            id: 1,
             config: {
               mode: 'DIGITAL_OUTPUT',
               safeState: 0,
@@ -94,8 +93,7 @@ module.exports = () => {
               controlMode: 'REMOTE_CONTROL',
             },
           },
-          channelId: 'channel1',
-          controlValue: 1,
+                    controlValue: 1,
         }
       })
 
@@ -190,17 +188,16 @@ module.exports = () => {
         await graphql({
           query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
             updateChannel(where: $where, channel: $channel) {
-              physicalChannelId
+              id
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
-            where: {physicalChannelId: 1},
+            where: {id: 1},
             channel: {
               name: 'Channel 1',
-              id: 'channel1',
-              config: {
+                            config: {
                 mode: 'DIGITAL_OUTPUT',
                 safeState: 0,
                 reversePolarity: false,
@@ -234,17 +231,16 @@ module.exports = () => {
         await graphql({
           query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
             updateChannel(where: $where, channel: $channel) {
-              physicalChannelId
+              id
             }
           }
           `,
           operationName: 'prepareTest',
           variables: {
-            where: {physicalChannelId: 1},
+            where: {id: 1},
             channel: {
               name: 'Channel 1',
-              id: 'channel1',
-              config: {
+                            config: {
                 mode: 'DISABLED',
                 controlLogic: [],
               },
@@ -312,17 +308,16 @@ module.exports = () => {
           graphql({
             query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
               updateChannel(where: $where, channel: $channel) {
-                physicalChannelId
+                id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {physicalChannelId: 1},
+              where: {id: 1},
               channel: {
                 name: 'Channel 1',
-                id: 'channel1',
-                config: {
+                                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },
@@ -332,17 +327,16 @@ module.exports = () => {
           graphql({
             query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
               updateChannel(where: $where, channel: $channel) {
-                physicalChannelId
+                id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {physicalChannelId: 2},
+              where: {id: 2},
               channel: {
                 name: 'Channel 2',
-                id: 'channel2',
-                config: {
+                                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },
@@ -352,17 +346,16 @@ module.exports = () => {
           graphql({
             query: `mutation prepareTest($where: JSON!, $channel: InputChannel!) {
               updateChannel(where: $where, channel: $channel) {
-                physicalChannelId
+                id
               }
             }
             `,
             operationName: 'prepareTest',
             variables: {
-              where: {physicalChannelId: 3},
+              where: {id: 3},
               channel: {
                 name: 'Channel 3',
-                id: 'channel3',
-                config: {
+                                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },
@@ -421,7 +414,7 @@ module.exports = () => {
 
         const {data: {Channel: {config}}} = await graphql({
           query: `query {
-            Channel(where: {physicalChannelId: 1}) {
+            Channel(where: {id: 1}) {
               config
             }
           }`

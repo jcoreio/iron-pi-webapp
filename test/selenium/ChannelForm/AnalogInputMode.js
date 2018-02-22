@@ -10,15 +10,19 @@ import graphql from '../util/graphql'
 import poll from '@jcoreio/poll'
 
 const defaultChannel = {
-  id: 'channel1',
-  physicalChannelId: 1,
-  name: 'Channel 1',
-  config: {
-    mode: 'ANALOG_INPUT',
+  id: 0,
+  metadataItem: {
+    tag: 'channel1',
+    name: 'Channel 1',
+    dataType: 'number',
     units: 'gal',
-    precision: 1,
     min: 0.5,
     max: 2.5,
+    displayPrecision: 1,
+    storagePrecision: 1,
+  },
+  config: {
+    mode: 'ANALOG_INPUT',
     calibration: {
       points: [
         {x: 0, y: 0},
@@ -32,20 +36,20 @@ module.exports = () => {
   describe('AnalogInput mode', function () {
     this.timeout(60000)
     beforeEach(async () => {
-      const {id, physicalChannelId} = defaultChannel
+      const {id} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($where: JSON!, $channel: InputChannel!, $channelId: String!, $rawInput: Float!) {
-          updateChannel(where: $where, channel: $channel) {
-            physicalChannelId
+        query: `mutation prepareTest($where: JSON!, $channel: InputLocalIOChannel!, $id: Int!, $rawInput: Float!) {
+          updateLocalIOChannel(where: $where, channel: $channel) {
+            id
           }
-          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
+          setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
         }
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {physicalChannelId},
+          where: {id},
+          id,
           channel: defaultChannel,
-          channelId: id,
           rawInput: 2.356,
         }
       })
@@ -60,25 +64,26 @@ module.exports = () => {
 
     it('displays the correct initial values', async () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('ANALOG_INPUT')
-      expect(await browser.getValue('#channelForm [name="name"]')).to.equal('Channel 1')
-      expect(await browser.getValue('#channelForm [name="id"]')).to.equal('channel1')
-      expect(await browser.getValue('#channelForm [name="config.units"]')).to.equal('gal')
-      expect(await browser.getValue('#channelForm [name="config.precision"]')).to.equal('1')
-      expect(await browser.getValue('#channelForm [name="config.min"]')).to.equal('0.5')
-      expect(await browser.getValue('#channelForm [name="config.max"]')).to.equal('2.5')
+      expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.units"]')).to.equal('gal')
+      expect(await browser.getValue('#channelForm [name="metadataItem.displayPrecision"]')).to.equal('1')
+      expect(await browser.getValue('#channelForm [name="metadataItem.min"]')).to.equal('0.5')
+      expect(await browser.getValue('#channelForm [name="metadataItem.max"]')).to.equal('2.5')
 
       expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="rawInput"] [data-test-name="value"]')).to.equal('2.36')
       expect(await browser.getText('[data-component="AnalogInputStateWidget"] [data-component="ValueBlock"][data-test-name="systemValue"] [data-test-name="value"]')).to.equal('23.6')
     })
 
     it('displays updated values', async () => {
+      const {id} = defaultChannel
       await graphql({
-        query: `mutation update($channelId: String!, $rawInput: Float!) {
-          setChannelValue(channelId: $channelId, rawAnalogInput: $rawInput)
+        query: `mutation update($id: Int!, $rawInput: Float!) {
+          setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
         }`,
         operationName: 'update',
         variables: {
-          channelId: 'channel1',
+          id,
           rawInput: 3.58,
         }
       })
@@ -94,34 +99,32 @@ module.exports = () => {
     })
 
     it('displays required validation errors', async () => {
-      const fields = ['name', 'id', 'config.units', 'config.precision', 'config.min', 'config.max']
+      const fields = ['metadataItem.name', 'metadataItem.tag', 'metadataItem.units', 'metadataItem.displayPrecision', 'metadataItem.min', 'metadataItem.max']
       for (let field of fields) {
         await browser.setValue(`#channelForm [name="${field}"]`, '')
       }
       await browser.click('#channelForm [type="submit"]')
 
       for (let field of fields) {
-        if (field === 'config.units') continue
+        if (field === 'metadataItem.units') continue
         expect(await browser.getText(`#channelForm [data-name="${field}"] [data-component="FormHelperText"]`)).to.equal(
           'is required'
         )
       }
 
-      expect(await browser.isVisible(`#channelForm [data-name="config.units"] [data-component="FormHelperText"]`)).to.be.false
+      expect(await browser.isVisible(`#channelForm [data-name="metadataItem.units"] [data-component="FormHelperText"]`)).to.be.false
     })
 
     it('displays other validation errors', async () => {
       const values = {
-        id: '1channel',
-        'config.precision': '2.5',
-        'config.min': '5',
-        'config.max': '0',
+        'metadataItem.displayPrecision': '2.5',
+        'metadataItem.min': '5',
+        'metadataItem.max': '0',
       }
       const errors = {
-        id: 'invalid Channel ID',
-        'config.precision': 'is not an integer',
-        'config.min': 'must be < max',
-        'config.max': 'must be > min',
+        'metadataItem.displayPrecision': 'is not an integer',
+        'metadataItem.min': 'must be < max',
+        'metadataItem.max': 'must be > min',
       }
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
@@ -137,12 +140,12 @@ module.exports = () => {
 
     it('saves normalized values', async () => {
       const values = {
-        name: '  Pump Pressure  ',
-        id: '  pump/pressure  ',
-        'config.precision': ' 1   ',
-        'config.units': 'psi',
-        'config.min': ' 0.3 ',
-        'config.max': ' 10.5 ',
+        'metadataItem.tag': 'pumpPress',
+        'metadataItem.name': '  Pump Pressure  ',
+        'metadataItem.displayPrecision': ' 1   ',
+        'metadataItem.units': 'psi',
+        'metadataItem.min': ' 0.3 ',
+        'metadataItem.max': ' 10.5 ',
       }
 
       for (let name in values) {
@@ -154,22 +157,32 @@ module.exports = () => {
 
       const {data: {Channel}} = await graphql({
         query: `query {
-          Channel(where: {physicalChannelId: 1}) {
-            name
-            id
+          Channel: LocalIOChannel(where: {id: 0}) {
+            metadataItem {
+              tag
+              name
+              ... on NumericMetadataItem {
+                units
+                displayPrecision
+                min
+                max
+              }
+            } 
             config
           }
         }`
       })
       expect(Channel).to.containSubset({
-        name: values.name.trim(),
-        id: values.id.trim(),
+        metadataItem: {
+          name: values['metadataItem.name'].trim(),
+          tag: values['metadataItem.tag'].trim(),
+          units: 'psi',
+          displayPrecision: parseInt(values['metadataItem.displayPrecision']),
+          min: parseFloat(values['metadataItem.min']),
+          max: parseFloat(values['metadataItem.max']),
+        },
         config: {
           mode: 'ANALOG_INPUT',
-          units: 'psi',
-          precision: parseInt(values['config.precision']),
-          min: parseFloat(values['config.min']),
-          max: parseFloat(values['config.max']),
         },
       })
     })
