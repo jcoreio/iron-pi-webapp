@@ -93,7 +93,7 @@ module.exports = () => {
               controlMode: 'REMOTE_CONTROL',
             },
           },
-                    controlValue: 1,
+          controlValue: 1,
         }
       })
 
@@ -197,7 +197,7 @@ module.exports = () => {
             where: {id: 1},
             channel: {
               name: 'Channel 1',
-                            config: {
+              config: {
                 mode: 'DIGITAL_OUTPUT',
                 safeState: 0,
                 reversePolarity: false,
@@ -240,7 +240,7 @@ module.exports = () => {
             where: {id: 1},
             channel: {
               name: 'Channel 1',
-                            config: {
+              config: {
                 mode: 'DISABLED',
                 controlLogic: [],
               },
@@ -317,7 +317,7 @@ module.exports = () => {
               where: {id: 1},
               channel: {
                 name: 'Channel 1',
-                                config: {
+                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },
@@ -336,7 +336,7 @@ module.exports = () => {
               where: {id: 2},
               channel: {
                 name: 'Channel 2',
-                                config: {
+                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },
@@ -355,7 +355,7 @@ module.exports = () => {
               where: {id: 3},
               channel: {
                 name: 'Channel 3',
-                                config: {
+                config: {
                   mode: 'DISABLED',
                   controlLogic: [],
                 },

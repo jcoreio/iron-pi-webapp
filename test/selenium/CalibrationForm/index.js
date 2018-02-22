@@ -118,7 +118,7 @@ module.exports = () => {
         `,
         operationName: 'updateValue',
         variables: {
-                    rawInput,
+          rawInput,
         }
       })
     }

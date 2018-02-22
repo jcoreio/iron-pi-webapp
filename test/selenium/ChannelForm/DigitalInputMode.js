@@ -10,7 +10,7 @@ import graphql from '../util/graphql'
 import poll from '@jcoreio/poll/lib/index'
 
 const defaultChannel = {
-    id: 1,
+  id: 1,
   name: 'Channel 1',
   config: {
     mode: 'DIGITAL_INPUT',
@@ -65,7 +65,7 @@ module.exports = () => {
         }`,
         operationName: 'update',
         variables: {
-                    rawInput: 1,
+          rawInput: 1,
         }
       })
 
@@ -97,9 +97,9 @@ module.exports = () => {
 
     it('displays other validation errors', async () => {
       const values = {
-              }
+      }
       const errors = {
-              }
+      }
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
       }
@@ -115,7 +115,7 @@ module.exports = () => {
     it('saves normalized values', async () => {
       const values = {
         name: '  Pump Pressure  ',
-              }
+      }
 
       for (let name in values) {
         await browser.setValue(`#channelForm [name="${name}"]`, values[name])
