@@ -2,6 +2,6 @@
 
 export type DecodedToken = {
   userId: number,
-  scopes: Array<string>,
+  scopes: Set<string>,
 }
 

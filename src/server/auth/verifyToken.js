@@ -9,7 +9,7 @@ export default async function verifyToken(token: string): Promise<DecodedToken> 
   const JWT_SECRET = requireEnv('JWT_SECRET')
   const ROOT_URL = requireEnv('ROOT_URL')
 
-  const decoded: DecodedToken = await promisify(cb => jwt.verify(
+  const {userId, scopes}: DecodedToken = await promisify(cb => jwt.verify(
     token,
     JWT_SECRET,
     {
@@ -18,6 +18,9 @@ export default async function verifyToken(token: string): Promise<DecodedToken> 
     cb
   ))()
 
-  return decoded
+  return {
+    userId,
+    scopes: new Set(scopes),
+  }
 }
 

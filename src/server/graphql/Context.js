@@ -7,7 +7,7 @@ import type {PubSubEngine} from 'graphql-subscriptions'
 
 export type Context = {
   userId: ?number,
-  scopes: ?Array<string>,
+  scopes: Set<string>,
   dataRouter: DataRouter,
   metadataHandler: MetadataHandler,
   pubsub: PubSubEngine,
