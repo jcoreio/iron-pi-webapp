@@ -33,6 +33,10 @@ type State = {
   showSuccess: boolean,
 }
 
+function shouldShow(props: Props): ?boolean {
+  return props.submitSucceeded && !props.submitting
+}
+
 class SubmitStatus extends React.Component<Props, State> {
   state: State = {showSuccess: Boolean(this.props.submitSucceeded && !this.props.submitting)}
 
@@ -45,11 +49,11 @@ class SubmitStatus extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.submitSucceeded && !this.props.submitting) this.showSuccess()
+    if (shouldShow(this.props)) this.showSuccess()
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.submitSucceeded && !nextProps.submitting && this.props.submitting) {
+    if (shouldShow(nextProps) && !shouldShow(this.props)) {
       this.showSuccess()
     }
   }
