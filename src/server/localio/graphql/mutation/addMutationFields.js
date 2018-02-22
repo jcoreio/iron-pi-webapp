@@ -4,6 +4,7 @@ import * as graphql from 'graphql'
 import setLocalChannelRemoteControlValue from './setLocalChannelRemoteControlValue'
 import type {Context} from '../../../graphql/Context'
 import updateLocalIOChannel from './updateLocalIOChannel'
+import updateLocalIOChannelCalibration from './updateLocalIOChannelCalibration'
 
 export default function addMutationFields({types, inputTypes, mutationFields}: {
   types: {[name: string]: graphql.GraphQLOutputType},
@@ -12,5 +13,6 @@ export default function addMutationFields({types, inputTypes, mutationFields}: {
 }) {
   mutationFields.setLocalChannelRemoteControlValue = setLocalChannelRemoteControlValue({plugin: this._plugin})
   mutationFields.updateLocalIOChannel = updateLocalIOChannel({types, inputTypes})
+  mutationFields.updateLocalIOChannelCalibration = updateLocalIOChannelCalibration({types})
 }
 

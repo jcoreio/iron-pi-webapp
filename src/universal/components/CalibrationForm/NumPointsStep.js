@@ -3,11 +3,11 @@
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
 import {numericality, required} from '@jcoreio/redux-form-validators/lib/index'
-import TextField from '../../components/TextField'
+import TextField from '../TextField'
 import {NumericField} from 'redux-form-numeric-field'
 import {TransitionListener} from 'react-transition-context'
 
-import type {Theme} from '../../theme'
+import type {Theme} from '../../theme/index'
 
 const styles = (theme: Theme) => ({
   numPointsField: {

@@ -12,16 +12,17 @@ import ChevronRight from '../../components/Navbar/ChevronRight'
 import LocalIOSidebarSectionContainer from './LocalIOSidebarSectionContainer'
 
 export const FEATURE_ID = 'localio'
+export const FEATURE_NAME = 'Local I/O Control Panel'
 
 const ChannelFormContainer = featureLoader({
   featureId: FEATURE_ID,
-  featureName: 'Local I/O',
+  featureName: FEATURE_NAME,
   getComponent: feature => (feature: any).ChannelFormContainer,
 })
 
 const CalibrationFormContainer = featureLoader({
-  featureId: 'calibrationForm',
-  featureName: 'Calibration Form',
+  featureId: FEATURE_ID,
+  featureName: FEATURE_NAME,
   getComponent: feature => (feature: any).CalibrationFormContainer,
 })
 
@@ -80,6 +81,7 @@ const LocalIOFeature: Feature = {
     return {
       ...LocalIOFeature,
       ChannelFormContainer: (await import('./ChannelFormContainer')).default,
+      CalibrationFormContainer: (await import('./CalibrationFormContainer')).default,
     }
   }
 }

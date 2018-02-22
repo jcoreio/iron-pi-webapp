@@ -9,9 +9,9 @@ import {NumericField} from 'redux-form-numeric-field'
 import {TransitionListener} from 'react-transition-context'
 import Arrow from 'react-arrow'
 
-import type {Theme} from '../../theme'
-import TextField from '../../components/TextField'
-import ValueBlock from '../../components/ValueBlock'
+import type {Theme} from '../../theme/index'
+import TextField from '../TextField'
+import ValueBlock from '../ValueBlock'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
@@ -32,12 +32,13 @@ export type ValueBlockFieldProps = {
   meta: {
     error?: string,
   },
+  precision: number,
 }
 
-const ValueBlockField = ({input, meta, ...props}: ValueBlockFieldProps): React.Node => (
+const ValueBlockField = ({input, meta, precision, ...props}: ValueBlockFieldProps): React.Node => (
   <ValueBlock
     value={input.value != null && Number.isFinite(input.value)
-      ? input.value.toFixed(2)
+      ? input.value.toFixed(precision)
       : input.value}
     error={meta.error}
     {...props}
@@ -86,19 +87,10 @@ export type Props = {
   bodyClass: string,
   pointIndex: number,
   change: (field: string, newValue: any) => void,
-  channel?: {
-    config: {
-      units?: string,
-    },
-    state?: {
-      rawInput?: number,
-    },
-  },
-}
-
-function getRawInput(channel: ?{state?: {rawInput?: number}}): ?number {
-  const {rawInput} = channel && channel.state || {}
-  return rawInput
+  units?: string,
+  rawInput?: ?number,
+  rawInputUnits: string,
+  rawInputPrecision?: ?number,
 }
 
 class PointStep extends React.Component<Props> {
@@ -113,8 +105,7 @@ class PointStep extends React.Component<Props> {
   }
 
   updateX = (props: Props = this.props) => {
-    const {channel, change, pointIndex} = props
-    const rawInput = getRawInput(channel)
+    const {rawInput, change, pointIndex} = props
     change(`points[${pointIndex}].x`, rawInput)
   }
 
@@ -123,23 +114,23 @@ class PointStep extends React.Component<Props> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (getRawInput(this.props.channel) !== getRawInput(nextProps.channel)) {
+    if (this.props.rawInput !== nextProps.rawInput) {
       this.updateX(nextProps)
     }
   }
 
   render(): ?React.Node {
-    const {classes, bodyClass, pointIndex, channel} = this.props
-    const {config: {units}} = channel || {config: {}}
+    const {classes, bodyClass, pointIndex, rawInputUnits, rawInputPrecision, units} = this.props
     return (
       <div className={classNames(bodyClass, classes.root)}>
         <Field
           name={`points[${pointIndex}].x`}
           title="Raw Input"
-          units="V"
+          units={rawInputUnits}
           className={classes.block}
           component={ValueBlockField}
           validate={required()}
+          precision={rawInputPrecision != null ? rawInputPrecision : 2}
         />
         <FlowArrow className={classes.arrow} />
         <div className={classNames(classes.block, classes.actualValueBlock)}>

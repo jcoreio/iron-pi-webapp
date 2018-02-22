@@ -3,7 +3,6 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {dirname} from 'path'
-import get from 'lodash.get'
 import type {Match, Location, RouterHistory} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
@@ -20,15 +19,14 @@ import {createSelector} from 'reselect'
 import NumPointsStep from './NumPointsStep'
 import PointStep from './PointStep'
 import CalibrationTable from './CalibrationTable'
-import Spinner from '../../components/Spinner'
+import Spinner from '../Spinner'
 
-import Fader from '../../components/Fader'
-import ErrorAlert from '../../components/ErrorAlert'
-import Autocollapse from '../../components/Autocollapse'
+import Fader from '../Fader'
+import ErrorAlert from '../ErrorAlert'
+import Autocollapse from '../Autocollapse'
 import type {Theme} from '../../theme/index'
-import type {Calibration, LocalIOChannel as FullChannel} from '../../localio/LocalIOChannel'
-import {CALIBRATION_TABLE} from '../localio/routePaths'
-import handleError from '../../redux-form/createSubmissionError'
+import type {Calibration} from '../../localio/LocalIOChannel'
+import {CALIBRATION_TABLE} from '../../features/localio/routePaths'
 
 const styles = ({spacing, calibration}: Theme) => ({
   form: {
@@ -87,20 +85,22 @@ export type Props = {
   history: RouterHistory,
   classes: Classes,
   numPoints: ?(string | number),
+  saveCalibration: (calibration: Calibration) => Promise<any>,
   handleSubmit: Function,
   pristine?: boolean,
   submitting?: boolean,
   initialized?: boolean,
   initialize: (values: Calibration) => any,
   change: (field: string, newValue: any) => void,
-  subscribeToChannelState?: (id: string) => Function,
   id: number,
   error?: string,
-  mutate: (options: {variables: {id: number, calibration: Calibration}}) => Promise<void>,
-  data: {
-    Channel?: FullChannel,
-    loading?: boolean,
-  },
+  name: string,
+  units: string,
+  rawInput?: ?number,
+  rawInputUnits: string,
+  rawInputPrecision?: ?number,
+  loading?: boolean,
+  calibration?: Calibration,
 }
 
 export type State = {
@@ -109,45 +109,34 @@ export type State = {
 
 class CalibrationForm extends React.Component<Props, State> {
   state: State = {step: 0}
-  unsubscribeFromChannelState: ?Function
   initializeTimeout: ?number
 
-  pickFormFields = ({config: {calibration}}: FullChannel): Calibration => ({
+  pickFormFields = (calibration?: Object): Calibration => ({
     points: [],
     ...calibration || {},
     numPoints: calibration ? calibration.points.length : 2,
   })
 
   componentDidMount() {
-    const {data: {Channel}, initialize, subscribeToChannelState} = this.props
-    if (Channel) {
-      this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(Channel)), 0)
-      if (subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(Channel.id)
-      }
+    const {calibration, loading, initialize} = this.props
+    if (!loading) {
+      this.initializeTimeout = setTimeout(() => initialize(this.pickFormFields(calibration)), 0)
     }
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const prevChannel = this.props.data.Channel
-    const nextChannel = nextProps.data.Channel
+    const prevLoading = this.props.loading
+    const nextLoading = nextProps.loading
+    const prevCalibration = this.props.calibration
+    const nextCalibration = nextProps.calibration
 
-    if (get(nextChannel, 'id') !== get(prevChannel, 'id')) {
-      if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
-      const {subscribeToChannelState} = nextProps
-      if (nextChannel && subscribeToChannelState) {
-        this.unsubscribeFromChannelState = subscribeToChannelState(nextChannel.id)
-      }
-    }
-
-    if (nextChannel && nextChannel !== prevChannel && nextProps.pristine) {
-      this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextChannel)), 0)
+    if (((!nextLoading && prevLoading) || nextCalibration !== prevCalibration) && nextProps.pristine) {
+      this.initializeTimeout = setTimeout(() => nextProps.initialize(this.pickFormFields(nextCalibration)), 0)
     }
   }
 
   componentWillUnmount() {
     if (this.initializeTimeout != null) clearTimeout(this.initializeTimeout)
-    if (this.unsubscribeFromChannelState) this.unsubscribeFromChannelState()
   }
 
   isInCalibration: (props: Props) => boolean = createSelector(
@@ -161,7 +150,7 @@ class CalibrationForm extends React.Component<Props, State> {
   }
 
   renderBody = () => {
-    const {classes, data: {Channel}, change} = this.props
+    const {classes, change, units, rawInput, rawInputUnits, rawInputPrecision} = this.props
     const numPoints = parseInt(this.props.numPoints) || 0
 
     if (this.isInCalibration(this.props)) {
@@ -170,7 +159,8 @@ class CalibrationForm extends React.Component<Props, State> {
           name="points"
           component={CalibrationTable}
           key={numPoints + 1}
-          channel={Channel}
+          units={units}
+          rawInputUnits={rawInputUnits}
           bodyClass={classes.body}
           validate={this.validatePoints}
         />
@@ -185,8 +175,11 @@ class CalibrationForm extends React.Component<Props, State> {
         key={step}
         pointIndex={step - 1}
         bodyClass={classNames(classes.body, classes.bodyStep)}
-        channel={Channel}
         change={change}
+        units={units}
+        rawInput={rawInput}
+        rawInputUnits={rawInputUnits}
+        rawInputPrecision={rawInputPrecision}
       />
     )
   }
@@ -204,20 +197,8 @@ class CalibrationForm extends React.Component<Props, State> {
     else this.setState({step: step + 1})
   }
 
-  handleSubmit = async ({points}: Calibration): Promise<any> => {
-    const {mutate, data: {Channel}, history, match} = this.props
-    if (!Channel) return
-    const {id} = Channel
-    return await mutate({variables: {id, calibration: {points}}}).then(
-      () => {
-        history.push(dirname(match.url))
-      },
-      handleError
-    )
-  }
-
   render(): ?React.Node {
-    const {match, classes, handleSubmit, submitting, data: {Channel, loading}, initialized, error} = this.props
+    const {match, classes, handleSubmit, saveCalibration, submitting, name, loading, initialized, error} = this.props
     const isInCalibration = this.isInCalibration(this.props)
 
     if (loading || !initialized) {
@@ -234,8 +215,6 @@ class CalibrationForm extends React.Component<Props, State> {
 
     const {step} = this.state
     const numPoints = parseInt(this.props.numPoints) || 0
-
-    const {name} = Channel || {name: `Channel ${match.params.id || '?'}`}
 
     let title
     if (isInCalibration) title = `${name} Calibration`
@@ -257,7 +236,7 @@ class CalibrationForm extends React.Component<Props, State> {
       <form
         id="calibrationForm"
         className={classes.form}
-        onSubmit={handleSubmit(isInCalibration ? this.handleSubmit : this.handleNext)}
+        onSubmit={handleSubmit(isInCalibration ? saveCalibration : this.handleNext)}
       >
         <Paper className={classes.paper}>
           <h3 className={classes.title} data-test-name="calibrationFormTitle">

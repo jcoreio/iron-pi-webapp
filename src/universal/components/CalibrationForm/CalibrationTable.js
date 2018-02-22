@@ -4,7 +4,7 @@ import * as React from 'react'
 import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import {NumericField} from 'redux-form-numeric-field'
-import TextField from '../../components/TextField'
+import TextField from '../TextField'
 import {required} from '@jcoreio/redux-form-validators'
 import type {FieldArrayProps} from 'redux-form'
 import IconButton from 'material-ui/IconButton'
@@ -19,8 +19,8 @@ import Table, {
 } from 'material-ui/Table'
 import {withTheme} from 'material-ui/styles/index'
 
-import type {Theme} from '../../theme'
-import AddIcon from '../../components/icons/AddRectangle'
+import type {Theme} from '../../theme/index'
+import AddIcon from '../icons/AddRectangle'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
@@ -93,11 +93,8 @@ export type Props = {
   bodyClass?: string,
   fields: Fields,
   editable?: boolean,
-  channel?: {
-    config: {
-      units?: string,
-    },
-  },
+  units?: ?string,
+  rawInputUnits: string,
   meta?: {
     warning?: string,
     error?: string,
@@ -107,18 +104,17 @@ export type Props = {
 
 class CalibrationTable extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes, fields, meta, channel, bodyClass} = this.props
+    const {classes, fields, meta, bodyClass, units, rawInputUnits} = this.props
     const editable = this.props.editable !== false
     const {warning, error, submitFailed} = meta || {}
     const hasError = submitFailed && (error != null || warning != null)
-    const {units} = channel && channel.config || {}
     return (
       <FormControl error={hasError} className={classNames(bodyClass, classes.root)} data-component="CalibrationTable">
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
               <TableCell>
-                Raw Value (V)
+                Raw Value ({rawInputUnits})
               </TableCell>
               <TableCell />
               <TableCell>
