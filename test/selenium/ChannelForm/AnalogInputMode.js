@@ -53,7 +53,7 @@ module.exports = () => {
           rawInput: 2.356,
         }
       })
-      await navigateTo('/channel/1')
+      await navigateTo(`/channel/${id + 1}`)
       await loginIfNecessary()
       browser.timeouts('implicit', 5000)
     })
@@ -139,6 +139,7 @@ module.exports = () => {
     })
 
     it('saves normalized values', async () => {
+      const {id} = defaultChannel
       const values = {
         'metadataItem.tag': 'pumpPress',
         'metadataItem.name': '  Pump Pressure  ',
@@ -156,8 +157,8 @@ module.exports = () => {
       await browser.waitForVisible('div=Your changes have been saved!', 5000)
 
       const {data: {Channel}} = await graphql({
-        query: `query {
-          Channel: LocalIOChannel(where: {id: 0}) {
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
             metadataItem {
               tag
               name
@@ -170,7 +171,8 @@ module.exports = () => {
             } 
             config
           }
-        }`
+        }`,
+        variables: {id},
       })
       expect(Channel).to.containSubset({
         metadataItem: {
