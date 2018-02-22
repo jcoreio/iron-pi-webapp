@@ -29,7 +29,7 @@ export default function updateLocalIOChannelCalibration({types}: {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!where) {
-        if (id) where = {id}
+        if (id != null) where = {id}
         else throw new Error('id or where must be provided')
       }
 
