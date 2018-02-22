@@ -57,14 +57,12 @@ describe('ChannelStateIcon', () => {
   describe('for ANALOG_INPUT channel', () => {
     it('renders correct basic state', () => {
       const {node} = setup({
-        config: {
-          mode: 'ANALOG_INPUT',
-          precision: 0,
+        metadataItem: {
+          displayPrecision: 0,
           min: -10,
           max: 10,
         },
         state: {
-          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 5,
           systemValue: 5,
@@ -82,14 +80,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders positive value correctly with zero in the middle', () => {
       const {node} = setup({
-        config: {
-          mode: 'ANALOG_INPUT',
-          precision: 0,
+        metadataItem: {
+          displayPrecision: 0,
           min: -10,
           max: 10,
         },
         state: {
-          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 5,
           systemValue: 5,
@@ -103,14 +99,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders negative value correctly with zero in the middle', () => {
       const {node} = setup({
-        config: {
-          mode: 'ANALOG_INPUT',
-          precision: 0,
+        metadataItem: {
+          displayPrecision: 0,
           min: -10,
           max: 10,
         },
         state: {
-          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: -4,
           systemValue: -4,
@@ -124,14 +118,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders positive value correctly with zero beyond left', () => {
       const {node} = setup({
-        config: {
-          mode: 'ANALOG_INPUT',
-          precision: 0,
+        metadataItem: {
+          displayPrecision: 0,
           min: 2,
           max: 6,
         },
         state: {
-          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: 4,
           systemValue: 4,
@@ -145,14 +137,12 @@ describe('ChannelStateIcon', () => {
     })
     it('renders negative value correctly with zero beyond right', () => {
       const {node} = setup({
-        config: {
-          mode: 'ANALOG_INPUT',
-          precision: 0,
+        metadataItem: {
+          displayPrecision: 0,
           min: -6,
           max: -2,
         },
         state: {
-          channelId: '1',
           mode: 'ANALOG_INPUT',
           rawInput: -4,
           systemValue: -4,
@@ -169,7 +159,6 @@ describe('ChannelStateIcon', () => {
     it('renders correct border width', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: 0,
@@ -182,7 +171,6 @@ describe('ChannelStateIcon', () => {
     it('renders missing correctly', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: null,
@@ -196,7 +184,6 @@ describe('ChannelStateIcon', () => {
     it('renders off color correctly', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: false,
           rawInput: 0,
@@ -209,7 +196,6 @@ describe('ChannelStateIcon', () => {
     it('renders on color correctly', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_INPUT',
           reversePolarity: true,
           rawInput: 0,
@@ -224,7 +210,6 @@ describe('ChannelStateIcon', () => {
     it('renders correct border width', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
           reversePolarity: false,
           safeState: 0,
@@ -239,13 +224,8 @@ describe('ChannelStateIcon', () => {
     it('renders off color correctly', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
-          reversePolarity: false,
-          safeState: 0,
-          controlMode: 'REMOTE_CONTROL',
-          controlValue: 0,
-          rawOutput: 0,
+          systemValue: 0,
         },
       })
       const computedStyle = getComputedStyle(node)
@@ -254,13 +234,8 @@ describe('ChannelStateIcon', () => {
     it('renders on color correctly', () => {
       const {node} = setup({
         state: {
-          channelId: '1',
           mode: 'DIGITAL_OUTPUT',
-          reversePolarity: true,
-          safeState: 0,
-          controlMode: 'REMOTE_CONTROL',
-          controlValue: 0,
-          rawOutput: 1,
+          systemValue: 1,
         },
       })
       const computedStyle = getComputedStyle(node)
