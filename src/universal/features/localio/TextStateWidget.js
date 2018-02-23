@@ -23,8 +23,8 @@ export type Props = {
 }
 
 const TextStateWidget = withStyles(styles, {withTheme: true})(
-  ({classes, className, children}: Props) => (
-    <div className={classNames(classes.root, className)}>
+  ({classes, className, children, ...props}: Props) => (
+    <div className={classNames(classes.root, className)} {...props}>
       {children}
     </div>
   )

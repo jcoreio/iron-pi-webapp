@@ -7,6 +7,7 @@ module.exports = () => (
     require('./AnalogInputMode')()
     require('./DigitalInputMode')()
     require('./DigitalOutputMode')()
+    require('./DisabledMode')()
   })
 )
 

@@ -38,8 +38,8 @@ module.exports = () => {
     beforeEach(async () => {
       const {id} = defaultChannel
       await graphql({
-        query: `mutation prepareTest($where: JSON!, $channel: InputLocalIOChannel!, $id: Int!, $rawInput: Float!) {
-          updateLocalIOChannel(where: $where, channel: $channel) {
+        query: `mutation prepareTest($channel: InputLocalIOChannel!, $id: Int!, $rawInput: Float!) {
+          updateLocalIOChannel(id: $id, channel: $channel) {
             id
           }
           setLocalChannelRawInput(id: $id, rawAnalogInput: $rawInput)
@@ -47,7 +47,6 @@ module.exports = () => {
         `,
         operationName: 'prepareTest',
         variables: {
-          where: {id},
           id,
           channel: defaultChannel,
           rawInput: 2.356,
