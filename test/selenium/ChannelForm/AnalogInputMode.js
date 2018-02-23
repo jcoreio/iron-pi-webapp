@@ -187,5 +187,39 @@ module.exports = () => {
         },
       })
     })
+    it('can be switched to DigitalInput mode', async () => {
+      const {id} = defaultChannel
+
+      await browser.click(`#channelForm [name="config.mode"] [value="DIGITAL_INPUT"]`)
+      await browser.click(`#channelForm [name="config.reversePolarity"] [value="false"]`)
+      await browser.click('#channelForm [type="submit"]')
+      browser.timeouts('implicit', 100)
+      await browser.waitForVisible('div=Your changes have been saved!', 5000)
+      await browser.waitForVisible('[data-component="DigitalInputStateWidget"]', 5000)
+
+      const {data: {Channel}} = await graphql({
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
+            metadataItem {
+              tag
+              name
+              dataType
+              ... on DigitalMetadataItem {
+                isDigital 
+              }
+            }
+            config
+          }
+        }`,
+        variables: {id},
+      })
+
+      expect(Channel.config.mode).to.equal('DIGITAL_INPUT')
+      expect(Channel.config.reversePolarity).to.be.false
+      expect(Channel.metadataItem.tag).to.equal(defaultChannel.metadataItem.tag)
+      expect(Channel.metadataItem.name).to.equal(defaultChannel.metadataItem.name)
+      expect(Channel.metadataItem.dataType).to.equal('number')
+      expect(Channel.metadataItem.isDigital).to.be.true
+    })
   })
 }
