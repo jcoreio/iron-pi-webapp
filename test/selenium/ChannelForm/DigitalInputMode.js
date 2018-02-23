@@ -135,5 +135,60 @@ module.exports = () => {
         },
       })
     })
+    it('can be switched to AnalogInput mode', async () => {
+      const {id} = defaultChannel
+
+      const values = {
+        'metadataItem.units': 'kPa',
+        'metadataItem.min': 5,
+        'metadataItem.max': 25,
+        'metadataItem.storagePrecision': 3,
+        'metadataItem.displayPrecision': 2,
+      }
+
+      await browser.click(`#channelForm [name="config.mode"] [value="ANALOG_INPUT"]`)
+      for (let name in values) {
+        await browser.setValue(`#channelForm [name="${name}"]`, values[name])
+      }
+      await browser.click('#channelForm [type="submit"]')
+      browser.timeouts('implicit', 100)
+      await browser.waitForVisible('div=Your changes have been saved!', 5000)
+      await browser.waitForVisible('[data-component="AnalogInputStateWidget"]', 5000)
+
+      const {data: {Channel: {config, metadataItem}}} = await graphql({
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
+            metadataItem {
+              tag
+              name
+              dataType
+              ... on NumericMetadataItem {
+                units
+                min
+                max
+                storagePrecision
+                displayPrecision
+              }
+              ... on DigitalMetadataItem {
+                isDigital 
+              }
+            }
+            config
+          }
+        }`,
+        variables: {id},
+      })
+
+      expect(config.mode).to.equal('ANALOG_INPUT')
+      expect(metadataItem.tag).to.equal(defaultChannel.metadataItem.tag)
+      expect(metadataItem.name).to.equal(defaultChannel.metadataItem.name)
+      expect(metadataItem.dataType).to.equal('number')
+      expect(metadataItem.isDigital).to.not.exist
+      expect(metadataItem.units).to.equal(values['metadataItem.units'])
+      expect(metadataItem.min).to.equal(values['metadataItem.min'])
+      expect(metadataItem.max).to.equal(values['metadataItem.max'])
+      expect(metadataItem.storagePrecision).to.equal(values['metadataItem.storagePrecision'])
+      expect(metadataItem.displayPrecision).to.equal(values['metadataItem.displayPrecision'])
+    })
   })
 }
