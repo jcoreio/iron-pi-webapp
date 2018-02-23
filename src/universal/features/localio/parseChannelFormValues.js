@@ -10,17 +10,18 @@ export default function parseChannelFormValues(channel) {
   case 'ANALOG_INPUT': {
     const {tag, name, units, min, max, storagePrecision, displayPrecision} = metadataItem
     result.metadataItem = {tag, name, dataType: 'number', units, min, max, storagePrecision, displayPrecision}
+    result.config.name = name
     break
   }
   case 'DIGITAL_INPUT':
   case 'DIGITAL_OUTPUT': {
     const {tag, name} = metadataItem
     result.metadataItem = {tag, name, dataType: 'number', isDigital: true}
+    result.config.name = name
     break
   }
   case 'DISABLED': {
-    const {tag, name} = metadataItem
-    result.metadataItem = {tag, name, dataType: 'number'}
+    result.tag = null
     break
   }
   }

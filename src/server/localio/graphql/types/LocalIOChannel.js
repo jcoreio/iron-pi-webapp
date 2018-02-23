@@ -29,10 +29,10 @@ export default function createLocalIOChannel(options: {
       name: {
         type: graphql.GraphQLString,
         description: 'the name for this channel',
-        resolve: ({tag}: LocalIOChannel, args: any, {metadataHandler}: Context) => {
-          if (!tag) return null
+        resolve: ({id, tag, config}: LocalIOChannel, args: any, {metadataHandler}: Context) => {
+          if (!tag) return config.name || `Channel ${id + 1}`
           const item = metadataHandler.getTagMetadata(tag)
-          return item ? item.name : null
+          return item ? item.name : `Channel ${id + 1}`
         },
       },
       state: {

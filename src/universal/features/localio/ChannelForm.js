@@ -22,6 +22,7 @@ import type {MetadataItem} from '../../types/MetadataItem'
 import AnalogInputConfigSection from './AnalogInputConfigSection'
 import DigitalInputConfigSection from './DigitalInputConfigSection'
 import DigitalOutputConfigSection from './DigitalOutputConfigSection'
+import DisabledConfigSection from './DisabledConfigSection'
 import ChannelStateWidget from './ChannelStateWidget'
 import handleError from '../../redux-form/createSubmissionError'
 import parseChannelFormValues from './parseChannelFormValues'
@@ -67,13 +68,11 @@ const styles = ({spacing}: Theme) => ({
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
-const Empty = () => <div />
-
 const ConfigComponents: {[mode: ChannelMode]: React.ComponentType<any> | string} = {
   ANALOG_INPUT: AnalogInputConfigSection,
   DIGITAL_INPUT: DigitalInputConfigSection,
   DIGITAL_OUTPUT: DigitalOutputConfigSection,
-  DISABLED: Empty,
+  DISABLED: DisabledConfigSection,
 }
 
 type ControlLogicMetadataItem = {
@@ -226,11 +225,11 @@ class ChannelForm extends React.Component<Props> {
 
   handleSubmit = (channel: FullChannel): Promise<void> => {
     const {mutate, initialize} = this.props
-    const {id, config, metadataItem} = parseChannelFormValues(channel)
+    const {id, tag, config, metadataItem} = parseChannelFormValues(channel)
     return mutate({
       variables: {
         where: {id},
-        channel: {id, config, metadataItem}
+        channel: {id, tag, config, metadataItem}
       }
     }).then(({data: {Channel}}: {data: {Channel: FullChannel}}) => {
       initialize(pickFormFields(Channel), false, {keepSubmitSucceeded: true})
@@ -283,15 +282,17 @@ class ChannelForm extends React.Component<Props> {
               validate={required()}
             />
           </ControlWithInfo>
-          <FormSection name="metadataItem">
-            <MetadataItemFieldsContainer
-              formControlClass={classes.formControl}
-              mode={{
-                dataType: 'number',
-                isDigital: config ? config.mode !== 'ANALOG_INPUT' : true,
-              }}
-            />
-          </FormSection>
+          {config && config.mode !== 'DISABLED' &&
+            <FormSection name="metadataItem">
+              <MetadataItemFieldsContainer
+                formControlClass={classes.formControl}
+                mode={{
+                  dataType: 'number',
+                  isDigital: config.mode !== 'ANALOG_INPUT',
+                }}
+              />
+            </FormSection>
+          }
           <ConfigSection
             config={config}
             formControlClass={classes.formControl}

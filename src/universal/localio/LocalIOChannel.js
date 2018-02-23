@@ -71,7 +71,10 @@ export type LocalControlDigitalOutputConfig = {
 }
 export const LocalControlDigitalOutputConfigType = (reify: Type<LocalControlDigitalOutputConfig>)
 
-export type DisabledConfig = Object
+export type DisabledConfig = {
+  mode: 'DISABLED',
+  name?: string,
+}
 export const DisabledConfigType = (reify: Type<DisabledConfig>)
 
 export const LocalIOChannelConfigTypes: {[mode: ChannelMode]: Type<any>} = {
@@ -83,6 +86,7 @@ export const LocalIOChannelConfigTypes: {[mode: ChannelMode]: Type<any>} = {
 
 export type LocalIOChannelConfig = {|
   mode: ChannelMode,
+  name?: string,
   calibration?: Calibration,
   controlMode?: ControlMode,
   controlLogic?: ControlLogic,

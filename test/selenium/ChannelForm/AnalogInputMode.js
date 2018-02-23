@@ -221,5 +221,31 @@ module.exports = () => {
       expect(Channel.metadataItem.dataType).to.equal('number')
       expect(Channel.metadataItem.isDigital).to.be.true
     })
+    it('can be switched to disabled mode', async () => {
+      const {id} = defaultChannel
+
+      await browser.click(`#channelForm [name="config.mode"] [value="DISABLED"]`)
+      await browser.setValue(`#channelForm [name="config.name"]`, 'Blah')
+      await browser.click('#channelForm [type="submit"]')
+      browser.timeouts('implicit', 100)
+      await browser.waitForVisible('div=Your changes have been saved!', 5000)
+      await browser.waitForVisible('[data-component="DisabledStateWidget"]', 5000)
+
+      const {data: {Channel}} = await graphql({
+        query: `query blah($id: Int!) {
+          Channel: LocalIOChannel(id: $id) {
+            tag
+            name
+            config
+          }
+        }`,
+        variables: {id},
+      })
+
+      expect(Channel.tag).to.equal(null)
+      expect(Channel.name).to.equal('Blah')
+      expect(Channel.config.mode).to.equal('DISABLED')
+      expect(Channel.config.name).to.equal('Blah')
+    })
   })
 }
