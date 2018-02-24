@@ -172,6 +172,7 @@ export default class Server {
       })
       if (process.env.BABEL_ENV === 'test') {
         app.post('/createTestToken', parseAuthHeader, bodyParser.json(), require('./express/createTestToken'))
+        app.post('/resetRootPassword', require('./express/resetRootPassword'))
       }
 
       const GRAPHQL_PATH = '/graphql'

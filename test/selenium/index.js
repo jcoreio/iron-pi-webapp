@@ -101,7 +101,10 @@ describe('selenium tests', function () {
             logLevel: WDIO_LOG_LEVEL || 'silent',
             baseUrl: resolveUrl('/'),
           })
-          await browser.init()
+          await Promise.all([
+            superagent.post('/resetRootPassword'),
+            browser.init(),
+          ])
           await browser.setViewportSize({
             width: 1200,
             height: 800,

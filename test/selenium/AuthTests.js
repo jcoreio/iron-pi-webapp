@@ -18,6 +18,12 @@ module.exports = () => {
       password: requireEnv('TEST_PASSWORD'),
     })).body.token
   })
+  beforeEach(async () => {
+    await superagent.post('/resetRootPassword')
+  })
+  after(async () => {
+    await superagent.post('/resetRootPassword')
+  })
 
   describe('Auth', function () {
     this.timeout(60000)
@@ -135,6 +141,113 @@ module.exports = () => {
           localStorage.removeItem('token')
         })
       }
+    })
+  })
+  describe('ChangePasswordDialog', () => {
+    it('displays error if old password is incorrect', async function () {
+      this.timeout(60000)
+      await navigateTo('/changePassword')
+      await loginIfNecessary()
+
+      const newPassword = 'semiscientific tribunal'
+
+      await browser.setValue('#changePasswordForm [name="oldPassword"]', 'blah')
+      await browser.setValue('#changePasswordForm [name="newPassword"]', newPassword)
+      await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', newPassword)
+      await browser.click('#changePasswordForm button[type="submit"]')
+
+      await poll(
+        async () => {
+          expect(
+            await browser.getText('#changePasswordForm [data-test-name="oldPassword"] [data-component="FormHelperText"]')
+          ).to.equal('Incorrect password')
+        },
+        50
+      ).timeout(10000)
+
+      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+        username: 'root',
+        password: requireEnv('TEST_PASSWORD'),
+      })
+      expect(token).to.exist
+    })
+    it('requires new passwords to match', async function () {
+      this.timeout(60000)
+      await navigateTo('/changePassword')
+      await loginIfNecessary()
+
+      await browser.setValue('#changePasswordForm [name="oldPassword"]', requireEnv('TEST_PASSWORD'))
+      await browser.setValue('#changePasswordForm [name="newPassword"]', 'blah')
+      await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', 'blahb')
+      await browser.setValue('#changePasswordForm [name="newPassword"]', 'blah')
+
+      await poll(
+        async () => {
+          expect(
+            await browser.getText('#changePasswordForm [data-test-name="retypeNewPassword"] [data-component="FormHelperText"]')
+          ).to.match(/doesn't match `New Password`/)
+        },
+        50
+      ).timeout(10000)
+
+      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+        username: 'root',
+        password: requireEnv('TEST_PASSWORD'),
+      })
+      expect(token).to.exist
+    })
+    it('applies password strength requirements to new password', async function () {
+      this.timeout(60000)
+      await navigateTo('/changePassword')
+      await loginIfNecessary()
+
+      const newPassword = 'blah'
+
+      await browser.setValue('#changePasswordForm [name="oldPassword"]', requireEnv('TEST_PASSWORD'))
+      await browser.setValue('#changePasswordForm [name="newPassword"]', newPassword)
+      await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', newPassword)
+      await browser.click('#changePasswordForm button[type="submit"]')
+
+      await poll(
+        async () => {
+          expect(
+            await browser.getText('#changePasswordForm [data-test-name="newPassword"] [data-component="FormHelperText"]')
+          ).to.match(/Add another word or two. Uncommon words are better/)
+        },
+        50
+      ).timeout(10000)
+
+      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+        username: 'root',
+        password: requireEnv('TEST_PASSWORD'),
+      })
+      expect(token).to.exist
+    })
+    it('changes password successfully', async function () {
+      this.timeout(60000)
+      await navigateTo('/')
+      await loginIfNecessary()
+      await navigateTo('/changePassword')
+
+      const newPassword = 'semiscientific tribunal'
+
+      await browser.setValue('#changePasswordForm [name="oldPassword"]', requireEnv('TEST_PASSWORD'))
+      await browser.setValue('#changePasswordForm [name="newPassword"]', newPassword)
+      await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', newPassword)
+      await browser.click('#changePasswordForm button[type="submit"]')
+
+      await poll(
+        async () => {
+          expect(await browser.isVisible('#changePasswordForm')).to.be.false
+        },
+        50
+      ).timeout(10000)
+
+      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+        username: 'root',
+        password: newPassword,
+      })
+      expect(token).to.exist
     })
   })
 }

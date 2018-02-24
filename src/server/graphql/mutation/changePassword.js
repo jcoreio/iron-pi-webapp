@@ -27,7 +27,7 @@ export default function changePassword(): GraphQLFieldConfig<any, Context> {
     resolve: async (doc: any, {oldPassword, newPassword}: Args, context: Context): Promise<any> => {
       const {userId: id} = context
       if (!id) throw new graphql.GraphQLError('You must be logged in to change your password')
-      const user = await User.findOne({id})
+      const user = await User.findOne({where: {id}})
       if (!user) throw new Error('User not found')
       const matches = await promisify(cb => bcrypt.compare(oldPassword, user.password, cb))()
       if (!matches) {
