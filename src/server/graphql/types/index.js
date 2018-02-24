@@ -9,6 +9,7 @@ import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import models from '../../models'
 import MetadataItem, {DigitalMetadataItem, NumericMetadataItem, TagDataType} from './MetadataItem'
 import InputMetadataItem from './InputMetadataItem'
+import createUser from './User'
 
 import TimeValuePair from './TimeValuePair'
 import TaggedTimeValuePair from './TaggedTimeValuePair'
@@ -48,6 +49,7 @@ export default function createTypes(options: Options): {
     MetadataItem,
     NumericMetadataItem,
     DigitalMetadataItem,
+    User: createUser({getType, getArgs, attributeFieldsCache})
   }
   const inputTypes: {[name: string]: GraphQLInputType} = {
     InputMetadataItem,
@@ -70,7 +72,7 @@ export default function createTypes(options: Options): {
   }
 
   for (let feature of features) {
-    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes, attributeFieldsCache})
+    if (feature.addTypes) feature.addTypes({sequelize, types, inputTypes, getType, getArgs, attributeFieldsCache})
   }
 
   return {types, inputTypes}

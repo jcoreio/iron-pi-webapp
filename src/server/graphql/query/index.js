@@ -28,9 +28,17 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         const {userId: id} = context
         if (id) {
           const user = await User.findOne({where: {id}})
-          if (user) return user.get({plain: true, raw: true})
+          if (user) return user
         }
         return null
+      },
+    },
+    rootPasswordHasBeenSet: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
+      resolve: async (): Promise<any> => {
+        const user = await User.findOne({where: {username: 'root'}, attributes: ['passwordHasBeenSet']})
+        if (!user) throw new graphql.GraphQLError('Unable to find root user')
+        return user.passwordHasBeenSet
       },
     },
     TagValue: createTagValue(),

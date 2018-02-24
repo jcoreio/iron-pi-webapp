@@ -32,12 +32,15 @@ export default function createSubscriptionServer(options: {
       execute,
       subscribe,
       onConnect: async ({token}: {token?: string}) => {
-        if (!token) {
-          const error = new Error('missing authorization token')
-          ;(error: any).statusCode = 400
-          throw error
+        let userId: ?number, scopes: Set<string>
+        if (token) {
+          const decoded = await verifyToken(token)
+          userId = decoded.userId
+          scopes = decoded.scopes
+        } else {
+          userId = null
+          scopes = new Set()
         }
-        const {userId, scopes} = await verifyToken(token)
         return {userId, scopes, sequelize, dataRouter, metadataHandler, pubsub}
       }
     },

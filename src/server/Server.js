@@ -40,6 +40,8 @@ import createFeatures from './createFeatures'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 import seedDatabase from './sequelize/seedDatabase'
 import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
+import User from './models/User'
+import {ROOT_PASSWORD_HAS_BEEN_SET} from './graphql/subscription/constants'
 
 const log = logger('Server')
 
@@ -141,6 +143,13 @@ export default class Server {
         features,
       })
 
+      User.afterUpdate((user: User) => {
+        if (user.username === 'root' && user.changed('passwordHasBeenSet')) {
+          pubsub.publish(ROOT_PASSWORD_HAS_BEEN_SET, {
+            rootPasswordHasBeenSet: user.passwordHasBeenSet,
+          })
+        }
+      })
       for (let feature of features) {
         if (feature.addPublications) feature.addPublications({
           dataRouter,

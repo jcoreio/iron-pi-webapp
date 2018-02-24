@@ -1,6 +1,6 @@
 // @flow
 
-import type Sequelize from 'sequelize'
+import type Sequelize, {Model} from 'sequelize'
 import type {GraphQLInputType, GraphQLOutputType, GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
 import type {Context} from './Context'
@@ -10,6 +10,8 @@ export type GraphQLFeature = {
     sequelize: Sequelize,
     types: {[name: string]: GraphQLOutputType},
     inputTypes: {[name: string]: GraphQLInputType},
+    getType: (model: Class<Model<any>>) => GraphQLOutputType,
+    getArgs: (model: Class<Model<any>>) => graphql.GraphQLFieldConfigArgumentMap,
     attributeFieldsCache: Object,
   }) => any,
   +addQueryFields?: (options: {

@@ -38,7 +38,7 @@ export default function changePassword(): GraphQLFieldConfig<any, Context> {
         throw error
       }
       try {
-        await user.update({password: newPassword}, {individualHooks: true})
+        await user.update({password: newPassword, passwordHasBeenSet: true}, {individualHooks: true})
       } catch (error) {
         if (error instanceof ValidationError) {
           const passwordItem = error.errors.find(item => item.path === 'password')

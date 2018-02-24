@@ -31,6 +31,7 @@ export type UserAttributes = UserInitAttributes & {
   id: number;
   createdAt: Date;
   updatedAt: Date;
+  passwordHasBeenSet: boolean;
   Scopes?: Array<Scope>;
 }
 
@@ -43,6 +44,7 @@ async function hashPasswordHook(user: User): Promise<void> {
 export default class User extends Model<UserAttributes, UserInitAttributes> {
   username: string;
   password: string;
+  passwordHasBeenSet: boolean;
   id: number;
   createdAt: Date;
   updatedAt: Date;
@@ -90,6 +92,11 @@ export default class User extends Model<UserAttributes, UserInitAttributes> {
             }
           }
         }
+      },
+      passwordHasBeenSet: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     }, {sequelize})
 
