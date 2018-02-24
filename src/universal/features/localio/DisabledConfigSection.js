@@ -18,7 +18,7 @@ const DisabledConfigSection = ({formControlClass, firstControlClass, lastControl
   <React.Fragment>
     <ControlWithInfo info="Display name for this channel">
       <Field
-        name="config.name"
+        name="metadataItem.name"
         label="Name"
         type="text"
         component={TextField}

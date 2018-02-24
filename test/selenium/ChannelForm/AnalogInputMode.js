@@ -225,7 +225,7 @@ module.exports = () => {
       const {id} = defaultChannel
 
       await browser.click(`#channelForm [name="config.mode"] [value="DISABLED"]`)
-      await browser.setValue(`#channelForm [name="config.name"]`, 'Blah')
+      await browser.setValue(`#channelForm [name="metadataItem.name"]`, 'Blah')
       await browser.click('#channelForm [type="submit"]')
       browser.timeouts('implicit', 100)
       await browser.waitForVisible('div=Your changes have been saved!', 5000)

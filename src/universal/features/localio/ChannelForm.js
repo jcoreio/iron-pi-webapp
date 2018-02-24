@@ -171,7 +171,12 @@ function _shouldInitialize({data: {Channel}, id, loadedId, pristine}: Props): bo
   return Channel != null && Channel.id === id && (pristine || loadedId !== Channel.id)
 }
 
-const pickFormFields = ({id, metadataItem, config}: FullChannel) => ({id, metadataItem, config})
+const pickFormFields = ({id, metadataItem, config}: FullChannel) => {
+  if (config.mode === 'DISABLED') {
+    metadataItem = ({name: config.name}: any)
+  }
+  return {id, metadataItem, config}
+}
 
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
