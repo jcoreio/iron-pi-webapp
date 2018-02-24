@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import {Route} from 'react-router-dom'
+import {Route, Link} from 'react-router-dom'
 import Switch from 'react-router-transition-switch'
 import Fader from '../Fader'
 
@@ -14,6 +14,7 @@ import AccountCircle from 'material-ui-icons/AccountCircle'
 import Menu, { MenuItem } from 'material-ui/Menu'
 import featureContent from '../featureContent'
 import Title from './Title'
+import {CHANGE_PASSWORD} from '../../react-router/paths'
 
 const styles = {
   root: {
@@ -82,6 +83,7 @@ class Navbar extends React.Component<Props, State> {
                   <Switch component={Fader}>
                     <Route path="/" exact render={() => <Title>Home</Title>} />
                     <Route path="/about" exact render={() => <Title>About</Title>} />
+                    <Route path={CHANGE_PASSWORD} exact render={() => <div />} />
                     {routes}
                     <Route path="*" render={() => <Title>Not Found</Title>} />
                   </Switch>
@@ -116,6 +118,14 @@ class Navbar extends React.Component<Props, State> {
                 }}
               >
                 <MenuItem id="logOutMenuItem" onClick={this.handleLogOutClick}>Log out</MenuItem>
+                <MenuItem
+                  id="changePasswordMenuItem"
+                  component={Link}
+                  to={CHANGE_PASSWORD}
+                  onClick={this.handleCloseUserMenu}
+                >
+                  Change Password
+                </MenuItem>
               </Menu>
             }
           </Toolbar>

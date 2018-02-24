@@ -4,6 +4,7 @@ import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
 import type {GraphQLOutputType, GraphQLInputType} from 'graphql'
 import setUsername from './setUsername'
+import changePassword from './changePassword'
 import createMetadataItem from './createMetadataItem'
 import updateMetadataItem from './updateMetadataItem'
 import type {GraphQLFeature} from '../GraphQLFeature'
@@ -19,6 +20,7 @@ export default function createMutation(options: Options): graphql.GraphQLObjectT
   const {sequelize, types, inputTypes, features} = options
   const mutationFields = {
     setUsername: setUsername({types}),
+    changePassword: changePassword(),
     createMetadataItem: createMetadataItem(),
     updateMetadataItem: updateMetadataItem(),
   }

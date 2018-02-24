@@ -3,6 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {Route, Link, withRouter} from 'react-router-dom'
+import type {Location, RouterHistory} from 'react-router-dom'
 import Switch from 'react-router-transition-switch'
 import Fader from './Fader'
 import {connect} from 'react-redux'
@@ -16,7 +17,10 @@ import SidebarContainer from './Sidebar/SidebarContainer'
 import type {Dispatch, RenderMode, State} from '../redux/types'
 import type {Theme} from '../theme'
 import LoginDialogContainer from './Login/LoginDialogContainer'
+import ChangePasswordDialog from './ChangePassword/ChangePasswordDialog'
+import ChangePasswordFormContainer from './ChangePassword/ChangePasswordFormContainer'
 import featureContent from './featureContent'
+import {CHANGE_PASSWORD} from '../react-router/paths'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -87,6 +91,11 @@ type PropsFromJss = {
   classes: Classes,
 }
 
+type PropsFromRouter = {
+  location: Location,
+  history: RouterHistory,
+}
+
 type PropsFromState = {
   sidebarOpen: ?boolean,
   renderMode: RenderMode,
@@ -96,13 +105,13 @@ type PropsFromDispatch = {
   dispatch: Dispatch,
 }
 
-type Props = PropsFromJss & PropsFromState & PropsFromDispatch
+type Props = PropsFromJss & PropsFromState & PropsFromDispatch & PropsFromRouter
 
 const BodyRoutes = featureContent({getContent: feature => (feature: any).bodyRoutes})
 
 class App extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes, sidebarOpen, renderMode} = this.props
+    const {classes, sidebarOpen, renderMode, location, history} = this.props
     return (
       <div className={classes.frame}>
         <SidebarContainer />
@@ -113,6 +122,9 @@ class App extends React.Component<Props> {
           })}
         >
           <NavbarContainer />
+          <ChangePasswordDialog open={location.pathname === CHANGE_PASSWORD}>
+            <ChangePasswordFormContainer history={history} />
+          </ChangePasswordDialog>
           {renderMode === 'client' && <LoginDialogContainer />}
           <div className={classes.body} id="body">
             <BodyRoutes>
@@ -120,6 +132,7 @@ class App extends React.Component<Props> {
                 <Switch component={Fader} createKey={(child, match) => match.url}>
                   <Route path="/" exact component={Home} />
                   <Route path="/about" exact component={About} />
+                  <Route path={CHANGE_PASSWORD} exact render={() => <div />} />
                   {routes}
                   <Route path="*" component={NotFound} />
                 </Switch>

@@ -54,6 +54,8 @@ export default function formatError(error: GraphQLError): any {
         errors: [...flattenValidationErrors(originalError, flattenOptions)]
       }
     }
+  } else if (originalError && originalError.validation) {
+    return {validation: originalError.validation}
   }
   return {locations, message, path}
 }
