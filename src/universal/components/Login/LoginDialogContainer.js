@@ -12,13 +12,17 @@ import {graphql} from 'react-apollo'
 import type {Dispatch, State} from '../../redux/types'
 import LoginDialog from './LoginDialog'
 import LoginFormContainer from './LoginFormContainer'
+import ResetPasswordFormContainer from '../ResetPassword/ResetPasswordFormContainer'
 import {FORGOT_PASSWORD} from '../../react-router/paths'
+
+import Fader from '../Fader'
 
 type PropsFromApollo = {
   data: {
     currentUser: ?{
       id: number,
     },
+    rootPasswordHasBeenSet?: boolean,
     loading: boolean,
   },
   subscribeToRootPasswordHasBeenSet: () => any,
@@ -36,7 +40,7 @@ type PropsFromDispatch = {
   dispatch: Dispatch,
 }
 
-type Props = PropsFromApollo & PropsFromState & PropsFromDispatch
+type Props = PropsFromApollo & PropsFromState & PropsFromDispatch & PropsFromRouter
 
 class LoginDialogContainer extends React.Component<Props> {
   componentDidMount() {
@@ -44,10 +48,20 @@ class LoginDialogContainer extends React.Component<Props> {
   }
 
   render(): React.Node {
-    const {open} = this.props
+    const {open, location, data: {rootPasswordHasBeenSet}} = this.props
     return (
       <LoginDialog open={open}>
-        <LoginFormContainer />
+        <Fader animateHeight>
+          {!rootPasswordHasBeenSet || location.pathname === FORGOT_PASSWORD
+            ? (
+              <ResetPasswordFormContainer
+                key="resetPassword"
+                title={rootPasswordHasBeenSet ? 'Reset Password' : 'Set Password'}
+              />
+            )
+            : <LoginFormContainer key="login" />
+          }
+        </Fader>
       </LoginDialog>
     )
   }
@@ -71,7 +85,7 @@ const subscription = gql(`subscription {
 
 type Data = {
   currentUser?: {id: number},
-  rootPasswordHasBeenSet: boolean,
+  rootPasswordHasBeenSet?: boolean,
 }
 
 export default compose(

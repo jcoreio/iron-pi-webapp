@@ -34,9 +34,6 @@ const styles = ({palette, jcoreLogo, ironPiLogo, spacing}: Theme) => ({
     ...ironPiLogo,
     margin: 0,
   },
-  loginHeader: {
-    marginBottom: 0,
-  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -62,7 +59,6 @@ const LoginDialog = ({classes, children, theme, ...props}: Props) => (
       <div className={classes.ironPiLogo}>iron pi</div>
     </DialogTitle>
     <DialogContent className={classes.content}>
-      <h3 className={classes.loginHeader}>Log In</h3>
       {children}
     </DialogContent>
   </Dialog>

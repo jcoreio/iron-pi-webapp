@@ -41,6 +41,13 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         return user.passwordHasBeenSet
       },
     },
+    inConnectMode: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
+      resolve: () => {
+        // TODO
+        return false
+      },
+    },
     TagValue: createTagValue(),
     MetadataItem: {
       type: MetadataItem,

@@ -6,6 +6,7 @@ import * as graphql from 'graphql'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import createTagValue from './TagValue'
 import createRootPasswordHasBeenSet from './rootPasswordHasBeenSet'
+import createInConnectMode from './inConnectMode'
 
 type Options = {
   sequelize: Sequelize,
@@ -18,6 +19,7 @@ export default function createSubscription(options: Options): graphql.GraphQLObj
   const subscriptionFields = {
     TagValue: createTagValue(),
     rootPasswordHasBeenSet: createRootPasswordHasBeenSet(),
+    inConnectMode: createInConnectMode(),
   }
   for (let feature of features) {
     if (feature.addSubscriptionFields) feature.addSubscriptionFields({sequelize, types, subscriptionFields})

@@ -17,8 +17,11 @@ export default function changePassword(): GraphQLFieldConfig<any, Context> {
   return {
     type: graphql.GraphQLBoolean,
     args: {
+      accessCode: {
+        type: graphql.GraphQLString,
+      },
       oldPassword: {
-        type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+        type: graphql.GraphQLString,
       },
       newPassword: {
         type: new graphql.GraphQLNonNull(graphql.GraphQLString),
@@ -29,6 +32,10 @@ export default function changePassword(): GraphQLFieldConfig<any, Context> {
       if (!id) throw new graphql.GraphQLError('You must be logged in to change your password')
       const user = await User.findOne({where: {id}})
       if (!user) throw new Error('User not found')
+      // TODO: Check connect mode
+      if (!oldPassword) {
+        throw new Error('You must provide the old password unless in connect mode')
+      }
       const matches = await promisify(cb => bcrypt.compare(oldPassword, user.password, cb))()
       if (!matches) {
         const error = new Error('Incorrect password');

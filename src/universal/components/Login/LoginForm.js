@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import {Field} from 'redux-form'
@@ -11,15 +12,25 @@ import {required} from '@jcoreio/redux-form-validators'
 
 import Spinner from '../Spinner'
 import type {Theme} from '../../theme'
+import {FORGOT_PASSWORD} from '../../react-router/paths'
 
-const styles = ({palette, spacing}: Theme) => ({
+const styles = ({palette, spacing, typography}: Theme) => ({
   root: {
   },
   footer: {
     textAlign: 'right',
     '& > :not(:first-child)': {
-      marginLeft: 5,
+      marginLeft: spacing.unit,
     }
+  },
+  forgotPasswordHolder: {
+    marginTop: spacing.unit,
+  },
+  forgotPasswordLink: {
+    fontSize: typography.pxToRem(14),
+    '&, &:visited, &:active, &:focus, &:hover': {
+      color: palette.text.primary,
+    },
   },
   error: {
     color: palette.error.A400,
@@ -36,6 +47,9 @@ const styles = ({palette, spacing}: Theme) => ({
   },
   loginButton: {
     padding: `${spacing.unit}px ${spacing.unit * 5}px`,
+  },
+  header: {
+    marginBottom: 0,
   },
 })
 
@@ -56,6 +70,7 @@ class LoginForm extends React.Component<Props> {
     const {classes, onSubmit, submitting, valid, error} = this.props
     return (
       <form id="loginForm" className={classes.root} onSubmit={onSubmit}>
+        <h3 className={classes.header}>Log In</h3>
         <Autocollapse>
           {error ? <ErrorAlert data-test-name="submitError">{error}</ErrorAlert> : null}
         </Autocollapse>
@@ -80,6 +95,11 @@ class LoginForm extends React.Component<Props> {
           >
             Log In
           </Button>
+          <div className={classes.forgotPasswordHolder}>
+            <Link to={FORGOT_PASSWORD} className={classes.forgotPasswordLink}>
+              Forgot Password?
+            </Link>
+          </div>
         </div>
       </form>
     )
