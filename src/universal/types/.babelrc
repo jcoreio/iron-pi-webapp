@@ -1,7 +1,0 @@
-{
-  "extends": "../../.babelrc",
-  "plugins": [
-    "transform-decorators-legacy",
-    "flow-runtime"
-  ]
-}

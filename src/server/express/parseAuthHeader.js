@@ -16,7 +16,7 @@ export default async function parseAuthHeader(req: $Request, res: $Response, nex
       if (/expired/i.test(error.message)) {
         error.message = 'Your session has expired; please log in again.'
       }
-      (error: any).statusCode = 403
+      error.statusCode = 403
       next(error)
       return
     }

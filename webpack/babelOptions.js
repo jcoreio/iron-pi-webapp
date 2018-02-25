@@ -10,7 +10,9 @@ module.exports = {
     "transform-class-properties",
     "transform-object-rest-spread",
     "transform-async-generator-functions",
-    "syntax-dynamic-import"
+    "syntax-dynamic-import",
+    'transform-decorators-legacy',
+    ['flow-runtime', {assert: false, annotate: true, optInOnly: true}],
   ],
   "env": {
     "test": {

@@ -1,4 +1,5 @@
 // @flow
+/* @flow-runtime enable */
 
 import t, {reify, validate, makeTypeError} from 'flow-runtime'
 import type {Type, Validation} from 'flow-runtime'

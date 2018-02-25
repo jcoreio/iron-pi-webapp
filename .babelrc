@@ -4,7 +4,9 @@
     "transform-class-properties",
     "transform-async-generator-functions",
     "transform-object-rest-spread",
-    "dynamic-import-node"
+    "dynamic-import-node",
+    "transform-decorators-legacy",
+    ["flow-runtime", {"assert": false, "annotate": true, "optInOnly": true}]
   ],
   "env": {
     "test": {
