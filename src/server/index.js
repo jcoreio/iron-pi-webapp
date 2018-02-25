@@ -3,7 +3,11 @@
 
 import Server from './Server'
 
-const server = new Server()
-server.start().catch(error => process.exit(1))
+export function start() {
+  const server = new Server()
+  server.start().catch(error => process.exit(1))
+}
 
-
+if (require.main === module) {
+  start()
+}
