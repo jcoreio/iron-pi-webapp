@@ -29,7 +29,11 @@ export default async function seedDatabase(): Promise<void> {
   }
   if (process.env.NODE_ENV === 'development') {
     if (!(await User.findOne({where: {username: 'root'}}))) {
-      await User.create({username: 'root', password: 'correct horse battery staple'})
+      await User.create({
+        username: 'root',
+        password: 'correct horse battery staple',
+        passwordHasBeenSet: true
+      })
     }
   }
 }
