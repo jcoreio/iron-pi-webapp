@@ -19,7 +19,6 @@ export default function parseChannelFormValues(channel) {
     break
   }
   case 'DISABLED': {
-    result.tag = null
     if (metadataItem) result.config.name = metadataItem.name
     break
   }

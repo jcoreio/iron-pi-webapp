@@ -173,7 +173,8 @@ function _shouldInitialize({data: {Channel}, id, loadedId, pristine}: Props): bo
 
 const pickFormFields = ({id, metadataItem, config}: FullChannel) => {
   if (config.mode === 'DISABLED') {
-    metadataItem = ({name: config.name}: any)
+    metadataItem = ((metadataItem ? {...metadataItem} : {}): any)
+    if (config.name) metadataItem.name = config.name
   }
   return {id, metadataItem, config}
 }

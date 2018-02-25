@@ -270,7 +270,10 @@ module.exports = () => {
                   isDigital: true,
                 },
                 config: {
-                  mode: 'DISABLED',
+                  mode: 'DIGITAL_OUTPUT',
+                  controlMode: 'REMOTE_CONTROL',
+                  reversePolarity: false,
+                  safeState: 0,
                   controlLogic: [],
                 },
               },
@@ -285,7 +288,7 @@ module.exports = () => {
             `,
             operationName: 'prepareTest',
             variables: {
-              id: 2,
+              id: 1,
               channel: {
                 metadataItem: {
                   tag: 'channel2',
@@ -309,7 +312,7 @@ module.exports = () => {
             `,
             operationName: 'prepareTest',
             variables: {
-              id: 3,
+              id: 2,
               channel: {
                 metadataItem: {
                   tag: 'channel3',
@@ -328,8 +331,6 @@ module.exports = () => {
         await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
-        await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
-        await delay(500)
         await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
@@ -401,7 +402,10 @@ module.exports = () => {
                   isDigital: true,
                 },
                 config: {
-                  mode: 'DISABLED',
+                  mode: 'DIGITAL_OUTPUT',
+                  controlMode: 'REMOTE_CONTROL',
+                  reversePolarity: false,
+                  safeState: 0,
                   controlLogic: [],
                 },
               },
@@ -416,7 +420,7 @@ module.exports = () => {
             `,
             operationName: 'prepareTest',
             variables: {
-              id: 2,
+              id: 1,
               channel: {
                 metadataItem: {
                   tag: 'channel2',
@@ -440,7 +444,7 @@ module.exports = () => {
             `,
             operationName: 'prepareTest',
             variables: {
-              id: 3,
+              id: 2,
               channel: {
                 metadataItem: {
                   tag: 'channel3',
@@ -459,8 +463,6 @@ module.exports = () => {
         await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
-        await browser.click('#channelForm [name="config.mode"] [value="DIGITAL_OUTPUT"]')
-        await delay(500)
         await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
