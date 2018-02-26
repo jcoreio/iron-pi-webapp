@@ -1,0 +1,14 @@
+[Unit]
+Description=SPI Hub
+After=network.target
+
+[Service]
+ExecStart=/service/spi-hub/spiHub.js
+WorkingDirectory=/service/spi-hub
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
