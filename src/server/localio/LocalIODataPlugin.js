@@ -13,6 +13,7 @@ import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-rou
 import Calibrator from '../calc/Calibrator'
 import type SPIHandler from './SPIHandler'
 import {CM_NUM_IO} from './SPIDevicesInfo'
+import isEqual from 'lodash.isequal'
 import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
@@ -31,6 +32,8 @@ function digitize(value: ?boolean): 1 | 0 | null {
 }
 
 export const EVENT_CHANNEL_STATES = 'channelStates'
+
+const OUTPUT_VALUES_REFRESH_INTERVAL = 500
 
 type Events = {
   channelStates: [Array<LocalIOChannelState>],
@@ -292,6 +295,12 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   } : () => {}
 
   dispatchCycleDone() {
+    this._sendOutputValues()
+  }
+
+  _lastOutputStates: ?Array<LocalIOChannelState>;
+
+  _sendOutputValues() {
     const outputValues: Array<boolean> = []
     const states: Array<LocalIOChannelState> = []
     for (let channel of this._channels) {
@@ -308,20 +317,30 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       states.push(state)
     }
     this._spiHandler.sendDigitalOutputs(outputValues)
-    this.emit(EVENT_CHANNEL_STATES, states)
+    if (!isEqual(states, this._lastOutputStates))
+      this.emit(EVENT_CHANNEL_STATES, states)
+    this._lastOutputStates = states
     if (process.env.BABEL_ENV === 'test') this._lastOutputValues = outputValues
   }
+
+  _sendOutputValuesInterval: ?number;
 
   start() {
     this._updateData()
     this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
     this._spiHandler.start()
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
+    if (!this._sendOutputValuesInterval)
+      this._sendOutputValuesInterval = setInterval(() => this._sendOutputValues(), OUTPUT_VALUES_REFRESH_INTERVAL)
   }
+
   destroy() {
     this._spiHandler.removeListener('deviceStatus', this._handleDeviceStatus)
     this._spiHandler.stop()
     LocalIOChannel.removeHook('afterUpdate', 'LocalIODataPlugin_channelUpdated')
+    if (this._sendOutputValuesInterval) {
+      clearInterval(this._sendOutputValuesInterval)
+      this._sendOutputValuesInterval = undefined
+    }
   }
 }
-

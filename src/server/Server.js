@@ -248,6 +248,11 @@ export default class Server {
         Object.assign(global, this._devGlobals)
       }
 
+      for (let feature of features) {
+        if (feature.start)
+          await feature.start()
+      }
+
       log.info(`App is listening on http://0.0.0.0:${port}`)
       this._running = true
     } catch (err) {
