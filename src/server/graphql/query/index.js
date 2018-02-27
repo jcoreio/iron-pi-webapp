@@ -5,7 +5,7 @@ import * as graphql from 'graphql'
 import {defaultArgs, resolver} from 'graphql-sequelize'
 
 import requireUserId from '../requireUserId'
-import type {Context} from '../Context'
+import type {GraphQLContext} from '../Context'
 import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'
@@ -24,7 +24,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
   const queryFields = {
     currentUser: {
       type: types[User.name],
-      resolve: async (obj: any, args: any, context: Context): Promise<any> => {
+      resolve: async (obj: any, args: any, context: GraphQLContext): Promise<any> => {
         const {userId: id} = context
         if (id) {
           const user = await User.findOne({where: {id}})
@@ -43,9 +43,8 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
     },
     inConnectMode: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
-      resolve: () => {
-        // TODO
-        return false
+      resolve: (obj: any, args: any, {connectModeHandler}: GraphQLContext): boolean => {
+        return connectModeHandler.inConnectMode
       },
     },
     TagValue: createTagValue(),
@@ -56,14 +55,14 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
           type: new graphql.GraphQLNonNull(graphql.GraphQLString),
         },
       },
-      resolve: (obj: any, {tag}: {tag: string}, {metadataHandler}: Context) => {
+      resolve: (obj: any, {tag}: {tag: string}, {metadataHandler}: GraphQLContext) => {
         const metadata = metadataHandler.getTagMetadata(tag)
         return metadata ? {...metadata, tag, _id: tag} : null
       }
     },
     Metadata: {
       type: new graphql.GraphQLList(new graphql.GraphQLNonNull(MetadataItem)),
-      resolve: (obj: any, args: any, {metadataHandler}: Context) => {
+      resolve: (obj: any, args: any, {metadataHandler}: GraphQLContext) => {
         const metadata = []
         const map = metadataHandler.metadata()
         for (let tag in map) {

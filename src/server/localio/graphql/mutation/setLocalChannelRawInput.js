@@ -1,12 +1,12 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 import type LocalIODataPlugin from '../../LocalIODataPlugin'
 
 export default function setLocalChannelRawInput({plugin}: {
   plugin: LocalIODataPlugin,
-}): graphql.GraphQLFieldConfig<any, Context> {
+}): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: graphql.GraphQLBoolean,
     args: {
@@ -24,7 +24,7 @@ export default function setLocalChannelRawInput({plugin}: {
         type: graphql.GraphQLBoolean,
       },
     },
-    resolve: (doc: any, args: {id: number, rawAnalogInput?: ?number, rawDigitalInput?: ?boolean, rawOutput?: ?boolean}, context: Context): ?boolean => {
+    resolve: (doc: any, args: {id: number, rawAnalogInput?: ?number, rawDigitalInput?: ?boolean, rawOutput?: ?boolean}, context: GraphQLContext): ?boolean => {
       const {userId, scopes} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!scopes.has('localio:test:setRawInputs')) {

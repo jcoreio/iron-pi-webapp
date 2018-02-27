@@ -3,12 +3,12 @@
 import * as graphql from 'graphql'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import JSONType from 'graphql-type-json'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 import type {Calibration} from '../../../../universal/localio/LocalIOChannel'
 
 export default function updateLocalIOChannelCalibration({types}: {
   types: {[name: string]: graphql.GraphQLOutputType},
-}): graphql.GraphQLFieldConfig<any, Context> {
+}): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: types[LocalIOChannel.options.name.singular],
     args: {
@@ -25,7 +25,7 @@ export default function updateLocalIOChannelCalibration({types}: {
         description: 'The new calibration for the channel',
       }
     },
-    resolve: async (doc: any, {id, where, calibration}: {id: ?number, where: ?Object, calibration: Calibration}, context: Context): Promise<any> => {
+    resolve: async (doc: any, {id, where, calibration}: {id: ?number, where: ?Object, calibration: Calibration}, context: GraphQLContext): Promise<any> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!where) {

@@ -55,7 +55,7 @@ export default function formatError(error: GraphQLError): any {
       }
     }
   } else if (originalError && originalError.validation) {
-    return {validation: originalError.validation}
+    return {message: originalError.message, validation: originalError.validation}
   }
   return {locations, message, path}
 }

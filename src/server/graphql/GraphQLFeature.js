@@ -3,7 +3,7 @@
 import type Sequelize, {Model} from 'sequelize'
 import type {GraphQLInputType, GraphQLOutputType, GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
-import type {Context} from './Context'
+import type {GraphQLContext} from './Context'
 
 export type GraphQLFeature = {
   +addTypes?: (options: {
@@ -17,18 +17,18 @@ export type GraphQLFeature = {
   +addQueryFields?: (options: {
     sequelize: Sequelize,
     types: {[name: string]: graphql.GraphQLOutputType},
-    queryFields: {[name: string]: GraphQLFieldConfig<any, Context>},
+    queryFields: {[name: string]: GraphQLFieldConfig<any, GraphQLContext>},
   }) => any,
   +addMutationFields?: (options: {
     sequelize: Sequelize,
     types: {[name: string]: graphql.GraphQLOutputType},
     inputTypes: {[name: string]: graphql.GraphQLInputType},
-    mutationFields: {[name: string]: GraphQLFieldConfig<any, Context>},
+    mutationFields: {[name: string]: GraphQLFieldConfig<any, GraphQLContext>},
   }) => any,
   +addSubscriptionFields?: (options: {
     sequelize: Sequelize,
     types: {[name: string]: graphql.GraphQLOutputType},
-    subscriptionFields: {[name: string]: GraphQLFieldConfig<any, Context>},
+    subscriptionFields: {[name: string]: GraphQLFieldConfig<any, GraphQLContext>},
   }) => any,
 }
 

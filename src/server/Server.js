@@ -20,6 +20,8 @@ import createSchema from './graphql/schema'
 import DataRouter from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
 import MetadataHandler from './metadata/MetadataHandler'
+import ConnectModeHandler from './device/ConnectModeHandler'
+import AccessCodeHandler from './device/AccessCodeHandler'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -32,6 +34,7 @@ import createToken from './auth/createToken'
 import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
 import createSubscriptionServer from './express/subscriptionServer'
+import type {GraphQLDependencies} from './graphql/Context'
 
 import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'
@@ -42,6 +45,8 @@ import seedDatabase from './sequelize/seedDatabase'
 import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
 import User from './models/User'
 import {ROOT_PASSWORD_HAS_BEEN_SET} from './graphql/subscription/constants'
+import {IN_CONNECT_MODE} from './graphql/subscription/constants'
+import {IN_CONNECT_MODE_CHANGED} from './device/ConnectModeHandler'
 
 const log = logger('Server')
 
@@ -71,6 +76,8 @@ export default class Server {
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
   metadataHandler: ?MetadataHandler
+  connectModeHandler: ConnectModeHandler
+  accessCodeHandler: AccessCodeHandler
   graphqlSchema: ?GraphQLSchema
   pubsub: PubSubEngine
   express: ?$Application
@@ -81,6 +88,8 @@ export default class Server {
     this._dbConnectionParams = {host, user, database, password}
     this.pubsub = new PubSub()
     this._graphqlDataPlugin = new GraphQLDataPlugin(this.pubsub)
+    this.connectModeHandler = new ConnectModeHandler()
+    this.accessCodeHandler = new AccessCodeHandler()
   }
 
   async start(): Promise<void> {
@@ -143,6 +152,8 @@ export default class Server {
         features,
       })
 
+      const {connectModeHandler, accessCodeHandler} = this
+      connectModeHandler.on(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
       User.afterUpdate((user: User) => {
         if (user.username === 'root' && user.changed('passwordHasBeenSet')) {
           pubsub.publish(ROOT_PASSWORD_HAS_BEEN_SET, {
@@ -184,13 +195,19 @@ export default class Server {
         app.post('/resetRootPassword', require('./express/resetRootPassword'))
       }
 
-      const GRAPHQL_PATH = '/graphql'
-      app.use(GRAPHQL_PATH, parseAuthHeader, bodyParser.json(), handleGraphql({
-        schema: graphqlSchema,
+      const graphqlDependencies: GraphQLDependencies = {
         sequelize,
         dataRouter,
         metadataHandler,
+        connectModeHandler,
+        accessCodeHandler,
         pubsub,
+      }
+
+      const GRAPHQL_PATH = '/graphql'
+      app.use(GRAPHQL_PATH, parseAuthHeader, bodyParser.json(), handleGraphql({
+        schema: graphqlSchema,
+        ...graphqlDependencies,
       }))
       app.use(GRAPHQL_PATH, (error: ?Error, req: $Request, res: $Response, next: Function) => {
         if (error) {
@@ -237,10 +254,7 @@ export default class Server {
         schema: graphqlSchema,
         server: httpServer,
         path: GRAPHQL_PATH,
-        sequelize,
-        dataRouter,
-        metadataHandler,
-        pubsub,
+        dependencies: graphqlDependencies,
       })
 
       // istanbul ignore next
@@ -274,11 +288,16 @@ export default class Server {
     if (dataRouter != null) dataRouter.setPlugins(this._getDataPlugins())
   }
 
+  _handleConnectModeChanged = (inConnectMode: boolean) => {
+    this.pubsub.publish(IN_CONNECT_MODE, {inConnectMode})
+  }
+
   // istanbul ignore next
   async stop(): Promise<void> {
     if (!this._running) return
     this._running = false
 
+    this.connectModeHandler.removeListener(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
     const {_features} = this
     if (_features) {
       for (let feature of _features) {

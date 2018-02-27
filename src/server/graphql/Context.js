@@ -4,13 +4,20 @@ import type Sequelize from 'sequelize'
 import type DataRouter from '../data-router/DataRouter'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {PubSubEngine} from 'graphql-subscriptions'
+import type ConnectModeHandler from '../device/ConnectModeHandler'
+import type AccessCodeHandler from '../device/AccessCodeHandler'
 
-export type Context = {
-  userId: ?number,
-  scopes: Set<string>,
+export type GraphQLDependencies = {
   dataRouter: DataRouter,
   metadataHandler: MetadataHandler,
+  connectModeHandler: ConnectModeHandler,
+  accessCodeHandler: AccessCodeHandler,
   pubsub: PubSubEngine,
   sequelize: Sequelize,
+}
+
+export type GraphQLContext = GraphQLDependencies & {
+  userId: ?number,
+  scopes: Set<string>,
 }
 

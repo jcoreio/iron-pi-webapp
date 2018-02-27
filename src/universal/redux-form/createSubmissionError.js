@@ -1,6 +1,7 @@
 // @flow
 
 import set from 'lodash.set'
+import size from 'lodash.size'
 import {SubmissionError} from 'redux-form'
 
 export default function createSubmissionError(err: {message: string, graphQLErrors?: Array<any>}) {
@@ -10,13 +11,14 @@ export default function createSubmissionError(err: {message: string, graphQLErro
     for (let error of graphQLErrors) {
       const {validation} = error
       const {errors} = validation || {}
-      for (let {path, message} of errors) {
-        set(submitErrors, path, message)
+      if (errors) {
+        for (let {path, message} of errors) {
+          set(submitErrors, path, message)
+        }
       }
     }
-  } else {
-    submitErrors._error = err.message
   }
+  if (!size(submitErrors)) submitErrors._error = err.message
   throw new SubmissionError(submitErrors)
 }
 

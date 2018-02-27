@@ -3,10 +3,12 @@
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
 import type {GraphQLOutputType, GraphQLInputType} from 'graphql'
+import type {GraphQLContext} from '../Context'
 import setUsername from './setUsername'
 import changePassword from './changePassword'
 import createMetadataItem from './createMetadataItem'
 import updateMetadataItem from './updateMetadataItem'
+import verifyAccessCode from './verifyAccessCode'
 import type {GraphQLFeature} from '../GraphQLFeature'
 
 type Options = {
@@ -18,11 +20,16 @@ type Options = {
 
 export default function createMutation(options: Options): graphql.GraphQLObjectType {
   const {sequelize, types, inputTypes, features} = options
-  const mutationFields = {
+  const mutationFields: graphql.GraphQLFieldConfigMap<any, GraphQLContext> = {
     setUsername: setUsername({types}),
     changePassword: changePassword(),
     createMetadataItem: createMetadataItem(),
     updateMetadataItem: updateMetadataItem(),
+    verifyAccessCode: verifyAccessCode(),
+  }
+  if (process.env.BABEL_ENV === 'test') {
+    mutationFields.setInConnectMode = require('./setInConnectMode')()
+    mutationFields.setTestAccessCode = require('./setTestAccessCode')()
   }
   for (let feature of features) {
     if (feature.addMutationFields) feature.addMutationFields({sequelize, types, inputTypes, mutationFields})

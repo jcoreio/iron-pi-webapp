@@ -1,6 +1,7 @@
 /* global browser */
 
 import {expect} from 'chai'
+import graphql from './util/graphql'
 import navigateTo from "./util/navigateTo"
 import poll from '@jcoreio/poll'
 import requireEnv from '@jcoreio/require-env'
@@ -9,6 +10,7 @@ import logoutIfNecessary from './util/logoutIfNecessary'
 import superagent from './util/superagent'
 import execute from './util/execute'
 import delay from 'delay'
+import waitForNotExist from './util/waitForNotExist'
 
 module.exports = () => {
   let token
@@ -248,6 +250,56 @@ module.exports = () => {
         password: newPassword,
       })
       expect(token).to.exist
+    })
+  })
+  describe('ResetPasswordForm', () => {
+    it('changes password successfully', async function () {
+      this.timeout(60000)
+      await graphql({
+        query: `mutation {
+          setInConnectMode(inConnectMode:false)
+          setTestAccessCode(accessCode:"ABCDEFGH") 
+        }`
+      })
+      const newPassword = 'semiscientific tribunal'
+      await navigateTo('/')
+      await logoutIfNecessary()
+      browser.timeouts('implicit', 5000)
+      await browser.click('#loginForm #forgotPasswordLink')
+      await browser.waitForVisible('#resetPasswordForm [data-test-name="pressConnectButtonMessage"]')
+      await graphql({query: `mutation { setInConnectMode(inConnectMode:true) }`})
+      await browser.setValue('#resetPasswordForm [name="accessCode"]', 'ABCDEFGH')
+      await browser.click('#resetPasswordForm button[type="submit"]')
+      await browser.setValue('#resetPasswordForm [name="newPassword"]', newPassword)
+      await browser.setValue('#resetPasswordForm [name="retypeNewPassword"]', newPassword)
+      await browser.click('#resetPasswordForm button[type="submit"]')
+      browser.timeouts('implicit', 100)
+      await waitForNotExist('body #resetPasswordForm', 5000)
+
+      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+        username: 'root',
+        password: newPassword,
+      })
+      expect(token).to.exist
+    })
+    it('displays correct error when access code is incorrect', async function () {
+      this.timeout(60000)
+      await graphql({
+        query: `mutation {
+          setInConnectMode(inConnectMode:true)
+          setTestAccessCode(accessCode:"ABCDEFGH") 
+        }`
+      })
+      await navigateTo('/')
+      await logoutIfNecessary()
+      browser.timeouts('implicit', 5000)
+      await browser.click('#loginForm #forgotPasswordLink')
+      await browser.setValue('#resetPasswordForm [name="accessCode"]', 'blah')
+      await browser.click('#resetPasswordForm button[type="submit"]')
+      await browser.waitForExist('#resetPasswordForm [data-name="accessCode"] [data-component="FormHelperText"]', 15000)
+      expect(
+        await browser.getText('#resetPasswordForm [data-name="accessCode"] [data-component="FormHelperText"]')
+      ).to.equal('Incorrect access code')
     })
   })
 }

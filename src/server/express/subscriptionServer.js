@@ -4,27 +4,17 @@ import {execute, subscribe} from 'graphql'
 import type {GraphQLSchema} from 'graphql'
 import {SubscriptionServer} from "subscriptions-transport-ws"
 import verifyToken from '../auth/verifyToken'
-import type DataRouter from '../data-router/DataRouter'
-import {PubSubEngine} from "graphql-subscriptions"
-import type Sequelize from 'sequelize'
-import type MetadataHandler from '../metadata/MetadataHandler'
-import type {Context} from '../graphql/Context'
+import type {GraphQLContext, GraphQLDependencies} from '../graphql/Context'
 
 export default function createSubscriptionServer(options: {
   schema: GraphQLSchema,
   server: net$Server,
   path: string,
-  sequelize: Sequelize,
-  dataRouter: DataRouter,
-  metadataHandler: MetadataHandler,
-  pubsub: PubSubEngine,
+  dependencies: GraphQLDependencies,
 }): SubscriptionServer {
   const {
     schema,
-    sequelize,
-    dataRouter,
-    metadataHandler,
-    pubsub,
+    dependencies,
     ...serverOptions
   } = options
 
@@ -33,11 +23,11 @@ export default function createSubscriptionServer(options: {
       schema,
       execute,
       subscribe,
-      onConnect: async ({token}: { token?: string }): Promise<Context> => {
+      onConnect: async ({token}: { token?: string }): Promise<GraphQLContext> => {
         const {userId, scopes} = token ? await verifyToken(token) : {userId: null, scopes: new Set()}
-        return {userId, scopes, sequelize, dataRouter, metadataHandler, pubsub}
+        return {userId, scopes, ...dependencies}
       },
-      onOperation: async (connectionParams: {payload: {token?: string}}, operationParams: {context: Context}): Promise<{context: Context}> => {
+      onOperation: async (connectionParams: {payload: {token?: string}}, operationParams: {context: GraphQLContext}): Promise<{context: GraphQLContext}> => {
         const {payload: {token}} = connectionParams
         if ((token != null) === (operationParams.context.userId != null)) return operationParams
         const {userId, scopes} = token ? await verifyToken(token) : {userId: null, scopes: new Set()}

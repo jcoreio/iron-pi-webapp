@@ -6,7 +6,7 @@ import type {LocalIOChannelConfig} from '../../../../universal/localio/LocalIOCh
 import type {MetadataItem} from '../../../../universal/types/MetadataItem'
 import SequelizeMetadataItem from '../../../models/MetadataItem'
 import JSONType from 'graphql-type-json'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 
 type InputChannel = {
   id?: number,
@@ -18,7 +18,7 @@ type InputChannel = {
 export default function updateLocalIOChannel({types, inputTypes}: {
   types: {[name: string]: graphql.GraphQLOutputType},
   inputTypes: {[name: string]: graphql.GraphQLInputType},
-}): graphql.GraphQLFieldConfig<any, Context> {
+}): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: types[LocalIOChannel.options.name.singular],
     args: {
@@ -35,7 +35,7 @@ export default function updateLocalIOChannel({types, inputTypes}: {
         description: 'The fields to update',
       }
     },
-    resolve: async (doc: any, {id, where, channel}: {id: ?number, where: ?Object, channel: InputChannel}, context: Context): Promise<any> => {
+    resolve: async (doc: any, {id, where, channel}: {id: ?number, where: ?Object, channel: InputChannel}, context: GraphQLContext): Promise<any> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!where) {

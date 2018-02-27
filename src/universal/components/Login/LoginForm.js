@@ -96,7 +96,11 @@ class LoginForm extends React.Component<Props> {
             Log In
           </Button>
           <div className={classes.forgotPasswordHolder}>
-            <Link to={FORGOT_PASSWORD} className={classes.forgotPasswordLink}>
+            <Link
+              id="forgotPasswordLink"
+              to={FORGOT_PASSWORD}
+              className={classes.forgotPasswordLink}
+            >
               Forgot Password?
             </Link>
           </div>

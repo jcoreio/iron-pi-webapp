@@ -1,12 +1,12 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {Context} from './Context'
+import type {GraphQLContext} from './Context'
 
 export default function requireUserId<F: Object>(
   findOptions: F,
   args: any,
-  context: Context,
+  context: GraphQLContext,
   {fieldName}: {fieldName: string}
 ): F {
   const {userId} = context

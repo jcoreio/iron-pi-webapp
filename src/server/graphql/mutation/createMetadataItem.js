@@ -1,13 +1,13 @@
 // @flow
 
-import type {Context} from '../Context'
+import type {GraphQLContext} from '../Context'
 import * as graphql from 'graphql'
 import type {MetadataItem} from '../../../universal/types/MetadataItem'
 import SequelizeMetadataItem from '../../models/MetadataItem'
 import GraphQLMetadataItem from '../types/MetadataItem'
 import InputMetadataItem from '../types/InputMetadataItem'
 
-export default function createMetadataItem(): graphql.GraphQLFieldConfig<any, Context> {
+export default function createMetadataItem(): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: GraphQLMetadataItem,
     args: {
@@ -16,7 +16,7 @@ export default function createMetadataItem(): graphql.GraphQLFieldConfig<any, Co
         description: 'The new metadata item',
       },
     },
-    resolve: async (doc: any, {item}: {item: MetadataItem}, context: Context): Promise<MetadataItem> => {
+    resolve: async (doc: any, {item}: {item: MetadataItem}, context: GraphQLContext): Promise<MetadataItem> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to create MetadataItems')
 

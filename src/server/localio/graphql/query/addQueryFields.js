@@ -4,12 +4,12 @@ import * as graphql from 'graphql'
 import {defaultArgs, resolver} from 'graphql-sequelize'
 import requireUserId from '../../../graphql/requireUserId'
 import LocalIOChannel from '../../models/LocalIOChannel'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 import type {LocalIOFeature} from '../../LocalIOFeature'
 
 const addQueryFields = (feature: LocalIOFeature) => ({types, queryFields}: {
   types: {[name: string]: graphql.GraphQLOutputType},
-  queryFields: {[name: string]: graphql.GraphQLFieldConfig<any, Context>},
+  queryFields: {[name: string]: graphql.GraphQLFieldConfig<any, GraphQLContext>},
 }) => {
   for (let model of [LocalIOChannel]) {
     const {options} = model

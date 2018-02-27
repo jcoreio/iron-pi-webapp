@@ -4,7 +4,7 @@ import * as graphql from 'graphql'
 import setLocalChannelRemoteControlValue from './setLocalChannelRemoteControlValue'
 import setLocalChannelRawInput from './setLocalChannelRawInput'
 import updateRawOutputs from './updateRawOutputs'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 import updateLocalIOChannel from './updateLocalIOChannel'
 import updateLocalIOChannelCalibration from './updateLocalIOChannelCalibration'
 import type {LocalIOFeature} from '../../LocalIOFeature'
@@ -12,7 +12,7 @@ import type {LocalIOFeature} from '../../LocalIOFeature'
 const addMutationFields = (feature: LocalIOFeature) => ({types, inputTypes, mutationFields}: {
   types: {[name: string]: graphql.GraphQLOutputType},
   inputTypes: {[name: string]: graphql.GraphQLInputType},
-  mutationFields: {[name: string]: graphql.GraphQLFieldConfig<any, Context>},
+  mutationFields: {[name: string]: graphql.GraphQLFieldConfig<any, GraphQLContext>},
 }) => {
   const plugin = feature._plugin
   mutationFields.setLocalChannelRemoteControlValue = setLocalChannelRemoteControlValue({plugin})

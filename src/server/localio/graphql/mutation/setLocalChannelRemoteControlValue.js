@@ -1,12 +1,12 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {Context} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/Context'
 import type LocalIODataPlugin from '../../LocalIODataPlugin'
 
 export default function setLocalChannelRemoteControlValue({plugin}: {
   plugin: LocalIODataPlugin,
-}): graphql.GraphQLFieldConfig<any, Context> {
+}): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: graphql.GraphQLBoolean,
     args: {
@@ -18,7 +18,7 @@ export default function setLocalChannelRemoteControlValue({plugin}: {
         type: graphql.GraphQLInt,
       },
     },
-    resolve: (doc: any, args: {id: number, controlValue: ?number}, context: Context): ?boolean => {
+    resolve: (doc: any, args: {id: number, controlValue: ?number}, context: GraphQLContext): ?boolean => {
       const {userId, scopes} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update LocalIOChannels')
       if (!scopes.has('localio:setRemoteControlValues')) {

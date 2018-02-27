@@ -5,15 +5,16 @@ import {ValidationError} from 'sequelize'
 import * as graphql from 'graphql'
 import bcrypt from 'bcrypt'
 import promisify from 'es6-promisify'
-import type {Context} from '../Context'
+import type {GraphQLContext} from '../Context'
 import User from '../../models/User'
 
 type Args = {
-  oldPassword: string,
+  accessCode?: string,
+  oldPassword?: string,
   newPassword: string,
 }
 
-export default function changePassword(): GraphQLFieldConfig<any, Context> {
+export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext> {
   return {
     type: graphql.GraphQLBoolean,
     args: {
@@ -27,23 +28,38 @@ export default function changePassword(): GraphQLFieldConfig<any, Context> {
         type: new graphql.GraphQLNonNull(graphql.GraphQLString),
       },
     },
-    resolve: async (doc: any, {oldPassword, newPassword}: Args, context: Context): Promise<any> => {
-      const {userId: id} = context
-      if (!id) throw new graphql.GraphQLError('You must be logged in to change your password')
-      const user = await User.findOne({where: {id}})
-      if (!user) throw new Error('User not found')
-      // TODO: Check connect mode
-      if (!oldPassword) {
-        throw new Error('You must provide the old password unless in connect mode')
-      }
-      const matches = await promisify(cb => bcrypt.compare(oldPassword, user.password, cb))()
-      if (!matches) {
-        const error = new Error('Incorrect password');
-        (error: any).validation = {
-          errors: [{path: ['oldPassword'], message: 'Incorrect password'}]
+    resolve: async (doc: any, {accessCode, oldPassword, newPassword}: Args, context: GraphQLContext): Promise<any> => {
+      const {userId: id, connectModeHandler, accessCodeHandler} = context
+      let user: ?User
+      if (connectModeHandler.inConnectMode && accessCode) {
+        try {
+          await accessCodeHandler.verifyAccessCode(accessCode)
+        } catch (err) {
+          const {message} = err
+          const error = new Error(message);
+          (error: any).validation = {
+            errors: [{path: ['accessCode'], message}]
+          }
+          throw error
         }
-        throw error
+        user = await User.findOne({where: {username: 'root'}})
+      } else {
+        if (!oldPassword) {
+          throw new Error('You must provide the old password unless you provide the accessCode in connect mode')
+        }
+        if (!id) throw new Error('You must be logged in to change your password')
+        const user = await User.findOne({where: {id}})
+        if (!user) throw new Error('User not found')
+        const matches = await promisify(cb => bcrypt.compare(oldPassword, user.password, cb))()
+        if (!matches) {
+          const error = new Error('Incorrect password');
+          (error: any).validation = {
+            errors: [{path: ['oldPassword'], message: 'Incorrect password'}]
+          }
+          throw error
+        }
       }
+      if (!user) throw new Error('User not found')
       try {
         await user.update({password: newPassword, passwordHasBeenSet: true}, {individualHooks: true})
       } catch (error) {

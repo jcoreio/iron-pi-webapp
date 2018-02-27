@@ -3,8 +3,9 @@
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
+import {InputLabel} from 'material-ui/Input'
 import {Field} from 'redux-form'
-import {TextField} from 'redux-form-material-ui'
+import TextField from '../TextField'
 import type {Theme} from '../../theme'
 import Fader from '../Fader'
 import Spinner from '../Spinner'
@@ -65,17 +66,19 @@ const validateRetypeNewPassword = [required(), confirmation({
 })]
 
 const Step1 = (props) => (
-  <div {...props}>
+  <div {...props} data-test-name="pressConnectButtonMessage">
     Press the {'"Connect"'} button on the Iron Pi...
   </div>
 )
 
 const Step2 = ({classes, ...props}: {classes: Classes}) => (
   <div {...props}>
+    <InputLabel>
+      Enter the Access Code printed on the Iron Pi:
+    </InputLabel>
     <Field
       type="text"
       name="accessCode"
-      label="Enter the Access Code printed on the Iron Pi:"
       component={TextField}
       validate={required()}
       className={classes.formControl}
@@ -109,7 +112,11 @@ const Steps = [Step1, Step2, Step3]
 const ResetPasswordForm = ({classes, onSubmit, onCancel, submitting, step, title, error}: Props) => {
   const Step = Steps[step - 1]
   return (
-    <form className={classes.root} onSubmit={onSubmit}>
+    <form
+      className={classes.root}
+      onSubmit={onSubmit}
+      id="resetPasswordForm"
+    >
       <h3 className={classes.title}>{title || 'Reset Password'}</h3>
       <h4 className={classes.stepNumber}>
         Step <Fader className={classes.stepFader}>{step}</Fader> of 3

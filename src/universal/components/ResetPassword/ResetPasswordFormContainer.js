@@ -22,6 +22,8 @@ export type Props = {
   handleSubmit: (handler: (values: {accessCode: string, newPassword: string}) => Promise<any>) => (event: Event) => any,
   subscribeToInConnectMode: () => any,
   data: Data,
+  submitting: boolean,
+  error?: string,
 }
 
 type State = {
@@ -69,7 +71,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
   }
 
   render(): ?React.Node {
-    const {title, handleSubmit} = this.props
+    const {title, handleSubmit, submitting, error} = this.props
     const {step} = this.state
     return (
       <ResetPasswordForm
@@ -77,6 +79,8 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
         step={step}
         onCancel={this.handleCancel}
         onSubmit={handleSubmit(this.handleSubmit)}
+        submitting={submitting}
+        error={error}
       />
     )
   }
