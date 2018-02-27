@@ -242,7 +242,7 @@ module.exports = () => {
         variables: {id},
       })
 
-      expect(Channel.tag).to.equal(null)
+      expect(Channel.tag).to.equal('channel1')
       expect(Channel.name).to.equal('Blah')
       expect(Channel.config.mode).to.equal('DISABLED')
       expect(Channel.config.name).to.equal('Blah')

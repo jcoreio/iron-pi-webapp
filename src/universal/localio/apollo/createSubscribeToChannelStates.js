@@ -74,7 +74,7 @@ export default function createSubscribeToChannelStates(
         }
         if (!data) return prev
         const {states} = data
-        if (!Array.isArray(states)) return
+        if (!Array.isArray(states)) return prev
         let result = prev
         for (let state of states) {
           const Channels = get(prev, channelsPath)

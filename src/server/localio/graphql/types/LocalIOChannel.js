@@ -30,6 +30,7 @@ export default function createLocalIOChannel(options: {
         type: graphql.GraphQLString,
         description: 'the name for this channel',
         resolve: ({id, tag, config}: LocalIOChannel, args: any, {metadataHandler}: Context) => {
+          if (config.mode === 'DISABLED' && config.name) return config.name
           if (!tag) return config.name || `Channel ${id + 1}`
           const item = metadataHandler.getTagMetadata(tag)
           return item ? item.name : `Channel ${id + 1}`

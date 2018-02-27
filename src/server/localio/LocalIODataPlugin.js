@@ -147,8 +147,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this._channels[id] = channel
     this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
     this._updateData()
-    const state = getChannelState(channel, {getTagValue: this._getTagValue})
-    this.emit(EVENT_CHANNEL_STATES, [state])
+    this._updateChannelStates()
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
@@ -266,8 +265,6 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this._updateData()
   }
 
-  _lastOutputValues: ?Array<boolean>
-
   /**
    * To be as truthful as possible, we pass the digitalOutputLevels coming directly from SPI into the
    * rawOutput internal tags.  But without any actual hardware in test mode, this doesn't happen automatically,
@@ -295,14 +292,15 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   } : () => {}
 
   dispatchCycleDone() {
-    this._sendOutputValues()
+    this._updateChannelStates()
   }
 
-  _lastOutputStates: ?Array<LocalIOChannelState>;
+  _lastOutputValues: ?Array<boolean>
+  _lastOutputStates: Map<number, LocalIOChannelState> = new Map()
 
-  _sendOutputValues() {
+  _updateChannelStates() {
     const outputValues: Array<boolean> = []
-    const states: Array<LocalIOChannelState> = []
+    const outputStates: Array<LocalIOChannelState> = []
     for (let channel of this._channels) {
       const {id, config} = channel
       if (config.mode === 'DIGITAL_OUTPUT') {
@@ -314,24 +312,33 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         outputValues[id] = false
       }
       const state = getChannelState(channel, {getTagValue: this._getTagValue})
-      states.push(state)
+      if (!isEqual(state, this._lastOutputStates.get(id))) {
+        outputStates.push(state)
+      }
+      this._lastOutputStates.set(id, state)
     }
+    if (outputStates.length) this.emit(EVENT_CHANNEL_STATES, outputStates)
+    this._lastOutputValues = outputValues
     this._spiHandler.sendDigitalOutputs(outputValues)
-    if (!isEqual(states, this._lastOutputStates))
-      this.emit(EVENT_CHANNEL_STATES, states)
-    this._lastOutputStates = states
-    if (process.env.BABEL_ENV === 'test') this._lastOutputValues = outputValues
   }
 
   _sendOutputValuesInterval: ?number;
 
   start() {
     this._updateData()
+    this._updateChannelStates()
     this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
     this._spiHandler.start()
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
-    if (!this._sendOutputValuesInterval)
-      this._sendOutputValuesInterval = setInterval(() => this._sendOutputValues(), OUTPUT_VALUES_REFRESH_INTERVAL)
+    if (!this._sendOutputValuesInterval) {
+      this._sendOutputValuesInterval = setInterval(
+        () => {
+          const outputValues = this._lastOutputValues
+          if (outputValues) this._spiHandler.sendDigitalOutputs(outputValues)
+        },
+        OUTPUT_VALUES_REFRESH_INTERVAL
+      )
+    }
   }
 
   destroy() {

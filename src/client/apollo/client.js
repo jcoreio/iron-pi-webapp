@@ -63,14 +63,22 @@ export default function createClient(options: Options = {}): ApolloClient {
     uri: `${window.location.origin}/graphql`
   })
 
+  const subscriptionMiddleware = {
+    applyMiddleware(options: Object, next: Function) {
+      options.token = localStorage.getItem('token')
+      next()
+    }
+  }
+
   // Create a WebSocket link:
   const wsLink = new WebSocketLink({
     uri: `ws://${window.location.host}/graphql`,
     options: {
       reconnect: true,
-      connectionParams: () => ({token: localStorage.getItem('token')}),
+      // connectionParams: () => ({token: localStorage.getItem('token')}),
     }
   })
+  wsLink.subscriptionClient.use([subscriptionMiddleware])
 
   const cacheOptions = {}
   if (introspectionQueryResultData) cacheOptions.fragmentMatcher = new IntrospectionFragmentMatcher({
