@@ -5,6 +5,8 @@ import * as graphql from 'graphql'
 import MQTTChannelConfig from '../../models/MQTTChannelConfig'
 import {attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra/lib/index'
+import type {GraphQLContext} from '../../../graphql/Context'
+import MetadataItem from '../../../graphql/types/MetadataItem'
 
 type Options = {
   getType: (model: Class<Model<any>>) => graphql.GraphQLOutputType,
@@ -23,6 +25,16 @@ export default function createMQTTChannelConfig({
       ...attributeFields(MQTTChannelConfig, {cache: attributeFieldsCache}),
       // $FlowFixMe
       ...associationFields(MQTTChannelConfig, {getType, getArgs}),
+      metadataItem: {
+        type: MetadataItem,
+        description: 'the metadata item for this channel',
+        resolve: ({internalTag}: MQTTChannelConfig, args: any, {metadataHandler}: GraphQLContext) => {
+          if (internalTag) {
+            const item = metadataHandler.getTagMetadata(internalTag)
+            return item ? {...item, internalTag, _id: internalTag} : null
+          }
+        },
+      },
     })
   })
 }
