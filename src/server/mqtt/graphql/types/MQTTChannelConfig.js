@@ -7,6 +7,7 @@ import {attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra/lib/index'
 import type {GraphQLContext} from '../../../graphql/Context'
 import MetadataItem from '../../../graphql/types/MetadataItem'
+import JSONType from 'graphql-type-json'
 
 type Options = {
   getType: (model: Class<Model<any>>) => graphql.GraphQLOutputType,
@@ -29,10 +30,15 @@ export default function createMQTTChannelConfig({
         type: MetadataItem,
         description: 'the metadata item for this channel',
         resolve: ({internalTag}: MQTTChannelConfig, args: any, {metadataHandler}: GraphQLContext) => {
-          if (internalTag) {
-            const item = metadataHandler.getTagMetadata(internalTag)
-            return item ? {...item, internalTag, _id: internalTag} : null
-          }
+          const item = metadataHandler.getTagMetadata(internalTag)
+          return item ? {...item, internalTag, _id: internalTag} : null
+        },
+      },
+      systemValue: {
+        type: JSONType,
+        description: 'the current system value for this channel',
+        resolve: ({internalTag}: MQTTChannelConfig, args: any, {dataRouter}: GraphQLContext) => {
+          return dataRouter.getTagValue(internalTag)
         },
       },
     })
