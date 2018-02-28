@@ -13,15 +13,15 @@ export default function createMQTTConfig({types, inputTypes}: {
   return {
     type: types[MQTTConfig.options.name.singular],
     args: {
-      config: {
+      values: {
         type: inputTypes[defaultCreateTypeName(MQTTConfig)],
-        description: 'The config to create',
+        description: 'The attribute values of the MQTTConfig to create',
       }
     },
-    resolve: async (doc: any, {config}: {config: MQTTConfigInitAttributes}, context: GraphQLContext): Promise<MQTTConfig> => {
+    resolve: async (doc: any, {values}: {values: MQTTConfigInitAttributes}, context: GraphQLContext): Promise<MQTTConfig> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to create MQTTConfigs')
-      return await MQTTConfig.create(config)
+      return await MQTTConfig.create(values)
     },
   }
 }

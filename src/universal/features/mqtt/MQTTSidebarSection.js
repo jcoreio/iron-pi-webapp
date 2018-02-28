@@ -3,18 +3,29 @@
 import * as React from 'react'
 import {ListItemSecondaryAction} from 'material-ui/List'
 import {withStyles} from 'material-ui/styles'
+import IconButton from 'material-ui/IconButton'
+import {Link} from 'react-router-dom'
+import {mqttConfigForm} from './routePaths'
 
 import type {Theme} from '../../theme'
 import SidebarSection from '../../components/Sidebar/SidebarSection'
 import MQTTConfigItem from './MQTTConfigItem'
 import type {Config} from './MQTTConfigItem'
 import Spinner from '../../components/Spinner'
+import AddIcon from '../../components/icons/AddRectangle'
 
 const styles = (theme: Theme) => ({
   secondaryAction: {
     marginTop: -theme.spacing.unit * 2,
-    marginRight: theme.spacing.unit * 2,
-  }
+    marginRight: theme.spacing.unit,
+  },
+  addConfigButton: {
+    marginTop: -theme.spacing.unit,
+    marginBottom: 0,
+  },
+  addConfigIcon: {
+    color: theme.sidebar.foregroundColor,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -35,6 +46,14 @@ const MQTTSidebarSection = ({expanded, configs, onExpandedChange, loading, class
       children: (
         <ListItemSecondaryAction className={classes.secondaryAction}>
           <Spinner in={loading} />
+          <IconButton
+            data-test-name="addMQTTConfigButton"
+            component={Link}
+            className={classes.addConfigButton}
+            to={mqttConfigForm(('create': any))}
+          >
+            <AddIcon className={classes.addConfigIcon} />
+          </IconButton>
         </ListItemSecondaryAction>
       )
     }}

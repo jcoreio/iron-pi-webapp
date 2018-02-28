@@ -16,30 +16,30 @@ export default function updateMQTTConfig({types, inputTypes}: {
     args: {
       id: {
         type: graphql.GraphQLInt,
-        description: 'The id of the config to update',
+        description: 'The id of the values to update',
       },
       where: {
         type: JSONType,
         description: 'The sequelize where options',
       },
-      config: {
+      values: {
         type: inputTypes[defaultUpdateTypeName(MQTTConfig)],
-        description: 'The fields to update',
+        description: 'The attribute values to update',
       },
     },
     resolve: async (
       doc: any,
-      {id, where, config}: {id: ?number, where: ?Object, config: $Shape<MQTTConfigAttributes>},
+      {id, where, values}: {id: ?number, where: ?Object, values: $Shape<MQTTConfigAttributes>},
       context: GraphQLContext
     ): Promise<?MQTTConfig> => {
       const {userId} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to update MQTTConfigs')
       if (!where) {
-        if (id == null) id = config.id
+        if (id == null) id = values.id
         if (id === null) throw new Error('Missing id or where options')
         where = {id}
       }
-      await MQTTConfig.update(config, {where, individualHooks: true})
+      await MQTTConfig.update(values, {where, individualHooks: true})
       return await MQTTConfig.findOne({where})
     },
   }
