@@ -1,4 +1,8 @@
 // @flow
+/* @flow-runtime enable */
+
+import {reify} from 'flow-runtime'
+import type {Type} from 'flow-runtime'
 
 import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
 
@@ -10,6 +14,7 @@ export type MQTTChannelConfig = {
   multiplier?: ?number,
   offset?: ?number,
 }
+export const MQTTChannelConfigType = (reify: Type<MQTTChannelConfig>)
 
 export type MQTTConfig = {
   name?: ?string,
