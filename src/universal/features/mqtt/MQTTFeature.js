@@ -2,12 +2,12 @@
 
 import * as React from 'react'
 import {Route, Link} from 'react-router-dom'
-import type {Match} from 'react-router-dom'
+import type {Match, RouterHistory} from 'react-router-dom'
 import Drilldown from 'react-router-drilldown/lib/withTransitionContext'
 
 import type {Feature} from '../Feature'
 import MQTTSidebarSectionContainer from './MQTTSidebarSectionContainer'
-import {mqttConfigForm} from './routePaths'
+import {mqttConfigForm, mqttChannelConfigForm} from './routePaths'
 import featureLoader from '../../components/featureLoader'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
@@ -19,6 +19,12 @@ const MQTTConfigFormContainer = featureLoader({
   featureId: FEATURE_ID,
   featureName: FEATURE_NAME,
   getComponent: feature => (feature: any).MQTTConfigFormContainer,
+})
+
+const MQTTChannelConfigFormContainer = featureLoader({
+  featureId: FEATURE_ID,
+  featureName: FEATURE_NAME,
+  getComponent: feature => (feature: any).MQTTChannelConfigFormContainer,
 })
 
 const MQTTFeature: Feature = {
@@ -33,6 +39,15 @@ const MQTTFeature: Feature = {
           <Link to={match.url} data-test-name="mqttConfigFormLink">
             {match.params.id === 'create' ? 'Create Config' : `Config ${match.params.id || '?'}`}
           </Link>
+          <Route
+            path={mqttChannelConfigForm(match.url, (':id': any))}
+            render={({match}) => (
+              <React.Fragment>
+                <ChevronRight />
+                {match.params.id === 'create' ? 'Create Channel' : 'Edit Channel'}
+              </React.Fragment>
+            )}
+          />
         </Title>
       )}
     />,
@@ -47,7 +62,7 @@ const MQTTFeature: Feature = {
             <Route
               path={mqttConfigForm(('create': any))}
               exact
-              render={({history}) => <MQTTConfigFormContainer history={history} />}
+              render={({match, history}) => <MQTTConfigFormContainer match={match} history={history} />}
             />
           </Drilldown>
         )
@@ -57,13 +72,32 @@ const MQTTFeature: Feature = {
       key={mqttConfigForm((':id': any))}
       path={mqttConfigForm((':id': any))}
       render={({match}: {match: Match}): React.Node => {
-        const id = parseInt(match.params.id) - 1
+        const id = parseInt(match.params.id)
         return (
           <Drilldown animateHeight={false}>
             <Route
               path={mqttConfigForm((':id': any))}
               exact
-              render={({history}) => <MQTTConfigFormContainer id={id} history={history} />}
+              render={({match, history}) => <MQTTConfigFormContainer id={id} match={match} history={history} />}
+            />
+            <Route
+              path={mqttChannelConfigForm(mqttConfigForm((':configId': any)), (':id': any))}
+              render={({match, history}: {match: Match, history: RouterHistory}) => {
+                const id = parseInt(match.params.id)
+                if (id === 'create') {
+                  return (
+                    <Route
+                      path=":direction"
+                      render={({match, history}: { match: Match, history: RouterHistory }) =>
+                        <MQTTChannelConfigFormContainer direction={match.params.direction} match={match} history={history} />
+                      }
+                    />
+                  )
+                }
+                return (
+                  <MQTTChannelConfigFormContainer id={id} match={match} history={history} />
+                )
+              }}
             />
           </Drilldown>
         )
@@ -78,6 +112,7 @@ const MQTTFeature: Feature = {
     return {
       ...MQTTFeature,
       MQTTConfigFormContainer: (await import('./MQTTConfigFormContainer')).default,
+      MQTTChannelConfigFormContainer: (await import('./MQTTChannelConfigFormContainer')).default,
     }
   }
 }

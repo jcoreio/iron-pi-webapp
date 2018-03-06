@@ -36,7 +36,7 @@ export type MQTTConfigItemProps = {
 }
 
 const MQTTConfigItem = ({config, classes}: MQTTConfigItemProps): React.Node => (
-  <SidebarItem component={NavLink} to={mqttConfigForm(config.id + 1)} data-component="MQTTConfigItem">
+  <SidebarItem component={NavLink} to={mqttConfigForm(config.id)} data-component="MQTTConfigItem">
     <SidebarItemText data-test-name="name" disableTypography primary={config.name} className={classes.name} />
   </SidebarItem>
 )

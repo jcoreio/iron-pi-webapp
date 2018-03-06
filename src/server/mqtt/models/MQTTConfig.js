@@ -15,6 +15,7 @@ import type {
 } from 'sequelize'
 import MQTTChannelConfig, {FROM_MQTT, TO_MQTT} from './MQTTChannelConfig'
 import type {MQTTChannelConfigAttributes, MQTTChannelConfigInitAttributes} from './MQTTChannelConfig'
+import {mqttUrlPattern} from '../../../universal/types/MQTTUrl'
 
 export type MQTTConfigInitAttributes = {
   name: string;
@@ -92,19 +93,20 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          isUrl: true,
+          is: {
+            args: mqttUrlPattern,
+            msg: 'must be a valid MQTT URL'
+          },
         },
       },
       username: {
         type: Sequelize.STRING,
-        allowNull: false,
         validate: {
           not: notWhitespace,
         },
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
         validate: {
           not: notWhitespace,
         },

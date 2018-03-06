@@ -10,7 +10,7 @@ import type {Theme} from '../../theme'
 import Fader from '../Fader'
 import Spinner from '../Spinner'
 import ViewSlider from 'react-view-slider/lib/simpleWithTransitionContext'
-import {required, confirmation} from '@jcoreio/redux-form-validators'
+import {required, confirmation} from 'redux-form-validators'
 import Autocollapse from '../Autocollapse'
 import ErrorAlert from '../ErrorAlert'
 

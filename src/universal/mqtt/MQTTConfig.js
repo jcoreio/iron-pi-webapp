@@ -20,8 +20,8 @@ export type MQTTConfig = {
   name?: ?string,
 
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
-  username: string,
-  password: string,
+  username?: string,
+  password?: string,
   groupId: string,
   nodeId: string,
 

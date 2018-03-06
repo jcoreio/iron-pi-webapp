@@ -3,7 +3,7 @@
 import * as React from 'react'
 import {compose} from 'redux'
 import {Field} from 'redux-form-normalize-on-blur'
-import {required, format} from '@jcoreio/redux-form-validators'
+import {required, format} from 'redux-form-validators'
 import {formValues} from 'redux-form'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../theme'

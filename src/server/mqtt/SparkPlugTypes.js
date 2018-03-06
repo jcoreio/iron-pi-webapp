@@ -65,8 +65,8 @@ export type SparkPlugClient = EventEmitter<SparkPlugClientEventTypes> & {
 
 export type SparkPlugNewClientOpts = {
   serverUrl: string,
-  username: string,
-  password: string,
+  username: ?string,
+  password: ?string,
   groupId: string,
   edgeNode: string,
   clientId: string,

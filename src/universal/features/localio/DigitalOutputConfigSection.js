@@ -8,7 +8,7 @@ import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {ControlModesArray, getControlModeDisplayText} from '../../localio/LocalIOChannel'
 import ControlLogicTable from './ControlLogicTable'
-import {required} from '@jcoreio/redux-form-validators'
+import {required} from 'redux-form-validators'
 import type {ControlMode} from '../../localio/LocalIOChannel'
 
 type MetadataItem = {

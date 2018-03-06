@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
-import {numericality, required} from '@jcoreio/redux-form-validators/lib/index'
+import {numericality, required} from 'redux-form-validators'
 import TextField from '../TextField'
 import {NumericField} from 'redux-form-numeric-field'
 import {TransitionListener} from 'react-transition-context'

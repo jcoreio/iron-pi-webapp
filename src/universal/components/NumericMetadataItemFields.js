@@ -6,7 +6,7 @@ import {Field, formValues} from 'redux-form'
 
 import ControlWithInfo from './ControlWithInfo'
 import {NumericField} from 'redux-form-numeric-field'
-import {required, numericality} from '@jcoreio/redux-form-validators'
+import {required, numericality} from 'redux-form-validators'
 
 export type Props = {
   formControlClass?: string,

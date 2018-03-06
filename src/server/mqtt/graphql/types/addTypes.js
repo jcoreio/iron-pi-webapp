@@ -4,12 +4,12 @@
 import type {Model} from 'sequelize'
 import * as graphql from 'graphql'
 import type MQTTFeature from '../../MQTTFeature'
+import MQTTConfig from '../../models/MQTTConfig'
+import MQTTChannelConfig from '../../models/MQTTChannelConfig'
 import createMQTTConfig from './MQTTConfig'
 import createMQTTChannelConfig from './MQTTChannelConfig'
-import createCreateMQTTConfig from './CreateMQTTConfig'
-import createUpdateMQTTConfig from './UpdateMQTTConfig'
-import createCreateMQTTChannelConfig from './CreateMQTTChannelConfig'
-import createUpdateMQTTChannelConfig from './UpdateMQTTChannelConfig'
+import defaultCreateType from '../../../graphql/types/defaultCreateType'
+import defaultUpdateType from '../../../graphql/types/defaultUpdateType'
 
 const addTypes = (feature: MQTTFeature) => (options: {
   types: {[name: string]: graphql.GraphQLOutputType},
@@ -18,7 +18,7 @@ const addTypes = (feature: MQTTFeature) => (options: {
   getArgs: (model: Class<Model<any>>) => graphql.GraphQLFieldConfigArgumentMap,
   attributeFieldsCache: Object,
 }) => {
-  const {types, inputTypes} = options
+  const {types, inputTypes, attributeFieldsCache: cache} = options
   for (let type of [
     createMQTTConfig(options),
     createMQTTChannelConfig(options),
@@ -26,10 +26,10 @@ const addTypes = (feature: MQTTFeature) => (options: {
     types[type.name] = type
   }
   for (let type of [
-    createCreateMQTTConfig(options),
-    createUpdateMQTTConfig(options),
-    createCreateMQTTChannelConfig(options),
-    createUpdateMQTTChannelConfig(options),
+    defaultCreateType(MQTTConfig, {cache}),
+    defaultUpdateType(MQTTConfig, {cache}),
+    defaultCreateType(MQTTChannelConfig, {cache}),
+    defaultUpdateType(MQTTChannelConfig, {cache}),
   ]) {
     inputTypes[type.name] = type
   }
