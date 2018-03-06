@@ -71,7 +71,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setExpanded: (expanded: boolean) => dispatch(setSectionExpanded(MQTT_SECTION, expanded)),
 })
 
-const query = gql(`{
+const query = gql(`query MQTTConfigs {
   MQTTConfigs {
     id
     name

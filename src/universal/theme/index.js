@@ -46,6 +46,7 @@ export type Theme = {
       contentFrame: string,
       default: string,
       paper: string,
+      parentPaper: string,
       sidebar: string,
       loginDialog: {
         header: string,
@@ -218,6 +219,7 @@ const theme: Theme = createMuiTheme({
     background: {
       appBar: '#fff',
       contentFrame: '#eef1f1',
+      parentPaper: '#f7f7f7',
       sidebar: darkBackground,
       loginDialog: {
         header: darkBackground,

@@ -7,7 +7,7 @@ import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
-import {required} from '@jcoreio/redux-form-validators'
+import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'

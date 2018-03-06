@@ -7,7 +7,7 @@ import {Field} from 'redux-form'
 import TextField from '../TextField'
 import ErrorAlert from '../ErrorAlert'
 import Autocollapse from '../Autocollapse'
-import {required, confirmation} from '@jcoreio/redux-form-validators'
+import {required, confirmation} from 'redux-form-validators'
 
 import Spinner from '../Spinner'
 import type {Theme} from '../../theme'

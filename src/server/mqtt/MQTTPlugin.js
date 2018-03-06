@@ -62,8 +62,8 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     const {serverURL, username, password, groupId, nodeId} = this._config
     this._client = (sparkplug: SparkPlugPackage).newClient({
       serverUrl: serverURL,
-      username,
-      password,
+      username: username || null,
+      password: password || null,
       groupId,
       edgeNode: nodeId,
       clientId: `jcore-node-${groupId}/${nodeId}`,

@@ -1,14 +1,15 @@
 // @flow
 
 import * as React from 'react'
-import type {RouterHistory} from 'react-router-dom'
+import type {RouterHistory, Match} from 'react-router-dom'
 import Paper from 'material-ui/Paper'
 import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
-import {required} from '@jcoreio/redux-form-validators'
+import {required, format} from 'redux-form-validators'
 import {mqttConfigForm} from './routePaths'
+import {mqttUrlPattern} from '../../types/MQTTUrl'
 
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
@@ -17,6 +18,10 @@ import Spinner from '../../components/Spinner'
 
 import handleError from '../../redux-form/createSubmissionError'
 import SubmitStatus from '../../components/SubmitStatus'
+import DeleteButton from '../../components/DeleteButton'
+
+import type {Channel} from './MQTTChannelConfigsTable'
+import MQTTChannelConfigsTable from './MQTTChannelConfigsTable'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -65,8 +70,8 @@ type MQTTConfig = {
   name?: ?string,
 
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
-  username: string,
-  password: string,
+  username?: ?string,
+  password?: ?string,
   groupId: string,
   nodeId: string,
 
@@ -77,6 +82,8 @@ type MQTTConfig = {
    * to any channels defined in channelsToMQTT.
    */
   publishAllPublicTags?: ?boolean,
+  channelsFromMQTT?: Array<Channel>,
+  channelsToMQTT?: Array<Channel>,
 }
 
 export type Props = {
@@ -91,6 +98,7 @@ export type Props = {
   pristine?: boolean,
   error?: string,
   change?: (field: string, newValue: any) => any,
+  match: Match,
   history: RouterHistory,
   data?: {
     Config?: MQTTConfig,
@@ -103,6 +111,7 @@ export type Props = {
   updateMQTTConfig: (options: {variables: {values: MQTTConfig}}) => Promise<{
     data: {Config: MQTTConfig},
   }>,
+  destroyMQTTConfig: (options: {variables: {id: number}}) => Promise<any>,
 }
 
 function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
@@ -115,15 +124,18 @@ const pickFormFields = ({
   id, name, serverURL, username, password, groupId, nodeId,
   minPublishInterval, publishAllPublicTags,
 }: MQTTConfig) => {
+  username = username || null
+  password = password || null
   return {
     id, name, serverURL, username, password, groupId, nodeId,
     minPublishInterval, publishAllPublicTags,
   }
 }
 
-// url() doesn't currently accept IP addresses or localhost.
-// const validateServerURL = [required(), url()]
-const validateServerURL = [required()]
+const validateServerURL = [required(), format({
+  with: mqttUrlPattern,
+  message: 'must be a valid MQTT URL',
+})]
 
 class MQTTConfigForm extends React.Component<Props> {
   initializeTimeout: ?number
@@ -175,11 +187,19 @@ class MQTTConfigForm extends React.Component<Props> {
     }).catch(handleError)
   }
 
+  handleDelete = () => {
+    const {loadedId, history, destroyMQTTConfig} = this.props
+    if (loadedId == null) return
+    destroyMQTTConfig({variables: {id: loadedId}})
+      .then(() => history.goBack())
+      .catch(handleError)
+  }
+
   render(): React.Node {
     const {
       classes, data, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
-      handleSubmit, loadedId, id,
+      handleSubmit, loadedId, id, match, history,
     } = this.props
     const loading = data ? data.loading : false
     if (data != null && (loading || !initialized || loadedId !== id)) {
@@ -193,6 +213,7 @@ class MQTTConfigForm extends React.Component<Props> {
         </div>
       )
     }
+    const Config = data ? data.Config : null
     return (
       <form id="MQTTConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         <Paper className={classes.paper}>
@@ -225,7 +246,6 @@ class MQTTConfigForm extends React.Component<Props> {
               type="text"
               component={TextField}
               className={classes.formControl}
-              validate={required()}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The password to connect with">
@@ -235,7 +255,6 @@ class MQTTConfigForm extends React.Component<Props> {
               type="password"
               component={TextField}
               className={classes.formControl}
-              validate={required()}
             />
           </ControlWithInfo>
           <ControlWithInfo info="The ID of the MQTT group">
@@ -274,6 +293,19 @@ class MQTTConfigForm extends React.Component<Props> {
             >
               Cancel
             </Button>
+            <DeleteButton
+              raised
+              onArmedClick={this.handleDelete}
+              className={classes.tallButton}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              transformOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+              }}
+            />
             <Button
               type="submit"
               raised
@@ -285,6 +317,26 @@ class MQTTConfigForm extends React.Component<Props> {
             </Button>
           </div>
         </Paper>
+        {id != null &&
+          <React.Fragment>
+            <Paper className={classes.paper}>
+              <MQTTChannelConfigsTable
+                direction="TO_MQTT"
+                channels={Config && Config.channelsToMQTT || []}
+                match={match}
+                history={history}
+              />
+            </Paper>
+            <Paper className={classes.paper}>
+              <MQTTChannelConfigsTable
+                direction="FROM_MQTT"
+                channels={Config && Config.channelsFromMQTT || []}
+                match={match}
+                history={history}
+              />
+            </Paper>
+          </React.Fragment>
+        }
       </form>
     )
   }
