@@ -9,12 +9,14 @@ import {graphql} from 'react-apollo'
 import type {MetadataItem} from '../types/MetadataItem'
 import MetadataItemFields from './MetadataItemFields'
 
+type Mode = {
+  dataType: string,
+  isDigital?: boolean,
+}
+
 export type Props = {
   tag: ?string,
-  mode?: {
-    dataType: string,
-    isDigital?: boolean,
-  },
+  mode?: Mode,
   data?: {
     metadataItem?: MetadataItem,
     loading: boolean,
@@ -63,6 +65,14 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
     }),
   }
 
+  _updateMode = (mode: Mode, context: Context = this.context) => {
+    const {_reduxForm: {sectionPrefix, change, dispatch}} = context
+    for (let key in mode) {
+      const field = sectionPrefix ? `${sectionPrefix}.${key}` : key
+      dispatch(change(field, mode[key]))
+    }
+  }
+
   _updateFields = (metadataItem: MetadataItem, context: Context = this.context) => {
     const {_reduxForm: {sectionPrefix, change, dispatch}} = context
     for (let key in metadataItem) {
@@ -75,6 +85,8 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
   componentDidMount() {
     const metadataItem = getMetadataItem(this.props)
     if (metadataItem) this._updateFields(metadataItem)
+    const {mode} = this.props
+    if (mode) this._updateMode(mode)
   }
 
   componentWillReceiveProps(nextProps: Props, nextContext: Context) {
@@ -82,6 +94,11 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
     const nextMetadataItem = getMetadataItem(nextProps)
     if (nextMetadataItem && nextMetadataItem !== prevMetadataItem) {
       this._updateFields(nextMetadataItem, nextContext)
+    }
+    const prevMode = this.props.mode
+    const nextMode = nextProps.mode
+    if (nextMode && nextMode !== prevMode) {
+      this._updateMode(nextMode, nextContext)
     }
   }
 
