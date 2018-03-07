@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import type {RouterHistory, Match} from 'react-router-dom'
+import omit from 'lodash.omit'
 import Paper from 'material-ui/Paper'
 import {FormSection} from 'redux-form'
 import {Field} from 'redux-form-normalize-on-blur'
@@ -84,6 +85,8 @@ const trim = (value: ?string): ?string => typeof value === 'string' ? value.trim
 
 type MQTTChannelConfig = {
   id: number,
+  configId?: number,
+  direction?: Direction,
   metadataItem: MetadataItem,
   mqttTag: string,
   enabled?: boolean,
@@ -96,6 +99,7 @@ export type Direction = 'TO_MQTT' | 'FROM_MQTT'
 
 export type Props = {
   id?: number,
+  configId: number,
   direction: Direction,
   loadedId: number,
   classes: Classes,
@@ -134,6 +138,8 @@ const pickFormFields = ({
 }: MQTTChannelConfig) => {
   if (enabled == null) enabled = true
   else enabled = Boolean(enabled)
+  metadataItem = omit(metadataItem, '_id', '__typename')
+  metadataItem.dataType = 'number'
   return {
     id, metadataItem, mqttTag, enabled, name, multiplier, offset,
   }
@@ -170,22 +176,20 @@ class MQTTChannelConfigForm extends React.Component<Props> {
   }
 
   handleCancel = () => {
-    const {data, initialize} = this.props
-    if (!data) return
-    const {Config} = data
-    if (Config) initialize(pickFormFields(Config))
+    const {history} = this.props
+    history.goBack()
   }
 
   handleSubmit = (values: MQTTChannelConfig): Promise<void> => {
-    const {initialize, history} = this.props
+    const {history, configId, direction} = this.props
     values = pickFormFields(values)
     const mutate = values.id != null ? this.props.updateMQTTChannelConfig : this.props.createMQTTChannelConfig
+    if (values.id == null) {
+      values.direction = direction
+      values.configId = configId
+    }
     return mutate({variables: {values}}).then(({data: {Config}}: {data: {Config: MQTTChannelConfig}}) => {
-      if (values.id == null) {
-        history.replace(mqttConfigForm(Config.id))
-      } else {
-        initialize(pickFormFields(Config), false, {keepSubmitSucceeded: true})
-      }
+      history.replace(mqttConfigForm(configId))
     }).catch(handleError)
   }
 

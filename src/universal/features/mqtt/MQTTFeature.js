@@ -72,30 +72,40 @@ const MQTTFeature: Feature = {
       key={mqttConfigForm((':id': any))}
       path={mqttConfigForm((':id': any))}
       render={({match}: {match: Match}): React.Node => {
-        const id = parseInt(match.params.id)
+        const configId = parseInt(match.params.id)
         return (
           <Drilldown animateHeight={false}>
             <Route
               path={mqttConfigForm((':id': any))}
               exact
-              render={({match, history}) => <MQTTConfigFormContainer id={id} match={match} history={history} />}
+              render={({match, history}) => <MQTTConfigFormContainer id={configId} match={match} history={history} />}
             />
             <Route
               path={mqttChannelConfigForm(mqttConfigForm((':configId': any)), (':id': any))}
               render={({match, history}: {match: Match, history: RouterHistory}) => {
-                const id = parseInt(match.params.id)
-                if (id === 'create') {
+                if (match.params.id === 'create') {
                   return (
                     <Route
-                      path=":direction"
-                      render={({match, history}: { match: Match, history: RouterHistory }) =>
-                        <MQTTChannelConfigFormContainer direction={match.params.direction} match={match} history={history} />
-                      }
+                      path={`${match.url}/:direction`}
+                      render={({match, history}: { match: Match, history: RouterHistory }) => (
+                        <MQTTChannelConfigFormContainer
+                          direction={match.params.direction === 'to' ? 'TO_MQTT' : 'FROM_MQTT'}
+                          configId={configId}
+                          match={match}
+                          history={history}
+                        />
+                      )}
                     />
                   )
                 }
+                const id = parseInt(match.params.id)
                 return (
-                  <MQTTChannelConfigFormContainer id={id} match={match} history={history} />
+                  <MQTTChannelConfigFormContainer
+                    id={id}
+                    configId={configId}
+                    match={match}
+                    history={history}
+                  />
                 )
               }}
             />

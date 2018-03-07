@@ -3,6 +3,7 @@
 
 import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
+import type {MetadataItem} from '../types/MetadataItem'
 
 import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
 
@@ -13,6 +14,7 @@ export type MQTTChannelConfig = {
   name?: ?string,
   multiplier?: ?number,
   offset?: ?number,
+  metadataItem?: MetadataItem,
 }
 export const MQTTChannelConfigType = (reify: Type<MQTTChannelConfig>)
 
