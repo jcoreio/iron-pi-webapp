@@ -28,10 +28,10 @@ import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction, ...props}: Object) => (
   <Arrow
     direction={direction}
-    shaftWidth={arrow.shaftWidth}
-    shaftLength={arrow.shaftLength}
-    headWidth={arrow.headWidth}
-    headLength={arrow.headLength}
+    shaftWidth={30}
+    shaftLength={10}
+    headWidth={50}
+    headLength={10}
     fill={arrow.fill}
     {...props}
   />
@@ -74,7 +74,16 @@ const styles = ({spacing, palette}: Theme) => ({
   },
   parentPaper: {
     extend: 'paper',
+    padding: spacing.unit * 2,
     backgroundColor: palette.background.parentPaper,
+    '& > :first-child': {
+      marginTop: 0,
+    },
+  },
+  arrowHolder: {
+    textAlign: 'center',
+    marginTop: -spacing.unit,
+    marginBottom: -spacing.unit * 1.5,
   },
 })
 
@@ -100,7 +109,7 @@ export type Direction = 'TO_MQTT' | 'FROM_MQTT'
 export type Props = {
   id?: number,
   configId: number,
-  direction: Direction,
+  direction?: Direction,
   loadedId: number,
   classes: Classes,
   initialize: (values: $Shape<MQTTChannelConfig>, keepDirty?: boolean, otherMeta?: {keepSubmitSucceeded?: boolean}) => any,
@@ -207,8 +216,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
       submitting, submitSucceeded, submitFailed, error,
       handleSubmit, loadedId, id,
     } = this.props
-    const loading = data ? data.loading : false
-    if (data != null && (loading || !initialized || loadedId !== id)) {
+    if (data != null && (data.loading || !initialized || loadedId !== id)) {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
@@ -219,6 +227,8 @@ class MQTTChannelConfigForm extends React.Component<Props> {
         </div>
       )
     }
+    const direction: ?Direction = this.props.direction || (data && data.Config ? data.Config.direction : null)
+    const flowDirection = direction === 'TO_MQTT' ? 'down' : 'up'
     return (
       <form id="MQTTChannelConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         <Paper className={classes.parentPaper}>
@@ -232,6 +242,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
               />
             </FormSection>
           </Paper>
+          <div className={classes.arrowHolder}>
+            <FlowArrow direction={flowDirection} />
+          </div>
           <Paper className={classes.paper}>
             <ControlWithInfo info="TODO">
               <NumericField
@@ -250,6 +263,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
               />
             </ControlWithInfo>
           </Paper>
+          <div className={classes.arrowHolder}>
+            <FlowArrow direction={flowDirection} />
+          </div>
           <Paper className={classes.paper}>
             <ControlWithInfo info="The tag for data in MQTT">
               <Field
