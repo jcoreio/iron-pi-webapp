@@ -25,7 +25,7 @@ fragment ChannelFields on MQTTChannelConfig {
   mqttTag
   internalTag
 }
-query Config($id: Int!) {
+query MQTTConfig($id: Int!) {
   Config: MQTTConfig(id: $id) {
     ${configFields}
     channelsFromMQTT {

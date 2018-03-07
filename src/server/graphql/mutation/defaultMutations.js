@@ -11,35 +11,47 @@ type Options = {
   model: Class<Model<any>>,
   types: {[name: string]: graphql.GraphQLOutputType},
   inputTypes: {[name: string]: graphql.GraphQLInputType},
+  beforeCreate?: graphql.GraphQLFieldResolver<any, GraphQLContext>,
+  beforeUpdateOne?: graphql.GraphQLFieldResolver<any, GraphQLContext>,
+  beforeDestroy?: graphql.GraphQLFieldResolver<any, GraphQLContext>,
 }
 
-
 export default function defaultMutations(options: Options): graphql.GraphQLFieldConfigMap<any, GraphQLContext> {
-  const {model, types, inputTypes} = options
+  const {model, types, inputTypes, beforeCreate, beforeUpdateOne, beforeDestroy} = options
   const singular = model.options.name.singular
   const plural = model.options.name.plural
-  const requireLoggedIn = (source: any, args: any, {userId}: GraphQLContext) => {
-    if (userId == null) {
-      throw new Error(`You must be logged in to create ${plural}`)
+  const requireLoggedIn =
+    (source: any, args: any, {userId}: GraphQLContext) => {
+      if (userId == null) {
+        throw new Error(`You must be logged in to create ${plural}`)
+      }
     }
-  }
   return {
     [`create${singular}`]: createMutation({
       model,
       inputType: (inputTypes[defaultCreateTypeName(model)]: any),
       returnType: (types[singular]: any),
-      before: requireLoggedIn,
+      before: (source: any, args: any, context: GraphQLContext, info: graphql.GraphQLResolveInfo): any => {
+        requireLoggedIn(source, args, context)
+        if (beforeCreate) return beforeCreate(source, args, context, info)
+      },
     }),
     [`update${singular}`]: updateOneMutation({
       model,
       inputType: (inputTypes[defaultUpdateTypeName(model)]: any),
       returnType: (types[singular]: any),
-      before: requireLoggedIn,
+      before: (source: any, args: any, context: GraphQLContext, info: graphql.GraphQLResolveInfo): any => {
+        requireLoggedIn(source, args, context)
+        if (beforeUpdateOne) return beforeUpdateOne(source, args, context, info)
+      },
       updateOptions: {individualHooks: true},
     }),
     [`destroy${singular}`]: destroyMutation({
       model,
-      before: requireLoggedIn,
+      before: (source: any, args: any, context: GraphQLContext, info: graphql.GraphQLResolveInfo): any => {
+        requireLoggedIn(source, args, context)
+        if (beforeDestroy) return beforeDestroy(source, args, context, info)
+      },
       destroyOptions: {individualHooks: true},
     }),
   }
