@@ -18,6 +18,7 @@ import Html from './Html'
 import type {Store} from '../../universal/redux/types'
 import addFeatures from '../../universal/features/addFeatures'
 import {StateRecord} from '../../universal/redux/types'
+import dataIdFromObject from '../../universal/apollo/dataIdFromObject'
 
 const rootDir = path.resolve(__dirname, '..', '..')
 
@@ -44,7 +45,7 @@ const serverSideRender = async (req: $Request, res: $Response): Promise<void> =>
     const apolloClient = new ApolloClient({
       ssrMode: true,
       link: new SchemaLink({schema}),
-      cache: new InMemoryCache(),
+      cache: new InMemoryCache({dataIdFromObject}),
     })
 
     const routerContext: {status?: number, url?: string} = {}

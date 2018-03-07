@@ -8,6 +8,7 @@ import { setContext } from 'apollo-link-context'
 import { WebSocketLink } from 'apollo-link-ws'
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { getMainDefinition } from 'apollo-utilities'
+import dataIdFromObject from '../../universal/apollo/dataIdFromObject'
 
 type Options = {
   onForbidden?: (error: string) => any,
@@ -80,8 +81,8 @@ export default function createClient(options: Options = {}): ApolloClient {
   })
   wsLink.subscriptionClient.use([subscriptionMiddleware])
 
-  const cacheOptions = {}
-  if (introspectionQueryResultData) cacheOptions.fragmentMatcher = new IntrospectionFragmentMatcher({
+  const cacheOptions = {dataIdFromObject}
+  if (introspectionQueryResultData) (cacheOptions: Object).fragmentMatcher = new IntrospectionFragmentMatcher({
     introspectionQueryResultData
   })
   const cache = new InMemoryCache(cacheOptions).restore(window.__APOLLO_STATE__)

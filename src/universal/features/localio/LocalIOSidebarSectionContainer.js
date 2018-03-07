@@ -88,7 +88,7 @@ const query = gql(`{
     id
     name
     metadataItem {
-      _id
+      tag
       ... on NumericMetadataItem {
         min
         max

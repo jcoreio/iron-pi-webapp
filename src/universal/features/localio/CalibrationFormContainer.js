@@ -19,7 +19,7 @@ const channelQuery = gql(`query Channels($id: Int!, $rawInputTag: String!) {
     name
     config
     metadataItem {
-      _id
+      tag
       ... on NumericMetadataItem {
         units
       }

@@ -15,6 +15,7 @@ import superagent from 'superagent'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import createSubscribeToChannelStates from '../src/universal/localio/apollo/createSubscribeToChannelStates'
+import dataIdFromObject from '../src/universal/apollo/dataIdFromObject'
 
 type Options = {
   rootUrl: string,
@@ -70,7 +71,7 @@ class ValueSimulator {
 
     const wsLink = new WebSocketLink(this.subscriptionClient)
 
-    const cache = new InMemoryCache()
+    const cache = new InMemoryCache({dataIdFromObject})
 
     this.client = new ApolloClient({
       // By default, this client will send queries to the

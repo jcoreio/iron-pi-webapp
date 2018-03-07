@@ -7,10 +7,12 @@ import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import MQTTChannelConfigForm from './MQTTChannelConfigForm'
 import type {Direction} from './MQTTChannelConfigForm'
+import type {MetadataItem} from '../../types/MetadataItem'
+import updateMetadataItem from '../../apollo/updateMetadataItem'
+import {ApolloClient} from "apollo-client"
 
 const metadataItemSelection = `
 metadataItem {
-  _id
   tag
   name
   dataType
@@ -99,11 +101,23 @@ export default compose(
           query: configChannelsQuery,
           variables: {id: configId},
         },
-      ]
+      ],
+      options: {
+        update: (proxy: ApolloClient, result: {data: {Config: {metadataItem?: MetadataItem}}}) => {
+          const {data: {Config: {metadataItem}}} = result
+          if (metadataItem) updateMetadataItem(proxy, metadataItem)
+        }
+      },
     })
   }),
   graphql(updateMutation, {
     name: 'updateMQTTChannelConfig',
+    options: {
+      update: (proxy: ApolloClient, result: {data: {Config: {metadataItem?: MetadataItem}}}) => {
+        const {data: {Config: {metadataItem}}} = result
+        if (metadataItem) updateMetadataItem(proxy, metadataItem)
+      }
+    },
   }),
   graphql(destroyMutation, {
     name: 'destroyMQTTChannelConfig',

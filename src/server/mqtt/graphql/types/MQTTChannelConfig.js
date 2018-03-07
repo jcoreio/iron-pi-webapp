@@ -31,7 +31,7 @@ export default function createMQTTChannelConfig({
         description: 'the metadata item for this channel',
         resolve: ({internalTag}: MQTTChannelConfig, args: any, {metadataHandler}: GraphQLContext) => {
           const item = metadataHandler.getTagMetadata(internalTag)
-          return item ? {...item, internalTag, _id: internalTag} : null
+          return item ? {...item, tag: internalTag} : null
         },
       },
       systemValue: {

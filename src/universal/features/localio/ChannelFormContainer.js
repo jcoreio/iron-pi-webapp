@@ -3,14 +3,16 @@
 import {reduxForm, formValues} from 'redux-form'
 import {compose} from 'redux'
 import {graphql} from 'react-apollo'
+import type {ApolloClient} from 'apollo-client'
 import gql from 'graphql-tag'
 import ChannelForm from './ChannelForm'
 import createSubscribeToChannelState from '../../localio/apollo/createSubscribeToChannelState'
 import {ALL_FIELDS_SELECTION as ALL_STATE_FIELDS} from '../../localio/apollo/createSubscribeToChannelState'
+import type {MetadataItem} from '../../types/MetadataItem'
+import updateMetadataItem from '../../apollo/updateMetadataItem'
 
 const metadataItemSelection = `
 metadataItem {
-  _id
   tag
   name
   dataType
@@ -35,7 +37,6 @@ const channelQuery = gql(`query Channels($id: Int!) {
     ${metadataItemSelection}
   }
   Metadata {
-    _id
     tag
     name
   }
@@ -59,7 +60,14 @@ type Props = {
 }
 
 export default compose(
-  graphql(mutationQuery),
+  graphql(mutationQuery, {
+    options: {
+      update: (proxy: ApolloClient, result: {data: {Channel: {metadataItem?: MetadataItem}}}) => {
+        const {data: {Channel: {metadataItem}}} = result
+        if (metadataItem) updateMetadataItem(proxy, metadataItem)
+      }
+    }
+  }),
   graphql(channelQuery, {
     options: ({id}: Props) => ({
       variables: {id},

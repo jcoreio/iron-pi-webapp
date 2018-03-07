@@ -25,7 +25,6 @@ export type Props = {
 
 const metadataItemQuery = gql(`query MetadataItem($tag: String!) {
   metadataItem: MetadataItem(tag: $tag) {
-    _id
     tag
     name
     dataType

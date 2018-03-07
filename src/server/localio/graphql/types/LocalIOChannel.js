@@ -22,7 +22,7 @@ export default function createLocalIOChannel(options: {
         resolve: ({tag}: LocalIOChannel, args: any, {metadataHandler}: GraphQLContext) => {
           if (tag) {
             const item = metadataHandler.getTagMetadata(tag)
-            return item ? {...item, tag, _id: tag} : null
+            return item ? {...item, tag} : null
           }
         },
       },
