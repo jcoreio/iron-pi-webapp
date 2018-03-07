@@ -18,7 +18,7 @@ import Spinner from '../../components/Spinner'
 
 import handleError from '../../redux-form/createSubmissionError'
 import SubmitStatus from '../../components/SubmitStatus'
-import DeleteButton from '../../components/DeleteButton'
+import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 
 import type {Channel} from './MQTTChannelConfigsTable'
 import MQTTChannelConfigsTable from './MQTTChannelConfigsTable'
@@ -112,6 +112,7 @@ export type Props = {
     data: {Config: MQTTConfig},
   }>,
   destroyMQTTConfig: (options: {variables: {id: number}}) => Promise<any>,
+  destroyMQTTChannelConfig: (options: {variables: {id: number}}) => Promise<any>,
 }
 
 function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
@@ -192,6 +193,12 @@ class MQTTConfigForm extends React.Component<Props> {
     if (loadedId == null) return
     destroyMQTTConfig({variables: {id: loadedId}})
       .then(() => history.goBack())
+      .catch(handleError)
+  }
+
+  handleDeleteChannel = (channelId: number) => {
+    const {destroyMQTTChannelConfig} = this.props
+    destroyMQTTChannelConfig({variables: {id: channelId}})
       .catch(handleError)
   }
 
@@ -293,10 +300,8 @@ class MQTTConfigForm extends React.Component<Props> {
             >
               Cancel
             </Button>
-            <DeleteButton
-              raised
-              onArmedClick={this.handleDelete}
-              className={classes.tallButton}
+            <ConfirmDeletePopover
+              onConfirmDelete={this.handleDelete}
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'center',
@@ -305,7 +310,13 @@ class MQTTConfigForm extends React.Component<Props> {
                 vertical: 'bottom',
                 horizontal: 'center',
               }}
-            />
+            >
+              {({bind}) => (
+                <Button raised className={classes.tallButton} {...bind}>
+                  Delete
+                </Button>
+              )}
+            </ConfirmDeletePopover>
             <Button
               type="submit"
               raised
@@ -325,6 +336,7 @@ class MQTTConfigForm extends React.Component<Props> {
                 channels={Config && Config.channelsToMQTT || []}
                 match={match}
                 history={history}
+                onDeleteChannel={this.handleDeleteChannel}
               />
             </Paper>
             <Paper className={classes.paper}>
@@ -333,6 +345,7 @@ class MQTTConfigForm extends React.Component<Props> {
                 channels={Config && Config.channelsFromMQTT || []}
                 match={match}
                 history={history}
+                onDeleteChannel={this.handleDeleteChannel}
               />
             </Paper>
           </React.Fragment>

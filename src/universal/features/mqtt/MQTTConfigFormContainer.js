@@ -60,6 +60,13 @@ mutation destroyConfig($id: Int!) {
 }
 `)
 
+
+const destroyChannelMutation = gql(`
+mutation destroyChannel($id: Int!) {
+  destroyMQTTChannelConfig(id: $id)
+}
+`)
+
 type Props = {
   id?: number,
   match: Match,
@@ -81,6 +88,17 @@ export default compose(
     options: {
       refetchQueries: ['MQTTConfigs']
     },
+  }),
+  graphql(destroyChannelMutation, {
+    name: 'destroyMQTTChannelConfig',
+    options: ({id}: Props) => ({
+      refetchQueries: [
+        {
+          query: configQuery,
+          variables: {id},
+        }
+      ]
+    }),
   }),
   graphql(configQuery, {
     options: ({id}: Props) => ({

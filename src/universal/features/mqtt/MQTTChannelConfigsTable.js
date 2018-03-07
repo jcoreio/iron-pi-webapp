@@ -19,6 +19,7 @@ import {withTheme} from 'material-ui/styles/index'
 
 import type {Theme} from '../../theme/index'
 import AddIcon from '../../components/icons/AddRectangle'
+import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 import {mqttChannelConfigForm} from './routePaths'
 
 type Direction = 'TO_MQTT' | 'FROM_MQTT'
@@ -119,16 +120,23 @@ export type Props = {
   match: Match,
   history: RouterHistory,
   direction: Direction,
-  onDeleteChannelClick?: (id: number) => any,
+  onDeleteChannel: (id: number) => any,
+}
+
+export type DefaultProps = {
+  onDeleteChannel: (id: number) => any,
 }
 
 class CalibrationTable extends React.Component<Props> {
+  static defaultProps: DefaultProps = {
+    onDeleteChannel() {},
+  }
   handleChannelClick = (id: number) => {
     const {match, history} = this.props
     history.push(mqttChannelConfigForm(match.url, id))
   }
   render(): ?React.Node {
-    const {classes, channels, direction, onDeleteChannelClick, match} = this.props
+    const {classes, channels, direction, onDeleteChannel, match} = this.props
     const arrowDirection = direction === 'TO_MQTT' ? 'right' : 'left'
     return (
       <Table className={classes.table}>
@@ -176,10 +184,24 @@ class CalibrationTable extends React.Component<Props> {
               <TableCell>
                 {mqttTag}
               </TableCell>
-              <TableCell>
-                <IconButton className={classes.deleteButton} onClick={() => onDeleteChannelClick && onDeleteChannelClick(id)}>
-                  <DeleteIcon />
-                </IconButton>
+              <TableCell onClick={e => e.stopPropagation()}>
+                <ConfirmDeletePopover
+                  onConfirmDelete={() => onDeleteChannel(id)}
+                  anchorOrigin={{
+                    vertical: 'center',
+                    horizontal: 'left',
+                  }}
+                  transformOrigin={{
+                    vertical: 'center',
+                    horizontal: 'right',
+                  }}
+                >
+                  {({bind}) => (
+                    <IconButton className={classes.deleteButton} {...bind}>
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </ConfirmDeletePopover>
               </TableCell>
             </TableRow>
           ))}

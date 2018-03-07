@@ -23,7 +23,7 @@ import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsCont
 
 import handleError from '../../redux-form/createSubmissionError'
 import SubmitStatus from '../../components/SubmitStatus'
-import DeleteButton from '../../components/DeleteButton'
+import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 
 const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction, ...props}: Object) => (
   <Arrow
@@ -277,10 +277,8 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             >
               Cancel
             </Button>
-            <DeleteButton
-              raised
-              onArmedClick={this.handleDelete}
-              className={classes.tallButton}
+            <ConfirmDeletePopover
+              onConfirmDelete={this.handleDelete}
               anchorOrigin={{
                 vertical: 'top',
                 horizontal: 'center',
@@ -289,7 +287,13 @@ class MQTTChannelConfigForm extends React.Component<Props> {
                 vertical: 'bottom',
                 horizontal: 'center',
               }}
-            />
+            >
+              {({bind}) => (
+                <Button raised className={classes.tallButton} {...bind}>
+                  Delete
+                </Button>
+              )}
+            </ConfirmDeletePopover>
             <Button
               type="submit"
               raised

@@ -19,7 +19,7 @@ const styles = ({spacing, palette}: Theme) => ({
       marginLeft: spacing.unit,
     }
   },
-  yesButton: {
+  deleteButton: {
     backgroundColor: palette.error[500],
     color: 'white',
   },
@@ -33,33 +33,44 @@ type Origin = {
   horizontal: 'left' | 'center' | 'right',
 }
 
+type ChildProps = {
+  bind: {
+    onClick: (event: Event) => any,
+  },
+}
+
 export type Props = {
   className?: string,
   classes: Classes,
-  onArmedClick?: (e: Event) => any,
+  confirmationMessage?: React.Node,
+  onConfirmDelete?: () => any,
   anchorOrigin?: Origin,
   transformOrigin?: Origin,
+  children: (props: ChildProps) => React.Node,
 }
 
 export type State = {
   anchorEl: ?HTMLElement,
 }
 
-class DeleteButton extends React.Component<Props, State> {
+class ConfirmDeletePopover extends React.Component<Props, State> {
   state: State = {anchorEl: null}
 
-  handlePopoverOpen = e => this.setState({anchorEl: e.target})
-  handlePopoverClose = e => this.setState({anchorEl: null})
+  handlePopoverOpen = e => this.setState({anchorEl: (e.target: any)})
+  handlePopoverClose = () => this.setState({anchorEl: null})
+  handleConfirmClick = () => {
+    this.setState({anchorEl: null})
+    const {onConfirmDelete} = this.props
+    if (onConfirmDelete) onConfirmDelete()
+  }
 
   render(): ?React.Node {
-    const {onArmedClick, className, classes, anchorOrigin, transformOrigin, ...props} = this.props
+    const {confirmationMessage, classes, anchorOrigin, transformOrigin, children} = this.props
     const {anchorEl} = this.state
     const open = anchorEl != null
     return (
       <React.Fragment>
-        <Button onClick={this.handlePopoverOpen} className={className} {...props}>
-          Delete
-        </Button>
+        {children({bind: {onClick: this.handlePopoverOpen}})}
         <Popover
           open={open}
           classes={{
@@ -77,10 +88,12 @@ class DeleteButton extends React.Component<Props, State> {
           onClose={this.handlePopoverClose}
           disableRestoreFocus
         >
-          <h4 className={classes.popoverTitle}>Are you sure you want to delete?</h4>
+          <h4 className={classes.popoverTitle}>
+            {confirmationMessage || 'Are you sure?'}
+          </h4>
           <div className={classes.buttons}>
-            <Button onClick={onArmedClick} raised className={classes.yesButton}>
-              Yes
+            <Button onClick={this.handleConfirmClick} raised className={classes.deleteButton}>
+              Delete
             </Button>
             <Button onClick={this.handlePopoverClose} raised>
               Cancel
@@ -92,4 +105,4 @@ class DeleteButton extends React.Component<Props, State> {
   }
 }
 
-export default withStyles(styles, {withTheme: true})(DeleteButton)
+export default withStyles(styles, {withTheme: true})(ConfirmDeletePopover)
