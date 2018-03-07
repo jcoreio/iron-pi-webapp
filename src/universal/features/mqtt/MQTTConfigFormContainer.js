@@ -11,10 +11,13 @@ const configFields = `
   id
   name
   serverURL
+  protocol
   username
   password
   groupId
   nodeId
+  dataTopic
+  metadataTopic
   minPublishInterval
   publishAllPublicTags
 `
@@ -113,6 +116,7 @@ export default compose(
   }),
   formValues({
     loadedId: 'id',
+    protocol: 'protocol',
   })
 )(MQTTConfigForm)
 

@@ -16,20 +16,29 @@ import type {
 import MQTTChannelConfig, {FROM_MQTT, TO_MQTT} from './MQTTChannelConfig'
 import type {MQTTChannelConfigAttributes, MQTTChannelConfigInitAttributes} from './MQTTChannelConfig'
 import {mqttUrlPattern} from '../../../universal/types/MQTTUrl'
+import {ProtocolRequiredFieldsType} from '../../../universal/mqtt/MQTTConfig'
+import {convertValidationErrors} from 'sequelize-validate-subfields-flow-runtime'
+import {validate} from 'flow-runtime'
+import type {Validation} from 'flow-runtime'
+
+type Protocol = 'SPARKPLUG' | 'TEXT_JSON'
 
 export type MQTTConfigInitAttributes = {
   name: string;
   serverURL: string;
   username: string;
   password: string;
-  groupId: string;
-  nodeId: string;
+  protocol: Protocol;
 }
 
 export type MQTTConfigAttributes = MQTTConfigInitAttributes & {
   id: number;
   minPublishInterval: number;
   publishAllPublicTags: boolean;
+  dataTopic: ?string;
+  metadataTopic: ?string;
+  groupId: ?string;
+  nodeId: ?string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,10 +54,13 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
   serverURL: string;
   username: string;
   password: string;
-  groupId: string;
-  nodeId: string;
+  groupId: ?string;
+  nodeId: ?string;
+  protocol: Protocol;
   minPublishInterval: number;
   publishAllPublicTags: boolean;
+  dataTopic: ?string;
+  metadataTopic: ?string;
   createdAt: Date;
   updatedAt: Date;
   channelsToMQTT: ?Array<MQTTChannelConfig>;
@@ -99,6 +111,10 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
           },
         },
       },
+      protocol: {
+        type: Sequelize.ENUM('SPARKPLUG', 'TEXT_JSON'),
+        allowNull: false,
+      },
       username: {
         type: Sequelize.STRING,
         validate: {
@@ -113,17 +129,25 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
       },
       groupId: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
           not: notWhitespace,
         },
       },
       nodeId: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
           not: notWhitespace,
         },
+      },
+      dataTopic: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      metadataTopic: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       minPublishInterval: {
         type: Sequelize.INTEGER,
@@ -136,7 +160,18 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
-    }, {sequelize})
+    }, {
+      sequelize,
+      validate: {
+        protocolAndFields() {
+          const validation: ?Validation = validate(ProtocolRequiredFieldsType, this)
+          if (!validation || !validation.errors) return
+          const error = new Error('Missing appropriate fields for protocol');
+          (error: Object).validation = {errors: [...convertValidationErrors(validation)]}
+          throw error
+        }
+      },
+    })
   }
 
   static initAssociations() {

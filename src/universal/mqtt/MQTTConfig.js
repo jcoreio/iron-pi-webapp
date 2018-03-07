@@ -18,14 +18,43 @@ export type MQTTChannelConfig = {
 }
 export const MQTTChannelConfigType = (reify: Type<MQTTChannelConfig>)
 
+export type Protocol = 'SPARKPLUG' | 'TEXT_JSON'
+
+export const Protocols: {[protocol: Protocol]: {displayText: string}} = {
+  SPARKPLUG: {displayText: 'SparkPlug'},
+  TEXT_JSON: {displayText: 'Text / JSON'},
+}
+export const ProtocolsArray = Object.keys(Protocols)
+
+export function getProtocolDisplayText(protocol: Protocol): string {
+  return Protocols[protocol].displayText
+}
+
+export type ProtocolRequiredFields =
+  {
+    protocol: 'SPARKPLUG',
+    groupId: string,
+    nodeId: string,
+  } |
+  {
+    protocol: 'TEXT_JSON',
+    dataTopic: string,
+    metadataTopic: string,
+  }
+
+export const ProtocolRequiredFieldsType = (reify: Type<ProtocolRequiredFields>)
+
 export type MQTTConfig = {
   name?: ?string,
 
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
   username?: string,
   password?: string,
-  groupId: string,
-  nodeId: string,
+  protocol: Protocol,
+  groupId?: string,
+  nodeId?: string,
+  dataTopic?: string,
+  metadataTopic?: string,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
 
