@@ -235,7 +235,8 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       const dataMetrics: Array<SparkPlugDataMertic> = this._generateDataMessage(this._getChannelsToSend({sendAll: true}))
       const metrics: Array<SparkPlugBirthMetric> = dataMetrics.map((dataMetric: SparkPlugDataMertic) => {
         const metadata = this._metadataToMQTT[dataMetric.name] || {}
-        const {name, dataType, isDigital} = metadata
+        const {name, dataType} = metadata
+        const isDigital = metadata.dataType === 'number' ? metadata.isDigital : false
         const metric: SparkPlugBirthMetric = {
           ...dataMetric,
           properties: {

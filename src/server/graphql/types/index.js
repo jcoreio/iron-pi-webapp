@@ -7,7 +7,9 @@ import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import models from '../../models'
-import MetadataItem, {DigitalMetadataItem, NumericMetadataItem, TagDataType} from './MetadataItem'
+import MetadataItem, {
+  DigitalMetadataItem, NumericMetadataItem, StringMetadataItem, TagDataType
+} from './MetadataItem'
 import InputMetadataItem from './InputMetadataItem'
 import createUser from './User'
 
@@ -49,6 +51,7 @@ export default function createTypes(options: Options): {
     MetadataItem,
     NumericMetadataItem,
     DigitalMetadataItem,
+    StringMetadataItem,
     User: createUser({getType, getArgs, attributeFieldsCache})
   }
   const inputTypes: {[name: string]: GraphQLInputType} = {

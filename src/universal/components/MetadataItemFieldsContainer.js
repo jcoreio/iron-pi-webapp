@@ -11,6 +11,10 @@ import MetadataItemFields from './MetadataItemFields'
 
 export type Props = {
   tag: ?string,
+  mode?: {
+    dataType: string,
+    isDigital?: boolean,
+  },
   data?: {
     metadataItem?: MetadataItem,
     loading: boolean,
@@ -48,6 +52,8 @@ function getMetadataItem(props: Props): ?MetadataItem {
   return props.data && props.data.metadataItem
 }
 
+const excludedKeys: Set<string> = new Set(['_id', '__typename'])
+
 class MetadataItemFieldsContainer extends React.Component<Props> {
   static contextTypes = {
     _reduxForm: PropTypes.shape({
@@ -60,6 +66,7 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
   _updateFields = (metadataItem: MetadataItem, context: Context = this.context) => {
     const {_reduxForm: {sectionPrefix, change, dispatch}} = context
     for (let key in metadataItem) {
+      if (excludedKeys.has(key)) continue
       const field = sectionPrefix ? `${sectionPrefix}.${key}` : key
       dispatch(change(field, metadataItem[key]))
     }

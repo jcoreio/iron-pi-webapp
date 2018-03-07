@@ -2,11 +2,12 @@
 
 import * as React from 'react'
 import type {RouterHistory, Match} from 'react-router-dom'
-import omit from 'lodash.omit'
 import Paper from 'material-ui/Paper'
-import {FormSection} from 'redux-form'
+import {FormSection, formValues} from 'redux-form'
+import {compose} from 'redux'
 import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles, withTheme} from 'material-ui/styles'
+import Collapse from 'material-ui/transitions/Collapse'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
 import {required} from 'redux-form-validators'
@@ -20,6 +21,7 @@ import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
 import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsContainer'
+import {pickMetadataItemFields} from '../../components/MetadataItemFields'
 
 import handleError from '../../redux-form/createSubmissionError'
 import SubmitStatus from '../../components/SubmitStatus'
@@ -72,6 +74,10 @@ const styles = ({spacing, palette}: Theme) => ({
     padding: `${spacing.unit * 2}px ${spacing.unit * 4}px`,
     margin: `${spacing.unit * 2}px auto`,
   },
+  paperCollapse: {
+    padding: `0 ${spacing.unit * 4}px`,
+    margin: `0 -${spacing.unit * 4}px`,
+  },
   parentPaper: {
     extend: 'paper',
     padding: spacing.unit * 2,
@@ -82,7 +88,6 @@ const styles = ({spacing, palette}: Theme) => ({
   },
   arrowHolder: {
     textAlign: 'center',
-    marginTop: -spacing.unit,
     marginBottom: -spacing.unit * 1.5,
   },
 })
@@ -110,6 +115,7 @@ export type Props = {
   id?: number,
   configId: number,
   direction?: Direction,
+  dataType?: string,
   loadedId: number,
   classes: Classes,
   initialize: (values: $Shape<MQTTChannelConfig>, keepDirty?: boolean, otherMeta?: {keepSubmitSucceeded?: boolean}) => any,
@@ -147,10 +153,8 @@ const pickFormFields = ({
 }: MQTTChannelConfig) => {
   if (enabled == null) enabled = true
   else enabled = Boolean(enabled)
-  metadataItem = omit(metadataItem, '_id', '__typename')
-  metadataItem.dataType = 'number'
   return {
-    id, metadataItem, mqttTag, enabled, name, multiplier, offset,
+    id, metadataItem: pickMetadataItemFields(metadataItem), mqttTag, enabled, name, multiplier, offset,
   }
 }
 
@@ -214,7 +218,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     const {
       classes, data, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
-      handleSubmit, loadedId, id,
+      handleSubmit, loadedId, id, dataType,
     } = this.props
     if (data != null && (data.loading || !initialized || loadedId !== id)) {
       return (
@@ -236,33 +240,32 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             <FormSection name="metadataItem">
               <MetadataItemFieldsContainer
                 formControlClass={classes.formControl}
-                mode={{
-                  dataType: 'number',
-                }}
               />
             </FormSection>
           </Paper>
-          <div className={classes.arrowHolder}>
-            <FlowArrow direction={flowDirection} />
-          </div>
-          <Paper className={classes.paper}>
-            <ControlWithInfo info="TODO">
-              <NumericField
-                name="multiplier"
-                label="Slope"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-              />
-              <NumericField
-                name="offset"
-                label="Offset"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-              />
-            </ControlWithInfo>
-          </Paper>
+          <Collapse in={dataType === 'number'} className={classes.paperCollapse}>
+            <div className={classes.arrowHolder}>
+              <FlowArrow direction={flowDirection} />
+            </div>
+            <Paper className={classes.paper}>
+              <ControlWithInfo info="TODO">
+                <NumericField
+                  name="multiplier"
+                  label="Slope"
+                  type="text"
+                  component={TextField}
+                  className={classes.formControl}
+                />
+                <NumericField
+                  name="offset"
+                  label="Offset"
+                  type="text"
+                  component={TextField}
+                  className={classes.formControl}
+                />
+              </ControlWithInfo>
+            </Paper>
+          </Collapse>
           <div className={classes.arrowHolder}>
             <FlowArrow direction={flowDirection} />
           </div>
@@ -326,5 +329,8 @@ class MQTTChannelConfigForm extends React.Component<Props> {
   }
 }
 
-export default withStyles(styles, {withTheme: true})(MQTTChannelConfigForm)
+export default compose(
+  withStyles(styles, {withTheme: true}),
+  formValues({dataType: 'metadataItem.dataType'})
+)(MQTTChannelConfigForm)
 

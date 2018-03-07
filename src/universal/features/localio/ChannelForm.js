@@ -12,6 +12,7 @@ import {required} from 'redux-form-validators'
 import type {Theme} from '../../theme'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsContainer'
+import {pickMetadataItemFields} from '../../components/MetadataItemFields'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
 import ButtonGroupField from '../../components/ButtonGroupField'
@@ -176,7 +177,7 @@ const pickFormFields = ({id, metadataItem, config}: FullChannel) => {
     metadataItem = ((metadataItem ? {...metadataItem} : {}): any)
     if (config.name) metadataItem.name = config.name
   }
-  return {id, metadataItem, config}
+  return {id, metadataItem: metadataItem && pickMetadataItemFields(metadataItem), config}
 }
 
 class ChannelForm extends React.Component<Props> {

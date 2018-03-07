@@ -1,6 +1,10 @@
 // @flow
 
 import * as graphql from 'graphql'
+import type {MetadataItem as FlowMetadataItem} from '../../../universal/types/MetadataItem'
+import {
+  getMetadataItemSubtype, DigitalMetadataItemType, NumericMetadataItemType, StringMetadataItemType,
+} from '../../../universal/types/MetadataItem'
 
 export const TagDataType = new graphql.GraphQLEnumType({
   name: 'TagDataType',
@@ -26,10 +30,12 @@ const MetadataItem = new graphql.GraphQLInterfaceType({
       type: new graphql.GraphQLNonNull(TagDataType),
     },
   },
-  resolveType(value: any): ?graphql.GraphQLObjectType {
-    if (value.dataType === 'number') {
-      if (value.isDigital) return DigitalMetadataItem
-      return NumericMetadataItem
+  resolveType(value: FlowMetadataItem): ?graphql.GraphQLObjectType {
+    switch (getMetadataItemSubtype(value)) {
+    case DigitalMetadataItemType: return DigitalMetadataItem
+    case NumericMetadataItemType: return NumericMetadataItem
+    case StringMetadataItemType: return StringMetadataItem
+    default: throw new Error('unrecognized metadata item type')
     }
   },
 })
@@ -91,4 +97,24 @@ export const DigitalMetadataItem = new graphql.GraphQLObjectType({
     },
   },
 })
+
+export const StringMetadataItem = new graphql.GraphQLObjectType({
+  name: 'StringMetadataItem',
+  interfaces: [MetadataItem],
+  fields: {
+    _id: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
+    tag: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
+    name: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+    },
+    dataType: {
+      type: new graphql.GraphQLNonNull(TagDataType),
+    },
+  },
+})
+
 
