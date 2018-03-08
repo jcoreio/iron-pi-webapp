@@ -83,8 +83,10 @@ type MQTTConfig = {
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
   username?: ?string,
   password?: ?string,
-  groupId: string,
-  nodeId: string,
+  groupId?: ?string,
+  nodeId?: ?string,
+  dataTopic?: ?string,
+  metadataTopic?: ?string,
   protocol: Protocol,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
@@ -136,13 +138,14 @@ function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
 
 const pickFormFields = ({
   id, name, serverURL, username, password, groupId, nodeId, protocol,
+  dataTopic, metadataTopic,
   minPublishInterval, publishAllPublicTags,
 }: MQTTConfig) => {
   username = username || null
   password = password || null
   if (!Number.isFinite(minPublishInterval)) minPublishInterval = null
   return {
-    id, name, serverURL, username, password, groupId, nodeId, protocol,
+    id, name, serverURL, username, password, groupId, nodeId, protocol, dataTopic, metadataTopic,
     minPublishInterval, publishAllPublicTags,
   }
 }

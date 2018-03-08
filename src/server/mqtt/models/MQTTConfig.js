@@ -16,10 +16,6 @@ import type {
 import MQTTChannelConfig, {FROM_MQTT, TO_MQTT} from './MQTTChannelConfig'
 import type {MQTTChannelConfigAttributes, MQTTChannelConfigInitAttributes} from './MQTTChannelConfig'
 import {mqttUrlPattern} from '../../../universal/types/MQTTUrl'
-import {ProtocolRequiredFieldsType} from '../../../universal/mqtt/MQTTConfig'
-import {convertValidationErrors} from 'sequelize-validate-subfields-flow-runtime'
-import {validate} from 'flow-runtime'
-import type {Validation} from 'flow-runtime'
 
 type Protocol = 'SPARKPLUG' | 'TEXT_JSON'
 
@@ -162,15 +158,6 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
       },
     }, {
       sequelize,
-      validate: {
-        protocolAndFields() {
-          const validation: ?Validation = validate(ProtocolRequiredFieldsType, this)
-          if (!validation || !validation.errors) return
-          const error = new Error('Missing appropriate fields for protocol');
-          (error: Object).validation = {errors: [...convertValidationErrors(validation)]}
-          throw error
-        }
-      },
     })
   }
 
