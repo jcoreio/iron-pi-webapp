@@ -44,8 +44,9 @@ import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 import seedDatabase from './sequelize/seedDatabase'
 import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
 import User from './models/User'
-import {MAPPING_PROBLEMS, ROOT_PASSWORD_HAS_BEEN_SET} from './graphql/subscription/constants'
-import {IN_CONNECT_MODE} from './graphql/subscription/constants'
+import {
+  MAPPING_PROBLEMS, NUM_MAPPING_PROBLEMS, ROOT_PASSWORD_HAS_BEEN_SET, IN_CONNECT_MODE,
+} from './graphql/subscription/constants'
 import {IN_CONNECT_MODE_CHANGED} from './device/ConnectModeHandler'
 import type {MappingProblem} from '../universal/data-router/PluginConfigTypes'
 
@@ -296,6 +297,8 @@ export default class Server {
   }
 
   _handleMappingProblemsChanged = (MappingProblems: Array<MappingProblem>) => {
+    const numMappingProblems = MappingProblems.length
+    this.pubsub.publish(NUM_MAPPING_PROBLEMS, {numMappingProblems})
     this.pubsub.publish(MAPPING_PROBLEMS, {MappingProblems})
   }
 

@@ -76,6 +76,10 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       type: new graphql.GraphQLList(new graphql.GraphQLNonNull(GraphQLMappingProblem)),
       resolve: (obj: any, args: any, {dataRouter}: GraphQLContext) => dataRouter.mappingProblems(),
     },
+    numMappingProblems: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
+      resolve: (obj: any, args: any, {dataRouter}: GraphQLContext) => dataRouter.mappingProblems().length,
+    },
   }
 
   for (let name in models) {

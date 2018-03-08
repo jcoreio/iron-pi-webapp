@@ -22,6 +22,7 @@ import ChangePasswordFormContainer from './ChangePassword/ChangePasswordFormCont
 import featureContent from './featureContent'
 import {CHANGE_PASSWORD, MAPPING_PROBLEMS} from '../react-router/paths'
 import MappingProblemsViewContainer from './MappingProblemsViewContainer'
+import MappingProblemsSnackbarContainer from './MappingProblemsSnackbarContainer'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -116,6 +117,7 @@ class App extends React.Component<Props> {
     return (
       <div className={classes.frame}>
         <SidebarContainer />
+        <MappingProblemsSnackbarContainer />
         <div
           className={classNames(classes.content, {
             [classes.contentOpen]: sidebarOpen,

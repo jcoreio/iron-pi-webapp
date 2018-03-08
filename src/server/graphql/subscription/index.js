@@ -8,6 +8,7 @@ import createTagValue from './TagValue'
 import createRootPasswordHasBeenSet from './rootPasswordHasBeenSet'
 import createInConnectMode from './inConnectMode'
 import createMappingProblems from './MappingProblems'
+import createNumMappingProblems from './numMappingProblems'
 
 type Options = {
   sequelize: Sequelize,
@@ -20,6 +21,7 @@ export default function createSubscription(options: Options): graphql.GraphQLObj
   const subscriptionFields = {
     TagValue: createTagValue(),
     MappingProblems: createMappingProblems(),
+    numMappingProblems: createNumMappingProblems(),
     rootPasswordHasBeenSet: createRootPasswordHasBeenSet(),
     inConnectMode: createInConnectMode(),
   }
