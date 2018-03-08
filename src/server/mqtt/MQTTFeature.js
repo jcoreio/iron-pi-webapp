@@ -3,56 +3,34 @@
 import path from 'path'
 import promisify from 'es6-promisify'
 import glob from 'glob'
-import {range} from 'lodash'
+import {debounce} from 'lodash'
 import type {DataPlugin, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import EventEmitter from '@jcoreio/typed-event-emitter/index'
 import MQTTPlugin from './MQTTPlugin'
 import type {MQTTPluginResources} from './MQTTPlugin'
-import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import type {MQTTConfig} from '../../universal/mqtt/MQTTConfig'
-import SignalGenerator from '../sim/SignalGenerator'
-import type {SignalGeneratorConfig} from '../sim/SignalGenerator'
 import SequelizeMQTTConfig from './models/MQTTConfig'
 import SequelizeMQTTChannelConfig from './models/MQTTChannelConfig'
 import type Sequelize from 'sequelize'
 import addTypes from './graphql/types/addTypes'
 import addQueryFields from './graphql/query/addQueryFields'
 import addMutationFields from './graphql/mutation/addMutationFields'
+import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
 
 export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> implements Feature {
-  _dataPlugins: Array<DataPlugin> = []
+  _dataPlugins: Map<number, MQTTPlugin> = new Map()
+  _resources: MQTTPluginResources
 
   async createDataPlugins(resources: MQTTPluginResources): Promise<void> {
-    // Read from Sequelize model and populate _instances array
-    const mqttConfig: MQTTConfig = {
-      serverURL: 'tcp://localhost:1883',
-      username: 'username',
-      password: 'password',
-      groupId: 'testGroupId',
-      nodeId: 'testNodeId',
-      minPublishInterval: 300,
-      publishAllPublicTags: true
+    this._resources = resources
+    const configInstances = await SequelizeMQTTConfig.findAll({
+      include: [
+        {association: SequelizeMQTTConfig.ChannelsFromMQTT},
+        {association: SequelizeMQTTConfig.ChannelsToMQTT},
+      ]
+    })
+    for (let instance of configInstances) {
+      this._createDataPlugin(instance)
     }
-    const mqttPluginInfo: PluginInfo = {
-      pluginType: 'mqtt',
-      pluginId: 'mqtt0',
-      pluginName: mqttConfig.name || 'MQTT Instance 1'
-    }
-    this._dataPlugins.push(new MQTTPlugin({pluginInfo: mqttPluginInfo, config: mqttConfig, resources}))
-
-    const signalGeneratorConfig: SignalGeneratorConfig = {
-      interval: 100,
-      channels: range(8).map((idx: number) => ({
-        tag: `channel${idx + 1}`,
-        offset: idx * 5000
-      }))
-    }
-    const simPluginInfo: PluginInfo = {
-      pluginType: 'signalGenerator',
-      pluginId: 'signalGenerator0',
-      pluginName: 'Signal Generator'
-    }
-    this._dataPlugins.push(new SignalGenerator({pluginInfo: simPluginInfo, config: signalGeneratorConfig}))
   }
 
   async getMigrations(): Promise<Array<string>> {
@@ -68,7 +46,62 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
   addQueryFields = addQueryFields(this)
   addMutationFields = addMutationFields(this)
 
-  getDataPlugins(): $ReadOnlyArray<DataPlugin> { return this._dataPlugins }
+  getDataPlugins(): $ReadOnlyArray<DataPlugin> { return [...this._dataPlugins.values()] }
+
+  _emitPluginsChanged = debounce(() => this.emit(FEATURE_EVENT_DATA_PLUGINS_CHANGE), 1000)
+
+  _createDataPlugin(instance: SequelizeMQTTConfig) {
+    const resources = this._resources
+    try {
+      const plugin = new MQTTPlugin({
+        config: (instance.get({plain: true, raw: true}): any),
+        resources,
+      })
+      this._dataPlugins.set(instance.id, plugin)
+    } catch (error) {
+      console.error(error.stack) // eslint-disable-line no-console
+    }
+  }
+
+  _handleMQTTConfigCreated = (instance: SequelizeMQTTConfig) => {
+    this._createDataPlugin(instance)
+    this._emitPluginsChanged()
+  }
+  _handleMQTTConfigUpdated = (instance: SequelizeMQTTConfig) => {
+    this._createDataPlugin(instance)
+    this._emitPluginsChanged()
+  }
+  _handleMQTTConfigDestroyed = (instance: SequelizeMQTTConfig) => {
+    this._dataPlugins.delete(instance.id)
+    this._emitPluginsChanged()
+  }
+
+  _handleMQTTChannelConfigChange = async (instance: SequelizeMQTTChannelConfig) => {
+    const config = await instance.getConfig({
+      include: [
+        {association: SequelizeMQTTConfig.ChannelsFromMQTT},
+        {association: SequelizeMQTTConfig.ChannelsToMQTT},
+      ]
+    })
+    if (config) this._createDataPlugin(config)
+  }
+
+  async start(): Promise<void> {
+    SequelizeMQTTConfig.addHook('afterCreate', 'MQTTFeature._handleMQTTConfigCreated', this._handleMQTTConfigCreated)
+    SequelizeMQTTConfig.addHook('afterUpdate', 'MQTTFeature._handleMQTTConfigUpdated', this._handleMQTTConfigUpdated)
+    SequelizeMQTTConfig.addHook('afterDestroy', 'MQTTFeature._handleMQTTConfigDestroyed', this._handleMQTTConfigDestroyed)
+    SequelizeMQTTChannelConfig.addHook('afterCreate', 'MQTTFeature._handleMQTTChannelConfigCreated', this._handleMQTTChannelConfigChange)
+    SequelizeMQTTChannelConfig.addHook('afterUpdate', 'MQTTFeature._handleMQTTChannelConfigUpdated', this._handleMQTTChannelConfigChange)
+    SequelizeMQTTChannelConfig.addHook('afterDestroy', 'MQTTFeature._handleMQTTChannelConfigDestroyed', this._handleMQTTChannelConfigChange)
+  }
+  async stop(): Promise<void> {
+    SequelizeMQTTConfig.removeHook('afterCreate', 'MQTTFeature._handleMQTTConfigCreated')
+    SequelizeMQTTConfig.removeHook('afterUpdate', 'MQTTFeature._handleMQTTConfigUpdated')
+    SequelizeMQTTConfig.removeHook('afterDestroy', 'MQTTFeature._handleMQTTConfigDestroyed')
+    SequelizeMQTTChannelConfig.removeHook('afterCreate', 'MQTTFeature._handleMQTTChannelConfigCreated')
+    SequelizeMQTTChannelConfig.removeHook('afterUpdate', 'MQTTFeature._handleMQTTChannelConfigUpdated')
+    SequelizeMQTTChannelConfig.removeHook('afterDestroy', 'MQTTFeature._handleMQTTChannelConfigDestroyed')
+  }
 }
 
 export function createFeature(): MQTTFeature {

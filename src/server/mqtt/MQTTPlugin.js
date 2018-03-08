@@ -19,6 +19,7 @@ import type MetadataHandler from '../metadata/MetadataHandler'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
 import type {SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
   SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
+import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
 
 type ToMQTTChannelState = {
   config: MQTTChannelConfig,
@@ -53,13 +54,20 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
-  constructor(args: {pluginInfo: PluginInfo, config: MQTTConfig, resources: MQTTPluginResources}) {
+  constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
     this._config = cleanMQTTConfig(args.config)
-    this._pluginInfo = args.pluginInfo
+    ProtocolRequiredFieldsType.assert(this._config)
+    this._pluginInfo = {
+      pluginType: 'mqtt',
+      pluginId: `mqtt${args.config.id}`,
+      pluginName: args.config.name || `MQTT Plugin ${args.config.id}`
+    }
     this._resources = args.resources
 
-    const {serverURL, username, password, groupId, nodeId} = this._config
+    const {serverURL, username, password, protocol, groupId, nodeId} = this._config
+    if (protocol !== 'SPARKPLUG') throw new Error('Only SparkPlug is currently supported')
+    if (!groupId || !nodeId) throw new Error('missing groupId or nodeId')
     this._client = (sparkplug: SparkPlugPackage).newClient({
       serverUrl: serverURL,
       username: username || null,
@@ -69,6 +77,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       clientId: `jcore-node-${groupId}/${nodeId}`,
       version: SPARKPLUG_VERSION_B_1_0,
     })
+    this._client.on('error', (err: Error) => console.error(err.stack)) // eslint-disable-line no-console
     this._client.on('birth', () => this._publishNodeBirth())
 
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)

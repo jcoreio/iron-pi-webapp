@@ -165,6 +165,7 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
     this.ChannelsFromMQTT = this.hasMany(MQTTChannelConfig, {
       as: 'channelsFromMQTT',
       foreignKey: 'configId',
+      onDelete: 'CASCADE',
       scope: {
         direction: FROM_MQTT,
       },
@@ -172,6 +173,7 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
     this.ChannelsToMQTT = this.hasMany(MQTTChannelConfig, {
       as: 'channelsToMQTT',
       foreignKey: 'configId',
+      onDelete: 'CASCADE',
       scope: {
         direction: TO_MQTT,
       },

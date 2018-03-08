@@ -45,6 +45,7 @@ export type ProtocolRequiredFields =
 export const ProtocolRequiredFieldsType = (reify: Type<ProtocolRequiredFields>)
 
 export type MQTTConfig = {
+  id: number,
   name?: ?string,
 
   serverURL: string, // e.g. tcp://myhost.mydomain.com:1883
