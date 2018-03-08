@@ -20,7 +20,8 @@ import LoginDialogContainer from './Login/LoginDialogContainer'
 import ChangePasswordDialog from './ChangePassword/ChangePasswordDialog'
 import ChangePasswordFormContainer from './ChangePassword/ChangePasswordFormContainer'
 import featureContent from './featureContent'
-import {CHANGE_PASSWORD} from '../react-router/paths'
+import {CHANGE_PASSWORD, MAPPING_PROBLEMS} from '../react-router/paths'
+import MappingProblemsViewContainer from './MappingProblemsViewContainer'
 
 const Home = () => <h1>Home</h1>
 const About = () => (
@@ -133,6 +134,7 @@ class App extends React.Component<Props> {
                   <Route path="/" exact component={Home} />
                   <Route path="/about" exact component={About} />
                   <Route path={CHANGE_PASSWORD} exact render={() => <div />} />
+                  <Route path={MAPPING_PROBLEMS} exact component={MappingProblemsViewContainer} />
                   {routes}
                   <Route path="*" component={NotFound} />
                 </Switch>
