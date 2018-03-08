@@ -74,33 +74,34 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     const mappings: Array<DataPluginMapping> = []
     for (let channel of this._channels) {
       const {id, tag, config: {mode, controlMode}} = channel
+      const displayNumber = id + 1
       const mapping: DataPluginMapping = {
         id,
-        name: `Local Channel ${id}`,
+        name: `Local Channel ${displayNumber}`,
       }
       if (tag) mapping.tagFromPlugin = tag
       const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
       mappings.push({
         id: rawAnalogInputTag,
-        name: `Local Channel ${id} raw analog input`,
+        name: `Local Channel ${displayNumber} raw analog input`,
         tagFromPlugin: rawAnalogInputTag,
       })
       const rawDigitalInputTag = LocalIOTags.rawDigitalInput(id)
       mappings.push({
         id: rawDigitalInputTag,
-        name: `Local Channel ${id} raw digital input`,
+        name: `Local Channel ${displayNumber} raw digital input`,
         tagFromPlugin: rawDigitalInputTag,
       })
       const systemValueTag = LocalIOTags.systemValue(id)
       mappings.push({
         id: systemValueTag,
-        name: `Local Channel ${id} system value`,
+        name: `Local Channel ${displayNumber} system value`,
         tagFromPlugin: systemValueTag,
       })
       const rawOutputTag = LocalIOTags.rawOutput(id)
       mappings.push({
         id: rawOutputTag,
-        name: `Local Channel ${id} raw output`,
+        name: `Local Channel ${displayNumber} raw output`,
         tagFromPlugin: rawOutputTag,
       })
       switch (mode) {
