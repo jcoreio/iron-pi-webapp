@@ -11,6 +11,7 @@ import type {
   DataPlugin, DispatchEvent, ValuesMap, TimestampedValuesMap, TimestampedDispatchEvent,
   PluginAndMappingsInfo, TimeValuePair} from './PluginTypes'
 import type {MappingProblem} from '../../universal/data-router/PluginConfigTypes'
+import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
 
 const log = logger('DataRouter')
 
@@ -36,7 +37,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   _publicTags: Array<string> = []
 
   _plugins: Array<DataPlugin> = []
-  _pluginsById: Map<string, DataPlugin> = new Map()
+  _pluginsByKey: Map<string, DataPlugin> = new Map()
   _pluginListeners: Map<string, ListenersForPlugin> = new Map()
   _pluginIOsChangedListener = () => this._pluginIOsChanged()
 
@@ -48,8 +49,8 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   _lastIngestTime: number = 0;
   _ingestRateLimitTimeout: ?number;
 
-  _tagsToProviderPluginIds: Map<string, string> = new Map();
-  _tagsToDestinationPluginIds: Map<string, Set<string>> = new Map();
+  _tagsToProviderPluginKeys: Map<string, string> = new Map();
+  _tagsToDestinationPluginKeys: Map<string, Set<string>> = new Map();
 
   _duplicateTags: Set<string> = new Set();
   _mappingProblems: Array<MappingProblem> = [];
@@ -91,12 +92,12 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     removedPlugins.forEach((plugin: DataPlugin) => {
       const eventEmitterPlugin: any = (plugin: any)
       if (_.isFunction(eventEmitterPlugin.removeListener)) {
-        const instanceId = plugin.pluginInfo().pluginId
-        const listeners: ?ListenersForPlugin = this._pluginListeners.get(instanceId)
+        const pluginKey = getPluginKey(plugin.pluginInfo())
+        const listeners: ?ListenersForPlugin = this._pluginListeners.get(pluginKey)
         if (listeners) {
           eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_DATA, listeners.dataListener)
           eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, listeners.timestampedDataListener)
-          this._pluginListeners.delete(instanceId)
+          this._pluginListeners.delete(pluginKey)
         }
         eventEmitterPlugin.removeListener(DATA_PLUGIN_EVENT_IOS_CHANGED, this._pluginIOsChangedListener)
       }
@@ -105,20 +106,21 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     })
 
     this._plugins = []
-    this._pluginsById.clear()
+    this._pluginsByKey.clear()
     plugins.forEach((plugin: DataPlugin) => {
       try {
         assert(plugin, 'DataRouter got a null plugin')
-        const existPlugin = this._pluginsById.get(plugin.pluginInfo().pluginId)
+        const pluginKey = getPluginKey(plugin.pluginInfo())
+        const existPlugin = this._pluginsByKey.get(pluginKey)
         if (existPlugin) {
           if (existPlugin === plugin) {
-            throw Error(`attempted to add plugin twice: ${plugin.pluginInfo().pluginId}`)
+            throw Error(`attempted to add plugin twice: ${pluginKey}`)
           } else {
-            throw Error(`there is already a different plugin with the unique ID: ${plugin.pluginInfo().pluginId}`)
+            throw Error(`there is already a different plugin with the unique ID: ${pluginKey}`)
           }
         }
         this._plugins.push(plugin)
-        this._pluginsById.set(plugin.pluginInfo().pluginId, plugin)
+        this._pluginsByKey.set(pluginKey, plugin)
       } catch (err) {
         log.error(`DataRouter could not add DataPlugin instance: ${err.stack}`)
       }
@@ -127,18 +129,18 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     const addedPlugins: Array<DataPlugin> = _.difference(this._plugins, prevPlugins)
     addedPlugins.forEach((plugin: DataPlugin) => {
       // If the plugin is an EventEmitter, listen to its 'data' event
-      const instanceId = plugin.pluginInfo().pluginId
+      const pluginKey = getPluginKey(plugin.pluginInfo())
       const eventEmitterPlugin: any = (plugin: any)
       if (_.isFunction(eventEmitterPlugin.on)) {
         const dataListener : DataPluginDataListener = (data: ValuesMap) =>
-          this.dispatch({pluginId: instanceId, values: data})
+          this.dispatch({pluginKey, values: data})
         const timestampedDataListener : DataPluginTimestampedDataListener = (data: TimestampedValuesMap) =>
-          this.dispatch({pluginId: instanceId, timestampedValues: data})
+          this.dispatch({pluginKey, timestampedValues: data})
         eventEmitterPlugin.on(DATA_PLUGIN_EVENT_DATA, dataListener)
         eventEmitterPlugin.on(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, timestampedDataListener)
         // The pluginIOsChanged listener is the same for all plugins
         eventEmitterPlugin.on(DATA_PLUGIN_EVENT_IOS_CHANGED, this._pluginIOsChangedListener)
-        this._pluginListeners.set(instanceId, {dataListener, timestampedDataListener})
+        this._pluginListeners.set(pluginKey, {dataListener, timestampedDataListener})
       }
     })
 
@@ -175,16 +177,16 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   }
 
   _cleanEvent(event: TimestampedDispatchEvent): TimestampedDispatchEvent {
-    const {pluginId, timestampedValues} = event
+    const {pluginKey, timestampedValues} = event
     let cleanedTimestampedValues
     for (let tag in timestampedValues) {
-      if (this._tagsToProviderPluginIds.get(tag) !== pluginId) {
-        const warningTag = `${pluginId}-${tag}`
+      if (this._tagsToProviderPluginKeys.get(tag) !== pluginKey) {
+        const warningTag = `${pluginKey}-${tag}`
         if (!this._printedWarningKeys.has(warningTag)) {
           this._printedWarningKeys.add(warningTag)
           log.error(this._duplicateTags.has(tag) ?
-            `plugin ${pluginId} cannot set tag ${tag} because it has multiple sources` :
-            `plugin ${pluginId} tried to set tag ${tag} without declaring it as an output`)
+            `plugin ${pluginKey} cannot set tag ${tag} because it has multiple sources` :
+            `plugin ${pluginKey} tried to set tag ${tag} without declaring it as an output`)
         }
         if (!cleanedTimestampedValues) {
           cleanedTimestampedValues = {...timestampedValues}
@@ -224,14 +226,14 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
 
         tagsChangedThisPass.forEach((tag: string) => {
           tagsChangedThisCycle.add(tag)
-          const pluginIdsForTag: ?Set<string> = this._tagsToDestinationPluginIds.get(tag)
-          if (pluginIdsForTag) {
-            pluginIdsForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
+          const pluginKeysForTag: ?Set<string> = this._tagsToDestinationPluginKeys.get(tag)
+          if (pluginKeysForTag) {
+            pluginKeysForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
           }
         })
 
         pluginsChangedThisPass.forEach((pluginId: string) => {
-          const plugin = this._pluginsById.get(pluginId)
+          const plugin = this._pluginsByKey.get(pluginId)
           if (plugin) {
             pluginsChangedThisCycle.add(pluginId)
             if (plugin.inputsChanged) {
@@ -262,15 +264,16 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
       // Call dispatchCycleDone on each plugin
       this._plugins.forEach((plugin: DataPlugin) => {
         if (plugin.dispatchCycleDone) {
+          const pluginKey = getPluginKey(plugin.pluginInfo())
           try {
             (plugin: any).dispatchCycleDone({
               time,
               changedTags: tagsChangedThisCycle,
-              inputsChanged: pluginsChangedThisCycle.has(plugin.pluginInfo().pluginId),
+              inputsChanged: pluginsChangedThisCycle.has(pluginKey),
               tagMap: this._tagMap
             })
           } catch (err) {
-            const warningKey = `dispatchCycleDoneError-${plugin.pluginInfo().pluginId}`
+            const warningKey = `dispatchCycleDoneError-${pluginKey}`
             if (!this._printedWarningKeys.has(warningKey)) {
               this._printedWarningKeys.add(warningKey)
               log.error('caught error during dispatchCycleDone', err.stack || err)
@@ -305,13 +308,13 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
       }
     })
 
-    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
       calculateMappingInfo(pluginMappings)
     const publicTagsChanged = !_.isEqual(publicTags, this._publicTags)
     this._tags = tags
     this._publicTags = publicTags
-    this._tagsToProviderPluginIds = tagsToProviderPluginIds
-    this._tagsToDestinationPluginIds = tagsToDestinationPluginIds
+    this._tagsToProviderPluginKeys = tagsToProviderPluginKeys
+    this._tagsToDestinationPluginKeys = tagsToDestinationPluginKeys
     this._duplicateTags = duplicateTags
     if (!_.isEqual(mappingProblems, this._mappingProblems)) {
       this._mappingProblems = mappingProblems
@@ -332,5 +335,5 @@ export function timestampDispatchData(args: {event: DispatchEvent, time: number}
   const valuesWithTimestamps: TimestampedValuesMap = _.mapValues(event.values || {}, (entry: any) => ({t: time, v: entry}))
   // Merge with any data that came in with timestamps
   const timestampedValues: TimestampedValuesMap = {...valuesWithTimestamps, ...(event.timestampedValues || {})}
-  return {pluginId: event.pluginId, timestampedValues}
+  return {pluginKey: event.pluginKey, timestampedValues}
 }

@@ -1,8 +1,15 @@
 // @flow
 
+export function pluginKey({pluginType, pluginId}: {
+  pluginType: string,
+  pluginId: string | number,
+}): string {
+  return JSON.stringify([pluginType, pluginId])
+}
+
 export type PluginInfo = {
   pluginType: string,
-  pluginId: string,
+  pluginId: string | number,
   pluginName: string,
 }
 
@@ -22,9 +29,9 @@ export const toPluginInfo = (config: PluginInfo) => ({
  */
 export type MappingLocationInfo = {
   pluginType: string,
-  pluginId: string,
+  pluginId: number | string,
   pluginName: string,
-  channelId: string,
+  channelId: number | string,
   channelName: string,
 }
 

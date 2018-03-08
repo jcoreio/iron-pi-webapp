@@ -8,7 +8,7 @@ import type {PubSubEngine} from 'graphql-subscriptions'
  * Information about a single mapping into or out of a plugin
  */
 export type DataPluginMapping = {
-  id: string, // Unique ID, e.g. "local1"
+  id: number | string, // Unique ID, e.g. "local1"
   name: string, // Descriptive name for this input or output, e.g. "Local 1". This is distinct from the user settable metadata name, e. g. "Pump 1".
   tagsToPlugin?: ?Array<string>,
   tagFromPlugin?: ?string, // Can be null if this is an output that does not publish a tag back to the tag map
@@ -100,7 +100,7 @@ export type ValuesMap = {[tag: string]: any}
  * source plugin.
  */
 export type DispatchEvent = {
-  pluginId: string,
+  pluginKey: string,
   // The caller can either provide `values` and allow the system to timestamp everything with the current time,
   // or the caller can provide `timestampedValues` if the data has already been timestamped upstream.
   values?: ?ValuesMap,
@@ -111,7 +111,7 @@ export type DispatchEvent = {
  * Dispatch event with only timestamped data
  */
 export type TimestampedDispatchEvent = {
-  pluginId: string,
+  pluginKey: string,
   timestampedValues: TimestampedValuesMap,
 }
 
@@ -121,7 +121,7 @@ export type TimestampedDispatchEvent = {
  */
 export type PluginAndMappingsInfo = {
   pluginType: string,
-  pluginId: string,
+  pluginId: number | string,
   pluginName: string,
   mappings: Array<DataPluginMapping>,
 }
@@ -130,8 +130,8 @@ export type PluginAndMappingsInfo = {
  * Information on all mappings across all plugins
  */
 export type SystemMappingInfo = {
-  tagsToProviderPluginIds: Map<string, string>,
-  tagsToDestinationPluginIds: Map<string, Set<string>>,
+  tagsToProviderPluginKeys: Map<string, string>,
+  tagsToDestinationPluginKeys: Map<string, Set<string>>,
   tags: Array<string>,
   publicTags: Array<string>,
   duplicateTags: Set<string>,

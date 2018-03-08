@@ -11,6 +11,7 @@ import DataRouter, {timestampDispatchData} from '../DataRouter'
 import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA,
   DATA_PLUGIN_EVENT_IOS_CHANGED} from '../PluginTypes'
 import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../PluginTypes'
+import {pluginKey as getPluginKey} from '../../../universal/data-router/PluginConfigTypes'
 
 const TEST_EVENT_INPUTS_CHANGED = 'inputsChanged'
 const TEST_EVENT_DISPATCH_CYCLE_DONE = 'dispatchCycleDone'
@@ -119,7 +120,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: plugin1.pluginInfo().pluginId, timestampedValues: {
+    router.dispatch({pluginKey: getPluginKey(plugin1.pluginInfo()), timestampedValues: {
       a: {t: 100, v: 200},
       b: {t: 300, v: 400}
     }})
@@ -169,7 +170,7 @@ describe('DataRouter', () => {
 
     expect(popEvents()).to.be.empty
 
-    router.dispatch({pluginId: sourcePlugin.pluginInfo().pluginId, values: {a: 2, b: 3}})
+    router.dispatch({pluginKey: getPluginKey(sourcePlugin.pluginInfo()), values: {a: 2, b: 3}})
 
     expect(popEvents()).to.deep.equal([
       {plugin: adder1, type: TEST_EVENT_INPUTS_CHANGED, time, changedTags: ['a', 'b']},
@@ -340,7 +341,7 @@ describe('DataRouter', () => {
     it('adds timestamps to data', () => {
       const PLUGIN_ID = 'testPluginId'
       const eventIn = {
-        pluginId: PLUGIN_ID,
+        pluginKey: PLUGIN_ID,
         values: {
           a: 1,
           b: 2
@@ -349,7 +350,7 @@ describe('DataRouter', () => {
       const t = Date.now()
       const eventOut = timestampDispatchData({event: eventIn, time: t})
       expect(eventOut).to.deep.equal({
-        pluginId: PLUGIN_ID,
+        pluginKey: PLUGIN_ID,
         timestampedValues: {
           a: {t, v: 1},
           b: {t, v: 2}
@@ -359,7 +360,7 @@ describe('DataRouter', () => {
 
     it('passes through already-timestamped data', () => {
       const eventIn = {
-        pluginId: PLUGIN_ID,
+        pluginKey: PLUGIN_ID,
         timestampedValues: {
           a: {
             t: 1000,
@@ -378,7 +379,7 @@ describe('DataRouter', () => {
     it('merges timestamped and non-timestamped data', () => {
       const PLUGIN_ID = 'testPluginId'
       const eventIn = {
-        pluginId: PLUGIN_ID,
+        pluginKey: PLUGIN_ID,
         values: {
           a: 1,
           b: 2
@@ -397,7 +398,7 @@ describe('DataRouter', () => {
       const t = Date.now()
       const eventOut = timestampDispatchData({event: eventIn, time: t})
       expect(eventOut).to.deep.equal({
-        pluginId: PLUGIN_ID,
+        pluginKey: PLUGIN_ID,
         timestampedValues: {
           a: {t, v: 1},
           b: {t: 1000, v: 3},

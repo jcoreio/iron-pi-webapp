@@ -6,39 +6,41 @@ import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../..
 import {INTERNAL} from '../../universal/types/Tag'
 import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
+import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
 
 export default function calculateMappingInfo(allPluginMappings: Array<PluginAndMappingsInfo>): SystemMappingInfo {
   const allTags: Set<string> = new Set()
-  const tagsToProviderPluginIds: Map<string, string> = new Map()
-  const tagsToDestinationPluginIds: Map<string, Set<string>> = new Map()
+  const tagsToProviderPluginKeys: Map<string, string> = new Map()
+  const tagsToDestinationPluginKeys: Map<string, Set<string>> = new Map()
   const duplicateTags: Set<string> = new Set()
   const mappingProblems: Array<MappingProblem> = []
 
   // Pass 1: Build mapping from tag to source plugin ID, and identify duplicate tags
   for (let mappingsForPlugin: PluginAndMappingsInfo of allPluginMappings) {
-    const {pluginId, mappings} = mappingsForPlugin
+    const {mappings} = mappingsForPlugin
+    const pluginKey = getPluginKey(mappingsForPlugin)
     for (let mapping: DataPluginMapping of mappings) {
       const {tagFromPlugin, tagsToPlugin} = mapping
       if (tagFromPlugin) {
         allTags.add(tagFromPlugin)
-        if (tagsToProviderPluginIds.has(tagFromPlugin)) {
+        if (tagsToProviderPluginKeys.has(tagFromPlugin)) {
           // Multiple sources
           duplicateTags.add(tagFromPlugin)
         } else {
-          tagsToProviderPluginIds.set(tagFromPlugin, pluginId)
+          tagsToProviderPluginKeys.set(tagFromPlugin, pluginKey)
         }
       }
       (tagsToPlugin || []).forEach((tag: string) => {
-        let pluginIdsForTag: ?Set<string> = tagsToDestinationPluginIds.get(tag)
-        if (!pluginIdsForTag) {
-          pluginIdsForTag = new Set()
-          tagsToDestinationPluginIds.set(tag, pluginIdsForTag)
+        let pluginKeysForTag: ?Set<string> = tagsToDestinationPluginKeys.get(tag)
+        if (!pluginKeysForTag) {
+          pluginKeysForTag = new Set()
+          tagsToDestinationPluginKeys.set(tag, pluginKeysForTag)
         }
-        pluginIdsForTag.add(pluginId)
+        pluginKeysForTag.add(pluginKey)
       })
     }
   }
-  duplicateTags.forEach(tag => tagsToProviderPluginIds.delete(tag))
+  duplicateTags.forEach(tag => tagsToProviderPluginKeys.delete(tag))
 
   // Pass 2: Build arrays of sources for all duplicate tags, and add mapping problem
   // info for all missing tags
@@ -61,7 +63,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
       }
       // Flag missing sources
       (tagsToPlugin || []).forEach((tag: string) => {
-        if (!tagsToProviderPluginIds.has(tag)) {
+        if (!tagsToProviderPluginKeys.has(tag)) {
           mappingProblems.push({
             mappingLocation,
             tag,
@@ -87,5 +89,5 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
 
   const tags: Array<string> = Array.from(allTags).sort()
   const publicTags = tags.filter(tag => !tag.startsWith(INTERNAL))
-  return {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems}
+  return {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems}
 }

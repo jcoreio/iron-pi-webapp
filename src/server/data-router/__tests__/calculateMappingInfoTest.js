@@ -8,6 +8,7 @@ import {
   MAPPING_PROBLEM_MULTIPLE_SOURCES,
   MAPPING_PROBLEM_NO_SOURCE
 } from '../../../universal/data-router/PluginConfigTypes'
+import {pluginKey as getPluginKey} from '../../../universal/data-router/PluginConfigTypes'
 
 const toPluginId = magic => `pluginId${magic}`
 
@@ -24,8 +25,8 @@ const toPluginAndMappingsInfo = (mappingsForAllPlugins: Array<Array<DataPluginMa
 function checkDestinations(actual, expected) {
   expect(actual.size).to.equal(Object.keys(expected).length)
   _.forOwn(expected, (expectedPluginIndices: Array<number>, tag: string) => {
-    const pluginIds = Array.from(actual.get(tag) || new Set()).sort()
-    expect(pluginIds).to.deep.equal(expectedPluginIndices.map(toPluginId))
+    const pluginKeys = Array.from(actual.get(tag) || new Set()).sort()
+    expect(pluginKeys).to.deep.equal(expectedPluginIndices.map(idx => getPluginKey(infoForPlugin(idx))))
   })
 }
 
@@ -82,17 +83,17 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
 
     const expectedTags = ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
-    ;['tag3', 'tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
+    ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(0))))
+    ;['tag3', 'tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(1))))
 
-    checkDestinations(tagsToDestinationPluginIds, {
+    checkDestinations(tagsToDestinationPluginKeys, {
       tag1: [1],
       tag2: [1],
       tag3: [0],
@@ -157,19 +158,19 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
 
     const expectedTags = ['tag1', 'tag2', 'tag3', 'tag4', 'tag5']
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
-    ;['tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
+    ;['tag1'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(0))))
+    ;['tag4', 'tag5'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(1))))
     // Duplicate tags shouldn't have any plugin identified as the source
-    ;['tag2', 'tag3'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal(undefined))
+    ;['tag2', 'tag3'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(undefined))
 
-    checkDestinations(tagsToDestinationPluginIds, {
+    checkDestinations(tagsToDestinationPluginKeys, {
       tag1: [1],
       tag4: [0],
       tag5: [0]
@@ -262,17 +263,17 @@ describe('calculateMappingInfo', () => {
         }
       ]
     ]
-    const {tags, publicTags, tagsToProviderPluginIds, tagsToDestinationPluginIds, duplicateTags, mappingProblems} =
+    const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
       calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
 
     const expectedTags = ['tag1', 'tag5']
     expect(tags).to.deep.equal(expectedTags)
     expect(publicTags).to.deep.equal(expectedTags)
 
-    ;['tag1'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId0'))
-    ;['tag5'].forEach(tag => expect(tagsToProviderPluginIds.get(tag)).to.equal('pluginId1'))
+    ;['tag1'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(0))))
+    ;['tag5'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(1))))
 
-    checkDestinations(tagsToDestinationPluginIds, {
+    checkDestinations(tagsToDestinationPluginKeys, {
       tag1: [1],
       tag2: [1],
       tag3: [0],
