@@ -77,7 +77,7 @@ const LocalIOFeature: Feature = {
   ],
   getMappingProblemURL: {
     localio: ({mappingLocation: {channelId}}: MappingProblem): ?string => {
-      return channelForm((channelId: any))
+      return channelForm(parseInt(channelId) + 1)
     }
   },
   sidebarSections: [
