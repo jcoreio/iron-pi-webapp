@@ -11,6 +11,7 @@ import {mqttConfigForm, mqttChannelConfigForm} from './routePaths'
 import featureLoader from '../../components/featureLoader'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
+import type {MappingProblem} from '../../data-router/PluginConfigTypes'
 
 export const FEATURE_ID = 'mqtt'
 export const FEATURE_NAME = 'MQTT Control Panel'
@@ -118,6 +119,11 @@ const MQTTFeature: Feature = {
     MQTTSidebarSectionContainer,
   ],
   sidebarSectionsOrder: 400,
+  getMappingProblemURL: {
+    mqtt: ({mappingLocation: {pluginId, channelId}}: MappingProblem): ?string => {
+      return mqttChannelConfigForm(mqttConfigForm((pluginId: any)), (channelId: any))
+    }
+  },
   load: async () => {
     return {
       ...MQTTFeature,

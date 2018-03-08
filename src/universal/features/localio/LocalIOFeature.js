@@ -10,6 +10,8 @@ import {channelForm, calibrationForm, CALIBRATION} from './routePaths'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
 import LocalIOSidebarSectionContainer from './LocalIOSidebarSectionContainer'
+import {mqttChannelConfigForm, mqttConfigForm} from '../mqtt/routePaths'
+import type {MappingProblem} from '../../data-router/PluginConfigTypes'
 
 export const FEATURE_ID = 'localio'
 export const FEATURE_NAME = 'Local I/O Control Panel'
@@ -73,6 +75,11 @@ const LocalIOFeature: Feature = {
       }}
     />,
   ],
+  getMappingProblemURL: {
+    localio: ({mappingLocation: {channelId}}: MappingProblem): ?string => {
+      return channelForm((channelId: any))
+    }
+  },
   sidebarSections: [
     LocalIOSidebarSectionContainer,
   ],

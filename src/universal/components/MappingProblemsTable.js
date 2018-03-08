@@ -13,8 +13,15 @@ import Typography from 'material-ui/Typography'
 import type {Theme} from '../theme'
 import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../data-router/PluginConfigTypes'
 import SuccessAlert from './SuccessAlert'
+import WorkaroundLink from './WorkaroundLink'
 
-const styles = (theme: Theme) => ({
+const styles = ({palette}: Theme) => ({
+  linkRow: {
+    cursor: 'pointer',
+    '&:hover > td': {
+      backgroundColor: palette.text.divider,
+    },
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -26,7 +33,10 @@ export type MappingProblem = {
   tag: string,
   problem: ProblemKind,
   mappingLocation: {
+    pluginType: string,
+    pluginId: string | number,
     pluginName: string,
+    channelId: string | number,
     channelName: string,
   },
 }
@@ -34,6 +44,7 @@ export type MappingProblem = {
 export type Props = {
   classes: Classes,
   MappingProblems?: Array<MappingProblem>,
+  getMappingProblemURL?: (mappingProblem: MappingProblem) => ?string,
 }
 
 class MappingProblemsTable extends React.Component<Props> {
@@ -48,7 +59,7 @@ class MappingProblemsTable extends React.Component<Props> {
     })
   )
   render(): ?React.Node {
-    const {classes} = this.props
+    const {classes, getMappingProblemURL} = this.props
     const {noSourceProblems, multipleSourcesProblems} = this._organizeMappingProblems(this.props)
     return (
       <Table>
@@ -67,6 +78,7 @@ class MappingProblemsTable extends React.Component<Props> {
           <MappingProblemsSection
             classes={classes}
             MappingProblems={noSourceProblems}
+            getMappingProblemURL={getMappingProblemURL}
             title="Output Tags with no source"
           />
         ) : null}
@@ -74,6 +86,7 @@ class MappingProblemsTable extends React.Component<Props> {
           <MappingProblemsSection
             classes={classes}
             MappingProblems={multipleSourcesProblems}
+            getMappingProblemURL={getMappingProblemURL}
             title="Input Tags with multiple sources"
           />
         ) : null}
@@ -84,7 +97,7 @@ class MappingProblemsTable extends React.Component<Props> {
 
 export default withStyles(styles, {withTheme: true})(MappingProblemsTable)
 
-const MappingProblemsSection = ({title, MappingProblems = []}: Props & {title: React.Node}): React.Node => (
+const MappingProblemsSection = ({classes, title, MappingProblems = [], getMappingProblemURL}: Props & {title: React.Node}): React.Node => (
   <React.Fragment>
     <TableHead>
       <TableRow>
@@ -101,19 +114,29 @@ const MappingProblemsSection = ({title, MappingProblems = []}: Props & {title: R
       </TableRow>
     </TableHead>
     <TableBody>
-      {MappingProblems.map((problem, key) => (
-        <TableRow key={key}>
-          <TableCell>
-            {problem.tag}
-          </TableCell>
-          <TableCell>
-            {problem.mappingLocation.pluginName}
-          </TableCell>
-          <TableCell>
-            {problem.mappingLocation.channelName}
-          </TableCell>
-        </TableRow>
-      ))}
+      {MappingProblems.map((problem: MappingProblem, key: any): React.Node => {
+        const content = (
+          <TableRow key={key}>
+            <TableCell>
+              {problem.tag}
+            </TableCell>
+            <TableCell>
+              {problem.mappingLocation.pluginName}
+            </TableCell>
+            <TableCell>
+              {problem.mappingLocation.channelName}
+            </TableCell>
+          </TableRow>
+        )
+
+        const to = getMappingProblemURL ? getMappingProblemURL(problem) : null
+        if (to) return (
+          <WorkaroundLink to={to}>
+            {({bind}) => React.cloneElement(content, {...bind, className: classes.linkRow})}
+          </WorkaroundLink>
+        )
+        return content
+      })}
     </TableBody>
   </React.Fragment>
 )

@@ -29,12 +29,19 @@ export type Props = {
     loading: boolean,
     MappingProblems?: Array<MappingProblem>,
   },
+  getMappingProblemURL?: (mappingProblem: MappingProblem) => ?string,
 }
 
-const MappingProblemsView = ({classes, data: {loading, MappingProblems}}: Props) => {
+const MappingProblemsView = ({classes, data: {loading, MappingProblems}, getMappingProblemURL}: Props) => {
   const content = loading
     ? <Typography type="subheading" key="loading" className={classes.loading}><Spinner /> Loading Mapping Problems...</Typography>
-    : <MappingProblemsTable key="loaded" MappingProblems={MappingProblems} />
+    : (
+      <MappingProblemsTable
+        key="loaded"
+        MappingProblems={MappingProblems}
+        getMappingProblemURL={getMappingProblemURL}
+      />
+    )
   return (
     <Paper className={classes.paper}>
       <Fader animateHeight>
