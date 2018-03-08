@@ -17,7 +17,7 @@ import type {$Request, $Response, $Application} from 'express'
 import {defaultDbConnectionParams} from './sequelize'
 import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
-import DataRouter from './data-router/DataRouter'
+import DataRouter, {EVENT_MAPPING_PROBLEMS_CHANGED} from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
 import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler from './device/ConnectModeHandler'
@@ -44,9 +44,10 @@ import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from './data-router/PluginTypes'
 import seedDatabase from './sequelize/seedDatabase'
 import GraphQLDataPlugin from './data-router/GraphQLDataPlugin'
 import User from './models/User'
-import {ROOT_PASSWORD_HAS_BEEN_SET} from './graphql/subscription/constants'
+import {MAPPING_PROBLEMS, ROOT_PASSWORD_HAS_BEEN_SET} from './graphql/subscription/constants'
 import {IN_CONNECT_MODE} from './graphql/subscription/constants'
 import {IN_CONNECT_MODE_CHANGED} from './device/ConnectModeHandler'
+import type {MappingProblem} from '../universal/data-router/PluginConfigTypes'
 
 const log = logger('Server')
 
@@ -144,6 +145,8 @@ export default class Server {
           feature.on(FEATURE_EVENT_DATA_PLUGINS_CHANGE, this._onFeatureDataPluginsChange)
         }
       }
+
+      dataRouter.on(EVENT_MAPPING_PROBLEMS_CHANGED, this._handleMappingProblemsChanged)
 
       this._devGlobals.dataRouter = dataRouter
 
@@ -292,12 +295,19 @@ export default class Server {
     this.pubsub.publish(IN_CONNECT_MODE, {inConnectMode})
   }
 
+  _handleMappingProblemsChanged = (MappingProblems: Array<MappingProblem>) => {
+    this.pubsub.publish(MAPPING_PROBLEMS, {MappingProblems})
+  }
+
   // istanbul ignore next
   async stop(): Promise<void> {
     if (!this._running) return
     this._running = false
 
     this.connectModeHandler.removeListener(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
+    if (this.dataRouter) {
+      this.dataRouter.removeListener(EVENT_MAPPING_PROBLEMS_CHANGED, this._handleMappingProblemsChanged)
+    }
     const {_features} = this
     if (_features) {
       for (let feature of _features) {

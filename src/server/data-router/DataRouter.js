@@ -17,7 +17,7 @@ const log = logger('DataRouter')
 
 const MIN_INGEST_INTERVAL_MILLIS = 50
 
-const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
+export const EVENT_MAPPING_PROBLEMS_CHANGED = 'mappingProblemsChanged'
 
 type DataPluginDataListener = (data: ValuesMap) => void
 type DataPluginTimestampedDataListener = (data: TimestampedValuesMap) => void
@@ -68,6 +68,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   tagMap(): TimestampedValuesMap { return this._tagMap }
   tags(): Array<string> { return this._tags }
   publicTags(): Array<string> { return this._publicTags }
+  mappingProblems(): $ReadOnlyArray<MappingProblem> { return this._mappingProblems }
 
   getTagValue(tag: string): any {
     const entry = this._tagMap[tag]

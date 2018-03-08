@@ -11,6 +11,7 @@ import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'
 import createTagValue from './TagValue'
 import MetadataItem from '../types/MetadataItem'
+import GraphQLMappingProblem from '../types/MappingProblem'
 
 type Options = {
   sequelize: Sequelize,
@@ -70,6 +71,10 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         }
         return metadata
       }
+    },
+    MappingProblems: {
+      type: new graphql.GraphQLList(new graphql.GraphQLNonNull(GraphQLMappingProblem)),
+      resolve: (obj: any, args: any, {dataRouter}: GraphQLContext) => dataRouter.mappingProblems(),
     },
   }
 

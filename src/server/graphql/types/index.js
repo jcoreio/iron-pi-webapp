@@ -10,6 +10,7 @@ import models from '../../models'
 import MetadataItem, {
   DigitalMetadataItem, NumericMetadataItem, StringMetadataItem, TagDataType
 } from './MetadataItem'
+import MappingProblem, {MappingLocationInfo, MappingProblemKind} from './MappingProblem'
 import InputMetadataItem from './InputMetadataItem'
 import createUser from './User'
 
@@ -52,6 +53,9 @@ export default function createTypes(options: Options): {
     NumericMetadataItem,
     DigitalMetadataItem,
     StringMetadataItem,
+    MappingLocationInfo,
+    MappingProblemKind,
+    MappingProblem,
     User: createUser({getType, getArgs, attributeFieldsCache})
   }
   const inputTypes: {[name: string]: GraphQLInputType} = {
