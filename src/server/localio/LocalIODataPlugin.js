@@ -75,7 +75,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     for (let channel of this._channels) {
       const {id, tag, config: {mode, controlMode}} = channel
       const mapping: DataPluginMapping = {
-        id: `localio/${id}`,
+        id,
         name: `Local Channel ${id}`,
       }
       if (tag) mapping.tagFromPlugin = tag
