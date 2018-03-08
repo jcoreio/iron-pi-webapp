@@ -8,6 +8,7 @@ import type {MetadataItem} from '../types/MetadataItem'
 import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
 
 export type MQTTChannelConfig = {
+  id: number,
   internalTag: string,
   mqttTag: string,
   enabled: boolean,
@@ -89,7 +90,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
     // Convert to DataPluginMappings
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
-      id: `toMQTT${item.index + 1}`,
+      id: item.channel.id,
       name: item.channel.name || `To MQTT ${item.index + 1}`,
       tagsToPlugin: [item.channel.internalTag]
     }))
@@ -103,7 +104,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
     // Convert to DataPluginMappings
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
-      id: `fromMQTT${item.index + 1}`,
+      id: item.channel.id,
       name: item.channel.name || `From MQTT ${item.index + 1}`,
       tagFromPlugin: item.channel.internalTag
     }))

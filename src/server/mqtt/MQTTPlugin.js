@@ -60,7 +60,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     ProtocolRequiredFieldsType.assert(this._config)
     this._pluginInfo = {
       pluginType: 'mqtt',
-      pluginId: `mqtt${args.config.id}`,
+      pluginId: args.config.id,
       pluginName: args.config.name || `MQTT Plugin ${args.config.id}`
     }
     this._resources = args.resources
