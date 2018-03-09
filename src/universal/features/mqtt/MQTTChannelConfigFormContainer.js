@@ -139,7 +139,6 @@ export default compose(
   }),
   reduxForm({
     form: 'MQTTChannelConfig',
-    destroyOnUnmount: false,
   }),
   formValues({
     loadedId: 'id',

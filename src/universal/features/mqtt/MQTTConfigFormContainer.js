@@ -112,7 +112,6 @@ export default compose(
   }),
   reduxForm({
     form: 'MQTTConfig',
-    destroyOnUnmount: false,
   }),
   formValues({
     loadedId: 'id',
