@@ -60,7 +60,7 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className?: string,
-  title: React.Node,
+  title?: React.Node,
   value?: React.Node,
   units?: React.Node,
   error?: React.Node,
@@ -68,9 +68,7 @@ export type Props = {
 
 const ValueBlock = ({classes, className, title, value, units, theme, error, ...props}: Props) => (
   <div className={classNames(classes.block, {[classes.error]: error}, className)} data-component="ValueBlock" {...props}>
-    <h4 className={classes.title} data-test-name="title">
-      {title}
-    </h4>
+    {title ? <h4 className={classes.title} data-test-name="title">{title}</h4> : null}
     <span className={classes.value} data-test-name="value">
       {value}
     </span>

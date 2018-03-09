@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {Link, withRouter} from 'react-router-dom'
+import {Link, NavLink, withRouter} from 'react-router-dom'
 import sortBy from 'lodash.sortby'
 import {featureComponents} from 'react-redux-features'
 import {withStyles} from 'material-ui/styles'
@@ -119,7 +119,7 @@ class Sidebar extends React.Component<Props> {
           <h2 className={classes.ironPiHeader}>iron pi</h2>
         </div>
         <List className={classes.sidebarBody}>
-          <SidebarSectionHeader component={Link} to={STATUS} title="Status" />
+          <SidebarSectionHeader component={NavLink} to={STATUS} title="Status" />
           <SidebarSections />
         </List>
       </div>

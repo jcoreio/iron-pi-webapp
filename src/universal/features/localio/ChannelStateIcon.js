@@ -33,6 +33,7 @@ const styles = (theme: Theme) => ({
     backgroundColor: theme.channelState.off,
   },
   rootOutput: {
+    width: theme.spacing.unit * 2,
     borderRadius: '100%',
   },
   bar: {
@@ -57,6 +58,7 @@ export type Channel = {
 export type Props = {
   classes: Classes,
   channel: Channel,
+  className?: string,
 }
 
 function percent(value: number): string {

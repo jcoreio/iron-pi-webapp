@@ -7,6 +7,7 @@ import { withStyles } from 'material-ui/styles'
 
 import PlayArrowIcon from 'material-ui-icons/PlayArrow'
 import type {Theme} from '../../theme'
+import {NavLink} from 'react-router-dom'
 
 const sidebarSectionHeaderStyles = (theme: Theme) => ({
   root: {
@@ -32,6 +33,15 @@ const sidebarSectionHeaderStyles = (theme: Theme) => ({
   expandIconOpen: {
     transform: 'rotate(90deg)',
   },
+  active: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    '&:focus': {
+      backgroundColor: 'rgba(255,255,255,0.1)',
+    },
+    '&:hover': {
+      backgroundColor: 'rgba(255,255,255,0.25)',
+    },
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -48,7 +58,13 @@ export type SidebarSectionHeaderProps = {
 
 const SidebarSectionHeader = withStyles(sidebarSectionHeaderStyles, {withTheme: true})(
   ({title, classes, expanded, children, ...props}: SidebarSectionHeaderProps) => (
-    <ListItem {...props} button className={classes.root} data-test-title={title}>
+    <ListItem
+      {...props}
+      button
+      className={classes.root}
+      data-test-title={title}
+      activeClassName={props.component === NavLink ? classes.active : undefined}
+    >
       <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
         <PlayArrowIcon
           className={classNames(classes.expandIcon, {

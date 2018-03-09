@@ -81,7 +81,6 @@ class Navbar extends React.Component<Props, State> {
               <NavbarRoutes>
                 {routes => (
                   <Switch component={Fader}>
-                    <Route path="/" exact render={() => <Title>Home</Title>} />
                     <Route path="/about" exact render={() => <Title>About</Title>} />
                     <Route path={STATUS} exact render={() => <Title>Status</Title>} />
                     <Route path={CHANGE_PASSWORD} exact render={() => <div />} />

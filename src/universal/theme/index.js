@@ -104,6 +104,15 @@ export type Theme = {
       lineHeight: string,
     },
   },
+  statusPanel: {
+    title: {
+      color: string,
+      fontSize: string,
+      fontWeight: number,
+      textAlign: string,
+      lineHeight: string,
+    },
+  },
   calibration: {
     title: {
       color: string,
@@ -330,6 +339,16 @@ theme.navbar = {
     fontSize: theme.typography.pxToRem(26),
     fontWeight: 500,
     lineHeight: theme.typography.pxToRem(32),
+  },
+}
+theme.statusPanel = {
+  title: {
+    color: '#323232',
+    textAlign: 'left',
+    fontSize: theme.typography.pxToRem(24),
+    fontWeight: 500,
+    lineHeight: theme.typography.pxToRem(29),
+    marginBottom: theme.spacing.unit * 2,
   },
 }
 theme.channelState = {

@@ -10,6 +10,7 @@ import {channelForm, calibrationForm, CALIBRATION} from './routePaths'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
 import LocalIOSidebarSectionContainer from './LocalIOSidebarSectionContainer'
+import LocalIOStatusPanelContainer from './LocalIOStatusPanelContainer'
 import type {MappingProblem} from '../../data-router/PluginConfigTypes'
 
 export const FEATURE_ID = 'localio'
@@ -83,6 +84,10 @@ const LocalIOFeature: Feature = {
     LocalIOSidebarSectionContainer,
   ],
   sidebarSectionsOrder: 500,
+  statusPanels: [
+    LocalIOStatusPanelContainer,
+  ],
+  statusPanelsOrder: 500,
   load: async () => {
     return {
       ...LocalIOFeature,

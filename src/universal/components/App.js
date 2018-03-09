@@ -24,8 +24,8 @@ import {CHANGE_PASSWORD, MAPPING_PROBLEMS, STATUS} from '../react-router/paths'
 import MappingProblemsViewContainer from './MappingProblemsViewContainer'
 import MappingProblemsSnackbarContainer from './MappingProblemsSnackbarContainer'
 import StatusView from './StatusView'
+import RedirectWithStatus from '../react-router/RedirectWithStatus'
 
-const Home = () => <h1>Home</h1>
 const About = () => (
   <div>
     <h1>About</h1>
@@ -134,7 +134,7 @@ class App extends React.Component<Props> {
             <BodyRoutes>
               {routes => (
                 <Switch component={Fader} createKey={(child, match) => match.url}>
-                  <Route path="/" exact component={Home} />
+                  <Route path="/" exact render={() => <RedirectWithStatus to={STATUS} />} />
                   <Route path="/about" exact component={About} />
                   <Route path={STATUS} exact component={StatusView} />
                   <Route path={CHANGE_PASSWORD} exact render={() => <div />} />

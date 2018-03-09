@@ -2,7 +2,10 @@
 
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
+import sortBy from 'lodash.sortby'
 import type {Theme} from '../theme'
+import {featureComponents} from 'react-redux-features'
+import {withRouter} from 'react-router-dom'
 
 const styles = (theme: Theme) => ({
 
@@ -15,10 +18,18 @@ export type Props = {
   classes: Classes,
 }
 
+const StatusPanels = withRouter(featureComponents({
+  getComponents: feature => (feature: any).statusPanels,
+  sortFeatures: features => sortBy(features, feature => feature.statusPanelsOrder),
+}))
+
 class StatusView extends React.Component<Props> {
   render(): ?React.Node {
-    const {classes} = this.props
-    return <div {...this.props} />
+    return (
+      <div>
+        <StatusPanels />
+      </div>
+    )
   }
 }
 
