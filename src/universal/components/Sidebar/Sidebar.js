@@ -13,6 +13,7 @@ import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
 
 import SidebarSectionHeader from './SidebarSectionHeader'
 import type {Theme} from '../../theme'
+import {STATUS} from '../../react-router/paths'
 
 const styles = ({palette: {background, secondary}, sidebar, jcoreLogo, ironPiLogo, zIndex}: Theme) => ({
   sidebar: {
@@ -118,7 +119,7 @@ class Sidebar extends React.Component<Props> {
           <h2 className={classes.ironPiHeader}>iron pi</h2>
         </div>
         <List className={classes.sidebarBody}>
-          <SidebarSectionHeader title="Status" />
+          <SidebarSectionHeader component={Link} to={STATUS} title="Status" />
           <SidebarSections />
         </List>
       </div>

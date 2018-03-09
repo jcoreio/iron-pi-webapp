@@ -43,6 +43,7 @@ export type SidebarSectionHeaderProps = {
   expanded?: boolean,
   onClick?: (event: MouseEvent) => any,
   children?: React.Node,
+  component?: React.ComponentType<any>,
 }
 
 const SidebarSectionHeader = withStyles(sidebarSectionHeaderStyles, {withTheme: true})(

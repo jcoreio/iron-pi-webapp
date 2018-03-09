@@ -14,7 +14,7 @@ import AccountCircle from 'material-ui-icons/AccountCircle'
 import Menu, { MenuItem } from 'material-ui/Menu'
 import featureContent from '../featureContent'
 import Title from './Title'
-import {CHANGE_PASSWORD, MAPPING_PROBLEMS} from '../../react-router/paths'
+import {CHANGE_PASSWORD, MAPPING_PROBLEMS, STATUS} from '../../react-router/paths'
 
 const styles = {
   root: {
@@ -83,6 +83,7 @@ class Navbar extends React.Component<Props, State> {
                   <Switch component={Fader}>
                     <Route path="/" exact render={() => <Title>Home</Title>} />
                     <Route path="/about" exact render={() => <Title>About</Title>} />
+                    <Route path={STATUS} exact render={() => <Title>Status</Title>} />
                     <Route path={CHANGE_PASSWORD} exact render={() => <div />} />
                     <Route path={MAPPING_PROBLEMS} exact render={() => <Title>Mapping Problems</Title>} />
                     {routes}
