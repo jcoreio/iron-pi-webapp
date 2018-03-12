@@ -230,7 +230,7 @@ class MQTTConfigForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
-            <Typography type="subheading">
+            <Typography variant="subheading">
               <Spinner /> Loading MQTT configuration...
             </Typography>
           </Paper>
@@ -253,7 +253,10 @@ class MQTTConfigForm extends React.Component<Props> {
               validate={required()}
             />
           </ControlWithInfo>
-          <ControlWithInfo info="The URL of the MQTT server" controlClassName={classes.serverURLControl}>
+          <ControlWithInfo
+            info="The URL of the MQTT server"
+            classes={{control: classes.serverURLControl}}
+          >
             <Field
               name="serverURL"
               label="Server URL"
@@ -274,9 +277,9 @@ class MQTTConfigForm extends React.Component<Props> {
             <Field
               name="protocol"
               component={ButtonGroupField}
-              buttonClassName={classes.tallButton}
+              classes={{button: classes.tallButton}}
               availableValues={ProtocolsArray}
-              activeButtonProps={{accent: true}}
+              activeButtonProps={{secondary: true}}
               getDisplayText={getProtocolDisplayText}
               className={classes.formControl}
               validate={required()}
@@ -326,7 +329,7 @@ class MQTTConfigForm extends React.Component<Props> {
           />
           <div className={classes.buttons}>
             <Button
-              raised
+              variant="raised"
               className={classes.tallButton}
               onClick={this.handleCancel}
             >
@@ -344,14 +347,14 @@ class MQTTConfigForm extends React.Component<Props> {
               }}
             >
               {({bind}) => (
-                <Button raised className={classes.tallButton} {...bind}>
+                <Button variant="raised" className={classes.tallButton} {...bind}>
                   Delete
                 </Button>
               )}
             </ConfirmDeletePopover>
             <Button
               type="submit"
-              raised
+              variant="raised"
               color="primary"
               className={classes.tallButton}
               disabled={pristine || submitting}

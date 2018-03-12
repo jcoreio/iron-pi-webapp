@@ -68,7 +68,7 @@ const DigitalOutputConfigSection = (
           name="config.controlMode"
           component={ButtonGroupField}
           className={formControlClass}
-          buttonClassName={tallButtonClass}
+          classes={{button: tallButtonClass}}
           availableValues={ControlModesArray}
           getDisplayText={getControlModeDisplayText}
           validate={required()}
@@ -90,7 +90,7 @@ const DigitalOutputConfigSection = (
           label="Safe State"
           component={ButtonGroupField}
           className={formControlClass}
-          buttonClassName={tallButtonClass}
+          classes={{button: tallButtonClass}}
           availableValues={[0, 1]}
           getDisplayText={value => value ? 'Output On' : 'Output Off'}
           validate={required()}
@@ -100,7 +100,7 @@ const DigitalOutputConfigSection = (
           label="Polarity"
           component={ButtonGroupField}
           className={formControlClass}
-          buttonClassName={tallButtonClass}
+          classes={{button: tallButtonClass}}
           availableValues={[false, true]}
           getDisplayText={value => value ? 'Reversed' : 'Normal'}
           validate={required()}

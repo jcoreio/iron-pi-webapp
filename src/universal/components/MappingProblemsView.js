@@ -34,7 +34,7 @@ export type Props = {
 
 const MappingProblemsView = ({classes, data: {loading, MappingProblems}, getMappingProblemURL}: Props) => {
   const content = loading
-    ? <Typography type="subheading" key="loading" className={classes.loading}><Spinner /> Loading Mapping Problems...</Typography>
+    ? <Typography variant="subheading" key="loading" className={classes.loading}><Spinner /> Loading Mapping Problems...</Typography>
     : (
       <MappingProblemsTable
         key="loaded"

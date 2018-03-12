@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom'
 import type {Match, RouterHistory} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
 import DeleteIcon from 'material-ui-icons/Delete'
 import Arrow from 'react-arrow'
 import Tooltip from 'material-ui/Tooltip'
@@ -100,7 +101,7 @@ const styles = ({spacing, palette, typography}: Theme) => ({
   channelRow: {
     cursor: 'pointer',
     '&:hover > td': {
-      backgroundColor: palette.text.divider,
+      backgroundColor: palette.divider,
     },
   },
 })
@@ -157,7 +158,7 @@ class CalibrationTable extends React.Component<Props> {
                 component={Link}
                 to={mqttChannelConfigForm(match.url, (`create/${direction === 'TO_MQTT' ? 'to' : 'from'}`: any))}
               >
-                <AddIcon />
+                <Icon><AddIcon /></Icon>
               </IconButton>
             </TableCell>
           </TableRow>
@@ -198,7 +199,7 @@ class CalibrationTable extends React.Component<Props> {
                 >
                   {({bind}) => (
                     <IconButton className={classes.deleteButton} {...bind}>
-                      <DeleteIcon />
+                      <Icon><DeleteIcon /></Icon>
                     </IconButton>
                   )}
                 </ConfirmDeletePopover>

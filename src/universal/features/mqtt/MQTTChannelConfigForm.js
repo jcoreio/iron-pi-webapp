@@ -224,7 +224,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
-            <Typography type="subheading">
+            <Typography variant="subheading">
               <Spinner /> Loading MQTT Channel configuration...
             </Typography>
           </Paper>
@@ -290,7 +290,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
           />
           <div className={classes.buttons}>
             <Button
-              raised
+              variant="raised"
               className={classes.tallButton}
               onClick={this.handleCancel}
             >
@@ -308,14 +308,14 @@ class MQTTChannelConfigForm extends React.Component<Props> {
               }}
             >
               {({bind}) => (
-                <Button raised className={classes.tallButton} {...bind}>
+                <Button variant="raised" className={classes.tallButton} {...bind}>
                   Delete
                 </Button>
               )}
             </ConfirmDeletePopover>
             <Button
               type="submit"
-              raised
+              variant="raised"
               color="primary"
               className={classes.tallButton}
               disabled={pristine || submitting}

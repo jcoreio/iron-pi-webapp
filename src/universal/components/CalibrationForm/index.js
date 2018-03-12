@@ -205,7 +205,7 @@ class CalibrationForm extends React.Component<Props, State> {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
-            <Typography type="subheading">
+            <Typography variant="subheading">
               <Spinner /> Loading channel calibration...
             </Typography>
           </Paper>
@@ -252,7 +252,7 @@ class CalibrationForm extends React.Component<Props, State> {
           </Autocollapse>
           <div className={classes.buttons}>
             <Button
-              raised
+              variant="raised"
               component={Link}
               to={`${match.url}/${CALIBRATION_TABLE}`}
               className={step === 0 && !isInCalibration ? undefined : classes.hidden}
@@ -264,14 +264,14 @@ class CalibrationForm extends React.Component<Props, State> {
             <Spinner in={Boolean(submitting)} />
             <Button
               component={Link}
-              raised
+              variant="raised"
               to={dirname(match.url)}
               data-test-name="cancelButton"
             >
               Cancel
             </Button>
             <Button
-              raised
+              variant="raised"
               color="primary"
               data-test-name="backButton"
               {...backButtonProps}
@@ -280,7 +280,7 @@ class CalibrationForm extends React.Component<Props, State> {
               Back
             </Button>
             <Button
-              raised
+              variant="raised"
               color="primary"
               type="submit"
               disabled={submitting}

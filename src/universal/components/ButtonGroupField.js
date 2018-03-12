@@ -14,6 +14,7 @@ const styles = ({spacing, palette}: Theme) => ({
     marginTop: spacing.unit * 2,
     marginBottom: spacing.unit,
   },
+  button: {},
   buttonUnselected: {
     border: {
       width: 1,
@@ -23,7 +24,8 @@ const styles = ({spacing, palette}: Theme) => ({
     '&:not(:last-child)': {
       borderRightWidth: 0,
     }
-  }
+  },
+  helperText: {},
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -33,9 +35,6 @@ export type Props<V> = {
   label?: React.Node,
   classes: Classes,
   className?: string,
-  labelClassName?: string,
-  buttonClassName?: string,
-  helperTextClassName?: string,
   availableValues: Array<V>,
   getDisplayText: (value: V) => string,
   selectedButtonProps: $Shape<React.ElementProps<typeof Button>>,
@@ -56,10 +55,7 @@ const ButtonGroupField = <V>({
   label,
   classes,
   className,
-  labelClassName,
-  buttonClassName,
   selectedButtonProps,
-  helperTextClassName,
   availableValues,
   getDisplayText,
   input: {value: selectedValue, onChange, disabled, name},
@@ -67,7 +63,7 @@ const ButtonGroupField = <V>({
 }: Props<V>): React.Node => (
   <FormControl className={className} error={touched && (error != null || warning != null)}>
     {label &&
-      <FormLabel className={classNames(classes.label, labelClassName)}>
+      <FormLabel className={classes.label}>
         {label}
       </FormLabel>
     }
@@ -78,7 +74,7 @@ const ButtonGroupField = <V>({
           <Button
             key={key}
             value={value}
-            className={classNames(buttonClassName, {
+            className={classNames(classes.button, {
               [classes.buttonUnselected]: !selected,
             })}
             disabled={disabled}
@@ -91,7 +87,7 @@ const ButtonGroupField = <V>({
       })}
     </ButtonGroup>
     {touched && (error || warning) &&
-      <FormHelperText className={helperTextClassName}>
+      <FormHelperText className={classes.helperText}>
         {error || warning}
       </FormHelperText>
     }
@@ -100,8 +96,8 @@ const ButtonGroupField = <V>({
 ButtonGroupField.defaultProps = {
   getDisplayText: value => String(value),
   selectedButtonProps: {
-    color: 'accent',
-    raised: true,
+    color: 'secondary',
+    variant: 'raised',
   },
 }
 

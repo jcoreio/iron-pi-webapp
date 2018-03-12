@@ -7,6 +7,7 @@ import sortBy from 'lodash.sortby'
 import {featureComponents} from 'react-redux-features'
 import {withStyles} from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
 import List from 'material-ui/List'
 
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
@@ -113,7 +114,7 @@ class Sidebar extends React.Component<Props> {
           <h1 className={classes.jcoreHeader}>
             <Link to="/">jcore.io</Link>
             <IconButton id="closeSidebarButton" color="inherit" onClick={onClose} className={classes.closeButton}>
-              <ChevronLeftIcon />
+              <Icon><ChevronLeftIcon /></Icon>
             </IconButton>
           </h1>
           <h2 className={classes.ironPiHeader}>iron pi</h2>

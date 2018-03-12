@@ -254,7 +254,7 @@ class ChannelForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <Paper className={classes.paper}>
-            <Typography type="subheading">
+            <Typography variant="subheading">
               <Spinner /> Loading channel configuration...
             </Typography>
           </Paper>
@@ -281,9 +281,9 @@ class ChannelForm extends React.Component<Props> {
             <Field
               name="config.mode"
               component={ButtonGroupField}
-              buttonClassName={classes.tallButton}
+              classes={{button: classes.tallButton}}
               availableValues={ChannelModesArray}
-              activeButtonProps={{accent: true}}
+              activeButtonProps={{secondary: true}}
               getDisplayText={getChannelModeDisplayText}
               className={classes.formControl}
               validate={required()}
@@ -317,7 +317,7 @@ class ChannelForm extends React.Component<Props> {
           />
           <div className={classes.buttons}>
             <Button
-              raised
+              variant="raised"
               className={classes.tallButton}
               onClick={this.handleCancel}
             >
@@ -325,7 +325,7 @@ class ChannelForm extends React.Component<Props> {
             </Button>
             <Button
               type="submit"
-              raised
+              variant="raised"
               color="primary"
               className={classes.tallButton}
               disabled={pristine || submitting}

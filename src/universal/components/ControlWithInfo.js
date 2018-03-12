@@ -37,15 +37,14 @@ type Classes = $Call<ExtractClasses, typeof styles>
 export type Props = {
   classes: Classes,
   className: string,
-  controlClassName?: string,
   children: React.Node,
   info: React.Node,
 }
 
 const ControlWithInfo = withStyles(styles, {withTheme: true})(
-  ({classes, className, children, info, controlClassName}: Props) => (
+  ({classes, className, children, info}: Props) => (
     <div className={classNames(classes.root, className)}>
-      <div className={classNames(classes.control, controlClassName)}>
+      <div className={classes.control}>
         {children}
       </div>
       <Tooltip title={info} placement="left" classes={{tooltip: classes.tooltip}}>

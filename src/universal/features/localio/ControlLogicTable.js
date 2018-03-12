@@ -12,6 +12,7 @@ import {withStyles} from 'material-ui/styles'
 import {MenuItem} from 'material-ui/Menu'
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
 import Tooltip from 'material-ui/Tooltip'
 import AddIcon from '../../components/icons/AddRectangle'
 import InfoIcon from 'material-ui-icons/Info'
@@ -95,7 +96,7 @@ const styles = ({spacing, palette, typography: {pxToRem}}: Theme) => ({
     fontSize: pxToRem(18),
   },
   labelValid: {
-    color: palette.input.inputText,
+    color: palette.text.primary,
   },
   addConditionButton: {
     fontSize: pxToRem(16),
@@ -251,7 +252,7 @@ class ControlLogicTable extends React.Component<Props> {
                     onClick={() => fields.remove(index)}
                     data-test-name="deleteConditionButton"
                   >
-                    <DeleteIcon />
+                    <Icon><DeleteIcon /></Icon>
                   </IconButton>
                 </TableCell>
               </TableRow>

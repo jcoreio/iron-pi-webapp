@@ -4,6 +4,7 @@ import * as React from 'react'
 import {ListItemSecondaryAction} from 'material-ui/List'
 import {withStyles} from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
 import {Link} from 'react-router-dom'
 import {mqttConfigForm} from './routePaths'
 
@@ -52,7 +53,7 @@ const MQTTSidebarSection = ({expanded, configs, onExpandedChange, loading, class
             className={classes.addConfigButton}
             to={mqttConfigForm(('create': any))}
           >
-            <AddIcon className={classes.addConfigIcon} />
+            <Icon><AddIcon className={classes.addConfigIcon} /></Icon>
           </IconButton>
         </ListItemSecondaryAction>
       )

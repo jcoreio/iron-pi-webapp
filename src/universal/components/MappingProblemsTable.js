@@ -19,7 +19,7 @@ const styles = ({palette}: Theme) => ({
   linkRow: {
     cursor: 'pointer',
     '&:hover > td': {
-      backgroundColor: palette.text.divider,
+      backgroundColor: palette.divider,
     },
   },
 })
@@ -102,7 +102,7 @@ const MappingProblemsSection = ({classes, title, MappingProblems = [], getMappin
     <TableHead>
       <TableRow>
         <TableCell colSpan={3}>
-          <Typography type="subheading">
+          <Typography variant="subheading">
             {title}
           </Typography>
         </TableCell>

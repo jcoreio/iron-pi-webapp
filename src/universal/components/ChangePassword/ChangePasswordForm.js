@@ -98,7 +98,7 @@ class ChangePasswordForm extends React.Component<Props> {
         <div className={classes.footer}>
           {submitting && <Spinner />}
           <Button
-            raised
+            variant="raised"
             onClick={onCancel}
             className={classes.footerButton}
           >
@@ -106,7 +106,7 @@ class ChangePasswordForm extends React.Component<Props> {
           </Button>
           <Button
             type="submit"
-            raised
+            variant="raised"
             color="primary"
             className={classes.footerButton}
             disabled={!valid || submitting}

@@ -8,6 +8,7 @@ import TextField from '../TextField'
 import {required} from 'redux-form-validators'
 import type {FieldArrayProps} from 'redux-form'
 import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
 import DeleteIcon from 'material-ui-icons/Delete'
 import {FormControl, FormHelperText} from 'material-ui/Form'
 import Arrow from 'react-arrow'
@@ -123,7 +124,7 @@ class CalibrationTable extends React.Component<Props> {
               {editable &&
                 <TableCell>
                   <IconButton className={classes.addButton} onClick={() => fields.push({})}>
-                    <AddIcon />
+                    <Icon><AddIcon /></Icon>
                   </IconButton>
                 </TableCell>
               }
@@ -154,7 +155,7 @@ class CalibrationTable extends React.Component<Props> {
                 {editable &&
                   <TableCell>
                     <IconButton className={classes.deleteButton} onClick={() => fields.remove(index)}>
-                      <DeleteIcon />
+                      <Icon><DeleteIcon /></Icon>
                     </IconButton>
                   </TableCell>
                 }

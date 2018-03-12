@@ -32,7 +32,7 @@ const DigitalInputConfigSection = (
           name="config.reversePolarity"
           label="Polarity"
           component={ButtonGroupField}
-          buttonClassName={tallButtonClass}
+          classes={{button: tallButtonClass}}
           availableValues={[false, true]}
           getDisplayText={value => value ? 'Reversed' : 'Normal'}
           validate={required()}

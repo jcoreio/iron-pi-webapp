@@ -25,7 +25,7 @@ const AnalogInputConfigSection = ({formControlClass, firstControlClass, lastCont
       <DrilldownButton
         className={formControlClass}
         component={Link}
-        raised
+        variant="raised"
         to={`${match.url}/${CALIBRATION}`}
       >
         Calibration

@@ -88,7 +88,7 @@ class LoginForm extends React.Component<Props> {
           {submitting && <Spinner />}
           <Button
             type="submit"
-            raised
+            variant="raised"
             color="primary"
             className={classes.loginButton}
             disabled={!valid || submitting}

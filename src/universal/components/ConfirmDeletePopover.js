@@ -92,10 +92,10 @@ class ConfirmDeletePopover extends React.Component<Props, State> {
             {confirmationMessage || 'Are you sure?'}
           </h4>
           <div className={classes.buttons}>
-            <Button onClick={this.handleConfirmClick} raised className={classes.deleteButton}>
+            <Button onClick={this.handleConfirmClick} variant="raised" className={classes.deleteButton}>
               Delete
             </Button>
-            <Button onClick={this.handlePopoverClose} raised>
+            <Button onClick={this.handlePopoverClose} variant="raised">
               Cancel
             </Button>
           </div>

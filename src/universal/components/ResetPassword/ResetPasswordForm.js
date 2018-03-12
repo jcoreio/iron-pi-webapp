@@ -129,10 +129,10 @@ const ResetPasswordForm = ({classes, onSubmit, onCancel, submitting, step, title
       </ViewSlider>
       <div className={classes.footer}>
         {submitting && <Spinner />}
-        <Button raised className={classes.footerButton} onClick={onCancel}>
+        <Button variant="raised" className={classes.footerButton} onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" raised color="primary" className={classes.footerButton} disabled={step === 1 || submitting}>
+        <Button type="submit" variant="raised" color="primary" className={classes.footerButton} disabled={step === 1 || submitting}>
           Next
         </Button>
       </div>
