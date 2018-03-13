@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import type {RouterHistory, Match} from 'react-router-dom'
+import {compose} from 'redux'
 import Paper from 'material-ui/Paper'
 import {Field} from 'redux-form-normalize-on-blur'
 import {NumericField} from 'redux-form-numeric-field'
@@ -28,6 +29,7 @@ import type {Channel} from './MQTTChannelConfigsTable'
 import MQTTChannelConfigsTable from './MQTTChannelConfigsTable'
 import {ProtocolsArray, getProtocolDisplayText} from '../../mqtt/MQTTConfig'
 import ButtonGroupField from '../../components/ButtonGroupField'
+import {formValues} from 'redux-form'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -453,5 +455,11 @@ const fieldsForProtocol: {[protocol: Protocol]: React.ComponentType<ProtocolFiel
   TEXT_JSON: TextJsonFields,
 }
 
-export default withStyles(styles, {withTheme: true})(MQTTConfigForm)
+export default compose(
+  withStyles(styles, {withTheme: true}),
+  formValues({
+    loadedId: 'id',
+    protocol: 'protocol',
+  })
+)(MQTTConfigForm)
 

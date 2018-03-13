@@ -1,6 +1,6 @@
 // @flow
 
-import {reduxForm, formValues} from 'redux-form'
+import {reduxForm} from 'redux-form'
 import type {Match, RouterHistory} from 'react-router-dom'
 import {compose} from 'redux'
 import {graphql} from 'react-apollo'
@@ -112,10 +112,6 @@ export default compose(
   }),
   reduxForm({
     form: 'MQTTConfig',
-  }),
-  formValues({
-    loadedId: 'id',
-    protocol: 'protocol',
   })
 )(MQTTConfigForm)
 
