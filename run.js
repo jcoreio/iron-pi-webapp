@@ -360,4 +360,9 @@ task('simulate:values', async () => {
   await new Promise(() => {})
 }).description('starts the channel value simulator')
 
+task('styleguide', async () => {
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  await spawn('styleguidist', ['server'])
+}).description('run styleguidist')
+
 cli()

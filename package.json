@@ -192,6 +192,8 @@
     "promisify-child-process": "^1.0.0",
     "raw-loader": "^0.5.1",
     "react-hot-loader": "^4.0.0-beta",
+    "react-styleguide": "^0.0.4",
+    "react-styleguidist": "^6.2.7",
     "redux-features-hot-loader": "^1.0.3",
     "redux-logger": "^3.0.1",
     "resolve-url-loader": "^2.0.2",
