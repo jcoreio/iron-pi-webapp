@@ -12,7 +12,6 @@ import {parseState} from '../universal/redux/types'
 import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
-import '../universal/components/initJss'
 import apollo, {cache} from './apollo/client'
 
 async function bootstrap(): Promise<any> {

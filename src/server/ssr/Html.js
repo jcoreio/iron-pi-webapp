@@ -12,7 +12,9 @@ import autoprefixer from 'autoprefixer'
 
 import App from '../../universal/components/App'
 import type {Store} from '../../universal/redux/types'
-import '../../universal/components/initJss'
+import createJss from '../../universal/jss/createJss'
+
+const jss = createJss()
 
 const postcssInstance = postcss([autoprefixer()])
 
@@ -38,7 +40,7 @@ const Html = ({routerContext, location, title, assets, store, apolloClient, extr
   const initialState = `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState().set('features', {}))}`
   const sheets = new SheetsRegistry()
   const root = renderToString(
-    <JssProvider registry={sheets}>
+    <JssProvider registry={sheets} jss={jss}>
       <ApolloProvider client={apolloClient}>
         <Provider store={store}>
           <StaticRouter context={routerContext} location={location}>

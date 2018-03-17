@@ -341,4 +341,9 @@ task('push:staging', async () => {
 task('bootstrap', ['node_modules'], rule => require('./scripts/bootstrap')(rule))
   .description('set up initial project after cloning from skeleton')
 
+task('styleguide', async () => {
+  require('defaultenv')(['env/dev.js', 'env/local.js'])
+  await spawn('styleguidist', ['server'])
+}).description('run styleguidist')
+
 cli()
