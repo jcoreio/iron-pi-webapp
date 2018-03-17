@@ -10,7 +10,6 @@ import Root from './Root'
 import {setRenderMode} from '../universal/redux/renderMode'
 import addFeatures from '../universal/features/addFeatures'
 import {loadInitialFeatures} from 'redux-features'
-import '../universal/components/initJss'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
