@@ -325,7 +325,9 @@ task('db:migrate:undo', async rule => require('./scripts/undoMigrations')(rule))
 task('db:migrate', async () => {
   require('defaultenv')(['env/local.js'])
   require('babel-register')
-  await require('./src/server/sequelize/migrate').default()
+  const {sequelize, umzug} = await require('./src/server/initDatabase').default()
+  await require('./src/server/sequelize/migrate').default({sequelize, umzug})
+  await sequelize.close()
 }).description('run database migrations')
 
 task('open:coverage', () => {
