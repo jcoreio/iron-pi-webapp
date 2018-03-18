@@ -1,20 +1,25 @@
 // @flow
 
 import {Client} from 'pg'
-import umzug from './umzug'
+import type Sequelize from 'sequelize'
+import type Umzug from 'umzug'
 import promisify from 'es6-promisify'
-
-import sequelize, {dbConnectionParams} from './index'
-import logger from '../../universal/logger'
+import logger from 'log4jcore'
 
 const log = logger('sequelize:migrate')
 
-const storage = umzug.storage
+type Options = {
+  sequelize: Sequelize,
+  umzug: Umzug,
+}
 
-export default async function migrate(): Promise<void> {
+export default async function migrate(options: Options): Promise<void> {
   log.info('Starting database migration...')
 
-  const {host, user, password, database} = dbConnectionParams()
+  const {sequelize, umzug} = options
+  // $FlowFixMe
+  const {host, username: user, password, database} = sequelize.config
+
   const client = new Client({host, user, password, database: user})
 
   try {
@@ -29,13 +34,7 @@ export default async function migrate(): Promise<void> {
     }
 
     try {
-      const executed = await umzug.executed()
-      if (!executed.length) {
-        await sequelize.sync()
-        for (let migration of await umzug.pending()) await storage.logMigration(migration.file)
-      } else {
-        await umzug.up()
-      }
+      await umzug.up()
 
       log.info('Successfully migrated SQL Database')
     } catch (error) {
@@ -46,4 +45,3 @@ export default async function migrate(): Promise<void> {
     client.end()
   }
 }
-

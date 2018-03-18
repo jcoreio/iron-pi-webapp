@@ -2,14 +2,17 @@
 
 import path from 'path'
 import express from 'express'
+import defaults from 'lodash.defaults'
 
-import type {$Request, $Response} from 'express'
+import type {$Request, $Response, $Application} from 'express'
 
 import Sequelize from 'sequelize'
-import sequelize from './sequelize'
-import umzug from './sequelize/umzug'
-import databaseReady from './sequelize/databaseReady'
+import type Umzug from 'umzug'
 import sequelizeMigrate from './sequelize/migrate'
+import {defaultDbConnectionParams} from './sequelize'
+import type {DbConnectionParams} from './sequelize'
+import createModels from './sequelize/createModels'
+import initDatabase from './initDatabase'
 
 import redisReady from './redis/redisReady'
 import redisSubscriber from './redis/RedisSubscriber'
@@ -17,6 +20,10 @@ import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
 
 const log = logger('Server')
+
+type Options = $Shape<DbConnectionParams & {
+  port: number,
+}>
 
 /**
  * Wrap server start and stop logic, to make it runnable either from a command line or
@@ -27,23 +34,39 @@ export default class Server {
   _running: boolean = false
   _devGlobals: Object = {
     Sequelize,
-    sequelize,
-    umzug,
-    ...sequelize.models,
+  }
+  _port: number
+  _dbConnectionParams: DbConnectionParams
+  _umzug: ?Umzug
+  sequelize: ?Sequelize
+  express: ?$Application
+
+  constructor(options?: Options = {}) {
+    this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
+    const {host, user, database, password} = defaults(options, defaultDbConnectionParams())
+    this._dbConnectionParams = {host, user, database, password}
   }
 
   async start(): Promise<void> {
     if (this._running) return
 
-    await Promise.all([
-      databaseReady(),
-      redisReady(),
-    ])
-
-    redisSubscriber.start()
+    const {sequelize, umzug} = await initDatabase({
+      connectionParams: this._dbConnectionParams,
+    })
+    this._devGlobals.sequelize = this.sequelize = sequelize
+    this._devGlobals.umzug = this._umzug = umzug
 
     const forceMigrate = 'production' !== process.env.NODE_ENV
-    if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate()
+    if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate({sequelize, umzug})
+
+    this._devGlobals.sequelize = sequelize
+
+    createModels(sequelize)
+
+    Object.assign(this._devGlobals, sequelize.models)
+
+    await redisReady()
+    redisSubscriber.start()
 
     const app = express()
 
@@ -99,6 +122,9 @@ export default class Server {
     const httpServer = this._httpServer
     if (httpServer) httpServer.close()
     this._httpServer = undefined
+
+    const {sequelize} = this
+    if (sequelize) sequelize.close()
   }
 }
 

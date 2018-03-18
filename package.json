@@ -33,6 +33,8 @@
     "jss": "^9.8.0",
     "jss-expand": "^5.0.0",
     "jss-nested": "^6.0.1",
+    "lodash.debounce": "^4.0.8",
+    "log4jcore": "^0.0.1",
     "mindfront-redux-utils": "^1.2.3",
     "mindfront-redux-utils-immutable": "^1.3.0",
     "p-timeout": "^2.0.1",

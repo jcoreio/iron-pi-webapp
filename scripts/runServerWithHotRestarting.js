@@ -2,7 +2,7 @@
 
 import path from 'path'
 import chokidar from 'chokidar'
-import {debounce} from 'lodash'
+import debounce from 'lodash.debounce'
 // $FlowFixMe
 import _module from 'module'
 import watchMigrations from 'umzug-beobachten'
@@ -16,7 +16,7 @@ type Options = {
 function runServerWithHotRestarting(options: Options): Promise<void> {
   const {srcDir} = options
   const serverDir = path.join(srcDir, 'server')
-  const main = options.main || path.resolve(serverDir, 'index.js')
+  const serverModule = options.main || path.resolve(serverDir, 'Server.js')
   const migrationsDir = options.migrationsDir || path.resolve(serverDir, 'sequelize', 'migrations')
 
   // Do "hot-reloading" of express stuff on the server
@@ -29,7 +29,7 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
 
   const serverSideRender = path.join(serverDir, 'ssr/serverSideRender.js')
   const moduleRequiresRestart: {[id: string]: boolean} = {
-    [main]: true,
+    [serverModule]: true,
     [serverSideRender]: false,
   }
 
@@ -42,6 +42,22 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
     return _load_orig(name, parent, isMain)
   }
 
+  let server
+  let umzugWatcher
+  async function start(): Promise<void> {
+    try {
+      // $FlowFixMe
+      const Server = require(serverModule).default
+      server = new Server()
+      await server.start()
+      umzugWatcher = watchMigrations(server._umzug)
+    } catch (error) {
+      console.error(error.stack)
+    }
+  }
+
+  start()
+
   function clearCache() {
     Object.keys(require.cache).forEach((id: string) => {
       if (id.startsWith(srcDir)) delete require.cache[id]
@@ -50,28 +66,16 @@ function runServerWithHotRestarting(options: Options): Promise<void> {
 
   const clearCacheSoon = debounce(clearCache, 1000)
 
-  // $FlowFixMe
-  let server = require(main)
-  try {
-    server.start()
-  } catch (error) {
-    console.error(error.stack)
-  }
-
   const restartSoon = debounce(async () => {
     try {
+      await umzugWatcher.close()
       await server.stop()
       clearCache()
-      // $FlowFixMe
-      server = require(serverDir)
-      server.start()
+      await start()
     } catch (error) {
       console.error(error.stack)
     }
   }, 1000)
-
-  // $FlowFixMe
-  watchMigrations(require(path.join(serverDir, 'sequelize/umzug')))
 
   return new Promise((resolve: () => void) => {
     watcher.on('ready', () => {

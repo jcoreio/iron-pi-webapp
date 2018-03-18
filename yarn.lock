@@ -5666,6 +5666,10 @@ lodash.compact@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/lodash.compact/-/lodash.compact-3.0.1.tgz#540ce3837745975807471e16b4a2ba21e7256ca5"
 
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.npmjs.org/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+
 lodash.defaults@^3.1.2:
   version "3.1.2"
   resolved "https://registry.npmjs.org/lodash.defaults/-/lodash.defaults-3.1.2.tgz#c7308b18dbf8bc9372d701a73493c61192bd2e2c"
@@ -5829,6 +5833,12 @@ log-symbols@^2.1.0:
   resolved "https://registry.npmjs.org/log-symbols/-/log-symbols-2.1.0.tgz#f35fa60e278832b538dc4dddcbb478a45d3e3be6"
   dependencies:
     chalk "^2.0.1"
+
+log4jcore@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/log4jcore/-/log4jcore-0.0.1.tgz#0c3a4fa330044a439d75861a7c49d8149de5ff98"
+  dependencies:
+    lodash "^4.17.4"
 
 loglevel@^1.4.1:
   version "1.6.1"
