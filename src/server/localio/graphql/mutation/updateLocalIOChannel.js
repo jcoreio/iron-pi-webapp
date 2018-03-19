@@ -6,7 +6,7 @@ import type {LocalIOChannelConfig} from '../../../../universal/localio/LocalIOCh
 import type {MetadataItem} from '../../../../universal/types/MetadataItem'
 import SequelizeMetadataItem from '../../../models/MetadataItem'
 import JSONType from 'graphql-type-json'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 
 type InputChannel = {
   id?: number,

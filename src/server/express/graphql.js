@@ -1,7 +1,7 @@
 // @flow
 
 import type {$Request, $Response} from 'express'
-import type {GraphQLContext, GraphQLDependencies} from '../graphql/Context'
+import type {GraphQLContext, GraphQLDependencies} from '../graphql/GraphQLContext'
 import {graphqlExpress} from "apollo-server-express"
 import type {GraphQLSchema} from 'graphql'
 import formatError from '../graphql/formatError'

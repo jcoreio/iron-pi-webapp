@@ -2,7 +2,7 @@
 
 import type {GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import {IN_CONNECT_MODE} from './constants'
 
 export default function createInConnectMode(): GraphQLFieldConfig<any, GraphQLContext> {

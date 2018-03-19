@@ -1,7 +1,7 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import createLocalIOChannelState from './LocalIOChannelState'
 import createLocalIOChannelStates from './LocalIOChannelStates'
 import type {LocalIOFeature} from '../../LocalIOFeature'

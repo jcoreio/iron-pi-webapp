@@ -5,7 +5,7 @@ import * as graphql from 'graphql'
 import MQTTChannelConfig from '../../models/MQTTChannelConfig'
 import {attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra/lib/index'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import MetadataItem from '../../../graphql/types/MetadataItem'
 import JSONType from 'graphql-type-json'
 

@@ -1,7 +1,7 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 
 export default function verifyAccessCode(): graphql.GraphQLFieldConfig<any, GraphQLContext> {
   return {

@@ -3,7 +3,7 @@
 import type Sequelize, {Model} from 'sequelize'
 import type {GraphQLInputType, GraphQLOutputType, GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
-import type {GraphQLContext} from './Context'
+import type {GraphQLContext} from './GraphQLContext'
 
 export type GraphQLFeature = {
   +addTypes?: (options: {

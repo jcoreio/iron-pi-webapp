@@ -5,7 +5,7 @@ import * as graphql from 'graphql'
 import {defaultArgs, resolver} from 'graphql-sequelize'
 
 import requireUserId from '../requireUserId'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'

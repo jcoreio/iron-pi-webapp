@@ -3,7 +3,7 @@
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
 import type {GraphQLOutputType, GraphQLInputType} from 'graphql'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import setUsername from './setUsername'
 import changePassword from './changePassword'
 import createMetadataItem from './createMetadataItem'

@@ -4,7 +4,7 @@ import * as graphql from 'graphql'
 import {defaultArgs, resolver} from 'graphql-sequelize'
 import requireUserId from '../../../graphql/requireUserId'
 import LocalIOChannel from '../../models/LocalIOChannel'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import type {LocalIOFeature} from '../../LocalIOFeature'
 
 const addQueryFields = (feature: LocalIOFeature) => ({types, queryFields}: {

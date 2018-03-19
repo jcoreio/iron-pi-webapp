@@ -5,7 +5,7 @@ import {defaultArgs, resolver} from 'graphql-sequelize'
 import requireUserId from '../../../graphql/requireUserId'
 import MQTTConfig from '../../models/MQTTConfig'
 import MQTTChannelConfig from '../../models/MQTTChannelConfig'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import type MQTTFeature from '../../MQTTFeature'
 
 const addQueryFields = (feature: MQTTFeature) => ({types, queryFields}: {

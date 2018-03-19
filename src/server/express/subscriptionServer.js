@@ -4,7 +4,7 @@ import {execute, subscribe} from 'graphql'
 import type {GraphQLSchema} from 'graphql'
 import {SubscriptionServer} from "subscriptions-transport-ws"
 import verifyToken from '../auth/verifyToken'
-import type {GraphQLContext, GraphQLDependencies} from '../graphql/Context'
+import type {GraphQLContext, GraphQLDependencies} from '../graphql/GraphQLContext'
 
 export default function createSubscriptionServer(options: {
   schema: GraphQLSchema,

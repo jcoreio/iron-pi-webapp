@@ -3,7 +3,7 @@
 import * as graphql from 'graphql'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import JSONType from 'graphql-type-json'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import type {Calibration} from '../../../../universal/localio/LocalIOChannel'
 
 export default function updateLocalIOChannelCalibration({types}: {

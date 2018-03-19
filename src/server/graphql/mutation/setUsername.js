@@ -2,7 +2,7 @@
 
 import type {GraphQLFieldConfig, GraphQLOutputType} from 'graphql'
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import User from '../../models/User'
 
 type Options = {

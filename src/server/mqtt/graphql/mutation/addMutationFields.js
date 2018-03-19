@@ -1,7 +1,7 @@
 // @flow
 
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import defaultMutations from '../../../graphql/mutation/defaultMutations'
 import type MQTTFeature from '../../MQTTFeature'
 import SequelizeMQTTConfig from '../../models/MQTTConfig'

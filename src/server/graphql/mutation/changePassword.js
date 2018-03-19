@@ -5,7 +5,7 @@ import {ValidationError} from 'sequelize'
 import * as graphql from 'graphql'
 import bcrypt from 'bcrypt'
 import promisify from 'es6-promisify'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import User from '../../models/User'
 
 type Args = {

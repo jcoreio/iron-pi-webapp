@@ -34,7 +34,7 @@ import createToken from './auth/createToken'
 import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
 import createSubscriptionServer from './express/subscriptionServer'
-import type {GraphQLDependencies} from './graphql/Context'
+import type {GraphQLDependencies} from './graphql/GraphQLContext'
 
 import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'

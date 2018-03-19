@@ -2,7 +2,7 @@
 
 import type {GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../../../graphql/Context'
+import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import {LocalIOChannelState as GraphQLLocalIOChannelState} from '../types/LocalIOChannelState'
 import type {LocalIOChannelState} from '../../../../universal/localio/LocalIOChannel'
 

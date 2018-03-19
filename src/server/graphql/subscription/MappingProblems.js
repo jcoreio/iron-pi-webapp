@@ -2,7 +2,7 @@
 
 import type {GraphQLFieldConfig} from 'graphql'
 import * as graphql from 'graphql'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import {MAPPING_PROBLEMS} from './constants'
 import GraphQLMappingProblem from '../types/MappingProblem'
 

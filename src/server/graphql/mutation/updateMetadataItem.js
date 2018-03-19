@@ -1,6 +1,6 @@
 // @flow
 
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import * as graphql from 'graphql'
 import type {MetadataItem} from '../../../universal/types/MetadataItem'
 import SequelizeMetadataItem from '../../models/MetadataItem'

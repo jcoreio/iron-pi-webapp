@@ -3,7 +3,7 @@
 import {Model} from 'sequelize'
 import * as graphql from 'graphql'
 import {createMutation, updateOneMutation, destroyMutation} from '@jcoreio/graphql-sequelize-extra'
-import type {GraphQLContext} from '../Context'
+import type {GraphQLContext} from '../GraphQLContext'
 import {defaultCreateTypeName} from '../types/defaultCreateType'
 import {defaultUpdateTypeName} from '../types/defaultUpdateType'
 
