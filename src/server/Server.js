@@ -3,10 +3,10 @@
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
-import {graphqlExpress, graphiqlExpress} from 'apollo-server-express'
-import {execute, subscribe} from 'graphql'
-import {SubscriptionServer} from 'subscriptions-transport-ws'
-import graphqlSchema from './graphql/schema'
+import type {GraphQLSchema} from 'graphql'
+import {PubSub} from 'graphql-subscriptions'
+import type {PubSubEngine} from 'graphql-subscriptions'
+import createSchema from './graphql/schema'
 import defaults from 'lodash.defaults'
 
 import type {$Request, $Response, $Application} from 'express'
@@ -18,12 +18,15 @@ import {defaultDbConnectionParams} from './sequelize'
 import type {DbConnectionParams} from './sequelize'
 import createModels from './sequelize/createModels'
 import initDatabase from './initDatabase'
-import pubsub from './graphql/pubsub'
 
 import redisReady from './redis/redisReady'
 import redisSubscriber from './redis/RedisSubscriber'
 import logger from '../universal/logger'
 import requireEnv from '@jcoreio/require-env'
+import handleGraphql from './express/graphql'
+import handleGraphiql from './express/graphiql'
+import createSubscriptionServer from './express/subscriptionServer'
+import type {GraphQLDependencies} from './graphql/GraphQLContext'
 
 const log = logger('Server')
 
@@ -40,23 +43,26 @@ export default class Server {
   _running: boolean = false
   _devGlobals: Object = {
     Sequelize,
-    graphqlSchema,
-    pubsub,
   }
   _port: number
   _dbConnectionParams: DbConnectionParams
   _umzug: ?Umzug
   sequelize: ?Sequelize
+  graphqlSchema: ?GraphQLSchema
+  pubsub: PubSubEngine
   express: ?$Application
 
   constructor(options?: Options = {}) {
     this._port = options.port || parseInt(requireEnv('BACKEND_PORT'))
     const {host, user, database, password} = defaults(options, defaultDbConnectionParams())
     this._dbConnectionParams = {host, user, database, password}
+    this.pubsub = new PubSub()
   }
 
   async start(): Promise<void> {
     if (this._running) return
+
+    const {pubsub} = this
 
     const {sequelize, umzug} = await initDatabase({
       connectionParams: this._dbConnectionParams,
@@ -73,6 +79,12 @@ export default class Server {
 
     Object.assign(this._devGlobals, sequelize.models)
 
+    this._devGlobals.pubsub = pubsub
+
+    const graphqlSchema = this.graphqlSchema = this._devGlobals.graphqlSchema = createSchema({
+      sequelize,
+    })
+
     await redisReady()
     redisSubscriber.start()
 
@@ -86,13 +98,28 @@ export default class Server {
       }
     })
 
-    const GRAPHQL_PATH = '/graphql'
-    app.use(GRAPHQL_PATH, bodyParser.json(), graphqlExpress({
-      schema: graphqlSchema,
-      context: {sequelize},
-    }))
 
-    app.use('/graphiql', graphiqlExpress({endpointURL: GRAPHQL_PATH}))
+    const graphqlDependencies: GraphQLDependencies = {
+      sequelize,
+      pubsub,
+    }
+
+    const GRAPHQL_PATH = '/graphql'
+    app.use(GRAPHQL_PATH, bodyParser.json(), handleGraphql({
+      schema: graphqlSchema,
+      ...graphqlDependencies,
+    }))
+    app.use(GRAPHQL_PATH, (error: ?Error, req: $Request, res: $Response, next: Function) => {
+      if (error) {
+        res.status((error: any).statusCode || 500).send({error: error.message})
+        return
+      }
+      next(error)
+    })
+
+    if (process.env.NODE_ENV !== 'production') {
+      app.use('/graphiql', handleGraphiql({endpointURL: GRAPHQL_PATH}))
+    }
     app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
     app.use('/static', express.static(path.resolve(__dirname, '..', '..', 'static')))
 
@@ -114,10 +141,13 @@ export default class Server {
 
     const port = parseInt(requireEnv('BACKEND_PORT'))
     const httpServer = this._httpServer = app.listen(port)
-    SubscriptionServer.create(
-      {schema: graphqlSchema, execute, subscribe},
-      {server: httpServer, path: GRAPHQL_PATH},
-    )
+    if (!httpServer) throw new Error('expected httpServer to be defined')
+    createSubscriptionServer({
+      schema: graphqlSchema,
+      server: httpServer,
+      path: GRAPHQL_PATH,
+      dependencies: graphqlDependencies,
+    })
 
     // istanbul ignore next
     if (process.env.NODE_ENV !== 'production') {

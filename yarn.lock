@@ -88,9 +88,9 @@
     resolve-global "^0.1.0"
     semver "^5.3.0"
 
-"@jcoreio/graphql-sequelize-extra@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@jcoreio/graphql-sequelize-extra/-/graphql-sequelize-extra-1.0.0.tgz#671127ff2f37bf9684286684ef6f0a0cae75fb43"
+"@jcoreio/graphql-sequelize-extra@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.npmjs.org/@jcoreio/graphql-sequelize-extra/-/graphql-sequelize-extra-1.3.1.tgz#80209a41d7725f1fa80a5746a497e6e9e051b3d0"
 
 "@jcoreio/poll@^1.0.0":
   version "1.0.0"
