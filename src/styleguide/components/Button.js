@@ -1,5 +1,8 @@
 import * as React from 'react'
-import Button from 'material-ui/Button'
+import MuiButton from 'material-ui/Button'
 
-export default ({children}) => <Button color="primary" variant="raised">{children}</Button>
+const Button = ({children}) => <MuiButton color="primary" variant="raised">{children}</MuiButton>
+
+export default Button
+
 

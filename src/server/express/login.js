@@ -7,7 +7,7 @@ import authorize from '../auth/authorize'
 export default async function login(req: $Request, res: $Response): Promise<void> {
   let token
   try {
-    const {username, password} = req.body
+    const {username, password} = (req.body: any)
     token = await authorize({username, password})
   } catch (error) {
     res.status(401).json({error: error.message})

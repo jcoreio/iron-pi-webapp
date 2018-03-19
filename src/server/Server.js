@@ -254,6 +254,7 @@ export default class Server {
 
       const port = this._port
       const httpServer = this._httpServer = app.listen(port)
+      if (!httpServer) throw new Error("Expected httpServer to be defined")
       createSubscriptionServer({
         schema: graphqlSchema,
         server: httpServer,

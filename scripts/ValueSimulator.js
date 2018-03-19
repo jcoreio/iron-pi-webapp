@@ -65,6 +65,7 @@ class ValueSimulator {
     })
 
     const httpLink = new HttpLink({
+      // $FlowFixMe
       uri: `${rootUrl}/graphql`,
       fetch,
     })

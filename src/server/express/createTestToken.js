@@ -12,7 +12,7 @@ async function createTestToken(req: $Request, res: $Response): Promise<void> {
     return
   }
 
-  const {expiresIn} = req.body
+  const {expiresIn} = (req.body: any)
   const token = await createToken({userId, scopes: [...scopes], expiresIn})
   res.status(200).json({token})
 }

@@ -61,6 +61,7 @@ export default function createClient(options: Options = {}): ApolloClient {
 
   // Create an http link:
   const httpLink = new HttpLink({
+    // $FlowFixMe
     uri: `${window.location.origin}/graphql`
   })
 
