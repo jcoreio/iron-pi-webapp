@@ -1,0 +1,9 @@
+{
+  "buses": [
+    {
+      "id": 0,
+      "path": "/dev/spidev0.0",
+      "irqPin": 34
+    }
+  ]
+}
