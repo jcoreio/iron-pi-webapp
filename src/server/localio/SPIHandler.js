@@ -58,11 +58,18 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
   _messageCount: number = 0;
   _okMessageCount: number = 0;
 
+  _spiErrorLogged: boolean = false;
+
   constructor(spiHubClient: SPIHubClient) {
     super()
     this._spi = spiHubClient
     this._spi.on('message', msgObj => this._onSPIMessage(msgObj))
-    this._spi.on('error', (err: Error) => log.error(`SPI error: ${err.stack || (err: any)}`))
+    this._spi.on('error', (err: Error) => {
+      if (!this._spiErrorLogged) {
+        log.error(`SPI error: ${err.stack || (err: any)}`)
+        this._spiErrorLogged = true
+      }
+    })
   }
 
   start() {
