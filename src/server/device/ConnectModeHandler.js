@@ -17,15 +17,15 @@ export default class ConnectModeHandler extends EventEmitter<Events> {
   _connectModeTimeout: ?number
 
   setConnectButtonEventCount(count: number) {
-    if (count !== this._prevCount) {
+    if (this._prevCount != null && count !== this._prevCount) {
       // Button was pressed
-      this._prevCount = count
       this.inConnectMode = true
       if (this._connectModeTimeout) {
         clearTimeout(this._connectModeTimeout)
       }
       this._connectModeTimeout = setTimeout(() => this._connectModeTimeoutExpired(), CONNECT_MODE_TIMEOUT)
     }
+    this._prevCount = count
   }
 
   _connectModeTimeoutExpired() {
