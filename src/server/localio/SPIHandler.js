@@ -25,6 +25,8 @@ export type DeviceStatus = {
   connectButtonEventCount?: number,
 }
 
+export const EVENT_DEVICE_STATUS = 'deviceStatus'
+
 type SPIHandlerEvents = {
   deviceStatus: [DeviceStatus],
 }
@@ -185,7 +187,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
       deviceStatus.connectButtonLevel = !!(connectButtonState & 0x80)
       deviceStatus.connectButtonEventCount = connectButtonState & 0x7F
     }
-    this.emit('deviceStatus', deviceStatus)
+    this.emit(EVENT_DEVICE_STATUS, deviceStatus)
   }
 }
 
