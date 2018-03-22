@@ -11,6 +11,7 @@ import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import defaults from 'lodash.defaults'
 import logger from 'log4jcore'
+import SPIHubClient from 'spi-hub-client'
 
 import type {$Request, $Response, $Application} from 'express'
 
@@ -19,6 +20,9 @@ import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import DataRouter, {EVENT_MAPPING_PROBLEMS_CHANGED} from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
+import LEDHandler from './localio/LEDHandler'
+import SPIHandler, {EVENT_DEVICE_STATUS} from './localio/SPIHandler'
+import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
@@ -35,6 +39,7 @@ import verifyToken from './auth/verifyToken'
 import requireAuthHeader from './express/requireAuthHeader'
 import createSubscriptionServer from './express/subscriptionServer'
 import type {GraphQLDependencies} from './graphql/GraphQLContext'
+
 
 import createModels from './sequelize/createModels'
 import type {ServerFeature} from './ServerFeature'
@@ -75,6 +80,11 @@ export default class Server {
   _features: ?Array<ServerFeature>
   _umzug: ?Umzug
   _graphqlDataPlugin: GraphQLDataPlugin
+
+  _spiHubClient = new SPIHubClient({binary: true})
+  _ledHandler = new LEDHandler(this._spiHubClient)
+  _spiHandler = new SPIHandler(this._spiHubClient)
+
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
   metadataHandler: ?MetadataHandler
@@ -91,6 +101,12 @@ export default class Server {
     this.pubsub = new PubSub()
     this._graphqlDataPlugin = new GraphQLDataPlugin(this.pubsub)
     this.connectModeHandler = new ConnectModeHandler()
+    this._spiHandler.on(EVENT_DEVICE_STATUS, (status: DeviceStatus) => {
+      const {connectButtonEventCount} = status
+      if (connectButtonEventCount != null)
+        this.connectModeHandler.setConnectButtonEventCount(connectButtonEventCount)
+    })
+
     this.accessCodeHandler = new AccessCodeHandler()
   }
 
@@ -138,6 +154,7 @@ export default class Server {
         tags: () => dataRouter.tags(),
         publicTags: () => dataRouter.publicTags(),
         metadataHandler,
+        spiHandler: this._spiHandler
       }
       await Promise.all(features.map(feature => feature.createDataPlugins && feature.createDataPlugins(dataPluginResources)))
       dataRouter.setPlugins(this._getDataPlugins())

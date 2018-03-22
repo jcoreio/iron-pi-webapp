@@ -19,32 +19,14 @@ import {EVENT_CHANNEL_STATES} from './LocalIODataPlugin'
 
 import type {DataPlugin, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import type {ServerFeature} from '../ServerFeature'
-import LEDHandler from './LEDHandler'
-import type {LEDMessage} from './LEDHandler'
-import SPIHandler from './SPIHandler'
-import SPIHubClient from 'spi-hub-client'
-
-const LED_MESSAGE_OK: LEDMessage = {
-  colors: [{color: 'green', count: 2}],
-  flashRate: 500,
-  idleTime: 2000
-}
-// "App Offline" LED pattern
-const LED_MESSAGE_APP_OFFLINE: LEDMessage = {
-  colors: [{color: 'red', count: 2}],
-  flashRate: 500,
-  idleTime: 2000
-}
+import type SPIHandler from './SPIHandler'
 
 type Resources = {
   getTagValue: (tag: string) => any,
+  spiHandler: SPIHandler,
 }
 
 export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
-  _spiHubClient = new SPIHubClient({binary: true})
-  _spiHandler = new SPIHandler(this._spiHubClient)
-  _ledHandler = new LEDHandler(this._spiHubClient)
-  _ledHandlerInterval: ?number
   _plugin: LocalIODataPlugin
 
   async getMigrations(): Promise<Array<string>> {
@@ -84,30 +66,13 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
       pubsub.publish(`LocalIOChannelStates`, {LocalIOChannelStates: states})
     })
   }
-  async start(): Promise<void> {
-    if (!this._ledHandlerInterval) {
-      this._ledHandlerInterval = setInterval(() => this._sendLEDStatus(), 4000)
-    }
-    this._sendLEDStatus()
-  }
 
   async stop(): Promise<void> {
     this._plugin.removeAllListeners(EVENT_CHANNEL_STATES)
-    if (this._ledHandlerInterval) {
-      clearInterval(this._ledHandlerInterval)
-      this._ledHandlerInterval = undefined
-    }
   }
 
-  _sendLEDStatus() {
-    this._ledHandler.sendLEDState(LED_MESSAGE_OK, LED_MESSAGE_APP_OFFLINE)
-  }
-
-  async createDataPlugins({getTagValue}: Resources): Promise<void> {
-    this._plugin = new LocalIODataPlugin({
-      spiHandler: this._spiHandler,
-      getTagValue,
-    })
+  async createDataPlugins({getTagValue, spiHandler}: Resources): Promise<void> {
+    this._plugin = new LocalIODataPlugin({getTagValue, spiHandler})
     await this._plugin._loadChannels()
   }
   getDataPlugins(): $ReadOnlyArray<DataPlugin> {

@@ -2,6 +2,7 @@
 
 import type {PluginInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import type MetadataHandler from '../metadata/MetadataHandler'
+import type SPIHandler from '../localio/SPIHandler'
 import type {PubSubEngine} from 'graphql-subscriptions'
 
 /**
@@ -67,6 +68,7 @@ export type DataPluginResources = {
   tags: () => Array<string>,
   publicTags: () => Array<string>,
   metadataHandler: MetadataHandler,
+  spiHandler: SPIHandler,
 }
 
 /**

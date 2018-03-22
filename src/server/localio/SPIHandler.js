@@ -1,12 +1,15 @@
 /* @flow */
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
+import logger from 'log4jcore'
 
 import { CHANNEL_DEVICE_STATUS, CHANNEL_DIGITAL_OUTPUT_STATUS, DIGITAL_OUTPUTS_TIMEOUT,
   MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID } from './SPIConstants'
 import { SPIDevices } from './SPIDevicesInfo'
 
 import type { SPIDeviceInfo } from './SPIDevicesInfo'
+
+const log = logger('SPIHandler')
 
 const MSG_ID_STATUS = 1
 
@@ -21,6 +24,8 @@ export type DeviceStatus = {
   connectButtonLevel?: boolean,
   connectButtonEventCount?: number,
 }
+
+export const EVENT_DEVICE_STATUS = 'deviceStatus'
 
 type SPIHandlerEvents = {
   deviceStatus: [DeviceStatus],
@@ -42,6 +47,7 @@ type MessageToSPI = string | Buffer | {
 
 type SPIHubEvents = {
   message: [MessageFromSPI],
+  error: [Error],
 }
 
 type SPIHubClient = EventEmitter<SPIHubEvents> & {
@@ -54,10 +60,18 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
   _messageCount: number = 0;
   _okMessageCount: number = 0;
 
+  _spiErrorLogged: boolean = false;
+
   constructor(spiHubClient: SPIHubClient) {
     super()
     this._spi = spiHubClient
     this._spi.on('message', msgObj => this._onSPIMessage(msgObj))
+    this._spi.on('error', (err: Error) => {
+      if (!this._spiErrorLogged) {
+        log.error(`SPI error: ${err.stack || (err: any)}`)
+        this._spiErrorLogged = true
+      }
+    })
   }
 
   start() {
@@ -173,7 +187,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
       deviceStatus.connectButtonLevel = !!(connectButtonState & 0x80)
       deviceStatus.connectButtonEventCount = connectButtonState & 0x7F
     }
-    this.emit('deviceStatus', deviceStatus)
+    this.emit(EVENT_DEVICE_STATUS, deviceStatus)
   }
 }
 

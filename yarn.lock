@@ -9770,9 +9770,9 @@ spdy@^3.4.1:
     select-hose "^2.0.0"
     spdy-transport "^2.0.18"
 
-spi-hub-client@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.npmjs.org/spi-hub-client/-/spi-hub-client-1.2.2.tgz#0f01160f629b9782dd67222c45a1149620ad24c5"
+spi-hub-client@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.npmjs.org/spi-hub-client/-/spi-hub-client-1.2.3.tgz#f787f34fa2c232a9365431d843aa34df678e5dae"
   dependencies:
     lodash "^4.12.0"
     socket-ipc "^1.0.0"

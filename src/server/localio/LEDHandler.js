@@ -20,6 +20,18 @@ export type LEDMessage = {
   idleTime: number,
 }
 
+export const LED_MESSAGE_OK: LEDMessage = {
+  colors: [{color: 'green', count: 2}],
+  flashRate: 500,
+  idleTime: 2000
+}
+// "App Offline" LED pattern
+export const LED_MESSAGE_APP_OFFLINE: LEDMessage = {
+  colors: [{color: 'red', count: 2}],
+  flashRate: 500,
+  idleTime: 2000
+}
+
 export default class LEDHandler {
   _spi: Object;
 

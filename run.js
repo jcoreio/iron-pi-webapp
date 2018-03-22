@@ -140,8 +140,7 @@ task('build:docker', dockerPrerequisites, async () => {
 
 task('build', [
   task('build:server'),
-  task('build:client'),
-  task('build:docker'),
+  task('build:client')
 ]).description('build everything')
 
 task('built', 'build', async () => {
