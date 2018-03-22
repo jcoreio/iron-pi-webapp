@@ -43,6 +43,7 @@ export type Props = {
   dataType?: string,
   isDigital?: boolean,
   mode?: Mode,
+  showConfigFields?: boolean,
 }
 
 export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem {
@@ -65,7 +66,7 @@ export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem
 
 class MetadataItemFields extends React.Component<Props> {
   render(): React.Node {
-    const {classes, formControlClass, mode, dataType, isDigital} = this.props
+    const {classes, formControlClass, mode, dataType, isDigital, showConfigFields} = this.props
     const showNumericFields = mode
       ? mode.dataType === 'number' && !mode.isDigital
       : dataType === 'number' && !isDigital
@@ -82,18 +83,20 @@ class MetadataItemFields extends React.Component<Props> {
             normalize={trim}
           />
         </ControlWithInfo>
-        <ControlWithInfo info="Display name for this tag">
-          <Field
-            name="name"
-            label="Name"
-            type="text"
-            component={TextField}
-            className={formControlClass}
-            validate={required()}
-            normalizeOnBlur={trim}
-          />
-        </ControlWithInfo>
-        {!mode && (
+        {showConfigFields !== false && (
+          <ControlWithInfo info="Display name for this tag">
+            <Field
+              name="name"
+              label="Name"
+              type="text"
+              component={TextField}
+              className={formControlClass}
+              validate={required()}
+              normalizeOnBlur={trim}
+            />
+          </ControlWithInfo>
+        )}
+        {!mode && showConfigFields !== false && (
           <ControlWithInfo info="The type of the value for this tag">
             <Field
               name="dataType"
@@ -115,14 +118,14 @@ class MetadataItemFields extends React.Component<Props> {
           </ControlWithInfo>
         )}
         <Fader animateHeight>
-          <div key={showNumericFields ? "numeric" : "other"}>
-            {showNumericFields &&
+          <div key={showNumericFields && showConfigFields ? "numeric" : "other"}>
+            {showNumericFields && showConfigFields && (
               <NumericMetadataItemFields
                 formControlClass={formControlClass}
                 firstControlClass={classes.firstFaderChild}
                 lastControlClass={classes.lastFaderChild}
               />
-            }
+            )}
           </div>
         </Fader>
       </React.Fragment>
