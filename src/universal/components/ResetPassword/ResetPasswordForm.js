@@ -132,7 +132,7 @@ const ResetPasswordForm = ({
       </ViewSlider>
       <div className={classes.footer}>
         {submitting && <Spinner />}
-        {showCancelButton !== false && (
+        {showCancelButton && (
           <Button variant="raised" className={classes.footerButton} onClick={onCancel}>
             Cancel
           </Button>

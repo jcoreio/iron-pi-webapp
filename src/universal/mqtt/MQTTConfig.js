@@ -5,7 +5,12 @@ import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
 import type {MetadataItem} from '../types/MetadataItem'
 
-import type {DataPluginMapping} from "../../server/data-router/PluginTypes"
+type DataPluginMapping = {
+  id: number | string, // Unique ID, e.g. "local1"
+  name: string, // Descriptive name for this input or output, e.g. "Local 1". This is distinct from the user settable metadata name, e. g. "Pump 1".
+  tagsToPlugin?: ?Array<string>,
+  tagFromPlugin?: ?string, // Can be null if this is an output that does not publish a tag back to the tag map
+}
 
 export type MQTTChannelConfig = {
   id: number,
