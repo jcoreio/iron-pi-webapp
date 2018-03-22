@@ -24,6 +24,7 @@ export type Props = {
   data: Data,
   submitting: boolean,
   error?: string,
+  showCancelButton?: boolean,
 }
 
 type State = {
@@ -71,7 +72,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
   }
 
   render(): ?React.Node {
-    const {title, handleSubmit, submitting, error} = this.props
+    const {title, handleSubmit, submitting, error, showCancelButton} = this.props
     const {step} = this.state
     return (
       <ResetPasswordForm
@@ -81,6 +82,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
         onSubmit={handleSubmit(this.handleSubmit)}
         submitting={submitting}
         error={error}
+        showCancelButton={showCancelButton}
       />
     )
   }

@@ -57,6 +57,7 @@ class LoginDialogContainer extends React.Component<Props> {
               <ResetPasswordFormContainer
                 key="resetPassword"
                 title={rootPasswordHasBeenSet ? 'Reset Password' : 'Set Password'}
+                showCancelButton={rootPasswordHasBeenSet}
               />
             )
             : <LoginFormContainer key="login" />

@@ -58,6 +58,7 @@ export type Props = {
   title?: React.Node,
   onSubmit?: (event: Event) => any,
   onCancel?: () => any,
+  showCancelButton?: boolean,
 }
 
 const validateRetypeNewPassword = [required(), confirmation({
@@ -109,7 +110,9 @@ const Step3 = ({classes, ...props}: {classes: Classes}) => (
 
 const Steps = [Step1, Step2, Step3]
 
-const ResetPasswordForm = ({classes, onSubmit, onCancel, submitting, step, title, error}: Props) => {
+const ResetPasswordForm = ({
+  classes, onSubmit, onCancel, submitting, step, title, error, showCancelButton,
+}: Props) => {
   const Step = Steps[step - 1]
   return (
     <form
@@ -129,9 +132,11 @@ const ResetPasswordForm = ({classes, onSubmit, onCancel, submitting, step, title
       </ViewSlider>
       <div className={classes.footer}>
         {submitting && <Spinner />}
-        <Button variant="raised" className={classes.footerButton} onClick={onCancel}>
-          Cancel
-        </Button>
+        {showCancelButton !== false && (
+          <Button variant="raised" className={classes.footerButton} onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
         <Button type="submit" variant="raised" color="primary" className={classes.footerButton} disabled={step === 1 || submitting}>
           Next
         </Button>
