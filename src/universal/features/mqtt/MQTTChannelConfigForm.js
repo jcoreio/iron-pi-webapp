@@ -10,6 +10,7 @@ import {withStyles, withTheme} from 'material-ui/styles'
 import Collapse from 'material-ui/transitions/Collapse'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
+import {FormLabel} from 'material-ui/Form'
 import {required} from 'redux-form-validators'
 import {NumericField} from 'redux-form-numeric-field'
 import {mqttConfigForm} from './routePaths'
@@ -151,6 +152,8 @@ function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
 const pickFormFields = ({
   id, metadataItem, mqttTag, enabled, name, multiplier, offset,
 }: MQTTChannelConfig) => {
+  if (!Number.isFinite(multiplier)) multiplier = 1
+  if (!Number.isFinite(offset)) offset = 0
   if (enabled == null) enabled = true
   else enabled = Boolean(enabled)
   return {
@@ -240,32 +243,40 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             <FormSection name="metadataItem">
               <MetadataItemFieldsContainer
                 formControlClass={classes.formControl}
+                showConfigFields={direction === 'FROM_MQTT'}
               />
             </FormSection>
           </Paper>
-          <Collapse in={dataType === 'number'} className={classes.paperCollapse}>
-            <div className={classes.arrowHolder}>
-              <FlowArrow direction={flowDirection} />
-            </div>
-            <Paper className={classes.paper}>
-              <ControlWithInfo info="TODO">
-                <NumericField
-                  name="multiplier"
-                  label="Slope"
-                  type="text"
-                  component={TextField}
-                  className={classes.formControl}
-                />
-                <NumericField
-                  name="offset"
-                  label="Offset"
-                  type="text"
-                  component={TextField}
-                  className={classes.formControl}
-                />
-              </ControlWithInfo>
-            </Paper>
-          </Collapse>
+          <div className={classes.arrowHolder}>
+            <FlowArrow direction={flowDirection} />
+          </div>
+          <Paper className={classes.paper}>
+            <Collapse in={dataType !== 'number'}>
+              <div>
+                <FormLabel>
+                  Slope and Offset are disabled for non-numeric tags.
+                </FormLabel>
+              </div>
+            </Collapse>
+            <ControlWithInfo info="TODO">
+              <NumericField
+                name="multiplier"
+                label="Slope"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                disabled={dataType !== 'number'}
+              />
+              <NumericField
+                name="offset"
+                label="Offset"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                disabled={dataType !== 'number'}
+              />
+            </ControlWithInfo>
+          </Paper>
           <div className={classes.arrowHolder}>
             <FlowArrow direction={flowDirection} />
           </div>

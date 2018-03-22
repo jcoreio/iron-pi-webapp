@@ -2,7 +2,7 @@
 
 import type Sequelize from 'sequelize'
 import * as graphql from 'graphql'
-import {defaultArgs, resolver} from 'graphql-sequelize'
+import {defaultArgs, defaultListArgs, resolver} from 'graphql-sequelize'
 
 import requireUserId from '../requireUserId'
 import type {GraphQLContext} from '../GraphQLContext'
@@ -101,7 +101,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
     }
     if (!queryFields[options.name.plural]) queryFields[options.name.plural] = {
       type: new graphql.GraphQLList(type),
-      args: defaultArgs(model),
+      args: defaultListArgs(model),
       resolve: resolver(model, {before: requireUserId}),
     }
   }
