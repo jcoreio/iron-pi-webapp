@@ -1,9 +1,12 @@
 // @flow
 
-import delay from 'delay'
-
 export default class AccessCodeHandler {
+  _accessCode: ?string = null
   _testAccessCode: ?string = null
+
+  setAccessCode(accessCode: string) {
+    this._accessCode = accessCode
+  }
 
   setTestAccessCode(accessCode: string) {
     if (process.env.BABEL_ENV === 'test') {
@@ -14,12 +17,9 @@ export default class AccessCodeHandler {
   }
 
   async verifyAccessCode(accessCode: string): Promise<void> {
-    await delay(1000)
-    if (process.env.BABEL_ENV === 'test') {
-      if (accessCode !== this._testAccessCode) throw new Error('Incorrect access code')
-    } else {
-      throw new Error('Hardware access code verification not implemented yet')
-    }
+    const correctCode = process.env.BABEL_ENV === 'test' ? this._testAccessCode : this._accessCode
+    if (!correctCode || (correctCode !== (accessCode || '').toUpperCase()))
+      throw new Error('Incorrect access code')
   }
 }
 
