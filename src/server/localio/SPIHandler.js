@@ -82,7 +82,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
     this._running = false
   }
 
-  sendDigitalOutputs(values: Array<boolean>) {
+  sendDigitalOutputs(values: ?Array<boolean>) {
     let outputIdx = 0
     SPIDevices.forEach((device: SPIDeviceInfo) => {
       if (device.numDigitalOutputs) {
@@ -94,7 +94,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
         let bitIdx = 0
         let byteValue = 0
         for (let deviceOutIdx = 0; deviceOutIdx < device.numDigitalOutputs; ++deviceOutIdx, ++outputIdx) {
-          byteValue |= values[outputIdx] ? (1 << bitIdx) : 0
+          byteValue |= (values || [])[outputIdx] ? (1 << bitIdx) : 0
           if (++bitIdx >= 8) {
             msg.writeUInt8(byteValue, byteIdx++)
             bitIdx = 0

@@ -33,7 +33,7 @@ function digitize(value: ?boolean): 1 | 0 | null {
 
 export const EVENT_CHANNEL_STATES = 'channelStates'
 
-const OUTPUT_VALUES_REFRESH_INTERVAL = 500
+const OUTPUT_VALUES_REFRESH_INTERVAL = 200
 
 type Events = {
   channelStates: [Array<LocalIOChannelState>],
@@ -333,10 +333,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
     if (!this._sendOutputValuesInterval) {
       this._sendOutputValuesInterval = setInterval(
-        () => {
-          const outputValues = this._lastOutputValues
-          if (outputValues) this._spiHandler.sendDigitalOutputs(outputValues)
-        },
+        () => this._spiHandler.sendDigitalOutputs(this._lastOutputValues),
         OUTPUT_VALUES_REFRESH_INTERVAL
       )
     }
