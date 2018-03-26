@@ -42,6 +42,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
 
   _started: boolean = false;
   _birthPublishDelayed: boolean = false;
+  _sparkplugBirthRequested: boolean = false;
 
   _metadataListener = () => this._metadataChanged();
   _metadataToMQTT: TagMetadataMap = {}
@@ -78,7 +79,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       version: SPARKPLUG_VERSION_B_1_0,
     })
     this._client.on('error', (err: Error) => console.error(err.stack)) // eslint-disable-line no-console
-    this._client.on('birth', () => this._publishNodeBirth())
+    this._client.on('birth', () => {
+      this._sparkplugBirthRequested = true
+      this._publishNodeBirth()
+    })
 
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
@@ -221,7 +225,11 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     const metadataToMQTT = this._calcMetadataToMQTT()
     if (!isEqual(metadataToMQTT, this._metadataToMQTT)) {
       this._metadataToMQTT = metadataToMQTT
-      this._publishNodeBirth()
+      // If we publish here before the SparkPlug client requests our birth certificate, we'll end up
+      // publishing the same info again when the birth certificate gets requested a few moments later.
+      if (this._sparkplugBirthRequested) {
+        this._publishNodeBirth()
+      }
     }
   }
 
