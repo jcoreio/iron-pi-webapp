@@ -111,7 +111,7 @@
     "sequelize": "^4.23.2",
     "sequelize-validate-subfields": "^1.1.0",
     "sequelize-validate-subfields-flow-runtime": "^1.0.0",
-    "sparkplug-client": "git://github.com/jcoreio/sparkplug-client-js.git#v3.2.2",
+    "sparkplug-client": "git://github.com/jcoreio/sparkplug-client-js.git#v3.3.0",
     "spi-hub-client": "^2.0.0",
     "subscriptions-transport-ws": "^0.9.4",
     "superagent": "^3.6.0",

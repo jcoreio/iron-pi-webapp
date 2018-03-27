@@ -83,6 +83,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       this._sparkplugBirthRequested = true
       this._publishNodeBirth()
     })
+    //this._client.on('ncmd', payload => console.log(`Got NCMD: ${JSON.stringify(payload, null, 2)}`))
 
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
@@ -286,7 +287,7 @@ function toSparkPlugString(value: any): SparkplugTypedValue {
 
 function toSparkPlugNumber(value: any): SparkplugTypedValue {
   return {
-    type: 'number',
+    type: 'Float',
     value: _.isFinite(value) ? value : NaN
   }
 }

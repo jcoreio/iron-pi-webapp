@@ -36,6 +36,13 @@ export type SparkPlugBirthMessage = {
   metrics: Array<SparkPlugBirthMetric>,
 }
 
+export type SparkPlugNCMDRequest = {
+  groupId: string,
+  nodeId: string,
+  timestamp?: number,
+  metrics: Array<SparkPlugDataMertic>,
+}
+
 export type SparkPlugPublishOpts = {
 
 }
@@ -61,18 +68,28 @@ export type SparkPlugClientEventTypes = {
 export type SparkPlugClient = EventEmitter<SparkPlugClientEventTypes> & {
   publishNodeBirth(payload: SparkPlugBirthMessage, options?: SparkPlugPublishOpts): void,
   publishNodeData(payload: SparkPlugDataMessage, options?: SparkPlugPublishOpts): void,
+  publishNodeCommand(request: SparkPlugNCMDRequest): void,
   stop(): void,
 }
 
-export type SparkPlugNewClientOpts = {
+export type SparkPlugCommonClientOpts = {
   serverUrl: string,
   username: ?string,
   password: ?string,
+  clientId: string,
+  version?: string,
+}
+
+export type SparkPlugEdgeClientOpts = SparkPlugCommonClientOpts & {
   groupId: string,
   edgeNode: string,
-  clientId: string,
-  version: string,
 }
+
+export type SparkPlugApplicationClientOpts = SparkPlugCommonClientOpts & {
+  isApplication: true,
+}
+
+export type SparkPlugNewClientOpts = SparkPlugEdgeClientOpts | SparkPlugApplicationClientOpts
 
 export type SparkPlugPackage = {
   newClient(opts: SparkPlugNewClientOpts): SparkPlugClient,
