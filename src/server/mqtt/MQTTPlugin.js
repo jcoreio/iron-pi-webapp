@@ -219,6 +219,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       clearTimeout(this._publishDataTimeout)
       this._publishDataTimeout = undefined
     }
+    this._client.stop()
   }
 
   _metadataChanged() {

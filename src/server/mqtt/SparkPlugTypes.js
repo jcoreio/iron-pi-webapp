@@ -61,6 +61,7 @@ export type SparkPlugClientEventTypes = {
 export type SparkPlugClient = EventEmitter<SparkPlugClientEventTypes> & {
   publishNodeBirth(payload: SparkPlugBirthMessage, options?: SparkPlugPublishOpts): void,
   publishNodeData(payload: SparkPlugDataMessage, options?: SparkPlugPublishOpts): void,
+  stop(): void,
 }
 
 export type SparkPlugNewClientOpts = {
