@@ -9,12 +9,13 @@ import PlayArrowIcon from 'material-ui-icons/PlayArrow'
 import type {Theme} from '../../theme'
 import {NavLink} from 'react-router-dom'
 
-const sidebarSectionHeaderStyles = (theme: Theme) => ({
+export const sidebarSectionHeaderStyles = (theme: Theme) => ({
   root: {
     height: 38,
     paddingTop: 0,
     paddingBottom: 0,
-    paddingRight: theme.spacing.unit * 6,
+    paddingLeft: theme.spacing.unit * 2,
+    paddingRight: theme.spacing.unit * 5,
   },
   title: {
     fontSize: 21,
@@ -25,7 +26,7 @@ const sidebarSectionHeaderStyles = (theme: Theme) => ({
   expandIcon: {
     color: '#7A8995',
     width: 20,
-    marginLeft: -4,
+    marginLeft: 0,
     marginRight: 5,
     transition: 'transform ease 200ms',
     transform: 'rotate(0deg)',
