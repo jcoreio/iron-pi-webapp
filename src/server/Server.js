@@ -129,8 +129,7 @@ export default class Server {
       this._devGlobals.sequelize = this.sequelize = sequelize
       this._devGlobals.umzug = this._umzug = umzug
 
-      const forceMigrate = 'production' !== process.env.NODE_ENV
-      if (forceMigrate || process.env.DB_MIGRATE) await sequelizeMigrate({sequelize, umzug})
+      await sequelizeMigrate({sequelize, umzug})
 
       this._devGlobals.sequelize = sequelize
 

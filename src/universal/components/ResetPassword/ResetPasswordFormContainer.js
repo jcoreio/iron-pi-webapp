@@ -25,6 +25,7 @@ export type Props = {
   submitting: boolean,
   error?: string,
   showCancelButton?: boolean,
+  afterPasswordChanged?: (newPassword: string) => any,
 }
 
 type State = {
@@ -49,7 +50,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
   }
 
   handleSubmit = async (values: {accessCode: string, newPassword: string}): Promise<any> => {
-    const {verifyAccessCode, changePassword, history} = this.props
+    const {verifyAccessCode, changePassword, afterPasswordChanged} = this.props
     const {accessCode, newPassword} = values
     const {step} = this.state
     switch (step) {
@@ -60,7 +61,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
     }
     case 3: {
       await changePassword({variables: {accessCode, newPassword}}).catch(handleError)
-      history.goBack()
+      if (afterPasswordChanged) afterPasswordChanged(newPassword)
       break
     }
     }

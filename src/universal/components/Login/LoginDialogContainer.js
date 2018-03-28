@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {withRouter} from 'react-router-dom'
-import type {Location} from 'react-router-dom'
+import type {Location, RouterHistory} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
 import {compose} from 'redux'
@@ -16,6 +16,7 @@ import ResetPasswordFormContainer from '../ResetPassword/ResetPasswordFormContai
 import {FORGOT_PASSWORD} from '../../react-router/paths'
 
 import Fader from '../Fader'
+import {login} from '../../auth/actions'
 
 type PropsFromApollo = {
   data: {
@@ -33,6 +34,7 @@ type PropsFromState = {
 }
 
 type PropsFromRouter = {
+  history: RouterHistory,
   location: Location,
 }
 
@@ -47,6 +49,17 @@ class LoginDialogContainer extends React.Component<Props> {
     this.props.subscribeToRootPasswordHasBeenSet()
   }
 
+  afterInitialPasswordSet = (password: string) => {
+    const {dispatch} = this.props
+    dispatch(login({password}))
+  }
+
+  afterPasswordReset = (password: string) => {
+    const {history, dispatch} = this.props
+    history.goBack()
+    dispatch(login({password}))
+  }
+
   render(): React.Node {
     const {open, location, data: {rootPasswordHasBeenSet}} = this.props
     return (
@@ -58,6 +71,10 @@ class LoginDialogContainer extends React.Component<Props> {
                 key="resetPassword"
                 title={rootPasswordHasBeenSet ? 'Reset Password' : 'Set Password'}
                 showCancelButton={rootPasswordHasBeenSet}
+                afterPasswordChanged={rootPasswordHasBeenSet
+                  ? this.afterPasswordReset
+                  : this.afterInitialPasswordSet
+                }
               />
             )
             : <LoginFormContainer key="login" />
