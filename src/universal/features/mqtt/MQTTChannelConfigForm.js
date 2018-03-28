@@ -103,6 +103,7 @@ type MQTTChannelConfig = {
   configId?: number,
   direction?: Direction,
   metadataItem: MetadataItem,
+  internalTag?: string,
   mqttTag: string,
   enabled?: boolean,
   name?: ?string,
@@ -154,14 +155,17 @@ function getDirection({direction, data}: Props): ?Direction {
 }
 
 const pickFormFields = (
-  {id, metadataItem, mqttTag, enabled, name, multiplier, offset}: MQTTChannelConfig
+  {id, metadataItem, internalTag, mqttTag, enabled, name, multiplier, offset}: MQTTChannelConfig
 ) => {
   if (!Number.isFinite(multiplier)) multiplier = 1
   if (!Number.isFinite(offset)) offset = 0
   if (enabled == null) enabled = true
   else enabled = Boolean(enabled)
   return {
-    id, metadataItem: pickMetadataItemFields(metadataItem), mqttTag, enabled, name, multiplier, offset,
+    id, mqttTag, enabled, name, multiplier, offset,
+    metadataItem: metadataItem
+      ? pickMetadataItemFields(metadataItem)
+      : ({tag: internalTag}: any),
   }
 }
 
@@ -169,9 +173,11 @@ class MQTTChannelConfigForm extends React.Component<Props> {
   initializeTimeout: ?number
 
   componentDidMount() {
-    const {id, data, initialize} = this.props
-    if (!id) initialize({})
-    if (!data) return
+    const {data, initialize} = this.props
+    if (!data) {
+      this.initializeTimeout = setTimeout(() => initialize(pickFormFields(({}: any))), 0)
+      return
+    }
     const {Config} = data
     if (Config) {
       if (_shouldInitialize(this.props)) {
@@ -297,6 +303,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
                 type="text"
                 component={TextField}
                 className={classes.formControl}
+                placeholder="1.0"
                 disabled={dataType !== 'number'}
               />
               <NumericField
@@ -305,6 +312,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
                 type="text"
                 component={TextField}
                 className={classes.formControl}
+                placeholder="0.0"
                 disabled={dataType !== 'number'}
               />
             </ControlWithInfo>
