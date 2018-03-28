@@ -3,6 +3,7 @@
 import _ from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
+import logger from 'log4jcore'
 import sparkplug from 'sparkplug-client'
 
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
@@ -10,6 +11,7 @@ import type {TagMetadataMap} from '../metadata/MetadataHandler'
 import type {MetadataItem, NumericMetadataItem} from '../../universal/types/MetadataItem'
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
+import {DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import type {
   DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
   DataPluginMapping,
@@ -17,9 +19,13 @@ import type {
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
-import type {SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
-  SparkPlugDataMertic, SparkPlugPackage} from './SparkPlugTypes'
+import type {
+  SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
+  SparkPlugDataMertic, SparkPlugPackage, SparkPlugDataMessage
+} from './SparkPlugTypes'
 import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
+
+const log = logger('MQTTPlugin')
 
 type ToMQTTChannelState = {
   config: MQTTChannelConfig,
@@ -31,6 +37,24 @@ export type MQTTPluginResources = {
   getTagValue: (tag: string) => any,
   publicTags: () => Array<string>,
   metadataHandler: MetadataHandler,
+}
+
+type ChannelFromMQTTConfig = {
+  internalTag: string,
+  dataType: 'number' | 'string',
+  multiplier?: ?number,
+  offset?: ?number,
+}
+
+/**
+ * Mappings from MQTT tag to config
+ */
+type ChannelsFromMQTTConfigMap = {
+  [channelId: string]: ChannelFromMQTTConfig,
+}
+
+type ValuesFromMQTTMap = {
+  [channelId: string]: any,
 }
 
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
@@ -47,6 +71,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _metadataListener = () => this._metadataChanged();
   _metadataToMQTT: TagMetadataMap = {}
 
+  _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
+  _valuesFromMQTT: ValuesFromMQTTMap = {}
+  _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
+
   /** Configs for enabled channels to MQTT, combined with channels that are being sent
    * because "publish all" is enabled */
   _toMQTTEnabledChannelConfigs: Array<MQTTChannelConfig> = [];
@@ -55,8 +83,11 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
+  _instanceId: number;
+
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
+    this._instanceId = Math.floor(1000 * Math.random())
     this._config = cleanMQTTConfig(args.config)
     ProtocolRequiredFieldsType.assert(this._config)
     this._pluginInfo = {
@@ -83,7 +114,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       this._sparkplugBirthRequested = true
       this._publishNodeBirth()
     })
-    //this._client.on('ncmd', payload => console.log(`Got NCMD: ${JSON.stringify(payload, null, 2)}`))
+    this._client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
 
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
@@ -157,7 +188,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
 
   start() {
     this._started = true
-    this._updateChannelsToMQTT()
+    this._updateMQTTChannels()
     this._metadataToMQTT = this._calcMetadataToMQTT()
     if (this._birthPublishDelayed) {
       this._birthPublishDelayed = false
@@ -166,13 +197,13 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   }
 
   tagsChanged() {
-    this._updateChannelsToMQTT()
+    this._updateMQTTChannels()
     this._metadataChanged()
   }
 
   // TODO: Ensure this is called whenever channelsToMQTT, channelsFromMQTT, or public tags
   // may have changed
-  _updateChannelsToMQTT() {
+  _updateMQTTChannels() {
     // Extra channels that need to be published in cases where publishAllPublicTags is enabled
     let extraChannelsToPublish: Array<MQTTChannelConfig> = []
     if (this._config.publishAllPublicTags) {
@@ -212,6 +243,20 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       // Force config to new config
       config
     }))
+
+    this._channelsFromMQTTConfigs = {}
+    for (let channelConfig: MQTTChannelConfig of (this._config.channelsFromMQTT || [])) {
+      const {enabled, internalTag, mqttTag, multiplier, offset, metadataItem} = channelConfig
+      if (enabled && internalTag && mqttTag) {
+        const dataType = (metadataItem && metadataItem.dataType === 'string') ? 'string' : 'number'
+        this._channelsFromMQTTConfigs[channelConfig.mqttTag] = {
+          internalTag,
+          dataType,
+          multiplier,
+          offset
+        }
+      }
+    }
   }
 
   destroy() {
@@ -275,6 +320,55 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     } else {
       this._birthPublishDelayed = true
     }
+  }
+
+  _setValuesFromMQTT(values: ValuesFromMQTTMap) {
+    const valuesToPublish: ValuesFromMQTTMap = {}
+    for (let channelId in values) {
+      const value = values[channelId]
+      const changed = !this._valuesFromMQTT.hasOwnProperty(channelId) || !isEqual(this._valuesFromMQTT[channelId], value)
+      if (changed) {
+        valuesToPublish[channelId] = value
+        this._valuesFromMQTT[channelId] = value
+      }
+    }
+    log.info(`Publishing data from MQTT: ${JSON.stringify(valuesToPublish)}`)
+    if (Object.keys(valuesToPublish).length)
+      this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
+  }
+
+  _handleDataFromSparkPlug(message: SparkPlugDataMessage) {
+    const metrics: Array<SparkPlugDataMertic> = message.metrics
+    const valuesFromMQTT: ValuesFromMQTTMap = {}
+    for (let metric: SparkPlugDataMertic of metrics) {
+      const {name, value} = metric
+      const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[name]
+      if (channelConfig) {
+        const {internalTag} = channelConfig
+        if ('string' === channelConfig.dataType) {
+          if (value == null || typeof value === 'string') {
+            valuesFromMQTT[internalTag] = value
+          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
+            log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
+            this._channelsFromMQTTWarningsPrinted.add(internalTag)
+          }
+        } else { // number
+          if (value == null || typeof value === 'number') {
+            let valueWithSlopeOffset = value
+            const {multiplier, offset} = channelConfig
+            if (multiplier != null)
+              valueWithSlopeOffset *= multiplier
+            if (offset != null)
+              valueWithSlopeOffset += offset
+            valuesFromMQTT[internalTag] = valueWithSlopeOffset
+          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
+            log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
+            this._channelsFromMQTTWarningsPrinted.add(internalTag)
+          }
+        }
+      }
+    }
+    this._setValuesFromMQTT(valuesFromMQTT)
   }
 }
 

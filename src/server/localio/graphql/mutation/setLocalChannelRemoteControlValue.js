@@ -12,7 +12,7 @@ export default function setLocalChannelRemoteControlValue({plugin}: {
     args: {
       id: {
         type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-        description: 'The id of the loca channel to set the remote control value of',
+        description: 'The id of the local channel to set the remote control value of',
       },
       controlValue: {
         type: graphql.GraphQLInt,

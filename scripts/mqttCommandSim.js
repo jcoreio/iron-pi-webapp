@@ -41,4 +41,4 @@ setInterval(() => {
     nodeId: TARGET_NODE_ID,
     metrics
   })
-}, 5000)
+}, 2000)
