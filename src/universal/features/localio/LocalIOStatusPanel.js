@@ -129,20 +129,13 @@ export type ChannelStateProps = {
   classes: ChannelStateClasses,
 }
 
-function getValueBlockProps(channel: Channel): {value: ?string, units: ?string} {
+function getValueBlockProps(channel: Channel): {value: ?React.Node, precision: number, units: ?string} {
   const {state, metadataItem} = channel
-  const units = metadataItem ? metadataItem.units : null
-  let value = 'NA'
-  if (state) {
-    const systemValue = state.systemValue || NaN
-    if (Number.isFinite(systemValue)) {
-      if (metadataItem) {
-        const displayPrecision = metadataItem.displayPrecision || 0
-        value = systemValue.toFixed(displayPrecision)
-      }
-    }
+  return {
+    value: state ? state.systemValue : NaN,
+    precision: metadataItem && metadataItem.displayPrecision || 0,
+    units: metadataItem ? metadataItem.units : null,
   }
-  return {value, units}
 }
 
 const StyledChannelStateItem = ({channel, classes}: ChannelStateProps): React.Node => (

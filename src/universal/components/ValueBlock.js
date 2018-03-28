@@ -64,13 +64,23 @@ export type Props = {
   value?: React.Node,
   units?: React.Node,
   error?: React.Node,
+  precision?: number,
 }
 
-const ValueBlock = ({classes, className, title, value, units, theme, error, ...props}: Props) => (
+export function formatValue(value: ?React.Node, precision: ?number): ?React.Node {
+  if (precision == null || !Number.isFinite(precision)) precision = 1
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value.toFixed(precision) : 'NA'
+  }
+  if (value == null) return 'NA'
+  return value
+}
+
+const ValueBlock = ({classes, className, title, value, precision, units, theme, error, ...props}: Props) => (
   <div className={classNames(classes.block, {[classes.error]: error}, className)} data-component="ValueBlock" {...props}>
     {title ? <h4 className={classes.title} data-test-name="title">{title}</h4> : null}
     <span className={classes.value} data-test-name="value">
-      {value}
+      {formatValue(value, precision)}
     </span>
     <span className={classes.units} data-test-name="units">
       {units}

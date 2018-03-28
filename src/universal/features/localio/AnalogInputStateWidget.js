@@ -113,7 +113,8 @@ const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="rawInput"
           title="Raw Input"
-          value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(2) : null}
+          value={rawInput}
+          precision={2}
           units="V"
         />
         <FlowArrow className={classes.arrow} />
@@ -123,7 +124,8 @@ const AnalogInputStateWidget = withStyles(styles, {withTheme: true})(
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="systemValue"
           title="System Value"
-          value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(precision || 0) : null}
+          value={systemValue}
+          precision={precision}
           units={units}
         />
       </div>

@@ -144,13 +144,15 @@ const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="controlValue"
           title="Control Value"
-          value={controlValue != null && Number.isFinite(controlValue) ? controlValue.toFixed(0) : null}
+          value={controlValue}
+          precision={0}
         />
         <ValueBlock
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="safeState"
           title="Safe State"
-          value={safeState != null && Number.isFinite(safeState) ? safeState.toFixed(0) : null}
+          value={safeState}
+          precision={0}
         />
       </div>
       <LeftArrow className={classes.arrow} controlValue={controlValue} />
@@ -160,7 +162,8 @@ const DigitalOutputStateWidget = ({classes, className, channel}: Props) => {
         className={classNames(classes.block, classes.valueBlock)}
         data-test-name="rawOutput"
         title="Raw Output"
-        value={rawOutput != null && Number.isFinite(rawOutput) ? rawOutput.toFixed(0) : null}
+        value={rawOutput}
+        precision={0}
       />
     </div>
   )

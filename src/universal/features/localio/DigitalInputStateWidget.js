@@ -107,7 +107,8 @@ const DigitalInputStateWidget = (
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="rawInput"
           title="Raw Input"
-          value={rawInput != null && Number.isFinite(rawInput) ? rawInput.toFixed(0) : null}
+          value={rawInput}
+          precision={0}
         />
         <FlowArrow className={classes.arrow} />
         <PolaritySection reversePolarity={reversePolarity} />
@@ -116,7 +117,8 @@ const DigitalInputStateWidget = (
           className={classNames(classes.block, classes.valueBlock)}
           data-test-name="systemValue"
           title="System Value"
-          value={systemValue != null && Number.isFinite(systemValue) ? systemValue.toFixed(0) : null}
+          value={systemValue}
+          precision={0}
         />
       </div>
     )
