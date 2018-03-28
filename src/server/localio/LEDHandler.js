@@ -25,11 +25,30 @@ export const LED_MESSAGE_OK: LEDMessage = {
   flashRate: 500,
   idleTime: 2000
 }
+
 // "App Offline" LED pattern
 export const LED_MESSAGE_APP_OFFLINE: LEDMessage = {
   colors: [{color: 'red', count: 2}],
   flashRate: 500,
   idleTime: 2000
+}
+
+export const LED_MESSAGE_CONNECT_MODE: LEDMessage = {
+  colors: [{color: 'green', count: 4}],
+  flashRate: 500,
+  idleTime: 4000
+}
+
+export const LED_MESSAGE_STATIC_MODE: LEDMessage = {
+  colors: [{color: 'green', count: 5}],
+  flashRate: 500,
+  idleTime: 4000
+}
+
+export const LED_MESSAGE_DHCP_MODE: LEDMessage = {
+  colors: [{color: 'green', count: 6}],
+  flashRate: 500,
+  idleTime: 4000
 }
 
 export default class LEDHandler {

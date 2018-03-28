@@ -20,12 +20,13 @@ import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import DataRouter, {EVENT_MAPPING_PROBLEMS_CHANGED} from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
-import LEDHandler, {LED_MESSAGE_OK} from './localio/LEDHandler'
+import LEDHandler, {LED_MESSAGE_OK, LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_STATIC_MODE, LED_MESSAGE_DHCP_MODE} from './localio/LEDHandler'
 import SPIHandler, {EVENT_DEVICE_STATUS} from './localio/SPIHandler'
 import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
-import ConnectModeHandler from './device/ConnectModeHandler'
+import ConnectModeHandler, {EVENT_CONNECT_BUTTON_PRESSED, EVENT_NETWORK_MODE_COMMAND} from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
+import NetworkSettingsHandler from './network-settings/NetworkSettingsHandler'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -84,6 +85,7 @@ export default class Server {
   _spiHubClient = new SPIHubClient({binary: true})
   _ledHandler = new LEDHandler(this._spiHubClient)
   _spiHandler = new SPIHandler(this._spiHubClient)
+  _networkSettingsHandler = new NetworkSettingsHandler()
 
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
@@ -108,9 +110,17 @@ export default class Server {
       log.info(`Access Code is ${message.accessCode}`)
     })
     this._spiHandler.on(EVENT_DEVICE_STATUS, (status: DeviceStatus) => {
-      const {connectButtonEventCount} = status
-      if (connectButtonEventCount != null)
-        this.connectModeHandler.setConnectButtonEventCount(connectButtonEventCount)
+      const {connectButtonLevel, connectButtonEventCount} = status
+      this.connectModeHandler.setConnectButtonState({connectButtonLevel, connectButtonEventCount})
+    })
+    this.connectModeHandler.on(EVENT_NETWORK_MODE_COMMAND, (mode: 'static' | 'dhcp') => {
+      log.info(`setting networking mode to ${mode}`)
+      this._networkSettingsHandler.setMode(mode)
+      this._ledHandler.sendLEDState('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE, LED_MESSAGE_OK)
+    })
+    this.connectModeHandler.on(EVENT_CONNECT_BUTTON_PRESSED, () => {
+      log.info('connect button pressed')
+      this._ledHandler.sendLEDState(LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_OK)
     })
   }
 
