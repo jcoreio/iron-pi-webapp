@@ -35,6 +35,7 @@ const channelQuery = gql(`query Channels($id: Int!) {
     config
     state ${ALL_STATE_FIELDS}
     ${metadataItemSelection}
+    supportedModes
   }
   Metadata {
     tag

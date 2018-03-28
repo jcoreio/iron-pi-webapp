@@ -1,8 +1,8 @@
 // @flow
 
 import {attributeFields} from 'graphql-sequelize'
-import {LocalIOChannelState as GraphQLLocalIOChannelState} from './LocalIOChannelState'
-import type {LocalIOChannelState} from '../../../../universal/localio/LocalIOChannel'
+import {LocalIOChannelMode, LocalIOChannelState as GraphQLLocalIOChannelState} from './LocalIOChannelState'
+import type {ChannelMode, LocalIOChannelState} from '../../../../universal/localio/LocalIOChannel'
 import LocalIOChannel from '../../models/LocalIOChannel'
 import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import * as graphql from 'graphql'
@@ -12,10 +12,11 @@ import getChannelState from '../../getChannelState'
 export default function createLocalIOChannel(options: {
   attributeFieldsCache: Object,
 }): graphql.GraphQLObjectType {
+  const {attributeFieldsCache} = options
   return new graphql.GraphQLObjectType({
     name: LocalIOChannel.options.name.singular,
     fields: () => ({
-      ...attributeFields(LocalIOChannel, {cache: options.attributeFieldsCache}),
+      ...attributeFields(LocalIOChannel, {cache: attributeFieldsCache}),
       metadataItem: {
         type: MetadataItem,
         description: 'the metadata item for this channel',
@@ -44,6 +45,15 @@ export default function createLocalIOChannel(options: {
             getTagValue: tag => dataRouter.getTagValue(tag),
           })
         }
+      },
+      supportedModes: {
+        type: new graphql.GraphQLList(LocalIOChannelMode),
+        description: 'the supported moes for this channel',
+        resolve: ({id}: LocalIOChannel): Array<ChannelMode> => {
+          // TODO: get this from elsewhere?
+          if (id < 4) return ['ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']
+          return ['DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']
+        },
       },
     }),
   })

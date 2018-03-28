@@ -7,6 +7,7 @@ import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
+import Tooltip from 'material-ui/Tooltip'
 import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'
@@ -157,7 +158,7 @@ export type Props = {
     mode: ChannelMode,
   },
   data: {
-    Channel?: FullChannel,
+    Channel?: FullChannel & {supportedModes: Array<ChannelMode>},
     Metadata?: Array<ControlLogicMetadataItem>,
     loading?: boolean,
   },
@@ -178,6 +179,11 @@ const pickFormFields = ({id, metadataItem, config}: FullChannel) => {
     if (config.name) metadataItem.name = config.name
   }
   return {id, metadataItem: metadataItem && pickMetadataItemFields(metadataItem), config}
+}
+
+export type ChannelModeButtonProps = {
+  +value: ChannelMode,
+  +disabled?: boolean,
 }
 
 class ChannelForm extends React.Component<Props> {
@@ -243,6 +249,35 @@ class ChannelForm extends React.Component<Props> {
     }).catch(handleError)
   }
 
+  ChannelModeButton = ({value, disabled, ...props}: ChannelModeButtonProps): React.Node => {
+    const {data: {Channel}} = this.props
+    let supportedModes: Array<ChannelMode> = ['DISABLED']
+    if (Channel && Channel.supportedModes) supportedModes = Channel.supportedModes
+    const unsupportedMode = supportedModes.indexOf(value) < 0
+    const displayText = getChannelModeDisplayText(value)
+    const unsupportedLabel = unsupportedMode ? `This channel doesn't support ${displayText} mode` : ''
+    const button = (
+      <Button
+        value={value}
+        disabled={disabled || unsupportedMode}
+        aria-label={unsupportedLabel}
+        {...props}
+      >
+        {displayText}
+      </Button>
+    )
+
+    if (unsupportedMode) return (
+      <Tooltip title={unsupportedLabel}>
+        <div>
+          {button}
+        </div>
+      </Tooltip>
+    )
+
+    return button
+  }
+
   render(): React.Node {
     const {
       classes, data: {Metadata, Channel, loading}, initialized, pristine,
@@ -264,7 +299,7 @@ class ChannelForm extends React.Component<Props> {
     const channelMode: ChannelMode = (Channel && Channel.state ? Channel.state.mode : null) || 'DISABLED'
     return (
       <form id="channelForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
-        {Channel &&
+        {Channel != null &&
           <Paper className={classes.paper}>
             <Fader animateHeight>
               <ControlWithInfo
@@ -287,6 +322,7 @@ class ChannelForm extends React.Component<Props> {
               getDisplayText={getChannelModeDisplayText}
               className={classes.formControl}
               validate={required()}
+              Button={this.ChannelModeButton}
             />
           </ControlWithInfo>
           {config && config.mode !== 'DISABLED' &&

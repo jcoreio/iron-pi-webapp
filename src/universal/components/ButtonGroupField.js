@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import Button from 'material-ui/Button'
+import _Button from 'material-ui/Button'
 import {FormControl, FormLabel, FormHelperText} from 'material-ui/Form'
 import {withStyles} from 'material-ui/styles'
 
@@ -37,7 +37,7 @@ export type Props<V> = {
   className?: string,
   availableValues: Array<V>,
   getDisplayText: (value: V) => string,
-  selectedButtonProps: $Shape<React.ElementProps<typeof Button>>,
+  selectedButtonProps: $Shape<React.ElementProps<typeof _Button>>,
   input: {
     value?: ?V,
     onChange?: (newValue: ?V) => any,
@@ -49,50 +49,55 @@ export type Props<V> = {
     error?: string,
     touched?: boolean,
   },
+  Button?: React.ComponentType<$ReadOnly<React.ElementProps<typeof _Button>>>,
 }
 
-const ButtonGroupField = <V>({
-  label,
-  classes,
-  className,
-  selectedButtonProps,
-  availableValues,
-  getDisplayText,
-  input: {value: selectedValue, onChange, disabled, name},
-  meta: {warning, error, touched},
-}: Props<V>): React.Node => (
-  <FormControl className={className} error={touched && (error != null || warning != null)}>
-    {label &&
+const ButtonGroupField = <V>(props: Props<V>): React.Node => {
+  const {
+    label,
+    classes,
+    className,
+    selectedButtonProps,
+    availableValues,
+    getDisplayText,
+    input: {value: selectedValue, onChange, disabled, name},
+    meta: {warning, error, touched},
+  } = props
+  const Button = props.Button || _Button
+  return (
+    <FormControl className={className} error={touched && (error != null || warning != null)}>
+      {label &&
       <FormLabel className={classes.label}>
         {label}
       </FormLabel>
-    }
-    <ButtonGroup name={name} data-value={selectedValue}>
-      {availableValues.map((value: V, key: any) => {
-        const selected = value === selectedValue
-        return (
-          <Button
-            key={key}
-            value={value}
-            className={classNames(classes.button, {
-              [classes.buttonUnselected]: !selected,
-            })}
-            disabled={disabled}
-            onClick={() => onChange && onChange(value)}
-            {...(selected ? selectedButtonProps : {})}
-          >
-            {getDisplayText(value)}
-          </Button>
-        )
-      })}
-    </ButtonGroup>
-    {touched && (error || warning) &&
+      }
+      <ButtonGroup name={name} data-value={selectedValue}>
+        {availableValues.map((value: V, key: any) => {
+          const selected = value === selectedValue
+          return (
+            <Button
+              key={key}
+              value={value}
+              className={classNames(classes.button, {
+                [classes.buttonUnselected]: !selected,
+              })}
+              disabled={disabled}
+              onClick={() => onChange && onChange(value)}
+              {...(selected ? selectedButtonProps : {})}
+            >
+              {getDisplayText(value)}
+            </Button>
+          )
+        })}
+      </ButtonGroup>
+      {touched && (error || warning) &&
       <FormHelperText className={classes.helperText}>
         {error || warning}
       </FormHelperText>
-    }
-  </FormControl>
-)
+      }
+    </FormControl>
+  )
+}
 ButtonGroupField.defaultProps = {
   getDisplayText: value => String(value),
   selectedButtonProps: {
