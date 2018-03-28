@@ -259,7 +259,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       case 'DIGITAL_OUTPUT': {
         const controlValueTag = LocalIOTags.controlValue(id)
         const systemValueTag = LocalIOTags.systemValue(id)
-        const {safeState, reversePolarity}: DigitalOutputConfig = (config: any)
+        const {safeState}: DigitalOutputConfig = (config: any)
         let controlValue
         switch (config.controlMode) {
         case 'FORCE_OFF': {
@@ -284,8 +284,6 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         }
         }
         let systemValue = digitize(controlValue != null ? controlValue : Boolean(safeState))
-        if (reversePolarity && systemValue != null)
-          systemValue = systemValue ? 0 : 1
         data[controlValueTag] = controlValue
         data[systemValueTag] = systemValue
         if (tag && !isRemoteControlChannel(config))
@@ -341,8 +339,9 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       const {id, config} = channel
       if (config.mode === 'DIGITAL_OUTPUT') {
         const {reversePolarity, safeState}: DigitalOutputConfig = (config: any)
-        const controlValue = this._getTagValue(LocalIOTags.controlValue(id))
-        outputValues[id] = controlValue != null ? Boolean(controlValue) : Boolean(safeState)
+        const systemValue = this._getTagValue(LocalIOTags.systemValue(id))
+        // systemValue should already have safeState applied, but just in case...
+        outputValues[id] = systemValue != null ? Boolean(systemValue) : Boolean(safeState)
         if (reversePolarity) outputValues[id] = !outputValues[id]
       } else {
         outputValues[id] = false
