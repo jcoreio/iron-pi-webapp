@@ -133,6 +133,10 @@ export function assertChannelConfig(config: any) {
   }
 }
 
+export function isRemoteControlChannel(config: LocalIOChannelConfig): boolean {
+  return 'DIGITAL_OUTPUT' === config.mode && 'REMOTE_CONTROL' === config.controlMode
+}
+
 export type LocalIOChannel = {
   id: number,
   tag: string,

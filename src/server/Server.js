@@ -330,8 +330,10 @@ export default class Server {
     this._running = false
 
     this.connectModeHandler.removeListener(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
-    if (this.dataRouter) {
-      this.dataRouter.removeListener(EVENT_MAPPING_PROBLEMS_CHANGED, this._handleMappingProblemsChanged)
+    const {dataRouter} = this
+    if (dataRouter) {
+      dataRouter.removeListener(EVENT_MAPPING_PROBLEMS_CHANGED, this._handleMappingProblemsChanged)
+      dataRouter.stop()
     }
     const {_features} = this
     if (_features) {

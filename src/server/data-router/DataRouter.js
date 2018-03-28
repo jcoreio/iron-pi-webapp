@@ -84,6 +84,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
       clearTimeout(this._ingestRateLimitTimeout)
       this._ingestRateLimitTimeout = undefined
     }
+    this.setPlugins([])
   }
 
   setPlugins(plugins: Array<DataPlugin>) {

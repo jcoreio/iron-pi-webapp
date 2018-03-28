@@ -3,6 +3,7 @@
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {createSelector} from 'reselect'
 import memoize from 'lodash.memoize'
+import logger from 'log4jcore'
 
 import LocalIOChannel from './models/LocalIOChannel'
 import type {DataPluginMapping, DataPluginEmittedEvents} from '../data-router/PluginTypes'
@@ -16,10 +17,13 @@ import {CM_NUM_IO} from './SPIDevicesInfo'
 import isEqual from 'lodash.isequal'
 import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
+import {isRemoteControlChannel} from '../../universal/localio/LocalIOChannel'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
 import {SPIDevices} from './SPIDevicesInfo'
 import * as LocalIOTags from '../../universal/localio/LocalIOTags'
+
+const log = logger('LocalIODataPlugin')
 
 type Options = {
   spiHandler: SPIHandler,
@@ -33,7 +37,9 @@ function digitize(value: ?boolean): 1 | 0 | null {
 
 export const EVENT_CHANNEL_STATES = 'channelStates'
 
-const OUTPUT_VALUES_REFRESH_INTERVAL = 500
+const OUTPUT_VALUES_REFRESH_INTERVAL = 200
+
+const NUM_ANALOG_INPUTS = 4
 
 type Events = {
   channelStates: [Array<LocalIOChannelState>],
@@ -62,6 +68,10 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     }
   }
 
+  _enabledChannels(): Array<LocalIOChannel> {
+    return this._channels.filter(channel => 'DISABLED' !== channel.config.mode)
+  }
+
   pluginInfo(): PluginInfo {
     return {
       pluginType: 'localio',
@@ -72,62 +82,82 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   ioMappings(): Array<DataPluginMapping> {
     const mappings: Array<DataPluginMapping> = []
-    for (let channel of this._channels) {
-      const {id, tag, config: {mode, controlMode}} = channel
+    for (let channel of this._enabledChannels()) {
+      const {id, tag, config} = channel
+      const {mode, controlMode} = config
       const displayNumber = id + 1
+      const channelSupportsAnalog = id < NUM_ANALOG_INPUTS
+      const tagsToPlugin: Array<string> = []
+      const baseName = `Local Channel ${displayNumber}`
       const mapping: DataPluginMapping = {
         id,
-        name: `Local Channel ${displayNumber}`,
+        name: baseName,
       }
-      if (tag) mapping.tagFromPlugin = tag
+      if (tag && !isRemoteControlChannel(config)) {
+        mapping.tagFromPlugin = tag
+      }
       const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
-      mappings.push({
-        id: rawAnalogInputTag,
-        name: `Local Channel ${displayNumber} raw analog input`,
-        tagFromPlugin: rawAnalogInputTag,
-      })
+      if (channelSupportsAnalog) {
+        mappings.push({
+          id: rawAnalogInputTag,
+          name: `${baseName} raw analog input`,
+          tagFromPlugin: rawAnalogInputTag,
+        })
+      }
       const rawDigitalInputTag = LocalIOTags.rawDigitalInput(id)
       mappings.push({
         id: rawDigitalInputTag,
-        name: `Local Channel ${displayNumber} raw digital input`,
+        name: `${baseName} raw digital input`,
         tagFromPlugin: rawDigitalInputTag,
       })
       const systemValueTag = LocalIOTags.systemValue(id)
       mappings.push({
         id: systemValueTag,
-        name: `Local Channel ${displayNumber} system value`,
+        name: `${baseName} system value`,
         tagFromPlugin: systemValueTag,
       })
       const rawOutputTag = LocalIOTags.rawOutput(id)
       mappings.push({
         id: rawOutputTag,
-        name: `Local Channel ${displayNumber} raw output`,
+        name: `${baseName} raw output`,
         tagFromPlugin: rawOutputTag,
       })
       switch (mode) {
       case 'ANALOG_INPUT': {
-        mapping.tagsToPlugin = [rawAnalogInputTag]
+        if (channelSupportsAnalog)
+          tagsToPlugin.push(rawAnalogInputTag)
+        else
+          log.error(`channel mode set to ANALOG_INPUT on channel ${displayNumber}, which does not support analog mode`)
         break
       }
       case 'DIGITAL_INPUT': {
-        mapping.tagsToPlugin = [rawDigitalInputTag]
+        tagsToPlugin.push(rawDigitalInputTag)
         break
       }
       case 'DIGITAL_OUTPUT': {
         const controlValueTag = LocalIOTags.controlValue(id)
         mappings.push({
           id: controlValueTag,
-          name: `Local Channel ${id} control value`,
+          name: `${baseName} control value`,
           tagFromPlugin: controlValueTag,
         })
-        const tagsToPlugin = mapping.tagsToPlugin = [controlValueTag]
-        if (controlMode === 'LOCAL_CONTROL') {
+        tagsToPlugin.push(controlValueTag)
+        switch (controlMode) {
+        case 'LOCAL_CONTROL': {
           const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
           tagsToPlugin.push(...controlLogic.map(({tag}) => tag))
+          break
         }
-        break
+        case 'REMOTE_CONTROL': {
+          if (tag)
+            tagsToPlugin.push(tag)
+          break
+        }
+        }
       }
       }
+      if (tagsToPlugin.length)
+        mapping.tagsToPlugin = tagsToPlugin
       mappings.push(mapping)
     }
     return mappings
@@ -201,7 +231,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   _updateData() {
     const data = {}
-    for (let channel of this._channels) {
+    for (let channel of this._enabledChannels()) {
       const {id, tag, config} = channel
       switch (config.mode) {
       case 'ANALOG_INPUT': {
@@ -229,32 +259,37 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       case 'DIGITAL_OUTPUT': {
         const controlValueTag = LocalIOTags.controlValue(id)
         const systemValueTag = LocalIOTags.systemValue(id)
-        const {safeState}: DigitalOutputConfig = (config: any)
+        const {safeState, reversePolarity}: DigitalOutputConfig = (config: any)
         let controlValue
         switch (config.controlMode) {
         case 'FORCE_OFF': {
-          controlValue = data[controlValueTag] = false
+          controlValue = false
           break
         }
         case 'FORCE_ON': {
-          controlValue = data[controlValueTag] = true
+          controlValue = true
           break
         }
         case 'LOCAL_CONTROL': {
           const {controlLogic}: LocalControlDigitalOutputConfig = (config: any)
-          controlValue = data[controlValueTag] = evaluateControlLogic(controlLogic, {
+          controlValue = evaluateControlLogic(controlLogic, {
             getChannelValue: this._getTagValue,
           })
           break
         }
         case 'REMOTE_CONTROL': {
-          controlValue = this._getTagValue(controlValueTag)
+          if (tag)
+            controlValue = this._getTagValue(tag)
           break
         }
         }
-        const systemValue = controlValue != null ? controlValue : Boolean(safeState)
-        data[systemValueTag] = digitize(systemValue)
-        if (tag) data[tag] = data[systemValueTag]
+        let systemValue = digitize(controlValue != null ? controlValue : Boolean(safeState))
+        if (reversePolarity && systemValue != null)
+          systemValue = systemValue ? 0 : 1
+        data[controlValueTag] = controlValue
+        data[systemValueTag] = systemValue
+        if (tag && !isRemoteControlChannel(config))
+          data[tag] = data[systemValueTag]
         break
       }
       }
@@ -333,10 +368,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
     if (!this._sendOutputValuesInterval) {
       this._sendOutputValuesInterval = setInterval(
-        () => {
-          const outputValues = this._lastOutputValues
-          if (outputValues) this._spiHandler.sendDigitalOutputs(outputValues)
-        },
+        () => this._spiHandler.sendDigitalOutputs(this._lastOutputValues),
         OUTPUT_VALUES_REFRESH_INTERVAL
       )
     }
