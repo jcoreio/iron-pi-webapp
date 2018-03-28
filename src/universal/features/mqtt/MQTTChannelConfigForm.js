@@ -28,9 +28,9 @@ import handleError from '../../redux-form/createSubmissionError'
 import SubmitStatus from '../../components/SubmitStatus'
 import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 
-const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction, ...props}: Object) => (
+const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Object) => (
   <Arrow
-    direction={direction}
+    direction="down"
     shaftWidth={30}
     shaftLength={10}
     headWidth={50}
@@ -245,22 +245,42 @@ class MQTTChannelConfigForm extends React.Component<Props> {
       )
     }
     const direction: ?Direction = getDirection(this.props)
-    const flowDirection = direction === 'TO_MQTT' ? 'down' : 'up'
+    const systemSection = (
+      <Paper className={classes.paper}>
+        <FormSection name="metadataItem">
+          <MetadataItemFieldsContainer
+            formControlClass={classes.formControl}
+            showConfigFields={direction === 'FROM_MQTT'}
+            showDataTypeSelector={direction === 'FROM_MQTT'}
+            force={{isDigital: false}}
+          />
+        </FormSection>
+      </Paper>
+    )
+    const mqttSection = (
+      <Paper className={classes.paper}>
+        <ControlWithInfo info="The tag for data in MQTT">
+          <Field
+            name="mqttTag"
+            label="MQTT Tag"
+            type="text"
+            component={TextField}
+            className={classes.formControl}
+            normalizeOnBlur={trim}
+            validate={required()}
+          />
+        </ControlWithInfo>
+      </Paper>
+    )
     return (
       <form id="MQTTChannelConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         <Paper className={classes.parentPaper}>
-          <Paper className={classes.paper}>
-            <FormSection name="metadataItem">
-              <MetadataItemFieldsContainer
-                formControlClass={classes.formControl}
-                showConfigFields={direction === 'FROM_MQTT'}
-                showDataTypeSelector={direction === 'FROM_MQTT'}
-                force={{isDigital: false}}
-              />
-            </FormSection>
-          </Paper>
+          {direction === 'TO_MQTT'
+            ? systemSection
+            : mqttSection
+          }
           <div className={classes.arrowHolder}>
-            <FlowArrow direction={flowDirection} />
+            <FlowArrow />
           </div>
           <Paper className={classes.paper}>
             <Collapse in={dataType !== 'number'}>
@@ -290,21 +310,12 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             </ControlWithInfo>
           </Paper>
           <div className={classes.arrowHolder}>
-            <FlowArrow direction={flowDirection} />
+            <FlowArrow />
           </div>
-          <Paper className={classes.paper}>
-            <ControlWithInfo info="The tag for data in MQTT">
-              <Field
-                name="mqttTag"
-                label="MQTT Tag"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-                normalizeOnBlur={trim}
-                validate={required()}
-              />
-            </ControlWithInfo>
-          </Paper>
+          {direction === 'TO_MQTT'
+            ? mqttSection
+            : systemSection
+          }
           <SubmitStatus
             submitting={submitting}
             submitSucceeded={submitSucceeded}
