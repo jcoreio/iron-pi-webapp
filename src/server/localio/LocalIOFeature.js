@@ -27,7 +27,7 @@ type Resources = {
 }
 
 export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
-  _plugin: LocalIODataPlugin
+  plugin: LocalIODataPlugin
 
   async getMigrations(): Promise<Array<string>> {
     return promisify(glob)(path.join(__dirname, 'migrations', '*.js'))
@@ -59,7 +59,7 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
   addPublications = ({pubsub}: {
     pubsub: PubSubEngine,
   }) => {
-    this._plugin.on(EVENT_CHANNEL_STATES, (states: Array<LocalIOChannelState>) => {
+    this.plugin.on(EVENT_CHANNEL_STATES, (states: Array<LocalIOChannelState>) => {
       states.forEach((state: LocalIOChannelState) => {
         pubsub.publish(`LocalIOChannelState/${state.id}`, {LocalIOChannelState: state})
       })
@@ -68,15 +68,15 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
   }
 
   async stop(): Promise<void> {
-    this._plugin.removeAllListeners(EVENT_CHANNEL_STATES)
+    this.plugin.removeAllListeners(EVENT_CHANNEL_STATES)
   }
 
   async createDataPlugins({getTagValue, spiHandler}: Resources): Promise<void> {
-    this._plugin = new LocalIODataPlugin({getTagValue, spiHandler})
-    await this._plugin._loadChannels()
+    this.plugin = new LocalIODataPlugin({getTagValue, spiHandler})
+    await this.plugin._loadChannels()
   }
   getDataPlugins(): $ReadOnlyArray<DataPlugin> {
-    return [this._plugin]
+    return [this.plugin]
   }
 }
 

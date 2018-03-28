@@ -22,7 +22,7 @@ const addTypes = (feature: LocalIOFeature) => ({types, inputTypes, attributeFiel
   ]) {
     types[type.name] = type
   }
-  types[LocalIOChannel.options.name.singular] = createLocalIOChannelType({attributeFieldsCache, types})
+  types[LocalIOChannel.options.name.singular] = createLocalIOChannelType({attributeFieldsCache, types, feature})
   inputTypes.LocalIOChannel = createInputLocalIOChannel({attributeFieldsCache})
 }
 export default addTypes

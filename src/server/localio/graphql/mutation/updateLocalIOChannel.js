@@ -7,6 +7,7 @@ import type {MetadataItem} from '../../../../universal/types/MetadataItem'
 import SequelizeMetadataItem from '../../../models/MetadataItem'
 import JSONType from 'graphql-type-json'
 import type {GraphQLContext} from '../../../graphql/GraphQLContext'
+import {LocalIOFeature} from '../../LocalIOFeature'
 
 type InputChannel = {
   id?: number,
@@ -15,7 +16,8 @@ type InputChannel = {
   metadataItem?: MetadataItem,
 }
 
-export default function updateLocalIOChannel({types, inputTypes}: {
+export default function updateLocalIOChannel({feature, types, inputTypes}: {
+  feature: LocalIOFeature,
   types: {[name: string]: graphql.GraphQLOutputType},
   inputTypes: {[name: string]: graphql.GraphQLInputType},
 }): graphql.GraphQLFieldConfig<any, GraphQLContext> {
@@ -51,6 +53,10 @@ export default function updateLocalIOChannel({types, inputTypes}: {
         updates.tag = tag
         const [numUpdated] = await SequelizeMetadataItem.update({item: metadataItem}, {where: {tag}, individualHooks: true})
         if (!numUpdated) await SequelizeMetadataItem.create({tag, item: metadataItem})
+      }
+      const {config} = updates
+      if (config && config.mode === 'ANALOG_INPUT' && !feature.plugin.channelSupportsAnalog(where.id)) {
+        throw new Error(`Channel ${where.id + 1} does not support Analog Input mode`)
       }
 
       await LocalIOChannel.update(updates, {where, individualHooks: true})

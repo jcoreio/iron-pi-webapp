@@ -14,13 +14,13 @@ const addMutationFields = (feature: LocalIOFeature) => ({types, inputTypes, muta
   inputTypes: {[name: string]: graphql.GraphQLInputType},
   mutationFields: {[name: string]: graphql.GraphQLFieldConfig<any, GraphQLContext>},
 }) => {
-  const plugin = feature._plugin
+  const plugin = feature.plugin
   mutationFields.setLocalChannelRemoteControlValue = setLocalChannelRemoteControlValue({plugin})
   if (process.env.BABEL_ENV === 'test') {
     mutationFields.setLocalChannelRawInput = setLocalChannelRawInput({plugin})
     mutationFields.updateRawOutputs = updateRawOutputs({plugin})
   }
-  mutationFields.updateLocalIOChannel = updateLocalIOChannel({types, inputTypes})
+  mutationFields.updateLocalIOChannel = updateLocalIOChannel({feature, types, inputTypes})
   mutationFields.updateLocalIOChannelCalibration = updateLocalIOChannelCalibration({types})
 }
 export default addMutationFields

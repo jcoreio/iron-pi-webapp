@@ -39,8 +39,6 @@ export const EVENT_CHANNEL_STATES = 'channelStates'
 
 const OUTPUT_VALUES_REFRESH_INTERVAL = 200
 
-const NUM_ANALOG_INPUTS = 4
-
 type Events = {
   channelStates: [Array<LocalIOChannelState>],
 } & DataPluginEmittedEvents
@@ -80,13 +78,21 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     }
   }
 
+  channelSupportsAnalog(id: number): boolean {
+    for (let deviceInfo of SPIDevices) {
+      if (id < deviceInfo.numAnalogInputs) return true
+      id -= Math.max(deviceInfo.numAnalogInputs, deviceInfo.numDigitalInputs, deviceInfo.numDigitalOutputs)
+    }
+    return false
+  }
+
   ioMappings(): Array<DataPluginMapping> {
     const mappings: Array<DataPluginMapping> = []
     for (let channel of this._enabledChannels()) {
       const {id, tag, config} = channel
       const {mode, controlMode} = config
       const displayNumber = id + 1
-      const channelSupportsAnalog = id < NUM_ANALOG_INPUTS
+      const channelSupportsAnalog = this.channelSupportsAnalog(id)
       const tagsToPlugin: Array<string> = []
       const baseName = `Local Channel ${displayNumber}`
       const mapping: DataPluginMapping = {

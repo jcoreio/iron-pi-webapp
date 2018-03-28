@@ -8,11 +8,13 @@ import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import * as graphql from 'graphql'
 import MetadataItem from '../../../graphql/types/MetadataItem'
 import getChannelState from '../../getChannelState'
+import {LocalIOFeature} from '../../LocalIOFeature'
 
 export default function createLocalIOChannel(options: {
+  feature: LocalIOFeature,
   attributeFieldsCache: Object,
 }): graphql.GraphQLObjectType {
-  const {attributeFieldsCache} = options
+  const {feature, attributeFieldsCache} = options
   return new graphql.GraphQLObjectType({
     name: LocalIOChannel.options.name.singular,
     fields: () => ({
@@ -50,8 +52,9 @@ export default function createLocalIOChannel(options: {
         type: new graphql.GraphQLList(LocalIOChannelMode),
         description: 'the supported moes for this channel',
         resolve: ({id}: LocalIOChannel): Array<ChannelMode> => {
-          // TODO: get this from elsewhere?
-          if (id < 4) return ['ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']
+          if (feature.plugin.channelSupportsAnalog(id)) {
+            return ['ANALOG_INPUT', 'DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']
+          }
           return ['DIGITAL_INPUT', 'DIGITAL_OUTPUT', 'DISABLED']
         },
       },
