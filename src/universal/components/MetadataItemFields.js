@@ -32,8 +32,8 @@ const styles = (theme: Theme) => ({
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
 type Classes = $Call<ExtractClasses, typeof styles>
 
-type Mode = {
-  dataType: string,
+type Force = {
+  dataType?: string,
   isDigital?: boolean,
 }
 
@@ -42,7 +42,8 @@ export type Props = {
   formControlClass?: string,
   dataType?: string,
   isDigital?: boolean,
-  mode?: Mode,
+  force?: Force,
+  showDataTypeSelector?: boolean,
   showConfigFields?: boolean,
 }
 
@@ -66,10 +67,14 @@ export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem
 
 class MetadataItemFields extends React.Component<Props> {
   render(): React.Node {
-    const {classes, formControlClass, mode, dataType, isDigital, showConfigFields} = this.props
-    const showNumericFields = mode
-      ? mode.dataType === 'number' && !mode.isDigital
-      : dataType === 'number' && !isDigital
+    const {classes, formControlClass, force, showDataTypeSelector} = this.props
+    let {dataType, isDigital} = this.props
+    if (force) {
+      if (force.dataType != null) dataType = force.dataType
+      if (force.isDigital != null) isDigital = force.isDigital
+    }
+    const showConfigFields = this.props.showConfigFields !== false
+    const showNumericFields = dataType === 'number' && !isDigital
     return (
       <React.Fragment>
         <ControlWithInfo info="Unique ID used to link this with other system functions">
@@ -83,7 +88,7 @@ class MetadataItemFields extends React.Component<Props> {
             normalize={trim}
           />
         </ControlWithInfo>
-        {showConfigFields !== false && (
+        {showConfigFields && (
           <ControlWithInfo info="Display name for this tag">
             <Field
               name="name"
@@ -96,7 +101,7 @@ class MetadataItemFields extends React.Component<Props> {
             />
           </ControlWithInfo>
         )}
-        {!mode && showConfigFields !== false && (
+        {showDataTypeSelector && (
           <ControlWithInfo info="The type of the value for this tag">
             <Field
               name="dataType"

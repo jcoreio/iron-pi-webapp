@@ -293,7 +293,7 @@ class ChannelForm extends React.Component<Props> {
             <FormSection name="metadataItem">
               <MetadataItemFieldsContainer
                 formControlClass={classes.formControl}
-                mode={{
+                force={{
                   dataType: 'number',
                   isDigital: config.mode !== 'ANALOG_INPUT',
                 }}

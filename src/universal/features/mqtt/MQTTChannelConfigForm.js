@@ -254,6 +254,8 @@ class MQTTChannelConfigForm extends React.Component<Props> {
               <MetadataItemFieldsContainer
                 formControlClass={classes.formControl}
                 showConfigFields={direction === 'FROM_MQTT'}
+                showDataTypeSelector={direction === 'FROM_MQTT'}
+                force={{isDigital: false}}
               />
             </FormSection>
           </Paper>
