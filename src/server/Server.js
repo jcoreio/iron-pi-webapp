@@ -107,6 +107,10 @@ export default class Server {
 
     log.info(`App is listening on http://0.0.0.0:${port}`)
     this._running = true
+
+    // preload this instead of waiting for the first request
+    // (the require weirdness here is to enable server-side hot-reloading)
+    require('./ssr/serverSideRender')
   }
 
   // istanbul ignore next
