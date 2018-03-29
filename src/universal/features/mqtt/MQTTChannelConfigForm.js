@@ -40,7 +40,7 @@ const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, ...props}: Objec
   />
 ))
 
-const styles = ({spacing, palette}: Theme) => ({
+const styles = ({spacing, palette, typography}: Theme) => ({
   form: {
     margin: '0 auto',
     minWidth: 570 + spacing.unit * 4,
@@ -90,6 +90,16 @@ const styles = ({spacing, palette}: Theme) => ({
   arrowHolder: {
     textAlign: 'center',
     marginBottom: -spacing.unit * 1.5,
+  },
+  title: {
+    fontSize: typography.pxToRem(20),
+    color: palette.text.primary,
+    paddingBottom: spacing.unit / 2,
+    borderBottom: {
+      width: 2,
+      style: 'solid',
+      color: palette.text.primary,
+    },
   },
 })
 
@@ -253,6 +263,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     const direction: ?Direction = getDirection(this.props)
     const systemSection = (
       <Paper className={classes.paper}>
+        <h1 className={classes.title}>
+          System
+        </h1>
         <FormSection name="metadataItem">
           <MetadataItemFieldsContainer
             formControlClass={classes.formControl}
@@ -265,6 +278,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     )
     const mqttSection = (
       <Paper className={classes.paper}>
+        <h1 className={classes.title}>
+          MQTT
+        </h1>
         <ControlWithInfo info="The tag for data in MQTT">
           <Field
             name="mqttTag"
@@ -289,6 +305,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             <FlowArrow />
           </div>
           <Paper className={classes.paper}>
+            <h1 className={classes.title}>
+              Slope / Offset
+            </h1>
             <Collapse in={dataType !== 'number'}>
               <div>
                 <FormLabel>
