@@ -22,6 +22,7 @@ import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
 import {SPIDevices} from './SPIDevicesInfo'
 import * as LocalIOTags from '../../universal/localio/LocalIOTags'
+import MetadataItem from '../models/MetadataItem'
 
 const log = logger('LocalIODataPlugin')
 
@@ -61,7 +62,31 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   async _loadChannels(): Promise<void> {
     this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
     if (!this._channels.length) {
-      await Promise.all(range(CM_NUM_IO).map(id => LocalIOChannel.create({id})))
+      await Promise.all(range(CM_NUM_IO).map(async (id: number): Promise<any> => {
+        const tag = `local${id + 1}`
+        const item = {
+          tag,
+          name: `Local ${id + 1}`,
+          dataType: 'number',
+          isDigital: true,
+          units: 'V',
+          displayPrecision: 2,
+          storagePrecision: 2,
+          min: 0,
+          max: 10,
+        }
+        await MetadataItem.create({tag, item})
+        await LocalIOChannel.create({
+          id,
+          tag,
+          config: {
+            mode: 'DIGITAL_INPUT',
+            reversePolarity: false,
+            controlMode: 'REMOTE_CONTROL',
+            safeState: 0,
+          },
+        })
+      }))
       this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
     }
   }
