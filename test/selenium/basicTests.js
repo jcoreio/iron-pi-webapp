@@ -3,9 +3,6 @@
 import {expect} from 'chai'
 import superagent from './util/superagent'
 import navigateTo from "./util/navigateTo"
-import delay from 'delay'
-import poll from '@jcoreio/poll'
-import loginIfNecessary from './util/loginIfNecessary'
 
 module.exports = () => describe('basic tests', () => {
   it('serves page with correct title', async function () {
@@ -31,21 +28,6 @@ module.exports = () => describe('basic tests', () => {
     }
     expect(error).to.exist
     expect(error.status).to.equal(404)
-  })
-  it('handles links', async function () {
-    this.timeout(60000)
-    await loginIfNecessary()
-    browser.timeouts('implicit', 1000)
-    await navigateTo('/about')
-    expect(await browser.getText('#body h1')).to.equal('About')
-    await browser.click('=Home')
-    await delay(300)
-    await poll(
-      async () => {
-        expect(await browser.getText('#body h1')).to.equal('Home')
-      },
-      50
-    )
   })
 })
 

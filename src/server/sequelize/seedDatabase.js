@@ -20,6 +20,7 @@ export default async function seedDatabase(): Promise<void> {
       // $FlowFixMe
       await testUser.addScopes(await Scope.findAll({where: {id: [
         'test:create:token',
+        'update:users',
       ]}}))
     }
 
