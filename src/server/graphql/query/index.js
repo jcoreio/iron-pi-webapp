@@ -48,6 +48,13 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
         return connectModeHandler.inConnectMode
       },
     },
+    sshEnabled: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
+      resolve: async (obj: any, args: any, context: GraphQLContext): Promise<any> => {
+        const {sshHandler} = context
+        return await sshHandler.isSSHEnabled()
+      },
+    },
     TagValue: createTagValue(),
     MetadataItem: {
       type: MetadataItem,

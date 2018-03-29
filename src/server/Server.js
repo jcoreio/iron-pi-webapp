@@ -26,6 +26,7 @@ import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler, {EVENT_CONNECT_BUTTON_PRESSED, EVENT_NETWORK_MODE_COMMAND} from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
+import SSHHandler from './device/SSHHandler'
 import NetworkSettingsHandler from './network-settings/NetworkSettingsHandler'
 
 import requireEnv from '@jcoreio/require-env'
@@ -92,6 +93,7 @@ export default class Server {
   metadataHandler: ?MetadataHandler
   connectModeHandler: ConnectModeHandler
   accessCodeHandler: AccessCodeHandler
+  sshHandler: SSHHandler
   graphqlSchema: ?GraphQLSchema
   pubsub: PubSubEngine
   express: ?$Application
@@ -104,6 +106,7 @@ export default class Server {
     this._graphqlDataPlugin = new GraphQLDataPlugin(this.pubsub)
     this.connectModeHandler = new ConnectModeHandler()
     this.accessCodeHandler = new AccessCodeHandler()
+    this.sshHandler = new SSHHandler()
     this._spiHubClient.on('devicesChanged', (message: Object) => {
       this.accessCodeHandler.setAccessCode(message.accessCode)
       this._ledHandler.sendLEDState(LED_MESSAGE_OK, LED_MESSAGE_OK)
@@ -186,7 +189,7 @@ export default class Server {
         features,
       })
 
-      const {connectModeHandler, accessCodeHandler} = this
+      const {connectModeHandler, accessCodeHandler, sshHandler} = this
       connectModeHandler.on(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
       User.afterUpdate((user: User) => {
         if (user.username === 'root' && user.changed('passwordHasBeenSet')) {
@@ -235,6 +238,7 @@ export default class Server {
         metadataHandler,
         connectModeHandler,
         accessCodeHandler,
+        sshHandler,
         pubsub,
       }
 

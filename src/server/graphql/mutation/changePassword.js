@@ -29,7 +29,7 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
       },
     },
     resolve: async (doc: any, {accessCode, oldPassword, newPassword}: Args, context: GraphQLContext): Promise<any> => {
-      const {userId: id, connectModeHandler, accessCodeHandler} = context
+      const {userId: id, connectModeHandler, accessCodeHandler, sshHandler} = context
       let user: ?User
       if (connectModeHandler.inConnectMode && accessCode) {
         try {
@@ -62,6 +62,7 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
       if (!user) throw new Error('User not found')
       try {
         await user.update({password: newPassword, passwordHasBeenSet: true}, {individualHooks: true})
+        await sshHandler.setSystemPassword(newPassword)
       } catch (error) {
         if (error instanceof ValidationError) {
           const passwordItem = error.errors.find(item => item.path === 'password')
