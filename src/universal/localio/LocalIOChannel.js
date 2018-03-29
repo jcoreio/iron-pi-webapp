@@ -44,8 +44,8 @@ export const DigitalInputConfigType = (reify: Type<DigitalInputConfig>)
 export const ControlModes = {
   FORCE_OFF: {displayText: 'Force Off'},
   FORCE_ON: {displayText: 'Force On'},
-  LOCAL_CONTROL: {displayText: 'Local Control'},
-  REMOTE_CONTROL: {displayText: 'Remote Control'},
+  LOCAL_CONTROL: {displayText: 'Condition'},
+  REMOTE_CONTROL: {displayText: 'Output Tag'},
 }
 
 export const ControlModesArray = Object.keys(ControlModes)
