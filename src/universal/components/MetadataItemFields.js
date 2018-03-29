@@ -48,21 +48,8 @@ export type Props = {
 }
 
 export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem {
-  switch (metadataItem.dataType) {
-  case 'number': {
-    if (metadataItem.isDigital) {
-      const {tag, name} = metadataItem
-      return {tag, name, dataType: 'number', isDigital: true}
-    }
-    const {tag, name, min, max, units, displayPrecision, storagePrecision} = metadataItem
-    return {tag, name, dataType: 'number', min, max, units, displayPrecision, storagePrecision}
-  }
-  case 'string': {
-    const {tag, name} = metadataItem
-    return {tag, name, dataType: 'string'}
-  }
-  default: return metadataItem
-  }
+  const {tag, dataType, name, min, max, units, displayPrecision, storagePrecision} = metadataItem
+  return {tag, name, dataType, min, max, units, displayPrecision, storagePrecision}
 }
 
 class MetadataItemFields extends React.Component<Props> {

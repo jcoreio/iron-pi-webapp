@@ -89,12 +89,10 @@ const query = gql(`{
     name
     metadataItem {
       tag
-      ... on NumericMetadataItem {
-        min
-        max
-        units
-        displayPrecision
-      }
+      min
+      max
+      units
+      displayPrecision
     } 
     state ${ALL_STATE_FIELDS}
   }  

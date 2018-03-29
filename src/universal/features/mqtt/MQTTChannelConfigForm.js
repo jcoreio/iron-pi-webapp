@@ -232,7 +232,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     }
     return mutate({variables: {values}}).then(({data: {Config}}: {data: {Config: MQTTChannelConfig}}) => {
       history.replace(mqttConfigForm(configId))
-    }).catch(handleError)
+    }).catch(err => handleError(err, {
+      mapPath: ([first, ...rest]) => [first === 'item' ? 'metadataItem' : first, ...rest],
+    }))
   }
 
   handleDelete = () => {

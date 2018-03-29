@@ -1,3 +1,5 @@
+import {pickMetadataItemFields} from '../../components/MetadataItemFields'
+
 export default function parseChannelFormValues(channel) {
   const {id, config, metadataItem, ...rest} = channel
   const result = {id: parseInt(id), config: {...config}, ...rest}
@@ -6,16 +8,18 @@ export default function parseChannelFormValues(channel) {
   if (typeof result.config.min !== 'number') delete result.config.min
   if (typeof result.config.max !== 'number') delete result.config.max
 
+  result.metadataItem = pickMetadataItemFields(metadataItem)
+
   switch (config.mode) {
   case 'ANALOG_INPUT': {
-    const {tag, name, units, min, max, storagePrecision, displayPrecision} = metadataItem
-    result.metadataItem = {tag, name, dataType: 'number', units, min, max, storagePrecision, displayPrecision}
+    result.metadataItem.dataType = 'number'
+    delete result.metadataItem.isDigital
     break
   }
   case 'DIGITAL_INPUT':
   case 'DIGITAL_OUTPUT': {
-    const {tag, name} = metadataItem
-    result.metadataItem = {tag, name, dataType: 'number', isDigital: true}
+    result.metadataItem.dataType = 'number'
+    result.metadataItem.isDigital = true
     break
   }
   case 'DISABLED': {

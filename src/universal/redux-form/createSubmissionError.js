@@ -4,7 +4,14 @@ import set from 'lodash.set'
 import size from 'lodash.size'
 import {SubmissionError} from 'redux-form'
 
-export default function createSubmissionError(err: {message: string, graphQLErrors?: Array<any>}) {
+type Options = {
+  mapPath?: (path: Array<string | number>) => Array<string | number>,
+}
+
+export default function createSubmissionError(
+  err: {message: string, graphQLErrors?: Array<any>},
+  {mapPath}: Options = {}
+) {
   const {graphQLErrors} = err
   const submitErrors = {}
   if (graphQLErrors) {
@@ -13,6 +20,7 @@ export default function createSubmissionError(err: {message: string, graphQLErro
       const {errors} = validation || {}
       if (errors) {
         for (let {path, message} of errors) {
+          if (mapPath) path = mapPath(path)
           set(submitErrors, path, message)
         }
       }

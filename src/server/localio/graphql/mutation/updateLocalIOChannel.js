@@ -51,6 +51,7 @@ export default function updateLocalIOChannel({feature, types, inputTypes}: {
       if (metadataItem) {
         const {tag} = metadataItem
         updates.tag = tag
+
         const [numUpdated] = await SequelizeMetadataItem.update({item: metadataItem}, {where: {tag}, individualHooks: true})
         if (!numUpdated) await SequelizeMetadataItem.create({tag, item: metadataItem})
       }

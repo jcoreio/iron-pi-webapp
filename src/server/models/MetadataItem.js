@@ -4,7 +4,7 @@ import Sequelize, {Model} from 'sequelize'
 import {tagPattern} from '../../universal/types/Tag'
 import {validateWithFlowRuntime} from 'sequelize-validate-subfields-flow-runtime'
 import type {MetadataItem as Item} from '../../universal/types/MetadataItem'
-import {MetadataItemType} from '../../universal/types/MetadataItem'
+import {validateMetadataItem} from '../../universal/types/MetadataItem'
 
 export type MetadataItemInitAttributes = {
   tag: string;
@@ -39,7 +39,7 @@ export default class MetadataItem extends Model<MetadataItemAttributes, Metadata
         type: Sequelize.JSON,
         allowNull: false,
         validate: {
-          isValid: validateWithFlowRuntime(MetadataItemType, {reduxFormStyle: true})
+          isValid: validateWithFlowRuntime(validateMetadataItem, {reduxFormStyle: true})
         },
       },
     }, {

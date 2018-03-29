@@ -10,6 +10,8 @@ import createMetadataItem from './createMetadataItem'
 import updateMetadataItem from './updateMetadataItem'
 import verifyAccessCode from './verifyAccessCode'
 import type {GraphQLFeature} from '../GraphQLFeature'
+import defaultMutations from './defaultMutations'
+import User from '../../models/User'
 
 type Options = {
   sequelize: Sequelize,
@@ -30,6 +32,12 @@ export default function createMutation(options: Options): graphql.GraphQLObjectT
   if (process.env.BABEL_ENV === 'test') {
     mutationFields.setInConnectMode = require('./setInConnectMode')()
     mutationFields.setTestAccessCode = require('./setTestAccessCode')()
+    Object.assign(mutationFields, defaultMutations({
+      model: User,
+      types,
+      inputTypes,
+      requireDefaultScopes: true,
+    }))
   }
   for (let feature of features) {
     if (feature.addMutationFields) feature.addMutationFields({sequelize, types, inputTypes, mutationFields})

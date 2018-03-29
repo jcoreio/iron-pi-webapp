@@ -7,9 +7,7 @@ import mapValues from 'lodash.mapvalues'
 import {defaultArgs, attributeFields} from 'graphql-sequelize'
 import {associationFields} from '@jcoreio/graphql-sequelize-extra'
 import models from '../../models'
-import MetadataItem, {
-  DigitalMetadataItem, NumericMetadataItem, StringMetadataItem, TagDataType
-} from './MetadataItem'
+import MetadataItem, {TagDataType} from './MetadataItem'
 import MappingProblem, {MappingLocationInfo, MappingProblemKind} from './MappingProblem'
 import InputMetadataItem from './InputMetadataItem'
 import createUser from './User'
@@ -18,6 +16,8 @@ import TimeValuePair from './TimeValuePair'
 import TaggedTimeValuePair from './TaggedTimeValuePair'
 import defaultInputType from './defaultInputType'
 import type {GraphQLFeature} from '../GraphQLFeature'
+import defaultCreateType from './defaultCreateType'
+import defaultUpdateType from './defaultUpdateType'
 
 export type Options = {
   sequelize: Sequelize,
@@ -50,9 +50,6 @@ export default function createTypes(options: Options): {
     TaggedTimeValuePair,
     TagDataType,
     MetadataItem,
-    NumericMetadataItem,
-    DigitalMetadataItem,
-    StringMetadataItem,
     MappingLocationInfo,
     MappingProblemKind,
     MappingProblem,
@@ -65,8 +62,7 @@ export default function createTypes(options: Options): {
   for (let key in models) {
     const model = models[key]
     const name = model.options.name.singular
-    if (types[name]) continue
-    types[name] = new graphql.GraphQLObjectType({
+    if (!types[name]) types[name] = new graphql.GraphQLObjectType({
       name,
       fields: () => ({
         ...attributeFields(model, {cache: attributeFieldsCache}),
@@ -75,7 +71,14 @@ export default function createTypes(options: Options): {
       })
     })
 
-    inputTypes[name] = defaultInputType(model, {cache: attributeFieldsCache})
+    if (!inputTypes[name]) inputTypes[name] = defaultInputType(model, {cache: attributeFieldsCache})
+
+    for (let inputType of [
+      defaultCreateType(model, {cache: attributeFieldsCache}),
+      defaultUpdateType(model, {cache: attributeFieldsCache}),
+    ]) {
+      if (!inputTypes[inputType.name]) inputTypes[inputType.name] = inputType
+    }
   }
 
   for (let feature of features) {

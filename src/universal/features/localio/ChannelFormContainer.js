@@ -16,16 +16,12 @@ metadataItem {
   tag
   name
   dataType
-  ... on NumericMetadataItem {
-    min
-    max
-    units
-    storagePrecision
-    displayPrecision
-  }
-  ... on DigitalMetadataItem {
-    isDigital
-  }
+  min
+  max
+  units
+  storagePrecision
+  displayPrecision
+  isDigital
 }
 `
 

@@ -1,8 +1,8 @@
 // @flow
 /* @flow-runtime enable */
 
-import {reify} from 'flow-runtime'
-import type {Type} from 'flow-runtime'
+import {reify, validate} from 'flow-runtime'
+import type {Type, Validation} from 'flow-runtime'
 
 export type DataType = 'number' | 'string'
 
@@ -42,7 +42,17 @@ export type NumericMetadataItem = {
 
 export const NumericMetadataItemType = (reify: Type<NumericMetadataItem>)
 
-export type MetadataItem = DigitalMetadataItem | NumericMetadataItem | StringMetadataItem
+export type MetadataItem = {
+  tag: string,
+  name: string,
+  dataType: DataType,
+  isDigital?: ?boolean,
+  units?: ?string,
+  min?: ?number,
+  max?: ?number,
+  displayPrecision?: ?number,
+  storagePrecision?: ?number,
+}
 
 export const MetadataItemType = (reify: Type<MetadataItem>)
 
@@ -54,5 +64,14 @@ export function getMetadataItemSubtype(item: MetadataItem): Type<DigitalMetadata
   case 'string': return StringMetadataItemType
   default: throw new Error(`unknown dataType: ${item.dataType}`)
   }
+}
+
+export function validateMetadataItem(item: MetadataItem): Validation {
+  const result: Validation = validate(getMetadataItemSubtype(item), item)
+  if (item.min != null && item.max != null && item.min >= item.max) {
+    result.errors.push([['min'], 'must be < max'])
+    result.errors.push([['max'], 'must be > min'])
+  }
+  return result
 }
 

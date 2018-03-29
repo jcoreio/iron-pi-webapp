@@ -246,7 +246,9 @@ class ChannelForm extends React.Component<Props> {
       }
     }).then(({data: {Channel}}: {data: {Channel: FullChannel}}) => {
       initialize(pickFormFields(Channel), false, {keepSubmitSucceeded: true})
-    }).catch(handleError)
+    }).catch(err => handleError(err, {
+      mapPath: ([first, ...rest]) => [first === 'item' ? 'metadataItem' : first, ...rest],
+    }))
   }
 
   ChannelModeButton = ({value, disabled, ...props}: ChannelModeButtonProps): React.Node => {

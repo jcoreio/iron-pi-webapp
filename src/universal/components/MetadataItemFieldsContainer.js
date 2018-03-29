@@ -28,16 +28,12 @@ const metadataItemQuery = gql(`query MetadataItem($tag: String!) {
     tag
     name
     dataType
-    ... on NumericMetadataItem {
-      min
-      max
-      units
-      storagePrecision
-      displayPrecision
-    }
-    ... on DigitalMetadataItem {
-      isDigital
-    }
+    min
+    max
+    units
+    storagePrecision
+    displayPrecision
+    isDigital
   }
 }`)
 
