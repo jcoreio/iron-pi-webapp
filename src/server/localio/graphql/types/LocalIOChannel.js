@@ -36,7 +36,7 @@ export default function createLocalIOChannel(options: {
           if (config.mode === 'DISABLED' && config.name) return config.name
           if (!tag) return config.name || `Channel ${id + 1}`
           const item = metadataHandler.getTagMetadata(tag)
-          return item ? item.name : `Channel ${id + 1}`
+          return item && item.name || `Channel ${id + 1}`
         },
       },
       state: {
