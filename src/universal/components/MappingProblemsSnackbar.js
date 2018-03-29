@@ -33,20 +33,24 @@ export type Props = {
   },
 }
 
-const MappingProblemsSnackbar = ({classes, data: {numMappingProblems}}: Props): React.Node => (
-  <Snackbar
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'left',
-    }}
-    open={numMappingProblems != null && numMappingProblems > 0}
-    message={
-      numMappingProblems != null && numMappingProblems > 0
-        ? <span><WarningIcon className={classes.icon} /> There are currently <Link className={classes.link} to={MAPPING_PROBLEMS}>{numMappingProblems} mapping problems</Link></span>
-        : <SuccessAlert>There are currently no mapping problems!</SuccessAlert>
-    }
-  />
-)
+const MappingProblemsSnackbar = ({classes, data: {numMappingProblems}}: Props): React.Node => {
+  const are = numMappingProblems === 1 ? 'is' : 'are'
+  const problems = numMappingProblems === 1 ? 'problem' : 'problems'
+  return (
+    <Snackbar
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      open={numMappingProblems != null && numMappingProblems > 0}
+      message={
+        numMappingProblems != null && numMappingProblems > 0
+          ? <span><WarningIcon className={classes.icon} /> There {are} currently <Link className={classes.link} to={MAPPING_PROBLEMS}>{numMappingProblems} mapping {problems}</Link></span>
+          : <SuccessAlert>There are currently no mapping problems!</SuccessAlert>
+      }
+    />
+  )
+}
 
 export default withStyles(styles, {withTheme: true})(MappingProblemsSnackbar)
 
