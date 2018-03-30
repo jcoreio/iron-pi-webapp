@@ -359,12 +359,12 @@ module.exports = () => {
 
         await browser.click('#channelForm [data-name="config.controlLogic[0].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[0].tag"] [value="channel2"]')
+        await browser.click('[id="menu-config.controlLogic[0].tag"] [data-value="channel2"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[1].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].tag"] [value="channel3"]')
+        await browser.click('[id="menu-config.controlLogic[1].tag"] [data-value="channel3"]')
         await delay(300)
 
         await browser.setValue('#channelForm [name="config.controlLogic[0].setpoint"]', ' 23a')
@@ -476,29 +476,29 @@ module.exports = () => {
 
         await browser.click('#channelForm [data-name="config.controlLogic[0].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[0].tag"] [value="channel2"]')
+        await browser.click('[id="menu-config.controlLogic[0].tag"] [data-value="channel2"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[0].comparison"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[0].comparison"] [value="EQ"]')
+        await browser.click('[id="menu-config.controlLogic[0].comparison"] [data-value="EQ"]')
         await delay(300)
 
         await browser.setValue('#channelForm [name="config.controlLogic[0].setpoint"]', ' 23')
 
         await browser.click('#channelForm [data-name="config.controlLogic[1].operator"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].operator"] [value="OR"]')
+        await browser.click('[id="menu-config.controlLogic[1].operator"] [data-value="OR"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[1].tag"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].tag"] [value="channel3"]')
+        await browser.click('[id="menu-config.controlLogic[1].tag"] [data-value="channel3"]')
         await delay(300)
 
         await browser.click('#channelForm [data-name="config.controlLogic[1].comparison"]')
         await delay(100)
-        await browser.click('[id="menu-config.controlLogic[1].comparison"] [value="LT"]')
+        await browser.click('[id="menu-config.controlLogic[1].comparison"] [data-value="LT"]')
         await delay(300)
 
         await browser.setValue('#channelForm [name="config.controlLogic[1].setpoint"]', ' 5.6')
