@@ -62,7 +62,7 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
       if (!user) throw new Error('User not found')
       try {
         await user.update({password: newPassword, passwordHasBeenSet: true}, {individualHooks: true})
-        await sshHandler.setSystemPassword(newPassword)
+        if (process.env.SET_SYSTEM_PASSWORD) await sshHandler.setSystemPassword(newPassword)
       } catch (error) {
         if (error instanceof ValidationError) {
           const passwordItem = error.errors.find(item => item.path === 'password')
