@@ -3,7 +3,7 @@
 import Sequelize, {Model, Association} from 'sequelize'
 import bcrypt from 'bcrypt'
 import promisify from 'es6-promisify'
-import zxcvbn from 'zxcvbn'
+//import zxcvbn from 'zxcvbn'
 import Scope from './Scope'
 import type {ScopeAttributes, ScopeInitAttributes} from './Scope'
 import UserScope from './UserScope'
@@ -83,15 +83,15 @@ export default class User extends Model<UserAttributes, UserInitAttributes> {
       password: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-          isStrongEnough(password: string) {
-            const result = zxcvbn(password)
-            if (result.score <= 2) {
-              const message = [result.feedback.warning + '.', ...result.feedback.suggestions].join('\n')
-              throw new Error(message)
-            }
-          }
-        }
+        // validate: {
+        //   isStrongEnough(password: string) {
+        //     const result = zxcvbn(password)
+        //     if (result.score <= 2) {
+        //       const message = [result.feedback.warning + '.', ...result.feedback.suggestions].join('\n')
+        //       throw new Error(message)
+        //     }
+        //   }
+        // }
       },
       passwordHasBeenSet: {
         type: Sequelize.BOOLEAN,
