@@ -40,7 +40,6 @@ const channelStateStyles = (theme: Theme) => ({
     whiteSpace: 'nowrap',
   },
   secondaryAction: {
-    marginTop: -theme.spacing.unit,
     marginRight: theme.spacing.unit * 3,
   },
 })

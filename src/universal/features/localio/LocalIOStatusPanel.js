@@ -31,7 +31,6 @@ export type Channel = {
 
 const styles = (theme: Theme) => ({
   secondaryAction: {
-    marginTop: -theme.spacing.unit * 2,
     marginRight: theme.spacing.unit * 2,
   }
 })
@@ -83,7 +82,6 @@ const channelStateStyles = (theme: Theme) => {
       flex: '1 1 140px',
     },
     secondaryAction: {
-      marginTop: -theme.spacing.unit * 1.5,
       marginRight: theme.spacing.unit * 3,
       flex: '0 0 150px',
       textAlign: 'center',
