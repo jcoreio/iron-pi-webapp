@@ -310,7 +310,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         }
         case 'REMOTE_CONTROL': {
           if (tag)
-            controlValue = this._getTagValue(tag)
+            controlValue = Boolean(this._getTagValue(tag))
           break
         }
         }
