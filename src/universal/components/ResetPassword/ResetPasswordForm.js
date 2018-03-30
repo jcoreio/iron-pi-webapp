@@ -120,8 +120,8 @@ const ResetPasswordForm = ({
       onSubmit={onSubmit}
       id="resetPasswordForm"
     >
-      <h3 className={classes.title}>{title || 'Reset Password'}</h3>
-      <h4 className={classes.stepNumber}>
+      <h3 className={classes.title} data-test-name="title">{title || 'Reset Password'}</h3>
+      <h4 className={classes.stepNumber} data-test-name="stepNumber">
         Step <Fader className={classes.stepFader}>{step}</Fader> of 3
       </h4>
       <Autocollapse>

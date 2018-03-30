@@ -12,6 +12,7 @@ export default async function logoutIfNecessary(): Promise<void> {
         await browser.click('body #logOutMenuItem').catch(fail)
       }
       else if (await browser.isVisible('body #loginForm')) return
+      else if (await browser.isVisible('body #resetPasswordForm')) return
       else throw new Error('retrying')
     },
     500
