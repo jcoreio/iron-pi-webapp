@@ -48,9 +48,9 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
           throw new Error('You must provide the old password unless you provide the accessCode in connect mode')
         }
         if (!id) throw new Error('You must be logged in to change your password')
-        const user = await User.findOne({where: {id}})
-        if (!user) throw new Error('User not found')
-        const matches = await promisify(cb => bcrypt.compare(oldPassword, user.password, cb))()
+        const fetchedUser = user = await User.findOne({where: {id}})
+        if (!fetchedUser) throw new Error('User not found')
+        const matches = await promisify(cb => bcrypt.compare(oldPassword, fetchedUser.password, cb))()
         if (!matches) {
           const error = new Error('Incorrect password');
           (error: any).validation = {
