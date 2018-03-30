@@ -52,6 +52,7 @@
     "graphql-tag": "^2.6.0",
     "graphql-type-json": "^0.1.4",
     "immutable": "^4.0.0-rc.9",
+    "is-ip": "^2.0.0",
     "jsonwebtoken": "^8.1.0",
     "jss": "^9.8.0",
     "jss-expand": "^5.0.0",
