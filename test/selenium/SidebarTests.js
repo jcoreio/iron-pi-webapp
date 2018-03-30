@@ -117,24 +117,24 @@ module.exports = () => describe('Sidebar', function () {
       })
 
       it("shows a status item", async function () {
-        expect(await browser.isVisible('#sidebar li[data-test-title="Status"]')).to.be.true
+        expect(await browser.isVisible('#sidebar [data-test-title="Status"]')).to.be.true
       })
 
       it("shows a Local I/O item", async function () {
         browser.timeouts('implicit', 500)
-        await browser.waitForVisible('#sidebar li[data-test-title="Local I/O"]', 10000)
+        await browser.waitForVisible('#sidebar [data-test-title="Local I/O"]', 10000)
       })
 
       it('Local I/O item is collapsible', async function () {
         browser.timeouts('implicit', 500)
-        await browser.waitForVisible('#sidebar li[data-test-title="Local I/O"]', 10000)
+        await browser.waitForVisible('#sidebar [data-test-title="Local I/O"]', 10000)
         await browser.waitForVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]', 10000)
 
-        await browser.click('#sidebar li[data-test-title="Local I/O"]')
+        await browser.click('#sidebar [data-test-title="Local I/O"]')
         await delay(300)
         expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.false
 
-        await browser.click('#sidebar li[data-test-title="Local I/O"]')
+        await browser.click('#sidebar [data-test-title="Local I/O"]')
         await delay(300)
         expect(await browser.isVisible('#sidebar [data-component="List"][data-test-title="Local I/O"]')).to.be.true
       })

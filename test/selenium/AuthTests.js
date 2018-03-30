@@ -10,7 +10,6 @@ import logoutIfNecessary from './util/logoutIfNecessary'
 import superagent from './util/superagent'
 import execute from './util/execute'
 import delay from 'delay'
-import waitForNotExist from './util/waitForNotExist'
 
 module.exports = () => {
   let token
@@ -27,10 +26,28 @@ module.exports = () => {
     await superagent.post('/resetRootPassword')
   })
 
+  async function canLoginWithPassword(password: string): Promise<void> {
+    const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
+      username: 'root',
+      password,
+    })
+    expect(token).to.exist
+  }
+
+  async function waitForLoggedIn(timeout: number = 10000): Promise<void> {
+    await browser.waitForVisible('body #openUserMenuButton', timeout)
+  }
+
   describe('Auth', function () {
     this.timeout(60000)
 
     beforeEach(async () => {
+      await graphql({query: `mutation {
+        updateUser(where: {username: "root"}, values: {passwordHasBeenSet: true}) {
+          id
+        }
+        setInConnectMode(inConnectMode: false)
+      }`})
       await navigateTo('/')
       browser.timeouts('implicit', 1000)
     })
@@ -67,16 +84,17 @@ module.exports = () => {
       browser.timeouts('implicit', 1000)
       await logoutIfNecessary()
       const accessCode = 'ABCDEFGH'
-      const password = requireEnv('TEST_PASSWORD') + 'test'
+      const oldPassword = requireEnv('TEST_PASSWORD')
+      const newPassword = requireEnv('TEST_PASSWORD') + 'test'
       await graphql({
-        query: `mutation prepare($accessCode: String!) {
-          updateUser(where: {username: "root"}, values: {passwordHasBeenSet: false}) {
+        query: `mutation prepare($accessCode: String!, $oldPassword: String!) {
+          updateUser(where: {username: "root"}, values: {passwordHasBeenSet: false, password: $oldPassword}) {
             id
           }
           setInConnectMode(inConnectMode: false)
           setTestAccessCode(accessCode: $accessCode)
         }`,
-        variables: {accessCode},
+        variables: {accessCode, oldPassword},
       })
 
       expect(await browser.getText('body #loginDialogTitle')).to.equal('jcore.io\nIRON PI')
@@ -92,11 +110,12 @@ module.exports = () => {
       await browser.click('#resetPasswordForm button[type="submit"]')
 
       await waitForStep(3)
-      await browser.setValue('#resetPasswordForm [name="newPassword"]', password)
-      await browser.setValue('#resetPasswordForm [name="retypeNewPassword"]', password)
+      await browser.setValue('#resetPasswordForm [name="newPassword"]', newPassword)
+      await browser.setValue('#resetPasswordForm [name="retypeNewPassword"]', newPassword)
       await browser.click('#resetPasswordForm button[type="submit"]')
 
-      await browser.waitForVisible('body #openUserMenuButton', 10000)
+      await waitForLoggedIn(10000)
+      await canLoginWithPassword(newPassword)
     })
     it('reset password workflow works', async function () {
       this.timeout(60000)
@@ -133,7 +152,8 @@ module.exports = () => {
       await browser.setValue('#resetPasswordForm [name="retypeNewPassword"]', newPassword)
       await browser.click('#resetPasswordForm button[type="submit"]')
 
-      await browser.waitForVisible('body #openUserMenuButton', 10000)
+      await waitForLoggedIn(10000)
+      await canLoginWithPassword(newPassword)
     })
     it('requires correct access code', async function () {
       this.timeout(60000)
@@ -162,6 +182,12 @@ module.exports = () => {
   })
   describe('LoginDialog', function () {
     beforeEach(async () => {
+      await graphql({query: `mutation {
+        updateUser(where: {username: "root"}, values: {passwordHasBeenSet: true}) {
+          id
+        }
+        setInConnectMode(inConnectMode: false)
+      }`})
       await navigateTo('/')
       browser.timeouts('implicit', 1000)
     })
@@ -256,6 +282,18 @@ module.exports = () => {
     })
   })
   describe('ChangePasswordDialog', () => {
+    beforeEach(async () => {
+      await graphql({
+        query: `mutation prepare($password: String!) {
+          updateUser(where: {username: "root"}, values: {passwordHasBeenSet: true, password: $password}) {
+            id
+          }
+          setInConnectMode(inConnectMode: false)
+        }`,
+        variables: {password: requireEnv('TEST_PASSWORD')}
+      })
+    })
+
     it('displays error if old password is incorrect', async function () {
       this.timeout(60000)
       await navigateTo('/changePassword')
@@ -277,11 +315,7 @@ module.exports = () => {
         50
       ).timeout(10000)
 
-      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
-        username: 'root',
-        password: requireEnv('TEST_PASSWORD'),
-      })
-      expect(token).to.exist
+      await canLoginWithPassword(requireEnv('TEST_PASSWORD'))
     })
     it('requires new passwords to match', async function () {
       this.timeout(60000)
@@ -302,39 +336,31 @@ module.exports = () => {
         50
       ).timeout(10000)
 
-      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
-        username: 'root',
-        password: requireEnv('TEST_PASSWORD'),
-      })
-      expect(token).to.exist
+      await canLoginWithPassword(requireEnv('TEST_PASSWORD'))
     })
-    it('applies password strength requirements to new password', async function () {
-      this.timeout(60000)
-      await navigateTo('/changePassword')
-      await loginIfNecessary()
-
-      const newPassword = 'blah'
-
-      await browser.setValue('#changePasswordForm [name="oldPassword"]', requireEnv('TEST_PASSWORD'))
-      await browser.setValue('#changePasswordForm [name="newPassword"]', newPassword)
-      await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', newPassword)
-      await browser.click('#changePasswordForm button[type="submit"]')
-
-      await poll(
-        async () => {
-          expect(
-            await browser.getText('#changePasswordForm [data-test-name="newPassword"] [data-component="FormHelperText"]')
-          ).to.match(/Add another word or two. Uncommon words are better/)
-        },
-        50
-      ).timeout(10000)
-
-      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
-        username: 'root',
-        password: requireEnv('TEST_PASSWORD'),
-      })
-      expect(token).to.exist
-    })
+    // it('applies password strength requirements to new password', async function () {
+    //   this.timeout(60000)
+    //   await navigateTo('/changePassword')
+    //   await loginIfNecessary()
+    //
+    //   const newPassword = 'blah'
+    //
+    //   await browser.setValue('#changePasswordForm [name="oldPassword"]', requireEnv('TEST_PASSWORD'))
+    //   await browser.setValue('#changePasswordForm [name="newPassword"]', newPassword)
+    //   await browser.setValue('#changePasswordForm [name="retypeNewPassword"]', newPassword)
+    //   await browser.click('#changePasswordForm button[type="submit"]')
+    //
+    //   await poll(
+    //     async () => {
+    //       expect(
+    //         await browser.getText('#changePasswordForm [data-test-name="newPassword"] [data-component="FormHelperText"]')
+    //       ).to.match(/Add another word or two. Uncommon words are better/)
+    //     },
+    //     50
+    //   ).timeout(10000)
+    //
+    //   await canLoginWithPassword(requireEnv('TEST_PASSWORD'))
+    // })
     it('changes password successfully', async function () {
       this.timeout(60000)
       await navigateTo('/')
@@ -355,11 +381,7 @@ module.exports = () => {
         50
       ).timeout(10000)
 
-      const {body: {token}} = await superagent.post('/login').type('json').accept('json').send({
-        username: 'root',
-        password: newPassword,
-      })
-      expect(token).to.exist
+      await canLoginWithPassword(newPassword)
     })
   })
 }

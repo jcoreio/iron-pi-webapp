@@ -2176,6 +2176,10 @@ clipboard-copy@^1.2.0:
   version "1.4.2"
   resolved "https://registry.npmjs.org/clipboard-copy/-/clipboard-copy-1.4.2.tgz#620cb6a9347d4f92447649db5a9b00edfcbb2cae"
 
+clipboard-copy@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/clipboard-copy/-/clipboard-copy-2.0.0.tgz#663abcd8be9c641de6e92a2eb9afef6e0afa727e"
+
 cliui@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/cliui/-/cliui-2.1.0.tgz#4b475760ff80264c762c3a1719032e91c7fea0d1"
@@ -6479,15 +6483,16 @@ material-ui-icons@^1.0.0-beta.36:
   dependencies:
     recompose "^0.26.0"
 
-material-ui@1.0.0-beta.37:
-  version "1.0.0-beta.37"
-  resolved "https://registry.npmjs.org/material-ui/-/material-ui-1.0.0-beta.37.tgz#19097dd05e61936d2d8449874aeed1c9ae9ceb8a"
+material-ui@1.0.0-beta.39:
+  version "1.0.0-beta.39"
+  resolved "https://registry.npmjs.org/material-ui/-/material-ui-1.0.0-beta.39.tgz#54697f0620bf1dc833d2b0046c981fd8beabedeb"
   dependencies:
     "@types/jss" "^9.3.0"
     "@types/react-transition-group" "^2.0.6"
     babel-runtime "^6.26.0"
     brcast "^3.0.1"
     classnames "^2.2.5"
+    clipboard-copy "^2.0.0"
     deepmerge "^2.0.1"
     dom-helpers "^3.2.1"
     hoist-non-react-statics "^2.5.0"

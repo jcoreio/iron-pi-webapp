@@ -115,13 +115,18 @@ module.exports = () => {
     })
 
     it('displays other validation errors', async () => {
+      await browser.setValue('#channelForm [name="metadataItem.displayPrecision"]', '2.5')
+      await browser.click('#channelForm [type="submit"]')
+      expect(await browser.getText(`#channelForm [data-name="metadataItem.displayPrecision"] [data-component="FormHelperText"]`)).to.equal(
+        'is not an integer'
+      )
+
       const values = {
-        'metadataItem.displayPrecision': '2.5',
+        'metadataItem.displayPrecision': '2',
         'metadataItem.min': '5',
         'metadataItem.max': '0',
       }
-      const errors = {
-        'metadataItem.displayPrecision': 'is not an integer',
+      let errors = {
         'metadataItem.min': 'must be < max',
         'metadataItem.max': 'must be > min',
       }
@@ -161,12 +166,10 @@ module.exports = () => {
             metadataItem {
               tag
               name
-              ... on NumericMetadataItem {
-                units
-                displayPrecision
-                min
-                max
-              }
+              units
+              displayPrecision
+              min
+              max
             } 
             config
           }
@@ -204,9 +207,7 @@ module.exports = () => {
               tag
               name
               dataType
-              ... on DigitalMetadataItem {
-                isDigital 
-              }
+              isDigital 
             }
             config
           }

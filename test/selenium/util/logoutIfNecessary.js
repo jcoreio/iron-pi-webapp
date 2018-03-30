@@ -8,7 +8,7 @@ export default async function logoutIfNecessary(): Promise<void> {
   await poll(
     async ({fail}: any) => {
       if (await browser.isVisible('body #openUserMenuButton')) {
-        await browser.click('body #openUserMenuButton').catch(fail)
+        await browser.click('body #openUserMenuButton')
         await browser.click('body #logOutMenuItem').catch(fail)
       }
       else if (await browser.isVisible('body #loginForm')) return

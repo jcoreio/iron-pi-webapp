@@ -162,16 +162,12 @@ module.exports = () => {
               tag
               name
               dataType
-              ... on NumericMetadataItem {
-                units
-                min
-                max
-                storagePrecision
-                displayPrecision
-              }
-              ... on DigitalMetadataItem {
-                isDigital 
-              }
+              units
+              min
+              max
+              storagePrecision
+              displayPrecision
+              isDigital 
             }
             config
           }
