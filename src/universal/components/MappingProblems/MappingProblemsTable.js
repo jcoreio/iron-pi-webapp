@@ -10,10 +10,10 @@ import Table, {
   TableRow,
 } from 'material-ui/Table'
 import Typography from 'material-ui/Typography'
-import type {Theme} from '../theme'
-import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../data-router/PluginConfigTypes'
-import SuccessAlert from './SuccessAlert'
-import WorkaroundLink from './WorkaroundLink'
+import type {Theme} from '../../theme/index'
+import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../../data-router/PluginConfigTypes'
+import SuccessAlert from '../SuccessAlert'
+import WorkaroundLink from '../WorkaroundLink'
 
 const styles = ({palette}: Theme) => ({
   linkRow: {

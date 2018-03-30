@@ -1,7 +1,6 @@
 // @flow
 
 import * as React from 'react'
-import Paper from 'material-ui/Paper'
 import {FormSection} from 'redux-form'
 import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles} from 'material-ui/styles'
@@ -11,6 +10,7 @@ import Tooltip from 'material-ui/Tooltip'
 import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'
+import ViewPanel from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsContainer'
 import {pickMetadataItemFields} from '../../components/MetadataItemFields'
@@ -60,10 +60,6 @@ const styles = ({spacing}: Theme) => ({
   },
   tallButton: {
     height: spacing.unit * 7,
-  },
-  paper: {
-    padding: `${spacing.unit * 2}px ${spacing.unit * 4}px`,
-    margin: spacing.unit * 2,
   },
 })
 
@@ -290,11 +286,11 @@ class ChannelForm extends React.Component<Props> {
     if (loading || !initialized || loadedId !== id) {
       return (
         <div className={classes.form}>
-          <Paper className={classes.paper}>
+          <ViewPanel>
             <Typography variant="subheading">
               <Spinner /> Loading channel configuration...
             </Typography>
-          </Paper>
+          </ViewPanel>
         </div>
       )
     }
@@ -302,7 +298,7 @@ class ChannelForm extends React.Component<Props> {
     return (
       <form id="channelForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         {Channel != null &&
-          <Paper className={classes.paper}>
+          <ViewPanel>
             <Fader animateHeight>
               <ControlWithInfo
                 info={channelStateInfo[channelMode]}
@@ -311,9 +307,9 @@ class ChannelForm extends React.Component<Props> {
                 <ChannelStateWidget channel={Channel} className={classes.formControl} />
               </ControlWithInfo>
             </Fader>
-          </Paper>
+          </ViewPanel>
         }
-        <Paper className={classes.paper}>
+        <ViewPanel>
           <ControlWithInfo info="The mode of this channel">
             <Field
               name="config.mode"
@@ -371,7 +367,7 @@ class ChannelForm extends React.Component<Props> {
               Save
             </Button>
           </div>
-        </Paper>
+        </ViewPanel>
       </form>
     )
   }

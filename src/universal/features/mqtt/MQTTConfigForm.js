@@ -3,7 +3,6 @@
 import * as React from 'react'
 import type {RouterHistory, Match} from 'react-router-dom'
 import {compose} from 'redux'
-import Paper from 'material-ui/Paper'
 import {Field} from 'redux-form-normalize-on-blur'
 import {NumericField} from 'redux-form-numeric-field'
 import {InputAdornment} from 'material-ui/Input'
@@ -16,6 +15,7 @@ import {mqttConfigForm} from './routePaths'
 import {mqttUrlPattern} from '../../types/MQTTUrl'
 
 import type {Theme} from '../../theme'
+import ViewPanel from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
@@ -61,10 +61,6 @@ const styles = ({spacing}: Theme) => ({
   },
   tallButton: {
     height: spacing.unit * 7,
-  },
-  paper: {
-    padding: `${spacing.unit * 2}px ${spacing.unit * 4}px`,
-    margin: spacing.unit * 2,
   },
   serverURLControl: {
     flexDirection: 'column',
@@ -231,11 +227,11 @@ class MQTTConfigForm extends React.Component<Props> {
     if (data != null && (loading || !initialized || loadedId !== id)) {
       return (
         <div className={classes.form}>
-          <Paper className={classes.paper}>
+          <ViewPanel>
             <Typography variant="subheading">
               <Spinner /> Loading MQTT configuration...
             </Typography>
-          </Paper>
+          </ViewPanel>
         </div>
       )
     }
@@ -243,7 +239,7 @@ class MQTTConfigForm extends React.Component<Props> {
     const ProtocolFields = protocol ? fieldsForProtocol[protocol] : null
     return (
       <form id="MQTTConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
-        <Paper className={classes.paper}>
+        <ViewPanel>
           <ControlWithInfo info="The name of the MQTT connection">
             <Field
               name="name"
@@ -364,10 +360,10 @@ class MQTTConfigForm extends React.Component<Props> {
               Save
             </Button>
           </div>
-        </Paper>
+        </ViewPanel>
         {id != null &&
           <React.Fragment>
-            <Paper className={classes.paper}>
+            <ViewPanel>
               <MQTTChannelConfigsTable
                 direction="TO_MQTT"
                 channels={Config && Config.channelsToMQTT || []}
@@ -375,8 +371,8 @@ class MQTTConfigForm extends React.Component<Props> {
                 history={history}
                 onDeleteChannel={this.handleDeleteChannel}
               />
-            </Paper>
-            <Paper className={classes.paper}>
+            </ViewPanel>
+            <ViewPanel>
               <MQTTChannelConfigsTable
                 direction="FROM_MQTT"
                 channels={Config && Config.channelsFromMQTT || []}
@@ -384,7 +380,7 @@ class MQTTConfigForm extends React.Component<Props> {
                 history={history}
                 onDeleteChannel={this.handleDeleteChannel}
               />
-            </Paper>
+            </ViewPanel>
           </React.Fragment>
         }
       </form>

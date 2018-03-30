@@ -9,7 +9,7 @@ import gql from 'graphql-tag'
 import {createStructuredSelector, createSelector} from 'reselect'
 import MappingProblemsView from './MappingProblemsView'
 import type {MappingProblem} from './MappingProblemsTable'
-import type {State, Action} from '../redux/types'
+import type {State, Action} from '../../redux/types'
 import type {Features} from 'redux-features'
 
 const selection = `{

@@ -2,19 +2,15 @@
 
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
-import Paper from 'material-ui/Paper'
 import Typography from 'material-ui/Typography'
-import type {Theme} from '../theme'
-import Fader from '../components/Fader'
+import type {Theme} from '../../theme/index'
+import Fader from '../Fader'
+import ViewPanel from '../ViewPanel'
 import MappingProblemsTable from './MappingProblemsTable'
 import type {MappingProblem} from './MappingProblemsTable'
-import Spinner from './Spinner'
+import Spinner from '../Spinner'
 
 const styles = ({spacing}: Theme) => ({
-  paper: {
-    margin: `${spacing.unit * 2}px auto`,
-    maxWidth: 600,
-  },
   loading: {
     padding: spacing.unit * 3,
   },
@@ -43,11 +39,11 @@ const MappingProblemsView = ({classes, data: {loading, MappingProblems}, getMapp
       />
     )
   return (
-    <Paper className={classes.paper}>
+    <ViewPanel>
       <Fader animateHeight>
         {content}
       </Fader>
-    </Paper>
+    </ViewPanel>
   )
 }
 

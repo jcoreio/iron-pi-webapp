@@ -3,11 +3,11 @@
 import * as React from 'react'
 import {Link} from 'react-router-dom'
 import Snackbar from 'material-ui/Snackbar'
-import {MAPPING_PROBLEMS} from '../react-router/paths'
-import SuccessAlert from './SuccessAlert'
+import {MAPPING_PROBLEMS} from '../../react-router/paths'
+import SuccessAlert from '../SuccessAlert'
 import WarningIcon from 'material-ui-icons/Warning'
 import {withStyles} from 'material-ui/styles'
-import type {Theme} from '../theme'
+import type {Theme} from '../../theme/index'
 
 const styles = ({palette}: Theme) => ({
   link: {

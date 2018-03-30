@@ -18,6 +18,7 @@ import type {MetadataItem} from '../../types/MetadataItem'
 import Arrow from 'react-arrow'
 
 import type {Theme} from '../../theme'
+import ViewPanel from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
@@ -80,8 +81,6 @@ const styles = ({spacing, palette, typography}: Theme) => ({
     margin: `0 -${spacing.unit * 4}px`,
   },
   parentPaper: {
-    extend: 'paper',
-    padding: spacing.unit * 2,
     backgroundColor: palette.background.parentPaper,
     '& > :first-child': {
       marginTop: 0,
@@ -254,11 +253,11 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     if (data != null && (data.loading || !initialized || loadedId !== id)) {
       return (
         <div className={classes.form}>
-          <Paper className={classes.paper}>
+          <ViewPanel>
             <Typography variant="subheading">
               <Spinner /> Loading MQTT Channel configuration...
             </Typography>
-          </Paper>
+          </ViewPanel>
         </div>
       )
     }
@@ -298,7 +297,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     )
     return (
       <form id="MQTTChannelConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
-        <Paper className={classes.parentPaper}>
+        <ViewPanel className={classes.parentPaper}>
           {direction === 'TO_MQTT'
             ? systemSection
             : mqttSection
@@ -386,7 +385,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
               Save
             </Button>
           </div>
-        </Paper>
+        </ViewPanel>
       </form>
     )
   }

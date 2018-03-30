@@ -7,7 +7,6 @@ import type {Match, Location, RouterHistory} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
 import {compose} from 'redux'
-import Paper from 'material-ui/Paper'
 import {formValues, FieldArray} from 'redux-form'
 import Button from 'material-ui/Button'
 import ChevronLeft from 'material-ui-icons/ChevronLeft'
@@ -16,6 +15,7 @@ import Typography from 'material-ui/Typography'
 import ViewSlider from 'react-view-slider/lib/simpleWithTransitionContext'
 import {createSelector} from 'reselect'
 
+import ViewPanel from '../ViewPanel'
 import NumPointsStep from './NumPointsStep'
 import PointStep from './PointStep'
 import CalibrationTable from './CalibrationTable'
@@ -32,10 +32,6 @@ const styles = ({spacing, calibration}: Theme) => ({
   form: {
     margin: '0 auto',
     maxWidth: 570,
-  },
-  paper: {
-    padding: `${spacing.unit * 3}px ${spacing.unit * 4}px`,
-    margin: spacing.unit * 2,
   },
   body: {
     padding: `0 ${spacing.unit * 4}px`,
@@ -204,11 +200,11 @@ class CalibrationForm extends React.Component<Props, State> {
     if (loading || !initialized) {
       return (
         <div className={classes.form}>
-          <Paper className={classes.paper}>
+          <ViewPanel>
             <Typography variant="subheading">
               <Spinner /> Loading channel calibration...
             </Typography>
-          </Paper>
+          </ViewPanel>
         </div>
       )
     }
@@ -238,7 +234,7 @@ class CalibrationForm extends React.Component<Props, State> {
         className={classes.form}
         onSubmit={handleSubmit(isInCalibration ? saveCalibration : this.handleNext)}
       >
-        <Paper className={classes.paper}>
+        <ViewPanel>
           <h3 className={classes.title} data-test-name="calibrationFormTitle">
             <Fader>
               {title}
@@ -290,7 +286,7 @@ class CalibrationForm extends React.Component<Props, State> {
               {!isInCalibration && <ChevronRight />}
             </Button>
           </div>
-        </Paper>
+        </ViewPanel>
       </form>
     )
   }
