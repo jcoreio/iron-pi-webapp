@@ -7,6 +7,7 @@ import type {GraphQLContext} from '../GraphQLContext'
 import setUsername from './setUsername'
 import changePassword from './changePassword'
 import createMetadataItem from './createMetadataItem'
+import setSSHEnabled from './setSSHEnabled'
 import updateMetadataItem from './updateMetadataItem'
 import verifyAccessCode from './verifyAccessCode'
 import type {GraphQLFeature} from '../GraphQLFeature'
@@ -26,6 +27,7 @@ export default function createMutation(options: Options): graphql.GraphQLObjectT
     setUsername: setUsername({types}),
     changePassword: changePassword(),
     createMetadataItem: createMetadataItem(),
+    setSSHEnabled: setSSHEnabled(),
     updateMetadataItem: updateMetadataItem(),
     verifyAccessCode: verifyAccessCode(),
   }

@@ -29,7 +29,7 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
       },
     },
     resolve: async (doc: any, {accessCode, oldPassword, newPassword}: Args, context: GraphQLContext): Promise<any> => {
-      const {userId: id, connectModeHandler, accessCodeHandler} = context
+      const {userId: id, connectModeHandler, accessCodeHandler, sshHandler} = context
       let user: ?User
       if (connectModeHandler.inConnectMode && accessCode) {
         try {
@@ -48,10 +48,9 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
           throw new Error('You must provide the old password unless you provide the accessCode in connect mode')
         }
         if (!id) throw new Error('You must be logged in to change your password')
-        user = await User.findOne({where: {id}})
-        const foundUser = user
-        if (!foundUser) throw new Error('User not found')
-        const matches = await promisify(cb => bcrypt.compare(oldPassword, foundUser.password, cb))()
+        const fetchedUser = user = await User.findOne({where: {id}})
+        if (!fetchedUser) throw new Error('User not found')
+        const matches = await promisify(cb => bcrypt.compare(oldPassword, fetchedUser.password, cb))()
         if (!matches) {
           const error = new Error('Incorrect password');
           (error: any).validation = {
@@ -63,6 +62,7 @@ export default function changePassword(): GraphQLFieldConfig<any, GraphQLContext
       if (!user) throw new Error('User not found')
       try {
         await user.update({password: newPassword, passwordHasBeenSet: true}, {individualHooks: true})
+        await sshHandler.setSystemPassword(newPassword)
       } catch (error) {
         if (error instanceof ValidationError) {
           const passwordItem = error.errors.find(item => item.path === 'password')
