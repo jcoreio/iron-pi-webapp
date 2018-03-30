@@ -7,7 +7,14 @@ const exec = promisify(child_process.exec)
 
 export default class SSHHandler {
   async isSSHEnabled(): Promise<boolean> {
-    return 'enabled' === await exec('systemctl is-enabled ssh')
+    try {
+      const status = await exec('systemctl is-enabled ssh')
+      return typeof status === 'string' && 'enabled' === status.trim()
+    } catch (err) {
+      // When ssh is not enabled, the command returns 1
+      if (err.code === 1) return false
+      throw err
+    }
   }
 
   async setSSHEnabled(enabled: boolean): Promise<void> {
