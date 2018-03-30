@@ -7,6 +7,7 @@ import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import Typography from 'material-ui/Typography'
 import {required} from 'redux-form-validators'
+import isIp from 'is-ip'
 
 import type {Theme} from '../../theme'
 import ViewPanel from '../../components/ViewPanel'
@@ -19,7 +20,7 @@ import SubmitStatus from '../../components/SubmitStatus'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {formValues} from 'redux-form'
 
-import {IPAddressModesArray, getIPAddressModeDisplayText} from '../../types/IPAddressConfig'
+import {IPAddressModesArray, getIPAddressModeDisplayText, splitDNSAddresses} from '../../types/IPAddressConfig'
 import type {IPAddressMode} from '../../types/IPAddressConfig'
 
 const styles = ({spacing}: Theme) => ({
@@ -67,9 +68,25 @@ type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<
 type Classes = $Call<ExtractClasses, typeof styles>
 
 const trim = (value: ?string): ?string => typeof value === 'string' ? value.trim() : value
-const validateIPAddress = [required()]
-const validateDNSServers = [required()]
-const normalizeDNSServers = text => text.replace(/\s+/g, '')
+const validateIPAddress = [
+  required(),
+  (address: ?string): ?string => {
+    if (!address) return
+    address = address.trim()
+    if (address && !isIp.v4(address)) return 'Must be a valid IPv4 address'
+  }
+]
+const validateDNSServers = [
+  required(),
+  (addresses: ?string): ?string => {
+    if (!addresses) return
+    const split = splitDNSAddresses(addresses)
+    for (let address of split) {
+      if (address && !isIp.v4(address)) return 'Must be a list of valid IPv4 address separated by commas'
+    }
+  }
+]
+const normalizeDNSServers = text => typeof text === 'string' ? text.replace(/\s+/g, '') : text
 
 type IPAddressConfig = {
   ipAddress: string,
