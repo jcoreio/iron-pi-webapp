@@ -255,7 +255,7 @@ export default class Server {
         next(error)
       })
 
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' || process.env.GRAPHIQL) {
         app.use('/graphiql', handleGraphiql({endpointURL: GRAPHQL_PATH}))
       }
       app.use('/assets', express.static(path.resolve(__dirname, '..', 'assets')))
