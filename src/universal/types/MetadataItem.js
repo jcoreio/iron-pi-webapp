@@ -4,6 +4,9 @@
 import {reify, validate} from 'flow-runtime'
 import type {Type, Validation} from 'flow-runtime'
 
+export const DATA_TYPE_NUMBER = 'number'
+export const DATA_TYPE_STRING = 'string'
+
 export type DataType = 'number' | 'string'
 
 export const DataTypes = {
@@ -60,8 +63,8 @@ export function getMetadataItemSubtype(item: MetadataItem): Type<DigitalMetadata
   Type<StringMetadataItem> |
   Type<NumericMetadataItem> {
   switch (item.dataType) {
-  case 'number': return item.isDigital ? DigitalMetadataItemType : NumericMetadataItemType
-  case 'string': return StringMetadataItemType
+  case DATA_TYPE_NUMBER: return item.isDigital ? DigitalMetadataItemType : NumericMetadataItemType
+  case DATA_TYPE_STRING: return StringMetadataItemType
   default: throw new Error(`unknown dataType: ${item.dataType}`)
   }
 }

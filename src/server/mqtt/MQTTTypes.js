@@ -2,7 +2,31 @@
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
 
+import type {MetadataItem} from '../../universal/types/MetadataItem'
+
 export const SPARKPLUG_VERSION_B_1_0 = 'spBv1.0'
+
+export type ValuesFromMQTTMap = {
+  [channelId: string]: any,
+}
+
+export type ChannelFromMQTTConfig = {
+  internalTag: string,
+  dataType: 'number' | 'string',
+  multiplier?: ?number,
+  offset?: ?number,
+}
+
+export type DataValueToMQTT = {
+  tag: string,
+  value: any,
+  type: string,
+}
+
+export type MetadataValueToMQTT = {
+  tag: string,
+  metadata: MetadataItem,
+}
 
 /** Metric sent during a NDATA message */
 export type SparkPlugDataMertic = {

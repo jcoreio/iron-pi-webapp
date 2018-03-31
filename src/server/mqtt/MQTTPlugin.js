@@ -4,11 +4,13 @@ import _ from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
 import logger from 'log4jcore'
-import sparkplug from 'sparkplug-client'
 
+import {EVENT_DATA_FROM_MQTT} from './protocols/MQTTProtocolHandler'
+import type {MQTTProtocolHandler} from './protocols/MQTTProtocolHandler'
+import SparkPlugHandler from './protocols/SparkPlugHandler'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import type {TagMetadataMap} from '../metadata/MetadataHandler'
-import type {MetadataItem, NumericMetadataItem} from '../../universal/types/MetadataItem'
+import {DATA_TYPE_STRING, DATA_TYPE_NUMBER} from '../../universal/types/MetadataItem'
+import type {MetadataItem} from '../../universal/types/MetadataItem'
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import {DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
@@ -18,12 +20,9 @@ import type {
 } from '../data-router/PluginTypes'
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
-import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
-import type {
-  SparkPlugBirthMetric, SparkplugTypedValue, SparkPlugClient,
-  SparkPlugDataMertic, SparkPlugPackage, SparkPlugDataMessage
-} from './SparkPlugTypes'
+import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
 import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
+import {EVENT_MQTT_CONNECT} from "./protocols/MQTTProtocolHandler"
 
 const log = logger('MQTTPlugin')
 
@@ -39,13 +38,6 @@ export type MQTTPluginResources = {
   metadataHandler: MetadataHandler,
 }
 
-type ChannelFromMQTTConfig = {
-  internalTag: string,
-  dataType: 'number' | 'string',
-  multiplier?: ?number,
-  offset?: ?number,
-}
-
 /**
  * Mappings from MQTT tag to config
  */
@@ -53,27 +45,23 @@ type ChannelsFromMQTTConfigMap = {
   [channelId: string]: ChannelFromMQTTConfig,
 }
 
-type ValuesFromMQTTMap = {
-  [channelId: string]: any,
-}
-
 export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
   _config: MQTTConfig;
   _pluginInfo: PluginInfo;
   _resources: MQTTPluginResources;
 
-  _client: SparkPlugClient;
+  _protocolHandler: MQTTProtocolHandler;
 
   _started: boolean = false;
   _birthPublishDelayed: boolean = false;
   _sparkplugBirthRequested: boolean = false;
 
   _metadataListener = () => this._metadataChanged();
-  _metadataToMQTT: TagMetadataMap = {}
+
+  _metadataToMQTT: Array<MetadataValueToMQTT> = []
 
   _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
   _valuesFromMQTT: ValuesFromMQTTMap = {}
-  _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
 
   /** Configs for enabled channels to MQTT, combined with channels that are being sent
    * because "publish all" is enabled */
@@ -97,25 +85,14 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     }
     this._resources = args.resources
 
-    const {serverURL, username, password, protocol, groupId, nodeId} = this._config
+    const {serverURL, username, password, protocol, groupId, nodeId} = (this._config: any)
     if (protocol !== 'SPARKPLUG') throw new Error('Only SparkPlug is currently supported')
-    if (!groupId || !nodeId) throw new Error('missing groupId or nodeId')
-    this._client = (sparkplug: SparkPlugPackage).newClient({
-      serverUrl: serverURL,
-      username: username || null,
-      password: password || null,
-      groupId,
-      edgeNode: nodeId,
-      clientId: `jcore-node-${groupId}/${nodeId}`,
-      version: SPARKPLUG_VERSION_B_1_0,
+    this._protocolHandler = new SparkPlugHandler({
+      config: {serverURL, username, password, groupId, nodeId},
+      getChannelFromMQTTConfig: (tag: string) => this._channelsFromMQTTConfigs[tag]
     })
-    this._client.on('error', (err: Error) => console.error(err.stack)) // eslint-disable-line no-console
-    this._client.on('birth', () => {
-      this._sparkplugBirthRequested = true
-      this._publishNodeBirth()
-    })
-    this._client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
-
+    this._protocolHandler.on(EVENT_DATA_FROM_MQTT, (data: ValuesFromMQTTMap) => this._setValuesFromMQTT(data))
+    this._protocolHandler.on(EVENT_MQTT_CONNECT, () => this._publishMetadata())
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
 
@@ -142,7 +119,7 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
         if (minWaitTime > 0) {
           this._publishDataTimeout = setTimeout(() => this._doDelayedPublish(), minWaitTime)
         } else {
-          this._sendDataMessage({channelsToSend, time: event.time})
+          this._publishData({channelsToSend, time: event.time})
         }
       }
     }
@@ -152,15 +129,13 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     this._publishDataTimeout = undefined
     const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
     if (channelsToSend.length)
-      this._sendDataMessage({channelsToSend, time: Date.now()})
+      this._publishData({channelsToSend, time: Date.now()})
   }
 
-  _sendDataMessage(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
+  _publishData(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
     const {channelsToSend, time} = args
-    this._client.publishNodeData({
-      timestamp: time,
-      metrics: this._generateDataMessage(channelsToSend)
-    })
+    const data: Array<DataValueToMQTT> = this._generateDataMessage(channelsToSend)
+    this._protocolHandler.publishData({data, time})
     this._lastTxTime = args.time
   }
 
@@ -174,26 +149,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     })
   }
 
-  _generateDataMessage(channelsToSend: Array<ToMQTTChannelState>): Array<SparkPlugDataMertic> {
-    // Note: this map() call is intended to mutate the states in channelsToSend
-    // and return the resulting SparkPlugDataMetrics
-    return channelsToSend.map((state: ToMQTTChannelState) => {
-      state.sentValue = state.curValue
-      return {
-        ...toSparkPlugMetric(state.curValue),
-        name: state.config.mqttTag
-      }
-    })
-  }
-
   start() {
     this._started = true
     this._updateMQTTChannels()
     this._metadataToMQTT = this._calcMetadataToMQTT()
-    if (this._birthPublishDelayed) {
-      this._birthPublishDelayed = false
-      this._publishNodeBirth()
-    }
   }
 
   tagsChanged() {
@@ -265,61 +224,53 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       clearTimeout(this._publishDataTimeout)
       this._publishDataTimeout = undefined
     }
-    this._client.stop()
+    this._protocolHandler.destroy()
   }
 
   _metadataChanged() {
     const metadataToMQTT = this._calcMetadataToMQTT()
     if (!isEqual(metadataToMQTT, this._metadataToMQTT)) {
       this._metadataToMQTT = metadataToMQTT
-      // If we publish here before the SparkPlug client requests our birth certificate, we'll end up
-      // publishing the same info again when the birth certificate gets requested a few moments later.
-      if (this._sparkplugBirthRequested) {
-        this._publishNodeBirth()
-      }
+      this._publishMetadata()
     }
   }
 
-  _calcMetadataToMQTT(): TagMetadataMap {
-    const metadataToMQTT = {}
+  _publishMetadata() {
+    this._protocolHandler.publishMetadata({
+      metadata: this._metadataToMQTT,
+      data: this._generateDataMessage(this._toMQTTChannelStates),
+      time: Date.now()
+    })
+  }
+
+  _generateDataMessage(channelsToSend: Array<ToMQTTChannelState>): Array<DataValueToMQTT> {
+    const values: Array<DataValueToMQTT> = []
+    for (let channelToSend: ToMQTTChannelState of channelsToSend) {
+      channelToSend.sentValue = channelToSend.curValue
+      const metadata: ?MetadataItem = channelToSend.config.metadataItem
+      values.push({
+        tag: channelToSend.config.mqttTag,
+        value: channelToSend.curValue,
+        type: metadata && DATA_TYPE_STRING === metadata.dataType ? DATA_TYPE_STRING : DATA_TYPE_NUMBER
+      })
+    }
+    return values
+  }
+
+  _calcMetadataToMQTT(): Array<MetadataValueToMQTT> {
+    const metadataToMQTT: Array<MetadataValueToMQTT> = []
+    const publishedMQTTTags: Set<string> = new Set()
     this._toMQTTEnabledChannelConfigs.forEach((channel: MQTTChannelConfig) => {
       const metadataForTag: ?MetadataItem = this._resources.metadataHandler.getTagMetadata(channel.internalTag)
-      if (metadataForTag && metadataToMQTT[channel.mqttTag] === undefined)
-        metadataToMQTT[channel.mqttTag] = metadataForTag
+      if (metadataForTag && !publishedMQTTTags.has(channel.mqttTag)) {
+        metadataToMQTT.push({
+          tag: channel.mqttTag,
+          metadata: metadataForTag
+        })
+        publishedMQTTTags.add(channel.mqttTag)
+      }
     })
     return metadataToMQTT
-  }
-
-  /**
-   * Send a SparkPlugin NBIRTH message on connect or when metadata changes
-   * @private
-   */
-  _publishNodeBirth() {
-    if (this._started) {
-      const dataMetrics: Array<SparkPlugDataMertic> = this._generateDataMessage(this._getChannelsToSend({sendAll: true}))
-      const metrics: Array<SparkPlugBirthMetric> = dataMetrics.map((dataMetric: SparkPlugDataMertic) => {
-        const metadata = this._metadataToMQTT[dataMetric.name] || {}
-        const {name, dataType} = metadata
-        const isDigital = metadata.dataType === 'number' ? metadata.isDigital : false
-        const metric: SparkPlugBirthMetric = {
-          ...dataMetric,
-          properties: {
-            longName: toSparkPlugString(name || dataMetric.name),
-          }
-        }
-        if (dataType === 'number' && isDigital !== true) {
-          const {min, max, units}: NumericMetadataItem = (metadata: any)
-          metric.properties.min = toSparkPlugNumber(min)
-          metric.properties.max = toSparkPlugNumber(max)
-          metric.properties.units = toSparkPlugString(units)
-        }
-        return metric
-      })
-      this._client.publishNodeBirth({timestamp: Date.now(), metrics})
-      this._lastTxTime = Date.now()
-    } else {
-      this._birthPublishDelayed = true
-    }
   }
 
   _setValuesFromMQTT(values: ValuesFromMQTTMap) {
@@ -336,56 +287,5 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
     if (Object.keys(valuesToPublish).length)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
   }
-
-  _handleDataFromSparkPlug(message: SparkPlugDataMessage) {
-    const metrics: Array<SparkPlugDataMertic> = message.metrics
-    const valuesFromMQTT: ValuesFromMQTTMap = {}
-    for (let metric: SparkPlugDataMertic of metrics) {
-      const {name, value} = metric
-      const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[name]
-      if (channelConfig) {
-        const {internalTag} = channelConfig
-        if ('string' === channelConfig.dataType) {
-          if (value == null || typeof value === 'string') {
-            valuesFromMQTT[internalTag] = value
-          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
-            log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
-            this._channelsFromMQTTWarningsPrinted.add(internalTag)
-          }
-        } else { // number
-          if (value == null || typeof value === 'number') {
-            let valueWithSlopeOffset = value
-            const {multiplier, offset} = channelConfig
-            if (multiplier != null)
-              valueWithSlopeOffset *= multiplier
-            if (offset != null)
-              valueWithSlopeOffset += offset
-            valuesFromMQTT[internalTag] = valueWithSlopeOffset
-          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
-            log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
-            this._channelsFromMQTTWarningsPrinted.add(internalTag)
-          }
-        }
-      }
-    }
-    this._setValuesFromMQTT(valuesFromMQTT)
-  }
 }
 
-function toSparkPlugString(value: any): SparkplugTypedValue {
-  return {
-    type: 'string',
-    value: _.isString(value) ? value : (_.isFinite(value) ? value.toString() : '')
-  }
-}
-
-function toSparkPlugNumber(value: any): SparkplugTypedValue {
-  return {
-    type: 'Float',
-    value: _.isFinite(value) ? value : NaN
-  }
-}
-
-function toSparkPlugMetric(value: any): SparkplugTypedValue {
-  return typeof value === 'string' ? toSparkPlugString(value) : toSparkPlugNumber(value)
-}

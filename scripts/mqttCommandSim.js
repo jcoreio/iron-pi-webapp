@@ -6,9 +6,6 @@
 const range = require('lodash.range')
 const sparkplug = require('sparkplug-client')
 
-
-//import type {SparkPlugClient, SparkPlugPackage} from '../src/server/mqtt/SparkPlugTypes'
-
 const TARGET_GROUP_ID = 'My Group'
 const TARGET_NODE_ID = 'My Node'
 
