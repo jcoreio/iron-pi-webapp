@@ -29,3 +29,33 @@ const ViewPanel = ({classes, className, ...props}: Props): React.Node => (
 
 export default withStyles(styles, {withTheme: true})(ViewPanel)
 
+const viewPanelTitleStyles = ({palette, spacing, typography}: Theme) => ({
+  root: {
+    fontSize: typography.pxToRem(20),
+    color: palette.text.primary,
+    paddingBottom: spacing.unit / 2,
+    borderBottom: {
+      width: 2,
+      style: 'solid',
+      color: palette.text.primary,
+    },
+  }
+})
+
+type ViewPanelTitleClasses = $Call<ExtractClasses, typeof viewPanelTitleStyles>
+
+export type ViewPanelTitleProps = {
+  children?: React.Node,
+  classes: ViewPanelTitleClasses,
+}
+
+const StyledViewPanelTitle = ({children, classes}: ViewPanelTitleProps) => (
+  <h2 className={classes.root}>
+    {children}
+  </h2>
+)
+
+export const ViewPanelTitle = withStyles(viewPanelTitleStyles, {withTheme: true})(
+  StyledViewPanelTitle
+)
+

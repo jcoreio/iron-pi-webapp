@@ -18,7 +18,7 @@ import type {MetadataItem} from '../../types/MetadataItem'
 import Arrow from 'react-arrow'
 
 import type {Theme} from '../../theme'
-import ViewPanel from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelTitle} from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
@@ -89,16 +89,6 @@ const styles = ({spacing, palette, typography}: Theme) => ({
   arrowHolder: {
     textAlign: 'center',
     marginBottom: -spacing.unit * 1.5,
-  },
-  title: {
-    fontSize: typography.pxToRem(20),
-    color: palette.text.primary,
-    paddingBottom: spacing.unit / 2,
-    borderBottom: {
-      width: 2,
-      style: 'solid',
-      color: palette.text.primary,
-    },
   },
 })
 
@@ -264,9 +254,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     const direction: ?Direction = getDirection(this.props)
     const systemSection = (
       <Paper className={classes.paper}>
-        <h1 className={classes.title}>
+        <ViewPanelTitle>
           System
-        </h1>
+        </ViewPanelTitle>
         <FormSection name="metadataItem">
           <MetadataItemFieldsContainer
             formControlClass={classes.formControl}
@@ -279,9 +269,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     )
     const mqttSection = (
       <Paper className={classes.paper}>
-        <h1 className={classes.title}>
+        <ViewPanelTitle>
           MQTT
-        </h1>
+        </ViewPanelTitle>
         <ControlWithInfo info="The tag for data in MQTT">
           <Field
             name="mqttTag"
@@ -306,9 +296,9 @@ class MQTTChannelConfigForm extends React.Component<Props> {
             <FlowArrow />
           </div>
           <Paper className={classes.paper}>
-            <h1 className={classes.title}>
+            <ViewPanelTitle>
               Slope / Offset
-            </h1>
+            </ViewPanelTitle>
             <Collapse in={dataType !== 'number'}>
               <div>
                 <FormLabel>
