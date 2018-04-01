@@ -13,6 +13,7 @@ import Typography from 'material-ui/Typography'
 import {required, format} from 'redux-form-validators'
 import {mqttConfigForm} from './routePaths'
 import {mqttUrlPattern} from '../../types/MQTTUrl'
+import type {MQTTPluginState} from '../../types/MQTTPluginState'
 
 import type {Theme} from '../../theme'
 import ViewPanel from '../../components/ViewPanel'
@@ -26,6 +27,7 @@ import SubmitStatus from '../../components/SubmitStatus'
 import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 
 import type {Channel} from './MQTTChannelConfigsTable'
+import MQTTConfigState from './MQTTConfigState'
 import MQTTChannelConfigsTable from './MQTTChannelConfigsTable'
 import {ProtocolsArray, getProtocolDisplayText} from '../../mqtt/MQTTConfig'
 import ButtonGroupField from '../../components/ButtonGroupField'
@@ -96,6 +98,7 @@ type MQTTConfig = {
   publishAllPublicTags?: ?boolean,
   channelsFromMQTT?: Array<Channel>,
   channelsToMQTT?: Array<Channel>,
+  state?: MQTTPluginState,
 }
 
 export type Props = {
@@ -117,6 +120,7 @@ export type Props = {
     Config?: MQTTConfig,
     loading?: boolean,
   },
+  subscribeToConfigState: (id: number) => any,
   handleSubmit: (onSubmit: (values: MQTTConfig) => any) => (event: Event) => any,
   createMQTTConfig: (options: {variables: {values: MQTTConfig}}) => Promise<{
     data: {Config: MQTTConfig},
@@ -155,9 +159,10 @@ const validateServerURL = [required(), format({
 
 class MQTTConfigForm extends React.Component<Props> {
   initializeTimeout: ?number
+  unsubscribeFromConfigState: ?Function
 
   componentDidMount() {
-    const {id, data, initialize} = this.props
+    const {id, data, initialize, subscribeToConfigState} = this.props
     if (!id) initialize({})
     if (!data) return
     const {Config} = data
@@ -165,6 +170,7 @@ class MQTTConfigForm extends React.Component<Props> {
       if (_shouldInitialize(this.props)) {
         this.initializeTimeout = setTimeout(() => initialize(pickFormFields(Config)), 0)
       }
+      this.unsubscribeFromConfigState = subscribeToConfigState(Config.id)
     }
   }
 
@@ -172,9 +178,21 @@ class MQTTConfigForm extends React.Component<Props> {
     const prevConfig = (this.props.data || {}).Config
     const nextConfig = (nextProps.data || {}).Config
 
+    function getId(config: ?{ id: number }): ?number {
+      return config ? config.id : null
+    }
+
     if (nextConfig !== prevConfig) {
       if (nextConfig && _shouldInitialize(nextProps)) {
         this.initializeTimeout = setTimeout(() => nextProps.initialize(pickFormFields(nextConfig)), 0)
+      }
+
+      if (getId(nextConfig) !== getId(prevConfig)) {
+        if (this.unsubscribeFromConfigState) {
+          this.unsubscribeFromConfigState()
+          this.unsubscribeFromConfigState = null
+        }
+        if (nextConfig) this.unsubscribeFromConfigState = nextProps.subscribeToConfigState(nextConfig.id)
       }
     }
   }
@@ -190,17 +208,22 @@ class MQTTConfigForm extends React.Component<Props> {
     if (Config) initialize(pickFormFields(Config))
   }
 
-  handleSubmit = (values: MQTTConfig): Promise<void> => {
+  handleSubmit = async (values: MQTTConfig): Promise<void> => {
     const {initialize, history} = this.props
     values = pickFormFields(values)
     const mutate = values.id != null ? this.props.updateMQTTConfig : this.props.createMQTTConfig
-    return mutate({variables: {values}}).then(({data: {Config}}: {data: {Config: MQTTConfig}}) => {
+    let result: {data: {Config: MQTTConfig}}
+    try {
+      result = await mutate({variables: {values}})
+      const {data: {Config}} = result
       if (values.id == null) {
         history.replace(mqttConfigForm(Config.id))
       } else {
         initialize(pickFormFields(Config), false, {keepSubmitSucceeded: true})
       }
-    }).catch(handleError)
+    } catch (error) {
+      handleError(error)
+    }
   }
 
   handleDelete = () => {
@@ -236,9 +259,15 @@ class MQTTConfigForm extends React.Component<Props> {
       )
     }
     const Config = data ? data.Config : null
+    const configState = Config ? Config.state : null
     const ProtocolFields = protocol ? fieldsForProtocol[protocol] : null
     return (
       <form id="MQTTConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
+        {configState && (
+          <ViewPanel>
+            <MQTTConfigState state={configState} />
+          </ViewPanel>
+        )}
         <ViewPanel>
           <ControlWithInfo info="The name of the MQTT connection">
             <Field

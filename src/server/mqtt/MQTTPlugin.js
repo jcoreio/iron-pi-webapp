@@ -4,8 +4,9 @@ import _ from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {isEqual} from 'lodash'
 import logger from 'log4jcore'
+import type {PubSubEngine} from 'graphql-subscriptions'
 
-import {EVENT_DATA_FROM_MQTT} from './protocols/MQTTProtocolHandler'
+import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_ERROR} from './protocols/MQTTProtocolHandler'
 import type {MQTTProtocolHandler} from './protocols/MQTTProtocolHandler'
 import SparkPlugHandler from './protocols/SparkPlugHandler'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
@@ -22,7 +23,12 @@ import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
 import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
-import {EVENT_MQTT_CONNECT} from "./protocols/MQTTProtocolHandler"
+import type {MQTTPluginState} from '../../universal/types/MQTTPluginState'
+import {
+  MQTT_PLUGIN_STATUS_CONNECTED,
+  MQTT_PLUGIN_STATUS_CONNECTING,
+  MQTT_PLUGIN_STATUS_ERROR
+} from '../../universal/types/MQTTPluginState'
 
 const log = logger('MQTTPlugin')
 
@@ -33,6 +39,7 @@ type ToMQTTChannelState = {
 }
 
 export type MQTTPluginResources = {
+  pubsub: PubSubEngine,
   getTagValue: (tag: string) => any,
   publicTags: () => Array<string>,
   metadataHandler: MetadataHandler,
@@ -45,7 +52,13 @@ type ChannelsFromMQTTConfigMap = {
   [channelId: string]: ChannelFromMQTTConfig,
 }
 
-export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> implements DataPlugin {
+export const MQTT_PLUGIN_EVENT_STATE_CHANGE = 'stateChange'
+
+type MQTTPluginEmittedEvents = {
+  stateChange: [MQTTPluginState],
+} & DataPluginEmittedEvents
+
+export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> implements DataPlugin {
   _config: MQTTConfig;
   _pluginInfo: PluginInfo;
   _resources: MQTTPluginResources;
@@ -67,6 +80,8 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
+  _state: MQTTPluginState
+
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
     this._config = cleanMQTTConfig(args.config)
@@ -75,6 +90,10 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       pluginType: 'mqtt',
       pluginId: args.config.id,
       pluginName: args.config.name || `MQTT Plugin ${args.config.id}`
+    }
+    this._state = {
+      id: args.config.id,
+      status: MQTT_PLUGIN_STATUS_CONNECTING,
     }
     this._resources = args.resources
 
@@ -85,8 +104,36 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
       getChannelFromMQTTConfig: (tag: string) => this._channelsFromMQTTConfigs[tag]
     })
     this._protocolHandler.on(EVENT_DATA_FROM_MQTT, (data: ValuesFromMQTTMap) => this._setValuesFromMQTT(data))
-    this._protocolHandler.on(EVENT_MQTT_CONNECT, () => this._publishMetadata())
+    this._protocolHandler.on(EVENT_MQTT_CONNECT, this._handleConnect)
+    this._protocolHandler.on(EVENT_MQTT_ERROR, this._handleError)
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
+  }
+
+  getState(): MQTTPluginState {
+    return this._state
+  }
+
+  _setState = (newState: MQTTPluginState) => {
+    this._state = newState
+    this.emit(MQTT_PLUGIN_EVENT_STATE_CHANGE, this._state)
+  }
+
+  _handleConnect = () => {
+    this._setState({
+      id: this._config.id,
+      status: MQTT_PLUGIN_STATUS_CONNECTED,
+      connectedSince: Date.now(),
+    })
+    this._publishMetadata()
+  }
+
+  _handleError = (err: Error) => {
+    this._setState({
+      id: this._config.id,
+      status: MQTT_PLUGIN_STATUS_ERROR,
+      error: err.message,
+    })
+    this._publishMetadata()
   }
 
   pluginInfo(): PluginInfo { return this._pluginInfo }

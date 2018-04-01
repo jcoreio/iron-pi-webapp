@@ -6,7 +6,7 @@ import glob from 'glob'
 import {debounce} from 'lodash'
 import type {DataPlugin, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import EventEmitter from '@jcoreio/typed-event-emitter/index'
-import MQTTPlugin from './MQTTPlugin'
+import MQTTPlugin, {MQTT_PLUGIN_EVENT_STATE_CHANGE} from './MQTTPlugin'
 import type {MQTTPluginResources} from './MQTTPlugin'
 import SequelizeMQTTConfig from './models/MQTTConfig'
 import SequelizeMQTTChannelConfig from './models/MQTTChannelConfig'
@@ -14,7 +14,10 @@ import type Sequelize from 'sequelize'
 import addTypes from './graphql/types/addTypes'
 import addQueryFields from './graphql/query/addQueryFields'
 import addMutationFields from './graphql/mutation/addMutationFields'
+import addSubscriptionFields from './graphql/subscription/addSubscriptionFields'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
+import {MQTT_PLUGIN_STATE_CHANGE} from './graphql/subscription/constants'
+import type {MQTTPluginState} from '../../universal/types/MQTTPluginState'
 
 export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> implements Feature {
   _dataPlugins: Map<number, MQTTPlugin> = new Map()
@@ -45,22 +48,43 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
   addTypes = addTypes(this)
   addQueryFields = addQueryFields(this)
   addMutationFields = addMutationFields(this)
+  addSubscriptionFields = addSubscriptionFields(this)
+
+  getDataPlugin(id: number): ?MQTTPlugin {
+    return this._dataPlugins.get(id)
+  }
 
   getDataPlugins(): $ReadOnlyArray<DataPlugin> { return [...this._dataPlugins.values()] }
 
   _emitPluginsChanged = debounce(() => this.emit(FEATURE_EVENT_DATA_PLUGINS_CHANGE), 1000)
 
+  _destroyDataPlugin(id: number) {
+    const plugin = this._dataPlugins.get(id)
+    if (plugin) {
+      plugin.removeAllListeners()
+      plugin.destroy()
+    }
+    this._dataPlugins.delete(id)
+  }
+
   _createDataPlugin(instance: SequelizeMQTTConfig) {
+    this._destroyDataPlugin(instance.id)
     const resources = this._resources
     try {
       const plugin = new MQTTPlugin({
         config: (instance.get({plain: true, raw: true}): any),
         resources,
       })
+      plugin.on(MQTT_PLUGIN_EVENT_STATE_CHANGE, this._handleMQTTPluginStateChange)
       this._dataPlugins.set(instance.id, plugin)
+      this._handleMQTTPluginStateChange(plugin.getState())
     } catch (error) {
       console.error(error.stack) // eslint-disable-line no-console
     }
+  }
+
+  _handleMQTTPluginStateChange = (state: MQTTPluginState) => {
+    this._resources.pubsub.publish(`${MQTT_PLUGIN_STATE_CHANGE}/${state.id}`, {MQTTPluginState: state})
   }
 
   _handleMQTTConfigCreated = (instance: SequelizeMQTTConfig) => {
@@ -72,7 +96,7 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
     this._emitPluginsChanged()
   }
   _handleMQTTConfigDestroyed = (instance: SequelizeMQTTConfig) => {
-    this._dataPlugins.delete(instance.id)
+    this._destroyDataPlugin(instance.id)
     this._emitPluginsChanged()
   }
 

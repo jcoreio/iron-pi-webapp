@@ -4,7 +4,7 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import logger from 'log4jcore'
 import sparkplug from 'sparkplug-client'
 
-import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT} from './MQTTProtocolHandler'
+import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_ERROR} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
 
 import type {DataValueToMQTT, MetadataValueToMQTT, ChannelFromMQTTConfig, ValuesFromMQTTMap} from '../MQTTTypes'
@@ -48,7 +48,14 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
       version: SPARKPLUG_VERSION_B_1_0,
     })
 
-    this._client.on('error', (err: Error) => log.error(`SparkPlug client error: ${err.stack}`)) // eslint-disable-line no-console
+    this._client.on('error', (err: Error) => {
+      log.error(`SparkPlug client error: ${err.stack}`) // eslint-disable-line no-console
+      this.emit(EVENT_MQTT_ERROR, err)
+    })
+    this._client.on('close', () => {
+      log.error(`SparkPlug client closed`) // eslint-disable-line no-console
+      this.emit(EVENT_MQTT_ERROR, new Error('connection closed'))
+    })
     this._client.on('birth', () => {
       this._sparkplugBirthRequested = true
       this.emit(EVENT_MQTT_CONNECT)

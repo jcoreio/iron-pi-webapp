@@ -6,6 +6,8 @@ import {compose} from 'redux'
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
 import MQTTConfigForm from './MQTTConfigForm'
+import {setIn} from '@jcoreio/mutate/lib/index'
+import type {MQTTPluginState} from '../../types/MQTTPluginState'
 
 const configFields = `
   id
@@ -37,9 +39,24 @@ query MQTTConfig($id: Int!) {
     channelsToMQTT {
       ...ChannelFields
     }
+    state {
+      id
+      status
+      connectedSince
+      error
+    }
   }
 }
 `)
+
+const stateSubscription = gql(`subscription pluginState($id: Int!) {
+  MQTTPluginState(id: $id) {
+    id
+    status
+    connectedSince
+    error
+  }
+}`)
 
 const createMutation = gql(`
 mutation createConfig($values: CreateMQTTConfig!) {
@@ -109,6 +126,24 @@ export default compose(
       errorPolicy: 'all',
     }),
     skip: ({id}: Props) => !Number.isFinite(id),
+    props: props => ({
+      ...props,
+      subscribeToConfigState: (id: number) => props.data.subscribeToMore({
+        document: stateSubscription,
+        variables: {id},
+        updateQuery: (prev: Object, update: {subscriptionData: {data: {MQTTPluginState: MQTTPluginState}, errors?: Array<Error>}}) => {
+          const {subscriptionData: {data, errors}} = (update: any)
+          if (errors) {
+            errors.forEach(error => console.error(error.message)) // eslint-disable-line no-console
+            return prev
+          }
+          if (!data) return prev
+          const {MQTTPluginState: newState} = data
+          if (!newState) return prev
+          return setIn(prev, ['Config', 'state'], newState)
+        },
+      })
+    }),
   }),
   reduxForm({
     form: 'MQTTConfig',

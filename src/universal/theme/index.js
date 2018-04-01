@@ -87,6 +87,32 @@ export type Theme = {
     autoOpenBreakpoint: () => number,
     isAutoOpen: (viewportWidth: number) => boolean,
   },
+  alert: {
+    success: {
+      backgroundColor: string,
+      border: {
+        width: number,
+        style: string,
+        color: string,
+      },
+    },
+    warning: {
+      backgroundColor: string,
+      border: {
+        width: number,
+        style: string,
+        color: string,
+      },
+    },
+    error: {
+      backgroundColor: string,
+      border: {
+        width: number,
+        style: string,
+        color: string,
+      },
+    },
+  },
   navbar: {
     title: {
       color: string,
@@ -266,6 +292,7 @@ const theme: Theme = createMuiTheme({
     },
     error: red,
     success: {
+      light: '#d3eec1',
       main: '#5dba54',
     },
     text: {
@@ -279,6 +306,35 @@ const theme: Theme = createMuiTheme({
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
     infoIcon: '#eee',
+    alert: {
+      success: {
+        color: '#3c763d',
+        backgroundColor: '#dff0d8',
+        border: {
+          width: 1,
+          style: 'solid',
+          color: '#d0e9c6',
+        },
+      },
+      warning: {
+        color: '#8a6d3b',
+        backgroundColor: '#fcf8e3',
+        border: {
+          width: 1,
+          style: 'solid',
+          color: '#faf2cc',
+        },
+      },
+      error: {
+        color: '#a94442',
+        backgroundColor: '#f2dede',
+        border: {
+          width: 1,
+          style: 'solid',
+          color: '#ebcccc',
+        },
+      },
+    },
   },
   typography: {
     fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',

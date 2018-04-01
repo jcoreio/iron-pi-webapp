@@ -3,7 +3,7 @@
 import * as React from 'react'
 
 export type Props = {
-  interval?: ?number,
+  delay?: ?number,
   children: (props: {time: number}) => ?React.Node,
 }
 
@@ -17,20 +17,20 @@ export default class Timer extends React.Component<Props> {
     }
   }
 
-  setIntervalIfNecessary(interval: ?number) {
-    if (interval != null && Number.isFinite(interval)) {
-      this.intervalID = setInterval(() => this.forceUpdate(), interval)
+  setIntervalIfNecessary(delay: ?number) {
+    if (delay != null && Number.isFinite(delay)) {
+      this.intervalID = setInterval(() => this.forceUpdate(), delay)
     }
   }
 
   componentDidMount() {
-    this.setIntervalIfNecessary(this.props.interval)
+    this.setIntervalIfNecessary(this.props.delay)
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (this.props.interval !== nextProps.interval) {
+    if (this.props.delay !== nextProps.delay) {
       this.clearIntervalIfNecessary()
-      this.setIntervalIfNecessary(nextProps.interval)
+      this.setIntervalIfNecessary(nextProps.delay)
     }
   }
 
@@ -39,12 +39,8 @@ export default class Timer extends React.Component<Props> {
   }
 
   render(): ?React.Node {
-    const {
-      interval, // eslint-disable-line no-unused-vars
-      children,
-      ...props
-    } = this.props
-    return children({...props, time: Date.now()})
+    const {children} = this.props
+    return children({time: Date.now()})
   }
 }
 

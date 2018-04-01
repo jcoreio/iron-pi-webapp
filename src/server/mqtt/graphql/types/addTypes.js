@@ -11,6 +11,7 @@ import createMQTTChannelConfig from './MQTTChannelConfig'
 import defaultCreateType from '../../../graphql/types/defaultCreateType'
 import defaultUpdateType from '../../../graphql/types/defaultUpdateType'
 import InputMetadataItem from '../../../graphql/types/InputMetadataItem'
+import {MQTTPluginStatus, MQTTPluginState} from './MQTTPluginState'
 
 const addTypes = (feature: MQTTFeature) => (options: {
   types: {[name: string]: graphql.GraphQLOutputType},
@@ -21,8 +22,10 @@ const addTypes = (feature: MQTTFeature) => (options: {
 }) => {
   const {types, inputTypes, attributeFieldsCache: cache} = options
   for (let type of [
-    createMQTTConfig(options),
+    createMQTTConfig({...options, feature}),
     createMQTTChannelConfig(options),
+    MQTTPluginStatus,
+    MQTTPluginState,
   ]) {
     types[type.name] = type
   }

@@ -4,10 +4,12 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import type {ValuesFromMQTTMap, DataValueToMQTT, MetadataValueToMQTT} from '../MQTTTypes'
 
 export const EVENT_MQTT_CONNECT = 'connect'
+export const EVENT_MQTT_ERROR = 'error'
 export const EVENT_DATA_FROM_MQTT = 'dataFromMQTT'
 
 export type MQTTProtocolHandlerEmittedEvents = {
   connect: [],
+  error: [Error],
   dataFromMQTT: [ValuesFromMQTTMap],
 }
 
