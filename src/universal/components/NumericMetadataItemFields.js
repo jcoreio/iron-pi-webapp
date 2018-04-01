@@ -61,6 +61,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             component={TextField}
             className={formControlClass}
             validate={required()}
+            inputProps={{size: 10}}
           />
           <NumericField
             name="max"
@@ -69,6 +70,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             component={TextField}
             className={formControlClass}
             validate={required()}
+            inputProps={{size: 10}}
           />
         </ControlWithInfo>
       </React.Fragment>
