@@ -12,7 +12,6 @@ import Spinner from '../../components/Spinner'
 
 const styles = (theme: Theme) => ({
   secondaryAction: {
-    marginTop: -theme.spacing.unit * 2,
     marginRight: theme.spacing.unit * 2,
   }
 })

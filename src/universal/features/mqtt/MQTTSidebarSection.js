@@ -17,11 +17,9 @@ import AddIcon from '../../components/icons/AddRectangle'
 
 const styles = (theme: Theme) => ({
   secondaryAction: {
-    marginTop: -theme.spacing.unit * 2,
     marginRight: theme.spacing.unit,
   },
   addConfigButton: {
-    marginTop: -theme.spacing.unit,
     marginBottom: 0,
   },
   addConfigIcon: {
