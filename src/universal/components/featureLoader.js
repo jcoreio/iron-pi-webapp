@@ -3,6 +3,7 @@
 import * as React from 'react'
 import {featureLoader as _featureLoader} from 'react-redux-features'
 import type {Feature, FeatureState} from 'redux-features'
+import ViewPanel from './ViewPanel'
 import Spinner from './Spinner'
 import ErrorAlert from './ErrorAlert'
 
@@ -30,15 +31,17 @@ export default function featureLoader<P: Object>(options: Options): React.Compon
 
     if (featureState instanceof Error) {
       return (
-        <ErrorAlert style={{margin: '15px auto', textAlign: 'center'}}>
-          Failed to load {featureName}: {featureState.message}
-        </ErrorAlert>
+        <ViewPanel>
+          <ErrorAlert>
+            Failed to load {featureName}: {featureState.message}
+          </ErrorAlert>
+        </ViewPanel>
       )
     } else if (!Comp) {
       return (
-        <div style={{margin: '15px auto', textAlign: 'center'}}>
+        <ViewPanel>
           <Spinner /> Loading {featureName}...
-        </div>
+        </ViewPanel>
       )
     }
     return <Comp {...props} />
