@@ -315,6 +315,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
                 className={classes.formControl}
                 placeholder="1.0"
                 disabled={dataType !== 'number'}
+                inputProps={{size: 10}}
               />
               <NumericField
                 name="offset"
@@ -324,6 +325,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
                 className={classes.formControl}
                 placeholder="0.0"
                 disabled={dataType !== 'number'}
+                inputProps={{size: 10}}
               />
             </ControlWithInfo>
           </Paper>
