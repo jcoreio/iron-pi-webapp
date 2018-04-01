@@ -1,6 +1,7 @@
 /* @flow */
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
+import range from 'lodash.range'
 import logger from 'log4jcore'
 
 import { CHANNEL_DEVICE_STATUS, CHANNEL_DIGITAL_OUTPUT_STATUS, DIGITAL_OUTPUTS_TIMEOUT,
@@ -62,6 +63,8 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
 
   _spiErrorLogged: boolean = false;
 
+  _simInterval: ?number;
+
   constructor(spiHubClient: SPIHubClient) {
     super()
     this._spi = spiHubClient
@@ -76,10 +79,16 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
 
   start() {
     this._running = true
+    if (process.env.IRON_PI_SIM && !this._simInterval)
+      this._simInterval = setInterval(() => this._sendSimMessage(), 2000)
   }
 
   stop() {
     this._running = false
+    const simInterval = this._simInterval
+    this._simInterval = undefined
+    if (simInterval)
+      clearInterval(simInterval)
   }
 
   sendDigitalOutputs(values: ?Array<boolean>) {
@@ -186,6 +195,21 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
       const connectButtonState = msg.readUInt8(pos++)
       deviceStatus.connectButtonLevel = !!(connectButtonState & 0x80)
       deviceStatus.connectButtonEventCount = connectButtonState & 0x7F
+    }
+    this.emit(EVENT_DEVICE_STATUS, deviceStatus)
+  }
+
+  _activeChannelIdx: number = -1;
+
+  _sendSimMessage() {
+    if (++this._activeChannelIdx >= 8)
+      this._activeChannelIdx = 0
+    const deviceStatus: DeviceStatus = {
+      deviceId: 1,
+      digitalInputLevels: range(8).map(idx => idx === this._activeChannelIdx ? 1 : 0),
+      digitalInputEventCounts: range(8).map(() => 0),
+      digitalOutputLevels: range(8).map(() => 0),
+      analogInputLevels: range(4).map(idx => idx === this._activeChannelIdx ? 1000 : 0)
     }
     this.emit(EVENT_DEVICE_STATUS, deviceStatus)
   }

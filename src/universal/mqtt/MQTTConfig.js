@@ -50,7 +50,7 @@ export type ProtocolRequiredFields =
 
 export const ProtocolRequiredFieldsType = (reify: Type<ProtocolRequiredFields>)
 
-export type MQTTConfig = {
+type MQTTConfigBase = {
   id: number,
   name?: ?string,
 
@@ -58,10 +58,6 @@ export type MQTTConfig = {
   username?: string,
   password?: string,
   protocol: Protocol,
-  groupId?: string,
-  nodeId?: string,
-  dataTopic?: string,
-  metadataTopic?: string,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
 
@@ -73,6 +69,18 @@ export type MQTTConfig = {
   channelsToMQTT?: ?Array<MQTTChannelConfig>,
   channelsFromMQTT?: ?Array<MQTTChannelConfig>,
 }
+
+export type MQTTConfigSparkPlug = MQTTConfigBase & {
+  groupId?: string,
+  nodeId?: string,
+}
+
+export type MQTTConfigPlainText = MQTTConfigBase & {
+  dataTopic?: string,
+  metadataTopic?: string,
+}
+
+export type MQTTConfig = MQTTConfigSparkPlug | MQTTConfigPlainText
 
 /**
  * Convert any arbitrary JSON into a valid MQTTConfig
