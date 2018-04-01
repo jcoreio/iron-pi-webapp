@@ -52,10 +52,6 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
 
   _protocolHandler: MQTTProtocolHandler;
 
-  _started: boolean = false;
-  _birthPublishDelayed: boolean = false;
-  _sparkplugBirthRequested: boolean = false;
-
   _metadataListener = () => this._metadataChanged();
 
   _metadataToMQTT: Array<MetadataValueToMQTT> = []
@@ -71,11 +67,8 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
-  _instanceId: number;
-
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
-    this._instanceId = Math.floor(1000 * Math.random())
     this._config = cleanMQTTConfig(args.config)
     ProtocolRequiredFieldsType.assert(this._config)
     this._pluginInfo = {
@@ -150,7 +143,6 @@ export default class MQTTPlugin extends EventEmitter<DataPluginEmittedEvents> im
   }
 
   start() {
-    this._started = true
     this._updateMQTTChannels()
     this._metadataToMQTT = this._calcMetadataToMQTT()
   }
