@@ -41,6 +41,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             component={TextField}
             className={formControlClass}
             validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
+            inputProps={{size: 2}}
           />
           <NumericField
             name="displayPrecision"
@@ -49,6 +50,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             component={TextField}
             className={formControlClass}
             validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
+            inputProps={{size: 2}}
           />
         </ControlWithInfo>
         <ControlWithInfo info="The display range of guages for this channel" className={lastControlClass}>
