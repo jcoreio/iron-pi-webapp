@@ -7,13 +7,11 @@ import sparkplug from 'sparkplug-client'
 import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
 
-import type {
-  DataValueToMQTT, MetadataValueToMQTT, ChannelFromMQTTConfig, ValuesFromMQTTMap,
-  SparkPlugBirthMetric,
-  SparkPlugClient, SparkPlugDataMertic, SparkPlugDataMessage, SparkPlugPackage,
-  SparkplugTypedValue
-} from '../MQTTTypes'
-import {SPARKPLUG_VERSION_B_1_0} from '../MQTTTypes'
+import type {DataValueToMQTT, MetadataValueToMQTT, ChannelFromMQTTConfig, ValuesFromMQTTMap} from '../MQTTTypes'
+import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
+import type {SparkPlugBirthMetric, SparkPlugClient, SparkPlugDataMertic, SparkPlugDataMessage, SparkPlugPackage,
+  SparkplugTypedValue} from './SparkPlugTypes'
+
 import {DATA_TYPE_NUMBER, DATA_TYPE_STRING} from '../../../universal/types/MetadataItem'
 import type {NumericMetadataItem, MetadataItem} from '../../../universal/types/MetadataItem'
 
