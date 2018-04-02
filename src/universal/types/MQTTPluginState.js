@@ -16,6 +16,6 @@ export type MQTTPluginState = {
   id: number,
   status: MQTTPluginStatus,
   error?: ?string,
-  connectedSince?: ?number,
+  connectedSince?: ?string,
 }
 

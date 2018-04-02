@@ -47,7 +47,7 @@ class MQTTConfigState extends React.Component<Props> {
       <Timer delay={1000}>
         {({time}) => (
           <div className={classNames(classes.root, classes.connected)}>
-            Connected{connectedSince != null ? ` for ${formatUptime(time - connectedSince)}` : null}
+            Connected{connectedSince != null ? ` for ${formatUptime(time - parseInt(connectedSince))}` : null}
           </div>
         )}
       </Timer>

@@ -132,7 +132,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_CONNECTED,
-      connectedSince: Date.now(),
+      connectedSince: Date.now().toString(),
     })
     this._publishAll()
   }
