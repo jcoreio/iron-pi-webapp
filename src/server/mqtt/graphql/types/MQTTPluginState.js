@@ -26,7 +26,7 @@ export const MQTTPluginState = new graphql.GraphQLObjectType({
       type: graphql.GraphQLString,
     },
     connectedSince: {
-      type: graphql.GraphQLInt,
+      type: graphql.GraphQLString,
     },
   },
 })
