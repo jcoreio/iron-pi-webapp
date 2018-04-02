@@ -4,10 +4,10 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import logger from 'log4jcore'
 import sparkplug from 'sparkplug-client'
 
-import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_ERROR} from './MQTTProtocolHandler'
+import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT, EVENT_MQTT_ERROR} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
 
-import type {DataValueToMQTT, MetadataValueToMQTT, ChannelFromMQTTConfig, ValuesFromMQTTMap} from '../MQTTTypes'
+import type {DataValueToMQTT, MetadataValueToMQTT, ValuesFromMQTTMap} from '../MQTTTypes'
 import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
 import type {SparkPlugBirthMetric, SparkPlugClient, SparkPlugDataMertic, SparkPlugDataMessage, SparkPlugPackage,
   SparkplugTypedValue} from './SparkPlugTypes'
@@ -15,7 +15,7 @@ import type {SparkPlugBirthMetric, SparkPlugClient, SparkPlugDataMertic, SparkPl
 import {DATA_TYPE_NUMBER, DATA_TYPE_STRING} from '../../../universal/types/MetadataItem'
 import type {NumericMetadataItem, MetadataItem} from '../../../universal/types/MetadataItem'
 
-const log = logger('SparkPlugHandler')
+const log = logger('MQTT:SparkPlugHandler')
 
 export type SparkPlugHandlerConfig = {
   serverURL: string,
@@ -27,18 +27,13 @@ export type SparkPlugHandlerConfig = {
 
 export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEmittedEvents> {
   _client: SparkPlugClient
-  _getChannelFromMQTTConfig: (tag: string) => ?ChannelFromMQTTConfig
   _sparkplugBirthRequested: boolean = false
 
-  _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
-
-  constructor(args: {config: SparkPlugHandlerConfig, getChannelFromMQTTConfig: (tag: string) => ?ChannelFromMQTTConfig}) {
+  constructor(args: {config: SparkPlugHandlerConfig}) {
     super()
-    const {config, getChannelFromMQTTConfig} = args
-    this._getChannelFromMQTTConfig = getChannelFromMQTTConfig
-    const {serverURL, username, password, groupId, nodeId} = config
+    const {serverURL, username, password, groupId, nodeId} = args.config
     if (!groupId || !nodeId) throw new Error('missing groupId or nodeId')
-    this._client = (sparkplug: SparkPlugPackage).newClient({
+    const client = this._client = (sparkplug: SparkPlugPackage).newClient({
       serverUrl: serverURL,
       username: username || null,
       password: password || null,
@@ -48,19 +43,19 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
       version: SPARKPLUG_VERSION_B_1_0,
     })
 
-    this._client.on('error', (err: Error) => {
-      log.error(`SparkPlug client error: ${err.stack}`) // eslint-disable-line no-console
+    client.on('error', (err: Error) => {
+      log.error(`SparkPlug client error: ${err.stack}`)
       this.emit(EVENT_MQTT_ERROR, err)
     })
-    this._client.on('close', () => {
-      log.error(`SparkPlug client closed`) // eslint-disable-line no-console
-      this.emit(EVENT_MQTT_ERROR, new Error('connection closed'))
+    client.on('close', () => {
+      log.error(`SparkPlug client closed`)
+      this.emit(EVENT_MQTT_DISCONNECT)
     })
-    this._client.on('birth', () => {
+    client.on('birth', () => {
       this._sparkplugBirthRequested = true
       this.emit(EVENT_MQTT_CONNECT)
     })
-    this._client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
+    client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
   }
 
   destroy() {
@@ -75,41 +70,7 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
     })
   }
 
-  _handleDataFromSparkPlug(message: SparkPlugDataMessage) {
-    const metrics: Array<SparkPlugDataMertic> = message.metrics
-    const valuesFromMQTT: ValuesFromMQTTMap = {}
-    for (let metric: SparkPlugDataMertic of metrics) {
-      const {name, value} = metric
-      const channelConfig: ?ChannelFromMQTTConfig = this._getChannelFromMQTTConfig(name)
-      if (channelConfig) {
-        const {internalTag} = channelConfig
-        if ('string' === channelConfig.dataType) {
-          if (value == null || typeof value === 'string') {
-            valuesFromMQTT[internalTag] = value
-          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
-            log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
-            this._channelsFromMQTTWarningsPrinted.add(internalTag)
-          }
-        } else { // number
-          if (value == null || typeof value === 'number') {
-            let valueWithSlopeOffset = value
-            const {multiplier, offset} = channelConfig
-            if (multiplier != null)
-              valueWithSlopeOffset *= multiplier
-            if (offset != null)
-              valueWithSlopeOffset += offset
-            valuesFromMQTT[internalTag] = valueWithSlopeOffset
-          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
-            log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
-            this._channelsFromMQTTWarningsPrinted.add(internalTag)
-          }
-        }
-      }
-    }
-    this.emit(EVENT_DATA_FROM_MQTT, valuesFromMQTT)
-  }
-
-  publishMetadata(args: {metadata: Array<MetadataValueToMQTT>, data: Array<DataValueToMQTT>, time: number}) {
+  publishAll(args: {metadata: Array<MetadataValueToMQTT>, data: Array<DataValueToMQTT>, time: number}) {
     // Wait for the SparkPlug client to request the birth certificate
     if (!this._sparkplugBirthRequested) return
 
@@ -142,6 +103,14 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
     })
 
     this._client.publishNodeBirth({timestamp: time, metrics})
+  }
+
+  _handleDataFromSparkPlug(message: SparkPlugDataMessage) {
+    const valuesFromMQTT: ValuesFromMQTTMap = {}
+    for (let metric: SparkPlugDataMertic of message.metrics) {
+      valuesFromMQTT[metric.name] = metric.value
+    }
+    this.emit(EVENT_DATA_FROM_MQTT, valuesFromMQTT)
   }
 }
 

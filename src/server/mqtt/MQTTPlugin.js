@@ -1,24 +1,24 @@
 // @flow
 
-import _ from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
-import {isEqual} from 'lodash'
+import difference from 'lodash.difference'
+import isEqual from 'lodash.isequal'
+import keyBy from 'lodash.keyby'
 import logger from 'log4jcore'
 import type {PubSubEngine} from 'graphql-subscriptions'
 
-import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_ERROR} from './protocols/MQTTProtocolHandler'
+import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT, EVENT_MQTT_ERROR} from './protocols/MQTTProtocolHandler'
+import MQTTJSONHandler from './protocols/MQTTJSONHandler'
 import type {MQTTProtocolHandler} from './protocols/MQTTProtocolHandler'
 import SparkPlugHandler from './protocols/SparkPlugHandler'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import {DATA_TYPE_STRING, DATA_TYPE_NUMBER} from '../../universal/types/MetadataItem'
 import type {MetadataItem} from '../../universal/types/MetadataItem'
-import {cleanMQTTConfig, mqttConfigToDataPluginMappings} from '../../universal/mqtt/MQTTConfig'
+import {cleanMQTTConfig, mqttConfigToDataPluginMappings, MQTT_PROTOCOL_SPARKPLUG, MQTT_PROTOCOL_TEXT_JSON} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import {DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
-import type {
-  DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
-  DataPluginMapping,
-} from '../data-router/PluginTypes'
+import type { DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
+  DataPluginMapping, ValuesMap} from '../data-router/PluginTypes'
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
@@ -71,6 +71,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
   _valuesFromMQTT: ValuesFromMQTTMap = {}
+  _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
 
   /** Configs for enabled channels to MQTT, combined with channels that are being sent
    * because "publish all" is enabled */
@@ -97,14 +98,23 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     }
     this._resources = args.resources
 
-    const {serverURL, username, password, protocol, groupId, nodeId} = (this._config: any)
-    if (protocol !== 'SPARKPLUG') throw new Error('Only SparkPlug is currently supported')
-    this._protocolHandler = new SparkPlugHandler({
-      config: {serverURL, username, password, groupId, nodeId},
-      getChannelFromMQTTConfig: (tag: string) => this._channelsFromMQTTConfigs[tag]
-    })
+    const {protocol} = this._config
+    switch (protocol) {
+    case MQTT_PROTOCOL_SPARKPLUG: {
+      const {serverURL, username, password, groupId, nodeId} = (this._config: any)
+      this._protocolHandler = new SparkPlugHandler({config: {serverURL, username, password, groupId, nodeId}})
+      break
+    }
+    case MQTT_PROTOCOL_TEXT_JSON: {
+      const {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic} = (this._config: any)
+      this._protocolHandler = new MQTTJSONHandler({config: {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic}})
+      break
+    }
+    default: throw new Error(`unrecognized MQTT protocol: was ${protocol}, expected '${MQTT_PROTOCOL_SPARKPLUG}' or '${MQTT_PROTOCOL_TEXT_JSON}'`)
+    }
     this._protocolHandler.on(EVENT_DATA_FROM_MQTT, (data: ValuesFromMQTTMap) => this._setValuesFromMQTT(data))
     this._protocolHandler.on(EVENT_MQTT_CONNECT, this._handleConnect)
+    this._protocolHandler.on(EVENT_MQTT_DISCONNECT, this._handleDisconnect)
     this._protocolHandler.on(EVENT_MQTT_ERROR, this._handleError)
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
   }
@@ -124,7 +134,21 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       status: MQTT_PLUGIN_STATUS_CONNECTED,
       connectedSince: Date.now(),
     })
-    this._publishMetadata()
+    this._publishAll()
+  }
+
+  _handleDisconnect = () => {
+    this._setState({
+      id: this._config.id,
+      status: MQTT_PLUGIN_STATUS_ERROR,
+    })
+    const valuesToPublish: ValuesFromMQTTMap = {}
+    for (let tag in this._valuesFromMQTT) {
+      valuesToPublish[tag] = null
+    }
+    this._valuesFromMQTT = {}
+    if (Object.keys(valuesToPublish).length)
+      this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
   }
 
   _handleError = (err: Error) => {
@@ -133,7 +157,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       status: MQTT_PLUGIN_STATUS_ERROR,
       error: err.message,
     })
-    this._publishMetadata()
   }
 
   pluginInfo(): PluginInfo { return this._pluginInfo }
@@ -185,7 +208,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     return this._toMQTTChannelStates.filter((state: ToMQTTChannelState) => {
       state.curValue = this._resources.getTagValue(state.config.internalTag)
       // Return the filtering result:
-      return opts.sendAll || !_.isEqual(state.curValue, state.sentValue)
+      return opts.sendAll || !isEqual(state.curValue, state.sentValue)
     })
   }
 
@@ -217,10 +240,10 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       const internalTagsFromThisPlugin = this._config.channelsFromMQTT || []
         .filter((channel: MQTTChannelConfig) => channel.enabled)
         .map((channel: MQTTChannelConfig) => channel.internalTag)
-      const publicTagsNotFromThisPlugin = _.difference(this._resources.publicTags(), internalTagsFromThisPlugin)
-      const unPublishedPublicTags = _.difference(publicTagsNotFromThisPlugin, alreadyPublishedSystemTags)
+      const publicTagsNotFromThisPlugin = difference(this._resources.publicTags(), internalTagsFromThisPlugin)
+      const unPublishedPublicTags = difference(publicTagsNotFromThisPlugin, alreadyPublishedSystemTags)
       // Don't publish tags where the MQTT tag path is already being published to
-      const extraTagsToPublish = _.difference(unPublishedPublicTags, alreadyPublishedMQTTTags)
+      const extraTagsToPublish = difference(unPublishedPublicTags, alreadyPublishedMQTTTags)
       extraChannelsToPublish = extraTagsToPublish.map((tag: string) => ({
         internalTag: tag,
         mqttTag: tag,
@@ -232,7 +255,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       // Filter down to only enabled and mapped channels
       .filter((channelConfig: MQTTChannelConfig) => channelConfig.enabled && channelConfig.mqttTag && channelConfig.internalTag)
 
-    const prevChannelStates = _.keyBy(this._toMQTTChannelStates, (state: ToMQTTChannelState) => state.config.mqttTag)
+    const prevChannelStates = keyBy(this._toMQTTChannelStates, (state: ToMQTTChannelState) => state.config.mqttTag)
     this._toMQTTChannelStates = this._toMQTTEnabledChannelConfigs.map((config: MQTTChannelConfig) => ({
       curValue: undefined,
       sentValue: undefined,
@@ -270,12 +293,12 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     const metadataToMQTT = this._calcMetadataToMQTT()
     if (!isEqual(metadataToMQTT, this._metadataToMQTT)) {
       this._metadataToMQTT = metadataToMQTT
-      this._publishMetadata()
+      this._publishAll()
     }
   }
 
-  _publishMetadata() {
-    this._protocolHandler.publishMetadata({
+  _publishAll() {
+    this._protocolHandler.publishAll({
       metadata: this._metadataToMQTT,
       data: this._generateDataMessage(this._toMQTTChannelStates),
       time: Date.now()
@@ -312,19 +335,49 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     return metadataToMQTT
   }
 
-  _setValuesFromMQTT(values: ValuesFromMQTTMap) {
-    const valuesToPublish: ValuesFromMQTTMap = {}
-    for (let channelId in values) {
-      const value = values[channelId]
+  _setValuesFromMQTT(valuesByMQTTTag: ValuesFromMQTTMap) {
+    const valuesByInternalTag: ValuesMap = {}
+    for (let mqttTag in valuesByMQTTTag) {
+      const value = valuesByMQTTTag[mqttTag]
+      const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[mqttTag]
+      if (channelConfig) {
+        const {internalTag} = channelConfig
+        if ('string' === channelConfig.dataType) {
+          if (value == null || typeof value === 'string') {
+            valuesByInternalTag[internalTag] = value
+          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
+            log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
+            this._channelsFromMQTTWarningsPrinted.add(internalTag)
+          }
+        } else { // number
+          if (value == null || typeof value === 'number') {
+            let valueWithSlopeOffset = value
+            const {multiplier, offset} = channelConfig
+            if (multiplier != null)
+              valueWithSlopeOffset *= multiplier
+            if (offset != null)
+              valueWithSlopeOffset += offset
+            valuesByInternalTag[internalTag] = valueWithSlopeOffset
+          } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
+            log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
+            this._channelsFromMQTTWarningsPrinted.add(internalTag)
+          }
+        }
+      }
+    }
+
+    let changedValues: ValuesMap = {}
+    for (let channelId in valuesByInternalTag) {
+      const value = valuesByInternalTag[channelId]
       const changed = !this._valuesFromMQTT.hasOwnProperty(channelId) || !isEqual(this._valuesFromMQTT[channelId], value)
       if (changed) {
-        valuesToPublish[channelId] = value
+        changedValues[channelId] = value
         this._valuesFromMQTT[channelId] = value
       }
     }
-    log.info(`Publishing data from MQTT: ${JSON.stringify(valuesToPublish)}`)
-    if (Object.keys(valuesToPublish).length)
-      this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
+    if (Object.keys(changedValues).length) {
+      log.info(`Publishing data from MQTT: ${JSON.stringify(changedValues)}`)
+      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
+    }
   }
 }
-

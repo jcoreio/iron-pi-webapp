@@ -24,6 +24,9 @@ export type MQTTChannelConfig = {
 }
 export const MQTTChannelConfigType = (reify: Type<MQTTChannelConfig>)
 
+export const MQTT_PROTOCOL_SPARKPLUG = 'SPARKPLUG'
+export const MQTT_PROTOCOL_TEXT_JSON = 'TEXT_JSON'
+
 export type Protocol = 'SPARKPLUG' | 'TEXT_JSON'
 
 export const Protocols: {[protocol: Protocol]: {displayText: string}} = {
