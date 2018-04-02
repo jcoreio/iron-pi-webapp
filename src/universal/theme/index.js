@@ -306,35 +306,6 @@ const theme: Theme = createMuiTheme({
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
     infoIcon: '#eee',
-    alert: {
-      success: {
-        color: '#3c763d',
-        backgroundColor: '#dff0d8',
-        border: {
-          width: 1,
-          style: 'solid',
-          color: '#d0e9c6',
-        },
-      },
-      warning: {
-        color: '#8a6d3b',
-        backgroundColor: '#fcf8e3',
-        border: {
-          width: 1,
-          style: 'solid',
-          color: '#faf2cc',
-        },
-      },
-      error: {
-        color: '#a94442',
-        backgroundColor: '#f2dede',
-        border: {
-          width: 1,
-          style: 'solid',
-          color: '#ebcccc',
-        },
-      },
-    },
   },
   typography: {
     fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
@@ -349,6 +320,36 @@ const theme: Theme = createMuiTheme({
     },
   },
 })
+
+theme.alert = {
+  success: {
+    color: '#3c763d',
+    backgroundColor: '#dff0d8',
+    border: {
+      width: 1,
+      style: 'solid',
+      color: '#d0e9c6',
+    },
+  },
+  warning: {
+    color: '#8a6d3b',
+    backgroundColor: '#fcf8e3',
+    border: {
+      width: 1,
+      style: 'solid',
+      color: '#faf2cc',
+    },
+  },
+  error: {
+    color: '#a94442',
+    backgroundColor: '#f2dede',
+    border: {
+      width: 1,
+      style: 'solid',
+      color: '#ebcccc',
+    },
+  },
+}
 
 theme.jcoreLogo = {
   fontFamily: 'Rubik',

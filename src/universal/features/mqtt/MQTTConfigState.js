@@ -15,19 +15,19 @@ import Timer from '../../components/Timer'
 import Spinner from '../../components/Spinner'
 import formatUptime from '../../util/formatUptime'
 
-const styles = ({palette, spacing, typography}: Theme) => ({
+const styles = ({alert, spacing, typography}: Theme) => ({
   root: {
     padding: `${spacing.unit}px ${spacing.unit * 2}px`,
     fontSize: typography.pxToRem(18),
   },
   connected: {
-    ...palette.alert.success,
+    ...alert.success,
   },
   connecting: {
-    ...palette.alert.warning,
+    ...alert.warning,
   },
   error: {
-    ...palette.alert.error,
+    ...alert.error,
   },
 })
 
