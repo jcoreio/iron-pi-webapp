@@ -10,5 +10,7 @@ module.exports = [
   srcDir,
   moduleDir('p-timeout'),
   moduleDir('p-finally'),
+  moduleDir('is-ip'),
+  moduleDir('ip-regex'),
 ]
 
