@@ -7,6 +7,10 @@ import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
 import TextField from 'material-ui/TextField'
 import Typography from 'material-ui/Typography'
+import IconButton from 'material-ui/IconButton'
+import Icon from 'material-ui/Icon'
+import Tooltip from 'material-ui/Tooltip'
+import RefreshIcon from 'material-ui-icons/Refresh'
 import {required} from 'redux-form-validators'
 import isIp from 'is-ip'
 
@@ -63,6 +67,10 @@ const styles = ({spacing}: Theme) => ({
   serverURLControl: {
     flexDirection: 'column',
   },
+  refreshButton: {
+    float: 'right',
+    margin: `-${spacing.unit * 1.5}px 0`,
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -98,6 +106,7 @@ export type Props = {
   change?: (field: string, newValue: any) => any,
   onSubmit?: (e: Event) => any,
   onCancel?: (e: MouseEvent) => any,
+  onRefresh?: (e: MouseEvent) => any,
   dhcpEnabled?: boolean,
   data?: {
     state?: NetworkSettings,
@@ -110,7 +119,7 @@ class NetworkSettingsForm extends React.Component<Props> {
     const {
       classes, data, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
-      dhcpEnabled, onSubmit, onCancel,
+      dhcpEnabled, onSubmit, onCancel, onRefresh,
     } = this.props
     const loading = data ? data.loading : false
     if (data != null && (loading || !initialized)) {
@@ -143,6 +152,8 @@ class NetworkSettingsForm extends React.Component<Props> {
               <DHCPFields
                 key="dhcp"
                 formControlClass={classes.formControl}
+                refreshButtonClass={classes.refreshButton}
+                onRefresh={onRefresh}
                 config={data && data.state && data.state.dhcpEnabled ? data.state : null}
               />
             ) : (
@@ -186,10 +197,19 @@ type ModeFieldsProps = {
   formControlClass: string,
 }
 
-const DHCPFields = ({formControlClass, config}: ModeFieldsProps & {config: ?NetworkSettings}): React.Node => {
+const DHCPFields = ({formControlClass, refreshButtonClass, onRefresh, config}: ModeFieldsProps & {
+  config: ?NetworkSettings,
+  refreshButtonClass: string,
+  onRefresh?: ?(e: MouseEvent) => any,
+}): React.Node => {
   return (
     <div>
       <Typography variant="subheading">
+        <Tooltip title="Refresh" placement="left">
+          <IconButton className={refreshButtonClass} onClick={onRefresh} aria-label="Refresh">
+            <Icon><RefreshIcon /></Icon>
+          </IconButton>
+        </Tooltip>
         Settings received from DHCP server:
       </Typography>
       <TextField

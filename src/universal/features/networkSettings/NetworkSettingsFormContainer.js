@@ -34,6 +34,7 @@ type Data = {
   loading: boolean,
   settings?: NetworkSettings,
   state?: NetworkSettings,
+  refetch: () => any,
 }
 
 export type Props = {
@@ -83,6 +84,11 @@ class NetworkSettingsFormContainer extends React.Component<Props> {
     this._initialize()
   }
 
+  _handleRefresh = () => {
+    const {data} = this.props
+    if (data) data.refetch()
+  }
+
   render(): ?React.Node {
     const {initialized, submitting, submitSucceeded, submitFailed, pristine, error, handleSubmit, data} = this.props
     return (
@@ -95,6 +101,7 @@ class NetworkSettingsFormContainer extends React.Component<Props> {
         error={error}
         onSubmit={handleSubmit(this._handleSubmit)}
         onCancel={this._handleCancel}
+        onRefresh={this._handleRefresh}
         data={data}
       />
     )
