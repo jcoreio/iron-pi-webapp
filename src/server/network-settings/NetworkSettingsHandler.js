@@ -8,7 +8,7 @@ import logger from 'log4jcore'
 
 const log = logger('NetworkSettingsHandler')
 
-import {validateNetworkSettings} from '../../universal/network-settings/NetworkSettingsCommon'
+import {validateNetworkSettingsForHandler} from '../../universal/network-settings/NetworkSettingsCommon'
 import type {NetworkSettings} from '../../universal/network-settings/NetworkSettingsCommon'
 
 const INTERFACES_FILE = '/etc/network/interfaces'
@@ -114,7 +114,7 @@ export default class NetworkSettingsHandler {
   }
 
   async setNetworkSettings(settings: NetworkSettings): Promise<void> {
-    const errors = validateNetworkSettings(settings)
+    const errors = validateNetworkSettingsForHandler(settings)
     if (errors.length) throw new Error(`Network settings are invalid:\n${errors.join('\n')}`)
     await this._writeNetworkSettings(settings)
     await this._restartNetworking()

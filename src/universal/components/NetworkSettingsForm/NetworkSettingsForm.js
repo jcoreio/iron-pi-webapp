@@ -20,8 +20,8 @@ import SubmitStatus from '../../components/SubmitStatus'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {formValues} from 'redux-form'
 
-import {IPAddressModesArray, getIPAddressModeDisplayText, splitDNSAddresses} from '../../types/IPAddressConfig'
-import type {IPAddressMode} from '../../types/IPAddressConfig'
+import type {NetworkSettings} from '../../network-settings/NetworkSettingsCommon'
+import {splitDNSAddresses} from '../../types/DNSServers'
 
 const styles = ({spacing}: Theme) => ({
   form: {
@@ -88,13 +88,6 @@ const validateDNSServers = [
 ]
 const normalizeDNSServers = text => typeof text === 'string' ? text.replace(/\s+/g, '') : text
 
-type IPAddressConfig = {
-  ipAddress: string,
-  subnetMask: string,
-  router: string,
-  dnsServers: string,
-}
-
 export type Props = {
   classes: Classes,
   initialized?: boolean,
@@ -106,19 +99,19 @@ export type Props = {
   change?: (field: string, newValue: any) => any,
   onSubmit?: (e: Event) => any,
   onCancel?: (e: MouseEvent) => any,
-  mode?: IPAddressMode,
+  dhcpEnabled?: boolean,
   data?: {
-    config?: IPAddressConfig,
+    state?: NetworkSettings,
     loading?: boolean,
   },
 }
 
-class IPAddressForm extends React.Component<Props> {
+class NetworkSettingsForm extends React.Component<Props> {
   render(): React.Node {
     const {
       classes, data, initialized, pristine,
       submitting, submitSucceeded, submitFailed, error,
-      mode, onSubmit, onCancel,
+      dhcpEnabled, onSubmit, onCancel,
     } = this.props
     const loading = data ? data.loading : false
     if (data != null && (loading || !initialized)) {
@@ -126,33 +119,37 @@ class IPAddressForm extends React.Component<Props> {
         <div className={classes.form}>
           <ViewPanel>
             <Typography variant="subheading">
-              <Spinner /> Loading IP Address configuration...
+              <Spinner /> Loading network settings...
             </Typography>
           </ViewPanel>
         </div>
       )
     }
-    const ModeFields = mode ? fieldsForMode[mode] : null
     return (
       <form id="IPAddressForm" className={classes.form} onSubmit={onSubmit}>
         <ViewPanel>
           <Field
-            name="mode"
+            name="dhcpEnabled"
             label="Mode"
             component={ButtonGroupField}
             classes={{button: classes.tallButton}}
-            availableValues={IPAddressModesArray}
+            availableValues={[true, false]}
             activeButtonProps={{secondary: true}}
-            getDisplayText={getIPAddressModeDisplayText}
+            getDisplayText={dhcpEnabled => dhcpEnabled ? 'DHCP' : 'Manual'}
             className={classes.modeField}
             validate={required()}
           />
           <Fader>
-            {ModeFields && (
-              <ModeFields
-                key={mode}
+            {dhcpEnabled ? (
+              <DHCPFields
+                key="dhcp"
                 formControlClass={classes.formControl}
-                config={data ? data.config : null}
+                config={data ? data.state : null}
+              />
+            ) : (
+              <StaticFields
+                key="static"
+                formControlClass={classes.formControl}
               />
             )}
           </Fader>
@@ -187,11 +184,10 @@ class IPAddressForm extends React.Component<Props> {
 }
 
 type ModeFieldsProps = {
-  config: ?IPAddressConfig,
   formControlClass: string,
 }
 
-const DHCPFields = ({formControlClass, config}: ModeFieldsProps): React.Node => {
+const DHCPFields = ({formControlClass, config}: ModeFieldsProps & {config: ?NetworkSettings}): React.Node => {
   return (
     <div>
       <Typography variant="subheading">
@@ -206,19 +202,19 @@ const DHCPFields = ({formControlClass, config}: ModeFieldsProps): React.Node => 
         className={formControlClass}
       />
       <TextField
-        name="subnetMask"
+        name="netmask"
         label="Subnet Mask"
         type="text"
         inputProps={{readOnly: true}}
-        value={config ? config.subnetMask : null}
+        value={config ? config.netmask : null}
         className={formControlClass}
       />
       <TextField
-        name="router"
+        name="gateway"
         label="Router"
         type="text"
         inputProps={{readOnly: true}}
-        value={config ? config.router : null}
+        value={config ? config.gateway : null}
         className={formControlClass}
       />
       <TextField
@@ -233,7 +229,7 @@ const DHCPFields = ({formControlClass, config}: ModeFieldsProps): React.Node => 
   )
 }
 
-const ManualFields = ({formControlClass}: ModeFieldsProps): React.Node => (
+const StaticFields = ({formControlClass}: ModeFieldsProps): React.Node => (
   <div>
     <Field
       name="ipAddress"
@@ -245,7 +241,7 @@ const ManualFields = ({formControlClass}: ModeFieldsProps): React.Node => (
       validate={validateIPAddress}
     />
     <Field
-      name="subnetMask"
+      name="netmask"
       label="Subnet Mask"
       type="text"
       component={TextField}
@@ -254,7 +250,7 @@ const ManualFields = ({formControlClass}: ModeFieldsProps): React.Node => (
       validate={validateIPAddress}
     />
     <Field
-      name="router"
+      name="gateway"
       label="Router"
       type="text"
       component={TextField}
@@ -274,13 +270,8 @@ const ManualFields = ({formControlClass}: ModeFieldsProps): React.Node => (
   </div>
 )
 
-const fieldsForMode: {[mode: IPAddressMode]: React.ComponentType<ModeFieldsProps>} = {
-  DHCP: DHCPFields,
-  MANUAL: ManualFields,
-}
-
 export default compose(
   withStyles(styles, {withTheme: true}),
-  formValues('mode')
-)(IPAddressForm)
+  formValues('dhcpEnabled')
+)(NetworkSettingsForm)
 
