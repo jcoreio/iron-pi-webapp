@@ -113,7 +113,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   ioMappings(): Array<DataPluginMapping> {
     const mappings: Array<DataPluginMapping> = []
-    for (let channel of this._enabledChannels()) {
+    for (let channel of this._channels) {
       const {id, tag, config} = channel
       const {mode, controlMode} = config
       const displayNumber = id + 1
@@ -197,11 +197,14 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   setRemoteControlValue(id: number, value: ?boolean) {
     const channel = this._channels[id]
     if (!channel) throw new Error(`Unknown channel: ${id}`)
-    const {config} = channel
+    const {config, tag} = channel
     if (config.mode !== 'DIGITAL_OUTPUT' || config.controlMode !== 'REMOTE_CONTROL') {
       throw new Error('Channel must be in remote control digital output mode to set its control value')
     }
-    this.emit(DATA_PLUGIN_EVENT_DATA, {[LocalIOTags.controlValue(id)]: digitize(value)})
+    if (tag == null) {
+      throw new Error('Could not get tag to set remote control value on')
+    }
+    this.emit(DATA_PLUGIN_EVENT_DATA, {[tag]: digitize(value)})
   }
 
   _channelUpdated = (channel: LocalIOChannel) => {
