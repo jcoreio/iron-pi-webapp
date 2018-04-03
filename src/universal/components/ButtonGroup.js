@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import classNames from 'classnames'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../theme'
 
@@ -29,11 +30,12 @@ type Classes = $Call<ExtractClasses, typeof styles>
 
 export type Props = {
   classes: Classes,
+  className?: string,
   children: React.Node,
 }
 
-const ButtonGroup = ({classes, children, theme, ...props}: Props) => (
-  <div className={classes.root} {...props}>
+const ButtonGroup = ({classes, className, children, theme, ...props}: Props) => (
+  <div className={classNames(classes.root, className)} {...props}>
     {children}
   </div>
 )

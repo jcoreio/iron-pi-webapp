@@ -316,7 +316,6 @@ class ChannelForm extends React.Component<Props> {
               component={ButtonGroupField}
               classes={{button: classes.tallButton}}
               availableValues={ChannelModesArray}
-              activeButtonProps={{secondary: true}}
               getDisplayText={getChannelModeDisplayText}
               className={classes.formControl}
               validate={required()}

@@ -1,12 +1,11 @@
 // @flow
 
 import * as React from 'react'
-import classNames from 'classnames'
 import _Button from 'material-ui/Button'
 import {FormControl, FormLabel, FormHelperText} from 'material-ui/Form'
 import {withStyles} from 'material-ui/styles'
 
-import ButtonGroup from './ButtonGroup'
+import RadioButtonGroup from './RadioButtonGroup'
 import type {Theme} from '../theme'
 
 const styles = ({spacing, palette}: Theme) => ({
@@ -15,16 +14,7 @@ const styles = ({spacing, palette}: Theme) => ({
     marginBottom: spacing.unit,
   },
   button: {},
-  buttonUnselected: {
-    border: {
-      width: 1,
-      style: 'solid',
-      color: palette.grey[300],
-    },
-    '&:not(:last-child)': {
-      borderRightWidth: 0,
-    }
-  },
+  buttonUnselected: {},
   helperText: {},
 })
 
@@ -60,36 +50,28 @@ const ButtonGroupField = <V>(props: Props<V>): React.Node => {
     selectedButtonProps,
     availableValues,
     getDisplayText,
-    input: {value: selectedValue, onChange, disabled, name},
+    input,
     meta: {warning, error, touched},
+    Button,
   } = props
-  const Button = props.Button || _Button
   return (
     <FormControl className={className} error={touched && (error != null || warning != null)}>
       {label &&
-      <FormLabel className={classes.label}>
-        {label}
-      </FormLabel>
+        <FormLabel className={classes.label}>
+          {label}
+        </FormLabel>
       }
-      <ButtonGroup name={name} data-value={selectedValue}>
-        {availableValues.map((value: V, key: any) => {
-          const selected = value === selectedValue
-          return (
-            <Button
-              key={key}
-              value={value}
-              className={classNames(classes.button, {
-                [classes.buttonUnselected]: !selected,
-              })}
-              disabled={disabled}
-              onClick={() => onChange && onChange(value)}
-              {...(selected ? selectedButtonProps : {})}
-            >
-              {getDisplayText(value)}
-            </Button>
-          )
-        })}
-      </ButtonGroup>
+      <RadioButtonGroup
+        availableValues={availableValues}
+        getDisplayText={getDisplayText}
+        selectedButtonProps={selectedButtonProps}
+        Button={Button}
+        classes={{
+          button: classes.button,
+          buttonUnselected: classes.buttonUnselected,
+        }}
+        {...input}
+      />
       {touched && (error || warning) &&
       <FormHelperText className={classes.helperText}>
         {error || warning}
