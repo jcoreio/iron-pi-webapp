@@ -9,19 +9,40 @@ const NetworkSettings = new graphql.GraphQLObjectType({
       type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
     },
     ipAddress: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      type: graphql.GraphQLString,
     },
     netmask: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      type: graphql.GraphQLString,
     },
     gateway: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      type: graphql.GraphQLString,
     },
     dnsServers: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLString),
+      type: graphql.GraphQLString,
     },
-  }
+  },
 })
 
 export default NetworkSettings
+
+export const InputNetworkSettings = new graphql.GraphQLInputObjectType({
+  name: 'InputNetworkSettings',
+  fields: {
+    dhcpEnabled: {
+      type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean),
+    },
+    ipAddress: {
+      type: graphql.GraphQLString,
+    },
+    netmask: {
+      type: graphql.GraphQLString,
+    },
+    gateway: {
+      type: graphql.GraphQLString,
+    },
+    dnsServers: {
+      type: graphql.GraphQLString,
+    },
+  },
+})
 

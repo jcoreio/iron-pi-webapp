@@ -8,6 +8,7 @@ import setUsername from './setUsername'
 import changePassword from './changePassword'
 import createMetadataItem from './createMetadataItem'
 import setSSHEnabled from './setSSHEnabled'
+import setNetworkSettings from './setNetworkSettings'
 import updateMetadataItem from './updateMetadataItem'
 import verifyAccessCode from './verifyAccessCode'
 import type {GraphQLFeature} from '../GraphQLFeature'
@@ -28,6 +29,7 @@ export default function createMutation(options: Options): graphql.GraphQLObjectT
     changePassword: changePassword(),
     createMetadataItem: createMetadataItem(),
     setSSHEnabled: setSSHEnabled(),
+    setNetworkSettings: setNetworkSettings(),
     updateMetadataItem: updateMetadataItem(),
     verifyAccessCode: verifyAccessCode(),
   }

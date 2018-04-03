@@ -18,6 +18,7 @@ import defaultInputType from './defaultInputType'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import defaultCreateType from './defaultCreateType'
 import defaultUpdateType from './defaultUpdateType'
+import NetworkSettings, {InputNetworkSettings} from './NetworkSettings'
 
 export type Options = {
   sequelize: Sequelize,
@@ -53,10 +54,12 @@ export default function createTypes(options: Options): {
     MappingLocationInfo,
     MappingProblemKind,
     MappingProblem,
+    NetworkSettings,
     User: createUser({getType, getArgs, attributeFieldsCache})
   }
   const inputTypes: {[name: string]: GraphQLInputType} = {
     InputMetadataItem,
+    InputNetworkSettings,
   }
 
   for (let key in models) {

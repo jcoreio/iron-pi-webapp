@@ -27,7 +27,8 @@ import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler, {EVENT_CONNECT_BUTTON_PRESSED, EVENT_NETWORK_MODE_COMMAND} from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
 import SSHHandler from './device/SSHHandler'
-import NetworkSettingsHandler from './network-settings/NetworkSettingsHandler'
+import DeviceNetworkSettingsHandler from './network-settings/NetworkSettingsHandler'
+import type {NetworkSettingsHandler} from './network-settings/NetworkSettingsHandler'
 
 import requireEnv from '@jcoreio/require-env'
 import type {DbConnectionParams} from './sequelize'
@@ -56,6 +57,7 @@ import {
 } from './graphql/subscription/constants'
 import {IN_CONNECT_MODE_CHANGED} from './device/ConnectModeHandler'
 import type {MappingProblem} from '../universal/data-router/PluginConfigTypes'
+import TestNetworkSettingsHandler from './network-settings/TestNetworkSettingsHandler'
 
 const log = logger('Server')
 
@@ -107,7 +109,9 @@ export default class Server {
     this.connectModeHandler = new ConnectModeHandler()
     this.accessCodeHandler = new AccessCodeHandler()
     this.sshHandler = new SSHHandler()
-    this.networkSettingsHandler = new NetworkSettingsHandler()
+    this.networkSettingsHandler = process.env.BABEL_ENV === 'test'
+      ? new TestNetworkSettingsHandler()
+      : new DeviceNetworkSettingsHandler()
     this._spiHubClient.on('devicesChanged', (message: Object) => {
       this.accessCodeHandler.setAccessCode(message.accessCode)
       this._ledHandler.sendLEDState(LED_MESSAGE_OK, LED_MESSAGE_OK)

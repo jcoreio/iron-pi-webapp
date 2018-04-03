@@ -53,7 +53,14 @@ function settingsForMode(mode: string): NetworkSettings {
 const isCommented = val => val.startsWith('#')
 const lineContent = val => (isCommented(val) ? val.substr(1) : val).trim()
 
-export default class NetworkSettingsHandler {
+export interface NetworkSettingsHandler {
+  setMode(mode: 'static' | 'dhcp'): void;
+  getNetworkSettings(): Promise<NetworkSettings>;
+  setNetworkSettings(settings: NetworkSettings): Promise<void>;
+  getNetworkState(): Promise<NetworkSettings>;
+}
+
+export default class DeviceNetworkSettingsHandler implements NetworkSettingsHandler {
   _setModeInProgress: ?string;
   _setModeNext: ?string;
 

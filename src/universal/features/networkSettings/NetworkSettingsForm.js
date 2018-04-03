@@ -5,13 +5,14 @@ import {compose} from 'redux'
 import {Field} from 'redux-form-normalize-on-blur'
 import {withStyles} from 'material-ui/styles'
 import Button from 'material-ui/Button'
+import TextField from 'material-ui/TextField'
 import Typography from 'material-ui/Typography'
 import {required} from 'redux-form-validators'
 import isIp from 'is-ip'
 
 import type {Theme} from '../../theme/index'
 import ViewPanel from '../../components/ViewPanel'
-import TextField from '../../components/TextField'
+import FormTextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
 
@@ -68,24 +69,22 @@ type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<
 type Classes = $Call<ExtractClasses, typeof styles>
 
 const trim = (value: ?string): ?string => typeof value === 'string' ? value.trim() : value
-const validateIPAddress = [
+const validateIPAddress = (address: ?string): ?string => {
+  if (!address) return
+  address = address.trim()
+  if (address && !isIp.v4(address)) return 'Must be a valid IPv4 address'
+}
+const validateRequiredIPAddress = [
   required(),
-  (address: ?string): ?string => {
-    if (!address) return
-    address = address.trim()
-    if (address && !isIp.v4(address)) return 'Must be a valid IPv4 address'
-  }
+  validateIPAddress,
 ]
-const validateDNSServers = [
-  required(),
-  (addresses: ?string): ?string => {
-    if (!addresses) return
-    const split = splitDNSAddresses(addresses)
-    for (let address of split) {
-      if (address && !isIp.v4(address)) return 'Must be a list of valid IPv4 address separated by commas'
-    }
+const validateDNSServers = (addresses: ?string): ?string => {
+  if (!addresses) return
+  const split = splitDNSAddresses(addresses)
+  for (let address of split) {
+    if (address && !isIp.v4(address)) return 'Must be a list of valid IPv4 address separated by commas'
   }
-]
+}
 const normalizeDNSServers = text => typeof text === 'string' ? text.replace(/\s+/g, '') : text
 
 export type Props = {
@@ -144,7 +143,7 @@ class NetworkSettingsForm extends React.Component<Props> {
               <DHCPFields
                 key="dhcp"
                 formControlClass={classes.formControl}
-                config={data ? data.state : null}
+                config={data && data.state && data.state.dhcpEnabled ? data.state : null}
               />
             ) : (
               <StaticFields
@@ -194,36 +193,40 @@ const DHCPFields = ({formControlClass, config}: ModeFieldsProps & {config: ?Netw
         Settings received from DHCP server:
       </Typography>
       <TextField
+        readOnly
         name="ipAddress"
+        value={config ? config.ipAddress : null}
         label="IP Address"
         type="text"
-        inputProps={{readOnly: true}}
-        value={config ? config.ipAddress : null}
         className={formControlClass}
+        InputLabelProps={{shrink: true}}
       />
       <TextField
+        readOnly
         name="netmask"
+        value={config ? config.netmask : null}
         label="Subnet Mask"
         type="text"
-        inputProps={{readOnly: true}}
-        value={config ? config.netmask : null}
         className={formControlClass}
+        InputLabelProps={{shrink: true}}
       />
       <TextField
+        readOnly
         name="gateway"
+        value={config ? config.gateway : null}
         label="Router"
         type="text"
-        inputProps={{readOnly: true}}
-        value={config ? config.gateway : null}
         className={formControlClass}
+        InputLabelProps={{shrink: true}}
       />
       <TextField
+        readOnly
         name="dnsServers"
+        value={config ? config.dnsServers : null}
         label="DNS Servers"
         type="text"
-        inputProps={{readOnly: true}}
-        value={config ? config.dnsServers : null}
         className={formControlClass}
+        InputLabelProps={{shrink: true}}
       />
     </div>
   )
@@ -235,25 +238,25 @@ const StaticFields = ({formControlClass}: ModeFieldsProps): React.Node => (
       name="ipAddress"
       label="IP Address"
       type="text"
-      component={TextField}
+      component={FormTextField}
       className={formControlClass}
       normalizeOnBlur={trim}
-      validate={validateIPAddress}
+      validate={validateRequiredIPAddress}
     />
     <Field
       name="netmask"
       label="Subnet Mask"
       type="text"
-      component={TextField}
+      component={FormTextField}
       className={formControlClass}
       normalizeOnBlur={trim}
-      validate={validateIPAddress}
+      validate={validateRequiredIPAddress}
     />
     <Field
       name="gateway"
       label="Router"
       type="text"
-      component={TextField}
+      component={FormTextField}
       className={formControlClass}
       normalizeOnBlur={trim}
       validate={validateIPAddress}
@@ -262,7 +265,7 @@ const StaticFields = ({formControlClass}: ModeFieldsProps): React.Node => (
       name="dnsServers"
       label="DNS Servers"
       type="text"
-      component={TextField}
+      component={FormTextField}
       className={formControlClass}
       normalizeOnBlur={normalizeDNSServers}
       validate={validateDNSServers}

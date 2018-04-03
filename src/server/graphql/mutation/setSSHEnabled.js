@@ -11,7 +11,8 @@ export default function createSetSSHEnabled(): graphql.GraphQLFieldConfig<any, G
         type: new graphql.GraphQLNonNull(graphql.GraphQLBoolean)
       },
     },
-    resolve: async (obj: any, {sshEnabled}: {sshEnabled: boolean}, {sshHandler}: GraphQLContext): Promise<any> => {
+    resolve: async (obj: any, {sshEnabled}: {sshEnabled: boolean}, {userId, sshHandler}: GraphQLContext): Promise<any> => {
+      if (!userId) throw new Error('You must be logged in to turn SSH on or off')
       await sshHandler.setSSHEnabled(!!sshEnabled)
       return await sshHandler.isSSHEnabled()
     }
