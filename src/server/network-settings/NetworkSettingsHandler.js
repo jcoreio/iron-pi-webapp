@@ -2,7 +2,7 @@
 
 import assert from 'assert'
 import child_process from 'child_process'
-import fs from 'fs'
+import {readFile, writeFile} from 'fs-extra'
 
 import promisify from 'es6-promisify'
 import logger from 'log4jcore'
@@ -13,8 +13,6 @@ import type {NetworkSettings} from '../../universal/network-settings/NetworkSett
 const log = logger('NetworkSettingsHandler')
 
 const exec = promisify(child_process.exec)
-const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
 
 const INTERFACES_FILE = '/etc/network/interfaces'
 
