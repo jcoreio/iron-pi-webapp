@@ -26,7 +26,8 @@ import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler, {EVENT_CONNECT_BUTTON_PRESSED, EVENT_NETWORK_MODE_COMMAND} from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
-import SSHHandler from './device/SSHHandler'
+import type {SSHHandler} from './device/SSHHandler'
+import DeviceSSHHandler from './device/SSHHandler'
 import DeviceNetworkSettingsHandler from './network-settings/NetworkSettingsHandler'
 import type {NetworkSettingsHandler} from './network-settings/NetworkSettingsHandler'
 
@@ -58,6 +59,7 @@ import {
 import {IN_CONNECT_MODE_CHANGED} from './device/ConnectModeHandler'
 import type {MappingProblem} from '../universal/data-router/PluginConfigTypes'
 import TestNetworkSettingsHandler from './network-settings/TestNetworkSettingsHandler'
+import TestSSHHandler from './device/TestSSHHandler'
 
 const log = logger('Server')
 
@@ -108,7 +110,9 @@ export default class Server {
     this._graphqlDataPlugin = new GraphQLDataPlugin(this.pubsub)
     this.connectModeHandler = new ConnectModeHandler()
     this.accessCodeHandler = new AccessCodeHandler()
-    this.sshHandler = new SSHHandler()
+    this.sshHandler = process.env.BABEL_ENV === 'test'
+      ? new TestSSHHandler()
+      : new DeviceSSHHandler()
     this.networkSettingsHandler = process.env.BABEL_ENV === 'test'
       ? new TestNetworkSettingsHandler()
       : new DeviceNetworkSettingsHandler()

@@ -5,7 +5,13 @@ import promisify from 'es6-promisify'
 
 const exec = promisify(child_process.exec)
 
-export default class SSHHandler {
+export interface SSHHandler {
+  isSSHEnabled(): Promise<boolean>;
+  setSSHEnabled(enabled: boolean): Promise<void>;
+  setSystemPassword(password: string): Promise<void>;
+}
+
+export default class DeviceSSHHandler implements SSHHandler {
   async isSSHEnabled(): Promise<boolean> {
     try {
       const status = await exec('systemctl is-enabled ssh')
@@ -29,3 +35,4 @@ export default class SSHHandler {
     await exec(`echo "pi:${password}" | chpasswd`)
   }
 }
+
