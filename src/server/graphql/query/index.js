@@ -92,6 +92,10 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       type: new graphql.GraphQLNonNull(GraphQLNetworkSettings),
       resolve: (obj: any, args: any, {networkSettingsHandler}: GraphQLContext) => networkSettingsHandler.getNetworkSettings(),
     },
+    NetworkState: {
+      type: new graphql.GraphQLNonNull(GraphQLNetworkSettings),
+      resolve: (obj: any, args: any, {networkSettingsHandler}: GraphQLContext) => networkSettingsHandler.getNetworkState(),
+    },
   }
 
   for (let name in models) {

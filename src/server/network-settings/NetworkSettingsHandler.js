@@ -1,15 +1,20 @@
 // @flow
 
-import {exec} from 'child_process'
-import {readFile, writeFile} from 'fs'
+import assert from 'assert'
+import child_process from 'child_process'
+import fs from 'fs'
 
 import promisify from 'es6-promisify'
 import logger from 'log4jcore'
 
-const log = logger('NetworkSettingsHandler')
-
 import {validateNetworkSettingsForHandler} from '../../universal/network-settings/NetworkSettingsCommon'
 import type {NetworkSettings} from '../../universal/network-settings/NetworkSettingsCommon'
+
+const log = logger('NetworkSettingsHandler')
+
+const exec = promisify(child_process.exec)
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
 
 const INTERFACES_FILE = '/etc/network/interfaces'
 
@@ -81,6 +86,12 @@ export default class NetworkSettingsHandler {
     applyNetworkSettings(settings)
   }
 
+  /**
+   * @returns {Promise<NetworkSettings>} Configured network settings, including DHCP
+   * enabled, and IP address / netmask / DNS server info that is used in static IP
+   * address mode. This method returns the settings stored in /etc/network/interfaces,
+   * while getNetworkState() returns the results of `ifconfig` and similar commands.
+   */
   async getNetworkSettings(): Promise<NetworkSettings> {
     const lines = await this._readNetworkSettingsFile()
     const networkSettingsLoc = locateNetworkSettings(lines)
@@ -157,17 +168,55 @@ export default class NetworkSettingsHandler {
       ...linesAfter
     ]
 
-    await promisify(writeFile)(INTERFACES_FILE, lines.join('\n'))
+    await writeFile(INTERFACES_FILE, lines.join('\n'))
   }
 
   async _readNetworkSettingsFile(): Promise<Array<string>> {
-    const strFile = await promisify(readFile)(INTERFACES_FILE, 'utf8')
+    const strFile = await readFile(INTERFACES_FILE, 'utf8')
     return strFile.split('\n')
   }
 
   async _restartNetworking(): Promise<void> {
     log.info('restarting eth0...')
-    await promisify(exec)('ifdown eth0 && ifup eth0')
+    await exec('ifdown eth0 && ifup eth0')
+  }
+
+  /**
+   * @returns {Promise<NetworkSettings>} Current network state, including IP address,
+   * netmask, and DNS server addresses. If the unit is in DHCP mode, this allows the
+   * UI to fetch the current network settings assigned by the DHCP server. If the unit
+   * is in static IP address mode, this function will still fetch the current network settings,
+   * which should match the ones returned by getNetworkSettings().
+   */
+  async getNetworkState(): Promise<NetworkSettings> {
+    // Reading /etc/network/interfaces seems to be the best way to determine if
+    // DHCP is enabled.
+    const {dhcpEnabled} = await this.getNetworkSettings()
+    let ipAddress = ''
+    let netmask = ''
+    try {
+      const result = parseIfconfig(await exec('ifconfig'))
+      ipAddress = result.ipAddress
+      netmask = result.netmask
+    } catch (err) {
+      log.error(`could not fetch IP address: ${err.stack}`)
+    }
+
+    let gateway = ''
+    try {
+      gateway = parseGateway(await exec('ip route'))
+    } catch (err) {
+      log.error(`could not fetch gateway: ${err.stack}`)
+    }
+
+    let dnsServers = ''
+    try {
+      dnsServers = parseDNSServers(await readFile('/etc/resolv.conf', 'utf8'))
+    } catch (err) {
+      log.error(`could not fetch DNS servers: ${err.stack}`)
+    }
+
+    return {dhcpEnabled, ipAddress, netmask, gateway, dnsServers}
   }
 }
 
@@ -177,4 +226,37 @@ function locateNetworkSettings(lines: Array<string>): Array<number> {
   const nextWhitespaceOffset = lines.slice(begin).findIndex(line => !line.trim().length)
   const end = nextWhitespaceOffset < 0 ? lines.length : begin + nextWhitespaceOffset
   return [ begin, end ]
+}
+
+function parseIfconfig(result: string): {ipAddress: string, netmask: string} {
+  const lines = result.split('\n')
+  const eth0LineIndex = lines.findIndex(line => line.startsWith('eth0'))
+  assert(eth0LineIndex >= 0, 'line beginning with "eth0" not found')
+  const addrLine = lines[eth0LineIndex + 1] // the `inet <ip address> line is immediately after the eth0: line
+  assert(addrLine, 'ip address line is missing')
+  const addrLineParts = addrLine.trim().split(' ').filter(part => !!part)
+  assert('inet' === addrLineParts[0] && 'netmask' === addrLineParts[2], 'unexpected inet line content:' + JSON.stringify(addrLineParts))
+  const ipAddress = addrLineParts[1]
+  const netmask = addrLineParts[3]
+  assert(ipAddress, 'ip address value is missing')
+  assert(netmask, 'netmask value is missing')
+  return {ipAddress, netmask}
+}
+
+function parseGateway(result: string): string {
+  const lines = result.split('\n')
+  const gatewayLine = lines[0]
+  assert(gatewayLine, 'gateway value is missing')
+  assert(gatewayLine.startsWith('default via'), `unexpected format for gateway value line: ${gatewayLine}`)
+  const gatewayLineParts = gatewayLine.split(' ')
+  const gateway = gatewayLineParts[2]
+  assert(gateway, `missing gateway: ${gatewayLine}`)
+  return gateway
+}
+
+function parseDNSServers(result: string): string {
+  const lines = result.split('\n')
+  const nameserverLines = lines.filter(line => line.startsWith('nameserver'))
+  const nameservers = nameserverLines.map(line => line.split(' ')[1]).filter(server => !!server)
+  return nameservers.join(' ')
 }
