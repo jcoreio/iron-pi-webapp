@@ -16,6 +16,9 @@ const MSG_ID_STATUS = 1
 
 const STATUS_MSG_LEN = 20
 
+const COUNTS_TO_VOLTS_SLOPE = 0.0001570585
+const COUNTS_TO_VOLTS_OFFSET = -0.124076182
+
 export type DeviceStatus = {
   deviceId: number,
   digitalInputLevels: Array<boolean>,
@@ -177,11 +180,12 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
       digitalInputEventCounts[digitalInputIdx] = msg.readUInt8(pos++)
     }
 
-    const analogInputLevels: Array<number> = []
+    const analogInputCounts: Array<number> = []
     for (let analogInputIdx = 0; analogInputIdx < deviceInfo.numAnalogInputs; ++analogInputIdx) {
-      analogInputLevels[analogInputIdx] = msg.readUInt16LE(pos)
+      analogInputCounts[analogInputIdx] = msg.readUInt16LE(pos)
       pos += 2
     }
+    const analogInputLevels = analogInputCounts.map(counts => Math.max(0, (counts * COUNTS_TO_VOLTS_SLOPE) + COUNTS_TO_VOLTS_OFFSET))
 
     const deviceStatus: DeviceStatus = {
       deviceId: deviceInfo.deviceId,
