@@ -8,16 +8,10 @@ import type {MappingProblem} from '../data-router/PluginConfigTypes'
 
 type Routes = Array<React.Element<Route>> | React.Element<Route>
 
-type SidebarSectionProps = {
-  onSectionExpandedChange: (section: string, expanded: boolean) => any,
-}
-type SidebarSection = React.ComponentType<SidebarSectionProps>
-type SidebarSections = SidebarSection | Array<SidebarSection>
-
 export type Feature = BaseFeature<State, Action> & {
   +navbarRoutes?: Routes,
   +bodyRoutes?: Routes,
-  +sidebarSections?: SidebarSections,
+  +sidebarSections?: any,
   +sidebarSectionsOrder?: number,
   +getMappingProblemURL?: {[pluginType: string]: (problem: MappingProblem) => ?string},
 }

@@ -9,7 +9,7 @@ import Typography from 'material-ui/Typography'
 import {required} from 'redux-form-validators'
 import isIp from 'is-ip'
 
-import type {Theme} from '../../theme'
+import type {Theme} from '../../theme/index'
 import ViewPanel from '../../components/ViewPanel'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
