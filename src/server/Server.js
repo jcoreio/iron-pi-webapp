@@ -86,7 +86,6 @@ export default class Server {
   _spiHubClient = new SPIHubClient({binary: true})
   _ledHandler = new LEDHandler(this._spiHubClient)
   _spiHandler = new SPIHandler(this._spiHubClient)
-  _networkSettingsHandler = new NetworkSettingsHandler()
 
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
@@ -94,6 +93,7 @@ export default class Server {
   connectModeHandler: ConnectModeHandler
   accessCodeHandler: AccessCodeHandler
   sshHandler: SSHHandler
+  networkSettingsHandler: NetworkSettingsHandler
   graphqlSchema: ?GraphQLSchema
   pubsub: PubSubEngine
   express: ?$Application
@@ -107,6 +107,7 @@ export default class Server {
     this.connectModeHandler = new ConnectModeHandler()
     this.accessCodeHandler = new AccessCodeHandler()
     this.sshHandler = new SSHHandler()
+    this.networkSettingsHandler = new NetworkSettingsHandler()
     this._spiHubClient.on('devicesChanged', (message: Object) => {
       this.accessCodeHandler.setAccessCode(message.accessCode)
       this._ledHandler.sendLEDState(LED_MESSAGE_OK, LED_MESSAGE_OK)
@@ -118,7 +119,7 @@ export default class Server {
     })
     this.connectModeHandler.on(EVENT_NETWORK_MODE_COMMAND, (mode: 'static' | 'dhcp') => {
       log.info(`setting networking mode to ${mode}`)
-      this._networkSettingsHandler.setMode(mode)
+      this.networkSettingsHandler.setMode(mode)
       this._ledHandler.sendLEDState('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE, LED_MESSAGE_OK)
     })
     this.connectModeHandler.on(EVENT_CONNECT_BUTTON_PRESSED, () => {
@@ -189,7 +190,7 @@ export default class Server {
         features,
       })
 
-      const {connectModeHandler, accessCodeHandler, sshHandler} = this
+      const {connectModeHandler, accessCodeHandler, sshHandler, networkSettingsHandler} = this
       connectModeHandler.on(IN_CONNECT_MODE_CHANGED, this._handleConnectModeChanged)
       User.afterUpdate((user: User) => {
         if (user.username === 'root' && user.changed('passwordHasBeenSet')) {
@@ -238,6 +239,7 @@ export default class Server {
         metadataHandler,
         connectModeHandler,
         accessCodeHandler,
+        networkSettingsHandler,
         sshHandler,
         pubsub,
       }

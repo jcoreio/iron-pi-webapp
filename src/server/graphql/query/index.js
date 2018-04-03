@@ -12,6 +12,7 @@ import models from '../../models'
 import createTagValue from './TagValue'
 import MetadataItem from '../types/MetadataItem'
 import GraphQLMappingProblem from '../types/MappingProblem'
+import GraphQLNetworkSettings from '../types/NetworkSettings'
 
 type Options = {
   sequelize: Sequelize,
@@ -86,6 +87,10 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
     numMappingProblems: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
       resolve: (obj: any, args: any, {dataRouter}: GraphQLContext) => dataRouter.mappingProblems().length,
+    },
+    NetworkSettings: {
+      type: new graphql.GraphQLNonNull(GraphQLNetworkSettings),
+      resolve: (obj: any, args: any, {networkSettingsHandler}: GraphQLContext) => networkSettingsHandler.getNetworkSettings(),
     },
   }
 
