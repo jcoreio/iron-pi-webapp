@@ -124,7 +124,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         id,
         name: baseName,
       }
-      if (tag && !isRemoteControlChannel(config)) {
+      if (tag && channel.config.mode !== 'DISABLED' && !isRemoteControlChannel(config)) {
         mapping.tagFromPlugin = tag
       }
       const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)

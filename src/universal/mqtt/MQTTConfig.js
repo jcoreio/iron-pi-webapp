@@ -125,7 +125,10 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
       name: item.channel.name || `From MQTT ${item.index + 1}`,
       tagFromPlugin: item.channel.internalTag,
     }))
-  const mqttValueChannelsMappings: Array<DataPluginMapping> = (config.channelsFromMQTT || [])
+  const mqttValueChannelsMappings: Array<DataPluginMapping> = [
+    ...config.channelsFromMQTT || [],
+    ...config.channelsToMQTT || [],
+  ]
     // Save the array index before we filter
     .map((channel: MQTTChannelConfig, index: number) => ({
       channel,

@@ -32,7 +32,7 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
       ]
     })
     for (let instance of configInstances) {
-      this._createDataPlugin(instance)
+      this._createDataPlugin(instance, {emitChange: false})
     }
   }
 
@@ -58,17 +58,18 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
 
   _emitPluginsChanged = debounce(() => this.emit(FEATURE_EVENT_DATA_PLUGINS_CHANGE), 1000)
 
-  _destroyDataPlugin(id: number) {
+  _destroyDataPlugin(id: number, {emitChange}: {emitChange?: boolean} = {}) {
     const plugin = this._dataPlugins.get(id)
     if (plugin) {
       plugin.removeAllListeners()
       plugin.destroy()
     }
     this._dataPlugins.delete(id)
+    if (emitChange !== false) this._emitPluginsChanged()
   }
 
-  _createDataPlugin(instance: SequelizeMQTTConfig) {
-    this._destroyDataPlugin(instance.id)
+  _createDataPlugin(instance: SequelizeMQTTConfig, {emitChange}: {emitChange?: boolean} = {}) {
+    this._destroyDataPlugin(instance.id, {emitChange: false})
     const resources = this._resources
     try {
       const plugin = new MQTTPlugin({
@@ -78,6 +79,7 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
       plugin.on(MQTT_PLUGIN_EVENT_STATE_CHANGE, this._handleMQTTPluginStateChange)
       this._dataPlugins.set(instance.id, plugin)
       this._handleMQTTPluginStateChange(plugin.getState())
+      if (emitChange !== false) this._emitPluginsChanged()
     } catch (error) {
       console.error(error.stack) // eslint-disable-line no-console
     }
@@ -89,15 +91,12 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
 
   _handleMQTTConfigCreated = (instance: SequelizeMQTTConfig) => {
     this._createDataPlugin(instance)
-    this._emitPluginsChanged()
   }
   _handleMQTTConfigUpdated = (instance: SequelizeMQTTConfig) => {
     this._createDataPlugin(instance)
-    this._emitPluginsChanged()
   }
   _handleMQTTConfigDestroyed = (instance: SequelizeMQTTConfig) => {
     this._destroyDataPlugin(instance.id)
-    this._emitPluginsChanged()
   }
 
   _handleMQTTChannelConfigChange = async (instance: SequelizeMQTTChannelConfig) => {
