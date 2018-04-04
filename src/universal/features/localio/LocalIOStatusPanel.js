@@ -113,18 +113,7 @@ const channelStateStyles = (theme: Theme) => {
     root: {
       padding: `${theme.spacing.unit}px ${theme.spacing.unit * 3}px`,
     },
-    container: {
-      transition: 'background-color ease 0.1s',
-      '&:nth-child(odd)': {
-        backgroundColor: theme.palette.grey[200],
-      },
-      '&:nth-child(even)': {
-        backgroundColor: theme.palette.grey[50],
-      },
-      '&:hover': {
-        backgroundColor: theme.palette.grey[300],
-      },
-    },
+    container: theme.stripedList,
     valueBlock: {
       height: theme.spacing.unit * 3,
       width: 122,

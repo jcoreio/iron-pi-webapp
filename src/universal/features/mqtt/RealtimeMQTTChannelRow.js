@@ -52,7 +52,7 @@ type Props = ChannelRowProps & {
 }
 
 const DELETE_ICON_RATIO = 0.07
-const ARROW_RATIO = 0.1
+const ARROW_RATIO = 0.07
 const CHANNEL_RATIO = (1 - DELETE_ICON_RATIO - ARROW_RATIO) * 0.3
 const VALUE_RATIO = (1 - DELETE_ICON_RATIO - ARROW_RATIO) * 0.2
 

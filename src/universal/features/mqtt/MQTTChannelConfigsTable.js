@@ -29,7 +29,7 @@ export const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction
   <Arrow
     direction={direction}
     shaftWidth={arrow.shaftWidth}
-    shaftLength={arrow.shaftLength}
+    shaftLength={arrow.shaftLength / 2}
     headWidth={arrow.headWidth}
     headLength={arrow.headLength}
     fill={arrow.fill}
@@ -37,7 +37,7 @@ export const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction
   />
 ))
 
-const styles = ({spacing, palette, typography}: Theme) => ({
+const styles = ({spacing, palette, typography, stripedList}: Theme) => ({
   root: {
     display: 'block',
     paddingTop: 0,
@@ -56,10 +56,11 @@ const styles = ({spacing, palette, typography}: Theme) => ({
       width: 225,
     },
     '& td:last-child, & th:last-child': {
-      paddingRight: 0,
+      paddingRight: spacing.unit / 2,
     },
     '& td': {
       fontSize: typography.pxToRem(18),
+      border: 'none',
     },
     '& > thead > tr:first-child': {
       height: spacing.unit * 4,
@@ -73,6 +74,7 @@ const styles = ({spacing, palette, typography}: Theme) => ({
     },
     '& > tbody > tr': {
       height: spacing.unit * 4,
+      ...stripedList,
     },
   },
   title: {
