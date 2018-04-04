@@ -9,6 +9,19 @@ import gql from 'graphql-tag'
 import MQTTConfigForm from './MQTTConfigForm'
 import {setIn} from '@jcoreio/mutate/lib/index'
 import type {MQTTPluginState} from '../../types/MQTTPluginState'
+import MQTTChannelStateSubscriptions from './MQTTChannelStateSubscriptions'
+import type {MQTTConfig} from './MQTTConfigForm'
+
+const MQTTConfigFormContainer = (props: Props) => {
+  return (
+    <React.Fragment>
+      {props.data && props.data.Config && (
+        <MQTTChannelStateSubscriptions config={props.data.Config} />
+      )}
+      <MQTTConfigForm {...props} />
+    </React.Fragment>
+  )
+}
 
 const configFields = `
   id
@@ -109,6 +122,9 @@ type Props = {
   id?: number,
   match: Match,
   history: RouterHistory,
+  data: {
+    Config: MQTTConfig,
+  },
 }
 
 export default compose(
@@ -166,5 +182,5 @@ export default compose(
   reduxForm({
     form: 'MQTTConfig',
   })
-)(MQTTConfigForm)
+)(MQTTConfigFormContainer)
 

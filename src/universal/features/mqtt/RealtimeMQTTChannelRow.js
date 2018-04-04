@@ -5,12 +5,10 @@ import {
   TableCell,
   TableRow,
 } from 'material-ui/Table'
-import * as tags from '../../mqtt/MQTTTags'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../../theme'
 
 import MetadataValueBlock from '../../components/MetadataValueBlock'
-import TagStateSubscription from '../../apollo/TagStateSubscription'
 
 import type {ChannelRowProps} from './MQTTChannelConfigsTable'
 import {DeleteButtonCell, FlowArrow} from './MQTTChannelConfigsTable'
@@ -71,8 +69,6 @@ export default class RealtimeMQTTChannelRow extends React.Component<Props> {
     } = this.props
     return (
       <TableRow className={classes.channelRow} onClick={onClick}>
-        <TagStateSubscription tag={internalTag} />
-        <TagStateSubscription tag={tags.mqttValue(mqttTag)} />
         <TableCell width={CHANNEL_WIDTH}>
           {internalTag}
         </TableCell>

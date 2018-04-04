@@ -16,6 +16,7 @@ import Spinner from '../../components/Spinner'
 import MQTTPluginStateSubscription from './MQTTPluginStateSubscription'
 import type {MQTTConfig} from './MQTTConfigForm'
 import MQTTStatusPanel from './MQTTStatusPanel'
+import MQTTChannelStateSubscriptions from './MQTTChannelStateSubscriptions'
 
 export const MQTT_SECTION = 'mqtt'
 
@@ -60,6 +61,7 @@ class MQTTStatusPanelsContainer extends React.Component<Props> {
           history={history}
         />
         <MQTTPluginStateSubscription id={config.id} />
+        <MQTTChannelStateSubscriptions config={config} />
       </React.Fragment>
     ))
   }

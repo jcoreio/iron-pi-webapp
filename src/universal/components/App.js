@@ -25,7 +25,6 @@ import MappingProblemsViewContainer from './MappingProblems/MappingProblemsViewC
 import MappingProblemsSnackbarContainer from './MappingProblems/MappingProblemsSnackbarContainer'
 import StatusView from './StatusView'
 import RedirectWithStatus from '../react-router/RedirectWithStatus'
-import TagStateSubscription from '../apollo/TagStateSubscription'
 
 const About = () => (
   <div>
@@ -118,7 +117,6 @@ class App extends React.Component<Props> {
     const {classes, sidebarOpen, renderMode, location, history} = this.props
     return (
       <div className={classes.frame}>
-        <TagStateSubscription tag="channel1" />
         <SidebarContainer />
         <MappingProblemsSnackbarContainer />
         <div
