@@ -63,6 +63,13 @@ export type Theme = {
       primary: string,
       secondary: string,
     },
+    action: {
+      active: string,
+      hover: string,
+      selected: string,
+      disabled: string,
+      disabledBackground: string,
+    },
     divider: string,
     grey: Palette,
     primary: Palette,
@@ -130,6 +137,12 @@ export type Theme = {
       fontWeight: number,
       textAlign: string,
       lineHeight: string,
+    },
+  },
+  viewPanel: {
+    title: {
+      color: string,
+      fontSize: string,
     },
   },
   calibration: {
@@ -297,8 +310,11 @@ const theme: Theme = createMuiTheme({
       main: '#5dba54',
     },
     text: {
-      primary: 'rgba(0, 0, 0, 0.5)',
-      secondary: 'rgba(0, 0, 0, 0.41)',
+      primary: 'rgba(0, 0, 0, 0.8)',
+      // includes form labels
+      secondary: 'rgba(0, 0, 0, 0.55)',
+      disabled: 'rgba(0, 0, 0, 0.38)',
+      hint: 'rgba(0, 0, 0, 0.38)',
     },
     input: {
       inputText: 'rgba(0, 0, 0, 0.61)',
@@ -306,7 +322,20 @@ const theme: Theme = createMuiTheme({
       helperText: 'rgba(0, 0, 0, 0.5)',
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
-    infoIcon: '#eee',
+    // The colors used to style the action elements.
+    action: {
+      // The color of an active action like an icon button.
+      active: 'rgba(0, 0, 0, 0.64)',
+      // The color of an hovered action.
+      hover: 'rgba(0, 0, 0, 0.08)',
+      // The color of a selected action.
+      selected: 'rgba(0, 0, 0, 0.14)',
+      // The color of a disabled action.
+      disabled: 'rgba(0, 0, 0, 0.26)',
+      // The background color of a disabled action.
+      disabledBackground: 'rgba(0, 0, 0, 0.12)',
+    },
+    infoIcon: '#ccc',
   },
   typography: {
     fontFamily: '"Helvetica Neue", "Helvetica", "Arial", sans-serif',
@@ -414,6 +443,18 @@ theme.statusPanel = {
     marginBottom: theme.spacing.unit * 2,
   },
 }
+theme.viewPanel = {
+  title: {
+    color: theme.palette.text.primary,
+    fontSize: theme.typography.pxToRem(20),
+    paddingBottom: theme.spacing.unit / 2,
+    borderBottom: {
+      width: 2,
+      style: 'solid',
+      color: theme.palette.text.primary,
+    },
+  },
+}
 theme.channelState = {
   on: theme.palette.success.main,
   off: '#d8d8d8',
@@ -456,9 +497,6 @@ theme.overrides = {
     },
     raised: {
       color: theme.palette.text.primary,
-    },
-    raisedAccent: {
-      color: 'rgba(0, 0, 0, 0.61)',
     },
   },
   MuiInput: {

@@ -86,6 +86,7 @@ const styles = ({spacing, palette, typography, stripedList}: Theme) => ({
   columnHeaders: {
     height: spacing.unit * 3,
     '& th': {
+      color: palette.text.secondary,
       fontSize: typography.pxToRem(15),
     },
   },
@@ -112,6 +113,9 @@ const styles = ({spacing, palette, typography, stripedList}: Theme) => ({
   },
   valueBlock: {
     width: '100%',
+  },
+  infoIcon: {
+    color: palette.infoIcon,
   },
 })
 
@@ -203,7 +207,7 @@ class MQTTChannelConfigsTable extends React.Component<Props> {
             </TableCell>
             <TableCell>
               <Tooltip title="TODO" placement="bottom">
-                <InfoIcon />
+                <InfoIcon className={classes.infoIcon} />
               </Tooltip>
             </TableCell>
             <TableCell colSpan={2} />

@@ -29,16 +29,9 @@ const ViewPanel = ({classes, className, ...props}: Props): React.Node => (
 
 export default withStyles(styles, {withTheme: true})(ViewPanel)
 
-const viewPanelTitleStyles = ({palette, spacing, typography}: Theme) => ({
+const viewPanelTitleStyles = ({palette, spacing, typography, viewPanel}: Theme) => ({
   root: {
-    fontSize: typography.pxToRem(20),
-    color: palette.text.primary,
-    paddingBottom: spacing.unit / 2,
-    borderBottom: {
-      width: 2,
-      style: 'solid',
-      color: palette.text.primary,
-    },
+    ...viewPanel.title,
   }
 })
 
