@@ -3,10 +3,12 @@
 import * as React from 'react'
 import {Link} from 'react-router-dom'
 import {withStyles} from 'material-ui/styles'
+import Typography from 'material-ui/Typography'
 import List, {ListItem, ListItemText, ListItemSecondaryAction} from 'material-ui/List'
 
 import type {Theme} from '../../theme'
 import StatusPanel, {StatusPanelTitle} from '../../components/StatusPanel'
+import Spinner from '../../components/Spinner'
 
 import type {ChannelMode} from '../../localio/LocalIOChannel'
 
@@ -46,17 +48,28 @@ export type Props = {
   classes: Classes,
 }
 
-const LocalIOStatusPanel = ({expanded, channels, onExpandedChange, loading, classes}: Props): React.Node => (
-  <StatusPanel>
-    <StatusPanelTitle>Local I/O</StatusPanelTitle>
-    <List>
-      <ChannelStateHeader />
-      {channels && channels.map((channel: Channel) =>
-        <ChannelStateItem channel={channel} key={channel.id} />
-      )}
-    </List>
-  </StatusPanel>
-)
+const LocalIOStatusPanel = ({expanded, channels, onExpandedChange, loading, classes}: Props): React.Node => {
+  if (loading) {
+    return (
+      <StatusPanel>
+        <Typography variant="subheading">
+          <Spinner /> Loading Local IO Status...
+        </Typography>
+      </StatusPanel>
+    )
+  }
+  return (
+    <StatusPanel>
+      <StatusPanelTitle>Local I/O</StatusPanelTitle>
+      <List>
+        <ChannelStateHeader />
+        {channels && channels.map((channel: Channel) =>
+          <ChannelStateItem channel={channel} key={channel.id} />
+        )}
+      </List>
+    </StatusPanel>
+  )
+}
 
 export default withStyles(styles, {withTheme: true})(LocalIOStatusPanel)
 
