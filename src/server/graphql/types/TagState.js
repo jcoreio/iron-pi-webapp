@@ -9,9 +9,6 @@ const TagState = new graphql.GraphQLObjectType({
     tag: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
     },
-    t: {
-      type: new graphql.GraphQLNonNull(graphql.GraphQLInt),
-    },
     v: {
       type: JSONType,
     },

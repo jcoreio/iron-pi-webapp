@@ -1,8 +1,6 @@
 // @flow
 
 import * as React from 'react'
-import {graphql} from 'react-apollo'
-import gql from 'graphql-tag'
 import {
   TableCell,
   TableRow,
@@ -61,16 +59,15 @@ const ARROW_WIDTH = `${ARROW_RATIO * 100}%`
 const CHANNEL_WIDTH = `${CHANNEL_RATIO * 100}%`
 const VALUE_WIDTH = `${VALUE_RATIO * 100}%`
 
-class RealtimeChannelRow extends React.Component<Props> {
+export default class RealtimeMQTTChannelRow extends React.Component<Props> {
   render(): React.Node {
     const {
-      channel: {mqttTag, internalTag},
+      channel: {mqttTag, internalTag, mqttTagState, internalTagState, metadataItem},
       arrowDirection,
       classes,
       onClick,
       onConfirmDelete,
       showDeleteButton,
-      data: {systemState, mqttState, metadataItem},
     } = this.props
     return (
       <TableRow className={classes.channelRow} onClick={onClick}>
@@ -81,7 +78,7 @@ class RealtimeChannelRow extends React.Component<Props> {
         </TableCell>
         <TableCell width={VALUE_WIDTH}>
           <SmallValueBlock
-            value={systemState ? systemState.v : null}
+            value={internalTagState ? internalTagState.v : null}
             metadataItem={metadataItem}
             showUnits={false}
           />
@@ -94,7 +91,7 @@ class RealtimeChannelRow extends React.Component<Props> {
         </TableCell>
         <TableCell width={VALUE_WIDTH}>
           <SmallValueBlock
-            value={mqttState ? mqttState.v : null}
+            value={mqttTagState ? mqttTagState.v : null}
             metadataItem={metadataItem}
             showUnits={false}
           />
@@ -110,31 +107,4 @@ class RealtimeChannelRow extends React.Component<Props> {
     )
   }
 }
-
-const realtimeChannelRowQuery = gql(`query realtimeData($internalTag: String!, $mqttTag: String!) {
-  systemState: TagState(tag: $internalTag) {
-    tag
-    v
-  }
-  mqttState: TagState(tag: $mqttTag) {
-    tag
-    v
-  }
-  metadataItem: MetadataItem(tag: $internalTag) {
-    tag
-    dataType
-    isDigital
-    displayPrecision
-  }
-}`)
-
-const RealtimeChannelRowContainer = graphql(realtimeChannelRowQuery, {
-  options: ({channel: {internalTag, mqttTag}}) => ({
-    errorPolicy: 'all',
-    fetchPolicy: 'network-only',
-    variables: {internalTag, mqttTag: tags.mqttValue(mqttTag)},
-  }),
-})(RealtimeChannelRow)
-
-export default RealtimeChannelRowContainer
 

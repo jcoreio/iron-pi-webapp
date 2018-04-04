@@ -1,5 +1,6 @@
 // @flow
 
+import * as React from 'react'
 import {reduxForm} from 'redux-form'
 import type {Match, RouterHistory} from 'react-router-dom'
 import {compose} from 'redux'
@@ -25,19 +26,36 @@ const configFields = `
 `
 
 const configQuery = gql(`
-fragment ChannelFields on MQTTChannelConfig {
+fragment MQTTConfigFormTagStateFields on TagState {
+  tag
+  v
+}
+fragment MQTTConfigFormChannelFields on MQTTChannelConfig {
   id
   mqttTag
   internalTag
+  mqttTagState {
+    ...MQTTConfigFormTagStateFields
+  }
+  internalTagState {
+    ...MQTTConfigFormTagStateFields
+  }
+  metadataItem {
+    tag
+    dataType
+    isDigital
+    units
+    displayPrecision
+  }
 }
 query MQTTConfig($id: Int!) {
   Config: MQTTConfig(id: $id) {
     ${configFields}
     channelsFromMQTT {
-      ...ChannelFields
+      ...MQTTConfigFormChannelFields
     }
     channelsToMQTT {
-      ...ChannelFields
+      ...MQTTConfigFormChannelFields
     }
     state {
       id

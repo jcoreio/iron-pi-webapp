@@ -66,20 +66,37 @@ class MQTTStatusPanelsContainer extends React.Component<Props> {
 }
 
 const configQuery = gql(`
-fragment ChannelFields on MQTTChannelConfig {
+fragment MQTTStatusPanelsTagStateFields on TagState {
+  tag
+  v
+}
+fragment MQTTStatusPanelsChannelFields on MQTTChannelConfig {
   id
   mqttTag
   internalTag
+  mqttTagState {
+    ...MQTTStatusPanelsTagStateFields
+  }
+  internalTagState {
+    ...MQTTStatusPanelsTagStateFields
+  }
+  metadataItem {
+    tag
+    dataType
+    isDigital
+    units
+    displayPrecision
+  }
 }
 query {
   MQTTConfigs {
     id
     name
     channelsFromMQTT {
-      ...ChannelFields
+      ...MQTTStatusPanelsChannelFields
     }
     channelsToMQTT {
-      ...ChannelFields
+      ...MQTTStatusPanelsChannelFields
     }
     state {
       id

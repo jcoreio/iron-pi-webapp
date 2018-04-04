@@ -22,6 +22,8 @@ import type {Theme} from '../../theme/index'
 import AddIcon from '../../components/icons/AddRectangle'
 import ConfirmDeletePopover from '../../components/ConfirmDeletePopover'
 import {mqttChannelConfigForm} from './routePaths'
+import type {TagState} from '../../types/TagState'
+import type {MetadataItem} from '../../types/MetadataItem'
 
 type Direction = 'TO_MQTT' | 'FROM_MQTT'
 
@@ -120,8 +122,10 @@ export type Channel = {
   id: number,
   mqttTag: string,
   internalTag: string,
+  metadataItem?: ?MetadataItem,
+  mqttTagState?: ?TagState,
+  internalTagState?: ?TagState,
 }
-
 
 export type ChannelRowProps = {
   +channel: Channel,

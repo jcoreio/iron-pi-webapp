@@ -12,6 +12,7 @@ import type {
   PluginAndMappingsInfo, TimeValuePair} from './PluginTypes'
 import type {MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
+import type {TagState} from '../../universal/types/TagState'
 
 const log = logger('DataRouter')
 
@@ -70,6 +71,10 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   publicTags(): Array<string> { return this._publicTags }
   mappingProblems(): $ReadOnlyArray<MappingProblem> { return this._mappingProblems }
 
+  getTagState(tag: string): ?TagState {
+    const entry = this._tagMap[tag]
+    return entry ? {tag, t: entry.t, v: entry.v} : null
+  }
   getTagValue(tag: string): any {
     const entry = this._tagMap[tag]
     return entry ? entry.v : null

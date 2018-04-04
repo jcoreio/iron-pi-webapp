@@ -18,10 +18,7 @@ export default function createTagState(): GraphQLFieldConfig<any, GraphQLContext
     resolve(doc: any, {tag}: {tag: string}, context: GraphQLContext): any {
       const {userId, dataRouter} = context
       if (!userId) throw new graphql.GraphQLError('You must be logged in to subscribe to tag states')
-      const state = dataRouter.tagMap()[tag]
-      if (!state) return null
-      const {t, v} = state
-      return {tag, t, v}
+      return dataRouter.getTagState(tag)
     }
   }
 }

@@ -8,6 +8,8 @@ import {associationFields} from '@jcoreio/graphql-sequelize-extra/lib/index'
 import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import MetadataItem from '../../../graphql/types/MetadataItem'
 import JSONType from 'graphql-type-json'
+import TagState from '../../../graphql/types/TagState'
+import * as tags from '../../../../universal/mqtt/MQTTTags'
 
 type Options = {
   getType: (model: Class<Model<any>>) => graphql.GraphQLOutputType,
@@ -32,6 +34,20 @@ export default function createMQTTChannelConfig({
         resolve: ({internalTag}: MQTTChannelConfig, args: any, {metadataHandler}: GraphQLContext) => {
           const item = metadataHandler.getTagMetadata(internalTag)
           return item ? {...item, tag: internalTag} : null
+        },
+      },
+      internalTagState: {
+        type: TagState,
+        description: "the current state for this channel's internalTag",
+        resolve: ({internalTag}: MQTTChannelConfig, args: any, {dataRouter}: GraphQLContext) => {
+          return dataRouter.getTagState(internalTag)
+        },
+      },
+      mqttTagState: {
+        type: TagState,
+        description: "the current state for this channel's mqttTag",
+        resolve: ({mqttTag}: MQTTChannelConfig, args: any, {dataRouter}: GraphQLContext) => {
+          return dataRouter.getTagState(tags.mqttValue(mqttTag))
         },
       },
       systemValue: {
