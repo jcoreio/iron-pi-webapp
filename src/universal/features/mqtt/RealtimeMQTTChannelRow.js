@@ -64,7 +64,7 @@ const VALUE_WIDTH = `${VALUE_RATIO * 100}%`
 class RealtimeChannelRow extends React.Component<Props> {
   render(): React.Node {
     const {
-      channel: {id, mqttTag, internalTag},
+      channel: {mqttTag, internalTag},
       arrowDirection,
       classes,
       onClick,
@@ -75,7 +75,7 @@ class RealtimeChannelRow extends React.Component<Props> {
     return (
       <TableRow className={classes.channelRow} onClick={onClick}>
         <TagStateSubscription tag={internalTag} />
-        <TagStateSubscription tag={tags.mqttValue(id)} />
+        <TagStateSubscription tag={tags.mqttValue(mqttTag)} />
         <TableCell width={CHANNEL_WIDTH}>
           {internalTag}
         </TableCell>
@@ -129,10 +129,10 @@ const realtimeChannelRowQuery = gql(`query realtimeData($internalTag: String!, $
 }`)
 
 const RealtimeChannelRowContainer = graphql(realtimeChannelRowQuery, {
-  options: ({channel: {id, internalTag}}) => ({
+  options: ({channel: {internalTag, mqttTag}}) => ({
     errorPolicy: 'all',
     fetchPolicy: 'network-only',
-    variables: {internalTag, mqttTag: tags.mqttValue(id)},
+    variables: {internalTag, mqttTag: tags.mqttValue(mqttTag)},
   }),
 })(RealtimeChannelRow)
 

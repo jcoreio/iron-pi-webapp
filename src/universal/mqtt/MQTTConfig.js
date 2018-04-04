@@ -137,7 +137,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
       id: `${item.channel.id}/mqttValue`,
       name: `${item.channel.id} MQTT Value`,
-      tagFromPlugin: tags.mqttValue(item.channel.id),
+      tagFromPlugin: tags.mqttValue(item.channel.mqttTag),
     }))
   return [...channelsToMQTTMappings, ...channelsFromMQTTMappings, ...mqttValueChannelsMappings]
 }

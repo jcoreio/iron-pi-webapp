@@ -198,9 +198,18 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _publishData(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
     const {channelsToSend, time} = args
+    const changedValues: ValuesMap = {}
+    for (let state: ToMQTTChannelState of channelsToSend) {
+      changedValues[tags.mqttValue(state.config.mqttTag)] = state.curValue
+    }
     const data: Array<DataValueToMQTT> = this._generateDataMessage(channelsToSend)
     this._protocolHandler.publishData({data, time})
     this._lastTxTime = args.time
+
+    if (Object.keys(changedValues).length) {
+      log.info(`Publishing data to MQTT: ${JSON.stringify(changedValues)}`)
+      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
+    }
   }
 
   _getChannelsToSend(opts: {sendAll?: ?boolean} = {}): Array<ToMQTTChannelState> {
@@ -344,7 +353,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       const value = valuesByMQTTTag[mqttTag]
       const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[mqttTag]
       if (channelConfig) {
-        changedValues[tags.mqttValue(channelConfig.id)] = value
+        changedValues[tags.mqttValue(mqttTag)] = value
         const {internalTag} = channelConfig
         if ('string' === channelConfig.dataType) {
           if (value == null || typeof value === 'string') {
