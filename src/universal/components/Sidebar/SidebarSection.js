@@ -23,7 +23,7 @@ const SidebarSection = (
         onClick={onHeaderClick}
         {...headerProps || {}}
       />
-      <Collapse component="li" in={expanded} timeout="auto" unmountOnExit>
+      <Collapse component="div" in={expanded} timeout="auto" unmountOnExit>
         <List component="div" disablePadding data-test-title={title} data-component="List">
           {children}
         </List>

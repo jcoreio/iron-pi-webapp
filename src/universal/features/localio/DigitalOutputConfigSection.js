@@ -45,15 +45,15 @@ const PolarityAndSafeStateInfo = ({controlMode}: {controlMode?: ControlMode}) =>
     }
     <p>
       <strong>Polarity</strong>: Optionally inverts the logic level of the input:
-      <ul>
-        <li>
-          <strong>Normal</strong>: Logic level is not inverted
-        </li>
-        <li>
-          <strong>Reversed</strong>: Logic level is inverted
-        </li>
-      </ul>
     </p>
+    <ul>
+      <li>
+        <strong>Normal</strong>: Logic level is not inverted
+      </li>
+      <li>
+        <strong>Reversed</strong>: Logic level is inverted
+      </li>
+    </ul>
   </span>
 )
 
