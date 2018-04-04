@@ -5,6 +5,7 @@ import * as graphql from 'graphql'
 
 import type {GraphQLFeature} from '../GraphQLFeature'
 import createTagValue from './TagValue'
+import createTagState from './TagState'
 import createRootPasswordHasBeenSet from './rootPasswordHasBeenSet'
 import createInConnectMode from './inConnectMode'
 import createMappingProblems from './MappingProblems'
@@ -20,6 +21,7 @@ export default function createSubscription(options: Options): graphql.GraphQLObj
   const {sequelize, types, features} = options
   const subscriptionFields = {
     TagValue: createTagValue(),
+    TagState: createTagState(),
     MappingProblems: createMappingProblems(),
     numMappingProblems: createNumMappingProblems(),
     rootPasswordHasBeenSet: createRootPasswordHasBeenSet(),

@@ -33,6 +33,8 @@ import {ProtocolsArray, getProtocolDisplayText} from '../../mqtt/MQTTConfig'
 import ButtonGroupField from '../../components/ButtonGroupField'
 import {formValues} from 'redux-form'
 
+import RealtimeMQTTChannelRow from './RealtimeMQTTChannelRow'
+
 const styles = ({spacing}: Theme) => ({
   form: {
     margin: '0 auto',
@@ -76,7 +78,7 @@ const trim = (value: ?string): ?string => typeof value === 'string' ? value.trim
 
 type Protocol = 'SPARKPLUG' | 'TEXT_JSON'
 
-type MQTTConfig = {
+export type MQTTConfig = {
   id: number,
   name?: ?string,
 
@@ -399,6 +401,7 @@ class MQTTConfigForm extends React.Component<Props> {
                 match={match}
                 history={history}
                 onDeleteChannel={this.handleDeleteChannel}
+                ChannelRow={RealtimeMQTTChannelRow}
               />
             </ViewPanel>
             <ViewPanel>
@@ -408,6 +411,7 @@ class MQTTConfigForm extends React.Component<Props> {
                 match={match}
                 history={history}
                 onDeleteChannel={this.handleDeleteChannel}
+                ChannelRow={RealtimeMQTTChannelRow}
               />
             </ViewPanel>
           </React.Fragment>

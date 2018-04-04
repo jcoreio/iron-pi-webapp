@@ -7,6 +7,7 @@ export type ValuesFromMQTTMap = {
 }
 
 export type ChannelFromMQTTConfig = {
+  id: number,
   internalTag: string,
   dataType: 'number' | 'string',
   multiplier?: ?number,

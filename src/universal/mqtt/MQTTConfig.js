@@ -4,6 +4,7 @@
 import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
 import type {MetadataItem} from '../types/MetadataItem'
+import * as tags from './MQTTTags'
 
 type DataPluginMapping = {
   id: number | string, // Unique ID, e.g. "local1"
@@ -108,7 +109,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
       id: item.channel.id,
       name: item.channel.name || `To MQTT ${item.index + 1}`,
-      tagsToPlugin: [item.channel.internalTag]
+      tagsToPlugin: [item.channel.internalTag],
     }))
   const channelsFromMQTTMappings: Array<DataPluginMapping> = (config.channelsFromMQTT || [])
     // Save the array index before we filter
@@ -122,7 +123,21 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
       id: item.channel.id,
       name: item.channel.name || `From MQTT ${item.index + 1}`,
-      tagFromPlugin: item.channel.internalTag
+      tagFromPlugin: item.channel.internalTag,
     }))
-  return [...channelsToMQTTMappings, ...channelsFromMQTTMappings]
+  const mqttValueChannelsMappings: Array<DataPluginMapping> = (config.channelsFromMQTT || [])
+    // Save the array index before we filter
+    .map((channel: MQTTChannelConfig, index: number) => ({
+      channel,
+      index
+    }))
+    // Filter to only enabled
+    .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
+    // Convert to DataPluginMappings
+    .map((item: {channel: MQTTChannelConfig, index: number}) => ({
+      id: `${item.channel.id}/mqttValue`,
+      name: `${item.channel.id} MQTT Value`,
+      tagFromPlugin: tags.mqttValue(item.channel.id),
+    }))
+  return [...channelsToMQTTMappings, ...channelsFromMQTTMappings, ...mqttValueChannelsMappings]
 }

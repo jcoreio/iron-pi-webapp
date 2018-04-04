@@ -13,7 +13,7 @@ import InputMetadataItem from './InputMetadataItem'
 import createUser from './User'
 
 import TimeValuePair from './TimeValuePair'
-import TaggedTimeValuePair from './TaggedTimeValuePair'
+import TagState from './TagState'
 import defaultInputType from './defaultInputType'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import defaultCreateType from './defaultCreateType'
@@ -48,7 +48,7 @@ export default function createTypes(options: Options): {
 
   const types: {[name: string]: GraphQLOutputType} = {
     TimeValuePair,
-    TaggedTimeValuePair,
+    TagState,
     TagDataType,
     MetadataItem,
     MappingLocationInfo,

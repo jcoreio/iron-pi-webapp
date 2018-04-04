@@ -28,6 +28,12 @@ const MQTTChannelConfigFormContainer = featureLoader({
   getComponent: feature => (feature: any).MQTTChannelConfigFormContainer,
 })
 
+const MQTTStatusPanelsContainer = featureLoader({
+  featureId: FEATURE_ID,
+  featureName: FEATURE_NAME,
+  getComponent: feature => (feature: any).MQTTStatusPanelsContainer,
+})
+
 const MQTTFeature: Feature = {
   navbarRoutes: [
     <Route
@@ -119,6 +125,10 @@ const MQTTFeature: Feature = {
     MQTTSidebarSectionContainer,
   ],
   sidebarSectionsOrder: 400,
+  statusPanels: [
+    MQTTStatusPanelsContainer,
+  ],
+  statusPanelsOrder: 400,
   getMappingProblemURL: {
     mqtt: ({mappingLocation: {pluginId, channelId}}: MappingProblem): ?string => {
       return mqttChannelConfigForm(mqttConfigForm((pluginId: any)), (channelId: any))
@@ -129,6 +139,7 @@ const MQTTFeature: Feature = {
       ...MQTTFeature,
       MQTTConfigFormContainer: (await import('./MQTTConfigFormContainer')).default,
       MQTTChannelConfigFormContainer: (await import('./MQTTChannelConfigFormContainer')).default,
+      MQTTStatusPanelsContainer: (await import('./MQTTStatusPanelsContainer')).default,
     }
   }
 }

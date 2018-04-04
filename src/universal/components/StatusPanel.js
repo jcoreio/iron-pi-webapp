@@ -14,6 +14,11 @@ type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<
 const statusPanelTitleStyles = ({statusPanel}: Theme) => ({
   root: {
     ...statusPanel.title,
+    display: 'block',
+    textDecoration: 'none',
+    '&:hover, &:focus, &:active, &:visited': {
+      textDecoration: 'none',
+    },
   },
 })
 
@@ -23,11 +28,15 @@ export type StatusPanelTitleProps = {
   classes: StatusPanelTitleClasses,
   className?: string,
   children?: React.Node,
+  component?: React.ComponentType<any>,
 }
 
-const StyledStatusPanelTitle = ({classes, className, ...props}: StatusPanelTitleProps) => (
-  <div className={classNames(classes.root, className)} {...props} data-component="StatusPanelTitle" />
-)
+const StyledStatusPanelTitle = ({classes, className, component, theme, ...props}: StatusPanelTitleProps) => {
+  const Comp = component || 'div'
+  return (
+    <Comp className={classNames(classes.root, className)} {...props} data-component="StatusPanelTitle" />
+  )
+}
 
 export const StatusPanelTitle = withStyles(statusPanelTitleStyles, {withTheme: true})(StyledStatusPanelTitle)
 

@@ -82,9 +82,11 @@ const ValueBlock = ({classes, className, title, value, precision, units, theme, 
     <span className={classes.value} data-test-name="value">
       {formatValue(value, precision)}
     </span>
-    <span className={classes.units} data-test-name="units">
-      {units}
-    </span>
+    {units &&
+      <span className={classes.units} data-test-name="units">
+        {units}
+      </span>
+    }
     {error && <FormHelperText className={classes.helperText} data-component="FormHelperText">{error}</FormHelperText>}
   </div>
 )

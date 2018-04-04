@@ -25,7 +25,7 @@ import {mqttChannelConfigForm} from './routePaths'
 
 type Direction = 'TO_MQTT' | 'FROM_MQTT'
 
-const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction, ...props}: Object) => (
+export const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction, ...props}: Object) => (
   <Arrow
     direction={direction}
     shaftWidth={arrow.shaftWidth}
@@ -42,6 +42,9 @@ const styles = ({spacing, palette, typography}: Theme) => ({
     display: 'block',
     paddingTop: 0,
   },
+  alignRight: {
+    textAlign: 'right',
+  },
   table: {
     borderCollapse: 'separate',
     '& td, & th': {
@@ -54,7 +57,6 @@ const styles = ({spacing, palette, typography}: Theme) => ({
     },
     '& td:last-child, & th:last-child': {
       paddingRight: 0,
-      textAlign: 'right',
     },
     '& td': {
       fontSize: typography.pxToRem(18),
@@ -104,6 +106,9 @@ const styles = ({spacing, palette, typography}: Theme) => ({
       backgroundColor: palette.divider,
     },
   },
+  valueBlock: {
+    width: '100%',
+  },
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -115,6 +120,44 @@ export type Channel = {
   internalTag: string,
 }
 
+
+export type ChannelRowProps = {
+  +channel: Channel,
+  +classes: Classes,
+  +onClick?: (e: MouseEvent) => any,
+  +onConfirmDelete?: () => any,
+  +arrowDirection: 'left' | 'right',
+  +showDeleteButton?: boolean,
+}
+
+const BasicChannelRow = ({
+  channel: {id, mqttTag, internalTag},
+  arrowDirection,
+  classes,
+  onClick,
+  onConfirmDelete,
+  showDeleteButton,
+}: ChannelRowProps): React.Node => (
+  <TableRow className={classes.channelRow} onClick={onClick}>
+    <TableCell colSpan={2}>
+      {internalTag}
+    </TableCell>
+    <TableCell className={classes.arrowCell}>
+      <FlowArrow direction={arrowDirection} />
+    </TableCell>
+    <TableCell colSpan={2}>
+      {mqttTag}
+    </TableCell>
+    {showDeleteButton !== false && (
+      <DeleteButtonCell
+        classes={classes}
+        onConfirmDelete={onConfirmDelete}
+      />
+    )}
+  </TableRow>
+)
+
+
 export type Props = {
   classes: Classes,
   channels: Array<Channel>,
@@ -122,28 +165,34 @@ export type Props = {
   history: RouterHistory,
   direction: Direction,
   onDeleteChannel: (id: number) => any,
+  ChannelRow: React.ComponentType<$ReadOnly<ChannelRowProps>>,
+  showEditButtons: boolean,
 }
 
 export type DefaultProps = {
+  showEditButtons: boolean,
   onDeleteChannel: (id: number) => any,
+  ChannelRow: React.ComponentType<$ReadOnly<ChannelRowProps>>,
 }
 
-class CalibrationTable extends React.Component<Props> {
+class MQTTChannelConfigsTable extends React.Component<Props> {
   static defaultProps: DefaultProps = {
+    showEditButtons: true,
     onDeleteChannel() {},
+    ChannelRow: BasicChannelRow,
   }
   handleChannelClick = (id: number) => {
     const {match, history} = this.props
     history.push(mqttChannelConfigForm(match.url, id))
   }
   render(): ?React.Node {
-    const {classes, channels, direction, onDeleteChannel, match} = this.props
+    const {classes, channels, direction, onDeleteChannel, match, ChannelRow, showEditButtons} = this.props
     const arrowDirection = direction === 'TO_MQTT' ? 'right' : 'left'
     return (
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell className={classes.title}>
+            <TableCell colSpan={2} className={classes.title}>
               Channels {direction === 'TO_MQTT' ? 'To' : 'From'} MQTT
             </TableCell>
             <TableCell>
@@ -151,60 +200,39 @@ class CalibrationTable extends React.Component<Props> {
                 <InfoIcon />
               </Tooltip>
             </TableCell>
-            <TableCell />
-            <TableCell>
-              <IconButton
-                className={classes.addButton}
-                component={Link}
-                to={mqttChannelConfigForm(match.url, (`create/${direction === 'TO_MQTT' ? 'to' : 'from'}`: any))}
-              >
-                <Icon><AddIcon /></Icon>
-              </IconButton>
-            </TableCell>
+            <TableCell colSpan={2} />
+            {showEditButtons && (
+              <TableCell className={classes.alignRight}>
+                <IconButton
+                  className={classes.addButton}
+                  component={Link}
+                  to={mqttChannelConfigForm(match.url, (`create/${direction === 'TO_MQTT' ? 'to' : 'from'}`: any))}
+                >
+                  <Icon><AddIcon /></Icon>
+                </IconButton>
+              </TableCell>
+            )}
           </TableRow>
           <TableRow className={classes.columnHeaders}>
-            <TableCell>
+            <TableCell colSpan={3}>
               System Tag
             </TableCell>
-            <TableCell />
-            <TableCell>
+            <TableCell colSpan={showEditButtons ? 3 : 2}>
               MQTT Tag
             </TableCell>
-            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
-          {channels.map(({id, mqttTag, internalTag}: Channel, index: number) => (
-            <TableRow key={index} className={classes.channelRow} onClick={() => this.handleChannelClick(id)}>
-              <TableCell>
-                {internalTag}
-              </TableCell>
-              <TableCell className={classes.arrowCell}>
-                <FlowArrow direction={arrowDirection} />
-              </TableCell>
-              <TableCell>
-                {mqttTag}
-              </TableCell>
-              <TableCell onClick={e => e.stopPropagation()}>
-                <ConfirmDeletePopover
-                  onConfirmDelete={() => onDeleteChannel(id)}
-                  anchorOrigin={{
-                    vertical: 'center',
-                    horizontal: 'left',
-                  }}
-                  transformOrigin={{
-                    vertical: 'center',
-                    horizontal: 'right',
-                  }}
-                >
-                  {({bind}) => (
-                    <IconButton className={classes.deleteButton} {...bind}>
-                      <Icon><DeleteIcon /></Icon>
-                    </IconButton>
-                  )}
-                </ConfirmDeletePopover>
-              </TableCell>
-            </TableRow>
+          {channels.map((channel: Channel, index: number) => (
+            <ChannelRow
+              key={index}
+              channel={channel}
+              classes={classes}
+              onClick={() => this.handleChannelClick(channel.id)}
+              onConfirmDelete={() => onDeleteChannel(channel.id)}
+              arrowDirection={arrowDirection}
+              showDeleteButton={showEditButtons}
+            />
           ))}
         </TableBody>
       </Table>
@@ -212,5 +240,33 @@ class CalibrationTable extends React.Component<Props> {
   }
 }
 
-export default withStyles(styles, {withTheme: true})(CalibrationTable)
+export type DeleteButtonCellProps = {
+  classes: Classes,
+  width?: number | string,
+  onConfirmDelete?: () => any,
+}
+
+export const DeleteButtonCell = ({classes, width, onConfirmDelete}: DeleteButtonCellProps): React.Node => (
+  <TableCell className={classes.alignRight} onClick={e => e.stopPropagation()} width={width}>
+    <ConfirmDeletePopover
+      onConfirmDelete={onConfirmDelete}
+      anchorOrigin={{
+        vertical: 'center',
+        horizontal: 'left',
+      }}
+      transformOrigin={{
+        vertical: 'center',
+        horizontal: 'right',
+      }}
+    >
+      {({bind}) => (
+        <IconButton className={classes.deleteButton} {...bind}>
+          <Icon><DeleteIcon /></Icon>
+        </IconButton>
+      )}
+    </ConfirmDeletePopover>
+  </TableCell>
+)
+
+export default withStyles(styles, {withTheme: true})(MQTTChannelConfigsTable)
 

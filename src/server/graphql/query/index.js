@@ -10,6 +10,7 @@ import User from '../../models/User'
 import type {GraphQLFeature} from '../GraphQLFeature'
 import models from '../../models'
 import createTagValue from './TagValue'
+import createTagState from './TagState'
 import MetadataItem from '../types/MetadataItem'
 import GraphQLMappingProblem from '../types/MappingProblem'
 import GraphQLNetworkSettings from '../types/NetworkSettings'
@@ -57,6 +58,7 @@ export default function createQuery(options: Options): graphql.GraphQLObjectType
       },
     },
     TagValue: createTagValue(),
+    TagState: createTagState(),
     MetadataItem: {
       type: MetadataItem,
       args: {

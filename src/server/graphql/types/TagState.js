@@ -3,8 +3,8 @@
 import * as graphql from 'graphql'
 import JSONType from 'graphql-type-json'
 
-const TaggedTimeValuePair = new graphql.GraphQLObjectType({
-  name: 'TaggedTimeValuePair',
+const TagState = new graphql.GraphQLObjectType({
+  name: 'TagState',
   fields: {
     tag: {
       type: new graphql.GraphQLNonNull(graphql.GraphQLString),
@@ -18,5 +18,5 @@ const TaggedTimeValuePair = new graphql.GraphQLObjectType({
   },
 })
 
-export default TaggedTimeValuePair
+export default TagState
 

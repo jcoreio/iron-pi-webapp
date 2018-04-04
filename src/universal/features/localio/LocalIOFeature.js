@@ -10,7 +10,6 @@ import {channelForm, calibrationForm, CALIBRATION} from './routePaths'
 import Title from '../../components/Navbar/Title'
 import ChevronRight from '../../components/Navbar/ChevronRight'
 import LocalIOSidebarSectionContainer from './LocalIOSidebarSectionContainer'
-import LocalIOStatusPanelContainer from './LocalIOStatusPanelContainer'
 import type {MappingProblem} from '../../data-router/PluginConfigTypes'
 
 export const FEATURE_ID = 'localio'
@@ -26,6 +25,12 @@ const CalibrationFormContainer = featureLoader({
   featureId: FEATURE_ID,
   featureName: FEATURE_NAME,
   getComponent: feature => (feature: any).CalibrationFormContainer,
+})
+
+const LocalIOStatusPanelContainer = featureLoader({
+  featureId: FEATURE_ID,
+  featureName: FEATURE_NAME,
+  getComponent: feature => (feature: any).LocalIOStatusPanelContainer,
 })
 
 const LocalIOFeature: Feature = {
@@ -93,6 +98,7 @@ const LocalIOFeature: Feature = {
       ...LocalIOFeature,
       ChannelFormContainer: (await import('./ChannelFormContainer')).default,
       CalibrationFormContainer: (await import('./CalibrationFormContainer')).default,
+      LocalIOStatusPanelContainer: (await import('./LocalIOStatusPanelContainer')).default,
     }
   }
 }

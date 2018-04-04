@@ -4,7 +4,7 @@ import type {PubSubEngine} from 'graphql-subscriptions'
 import type {DataPlugin, DataPluginMapping, CycleDoneEvent} from './PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 
-import {TAG_VALUE} from '../graphql/subscription/constants'
+import {TAG_VALUE, TAG_STATE} from '../graphql/subscription/constants'
 
 export default class GraphQLDataPlugin implements DataPlugin {
   _pubsub: PubSubEngine
@@ -28,8 +28,10 @@ export default class GraphQLDataPlugin implements DataPlugin {
   dispatchCycleDone(event: CycleDoneEvent) {
     const {changedTags, tagMap} = event
     for (let tag of changedTags) {
-      const {v} = tagMap[tag] || {v: null}
+      const state = tagMap[tag]
+      const {v} = state || {v: null}
       this._pubsub.publish(`${TAG_VALUE}/${tag}`, {TagValue: v})
+      this._pubsub.publish(`${TAG_STATE}/${tag}`, {TagState: state ? {...state, tag} : null})
     }
   }
 }

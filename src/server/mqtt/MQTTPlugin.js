@@ -22,6 +22,7 @@ import type { DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
+import * as tags from '../../universal/mqtt/MQTTTags'
 import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTPluginState} from '../../universal/types/MQTTPluginState'
 import {
@@ -267,10 +268,11 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
     this._channelsFromMQTTConfigs = {}
     for (let channelConfig: MQTTChannelConfig of (this._config.channelsFromMQTT || [])) {
-      const {enabled, internalTag, mqttTag, multiplier, offset, metadataItem} = channelConfig
+      const {id, enabled, internalTag, mqttTag, multiplier, offset, metadataItem} = channelConfig
       if (enabled && internalTag && mqttTag) {
         const dataType = (metadataItem && metadataItem.dataType === 'string') ? 'string' : 'number'
         this._channelsFromMQTTConfigs[channelConfig.mqttTag] = {
+          id,
           internalTag,
           dataType,
           multiplier,
@@ -336,11 +338,13 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _setValuesFromMQTT(valuesByMQTTTag: ValuesFromMQTTMap) {
+    let changedValues: ValuesMap = {}
     const valuesByInternalTag: ValuesMap = {}
     for (let mqttTag in valuesByMQTTTag) {
       const value = valuesByMQTTTag[mqttTag]
       const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[mqttTag]
       if (channelConfig) {
+        changedValues[tags.mqttValue(channelConfig.id)] = value
         const {internalTag} = channelConfig
         if ('string' === channelConfig.dataType) {
           if (value == null || typeof value === 'string') {
@@ -366,7 +370,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       }
     }
 
-    let changedValues: ValuesMap = {}
     for (let channelId in valuesByInternalTag) {
       const value = valuesByInternalTag[channelId]
       const changed = !this._valuesFromMQTT.hasOwnProperty(channelId) || !isEqual(this._valuesFromMQTT[channelId], value)
