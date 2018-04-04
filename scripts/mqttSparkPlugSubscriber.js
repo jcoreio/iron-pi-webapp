@@ -1,4 +1,16 @@
 #!/usr/bin/env node
+/*
+  Usage:
+   - Start the mqtt broker by running scripts/mqttBroker.
+   - Configure the Iron Pi MQTT plugin with the following setings:
+     - Server URL: mqtt://<host address>
+     - Group ID: 'My Group'
+     - Node ID: 'My Node'
+     - Channels To MQTT publishing MQTT tags, possibly `channel1`, `channel2`, etc.
+       Avoid publishing to `channel5` thru `channel8` if you're also using
+       mqttSparkPlugPublisher, which publishes to those tags.
+   - Run scripts/mqttSparkPlugSubscriber.js
+ */
 
 const sparkplug = require('sparkplug-client')
 

@@ -1,7 +1,15 @@
 #!/usr/bin/env node
-
-//import range from 'lodash.range'
-//import sparkplug from 'sparkplug-client'
+/*
+  Usage:
+   - Start the mqtt broker by running scripts/mqttBroker.
+   - Configure the Iron Pi MQTT plugin with the following setings:
+     - Server URL: mqtt://<host address>
+     - Group ID: 'My Group'
+     - Node ID: 'My Node'
+     - Channels From MQTT importing MQTT tags `channel5`, `channel6`,
+       `channel7`, and `channel8`.
+   - Run scripts/mqttSparkPlugPublisher.js
+ */
 
 const range = require('lodash.range')
 const sparkplug = require('sparkplug-client')
