@@ -32,6 +32,14 @@ const configFields = `
   configId
   internalTag
   mqttTag
+  mqttTagState {
+    tag
+    v
+  }
+  internalTagState {
+    tag
+    v
+  }
   enabled
   name
   multiplier
