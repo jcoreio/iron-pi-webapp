@@ -197,6 +197,9 @@ task('dev:client', ['node_modules'], async () => {
   await new Promise(() => {})
 }).description('launch webpack dev server')
 
+task('env:sim', ['node_modules'], () => require('defaultenv')(['env/sim.js']))
+  .description('set environment vars to run the value simulator')
+
 task('env:test', ['node_modules'], () => require('defaultenv')(['env/test.js']))
   .description('use default test environment vars for following tasks')
 
