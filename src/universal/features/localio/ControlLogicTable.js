@@ -46,6 +46,7 @@ const SetpointField = ({condition, classes, comparison}: SetpointFieldProps): Re
       component={TextField}
       className={classes.setpointField}
       validate={required()}
+      inputProps={{size: 10}}
     />
   )
 }
