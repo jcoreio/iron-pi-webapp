@@ -71,7 +71,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   _metadataToMQTT: Array<MetadataValueToMQTT> = []
 
   _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
-  _valuesFromMQTT: ValuesFromMQTTMap = {}
+  _tagsPublishedFromMQTT: Set<string> = new Set()
+
   _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
 
   /** Configs for enabled channels to MQTT, combined with channels that are being sent
@@ -144,10 +145,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       status: MQTT_PLUGIN_STATUS_ERROR,
     })
     const valuesToPublish: ValuesFromMQTTMap = {}
-    for (let tag in this._valuesFromMQTT) {
-      valuesToPublish[tag] = null
-    }
-    this._valuesFromMQTT = {}
+    this._tagsPublishedFromMQTT.forEach(tag => valuesToPublish[tag] = null)
+    this._tagsPublishedFromMQTT.clear()
     if (Object.keys(valuesToPublish).length)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
   }
@@ -347,17 +346,15 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _setValuesFromMQTT(valuesByMQTTTag: ValuesFromMQTTMap) {
-    let changedValues: ValuesMap = {}
-    const valuesByInternalTag: ValuesMap = {}
+    const valuesBySystemTag: ValuesMap = {}
     for (let mqttTag in valuesByMQTTTag) {
       const value = valuesByMQTTTag[mqttTag]
       const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[mqttTag]
       if (channelConfig) {
-        changedValues[tags.mqttValue(mqttTag)] = value
         const {internalTag} = channelConfig
         if ('string' === channelConfig.dataType) {
           if (value == null || typeof value === 'string') {
-            valuesByInternalTag[internalTag] = value
+            valuesBySystemTag[internalTag] = value
           } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
             log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
             this._channelsFromMQTTWarningsPrinted.add(internalTag)
@@ -370,7 +367,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
               valueWithSlopeOffset *= multiplier
             if (offset != null)
               valueWithSlopeOffset += offset
-            valuesByInternalTag[internalTag] = valueWithSlopeOffset
+            valuesBySystemTag[internalTag] = valueWithSlopeOffset
           } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
             log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
             this._channelsFromMQTTWarningsPrinted.add(internalTag)
@@ -379,17 +376,15 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       }
     }
 
-    for (let channelId in valuesByInternalTag) {
-      const value = valuesByInternalTag[channelId]
-      const changed = !this._valuesFromMQTT.hasOwnProperty(channelId) || !isEqual(this._valuesFromMQTT[channelId], value)
-      if (changed) {
-        changedValues[channelId] = value
-        this._valuesFromMQTT[channelId] = value
-      }
+    // Track which tags we're publishing, so that we can mark them unavailable when there's
+    // a disconnect or error
+    for (let tag in valuesBySystemTag) {
+      this._tagsPublishedFromMQTT.add(tag)
     }
-    if (Object.keys(changedValues).length) {
-      log.info(`Publishing data from MQTT: ${JSON.stringify(changedValues)}`)
-      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
+
+    if (Object.keys(valuesBySystemTag).length) {
+      log.info(`Publishing data from MQTT: ${JSON.stringify(valuesBySystemTag)}`)
+      this.emit(DATA_PLUGIN_EVENT_DATA, valuesBySystemTag)
     }
   }
 }
