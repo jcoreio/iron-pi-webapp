@@ -571,6 +571,16 @@ theme.overrides = {
       transform: 'translate(0, 1.5px)',
     },
   },
+  MuiTooltip: {
+    tooltip: {
+      [theme.breakpoints.down('xs')]: {
+        fontSize: theme.typography.pxToRem(12),
+      },
+      [theme.breakpoints.up('sm')]: {
+        fontSize: theme.typography.pxToRem(14),
+      }
+    },
+  },
 }
 
 export default theme
