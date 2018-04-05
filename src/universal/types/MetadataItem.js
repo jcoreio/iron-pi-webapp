@@ -36,7 +36,7 @@ export type NumericMetadataItem = {
   name: string,
   dataType: 'number',
   isDigital?: false,
-  units: ?string,
+  units?: ?string,
   min: number,
   max: number,
   rounding?: ?number,

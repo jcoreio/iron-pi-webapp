@@ -63,7 +63,7 @@ export function getControlModeDisplayText(mode: ControlMode): string {
 
 export type DigitalOutputConfig = {
   controlMode: ControlMode,
-  controlLogic?: ControlLogic,
+  controlLogic?: ?ControlLogic,
   reversePolarity: boolean,
   safeState: 0 | 1,
 }
@@ -79,7 +79,7 @@ export const LocalControlDigitalOutputConfigType = (reify: Type<LocalControlDigi
 
 export type DisabledConfig = {
   mode: 'DISABLED',
-  name?: string,
+  name?: ?string,
 }
 export const DisabledConfigType = (reify: Type<DisabledConfig>)
 
@@ -92,12 +92,12 @@ export const LocalIOChannelConfigTypes: {[mode: ChannelMode]: Type<any>} = {
 
 export type LocalIOChannelConfig = {|
   mode: ChannelMode,
-  name?: string,
-  calibration?: Calibration,
-  controlMode?: ControlMode,
-  controlLogic?: ControlLogic,
-  reversePolarity?: boolean,
-  safeState?: 0 | 1,
+  name?: ?string,
+  calibration?: ?Calibration,
+  controlMode?: ?ControlMode,
+  controlLogic?: ?ControlLogic,
+  reversePolarity?: ?boolean,
+  safeState?: ?(0 | 1),
 |}
 
 export const LocalIOChannelConfigType = (reify: Type<LocalIOChannelConfig>)
@@ -145,10 +145,10 @@ export function isOutputtingATag(config: LocalIOChannelConfig): boolean {
 export type LocalIOChannel = {
   id: number,
   tag: string,
-  metadataItem?: MetadataItem,
-  name?: string,
+  metadataItem?: ?MetadataItem,
+  name?: ?string,
   config: LocalIOChannelConfig,
-  state?: LocalIOChannelState,
+  state?: ?LocalIOChannelState,
 }
 
 export type AnalogInputState = {
