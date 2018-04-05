@@ -41,14 +41,19 @@ export type DigitalInputConfig = {
 }
 export const DigitalInputConfigType = (reify: Type<DigitalInputConfig>)
 
+export const CONTROL_MODE_OUTPUT_A_TAG = 'OUTPUT_A_TAG'
+export const CONTROL_MODE_CONDITION = 'CONDITION'
+export const CONTROL_MODE_FORCE_OFF = 'FORCE_OFF'
+export const CONTROL_MODE_FORCE_ON = 'FORCE_ON'
+
 export const ControlModes = {
-  FORCE_OFF: {displayText: 'Force Off'},
-  FORCE_ON: {displayText: 'Force On'},
-  LOCAL_CONTROL: {displayText: 'Condition'},
-  REMOTE_CONTROL: {displayText: 'Output Tag'},
+  [CONTROL_MODE_OUTPUT_A_TAG]: {displayText: 'Output a Tag'},
+  [CONTROL_MODE_CONDITION]: {displayText: 'Condition'},
+  [CONTROL_MODE_FORCE_OFF]: {displayText: 'Force Off'},
+  [CONTROL_MODE_FORCE_ON]: {displayText: 'Force On'},
 }
 
-export const ControlModesArray = Object.keys(ControlModes)
+export const ControlModesArray = [CONTROL_MODE_OUTPUT_A_TAG, CONTROL_MODE_CONDITION, CONTROL_MODE_FORCE_OFF, CONTROL_MODE_FORCE_ON]
 
 export type ControlMode = $Keys<typeof ControlModes>
 
@@ -65,7 +70,7 @@ export type DigitalOutputConfig = {
 export const DigitalOutputConfigType = (reify: Type<DigitalOutputConfig>)
 
 export type LocalControlDigitalOutputConfig = {
-  controlMode: 'LOCAL_CONTROL',
+  controlMode: 'CONDITION',
   controlLogic: NonEmptyControlLogic,
   reversePolarity: boolean,
   safeState: 0 | 1,
@@ -110,7 +115,7 @@ export function validateLocalIOChannelConfig(config: any): ?Validation {
   }
   case 'DIGITAL_OUTPUT': {
     const {controlMode, controlLogic} = config
-    if (controlMode === 'LOCAL_CONTROL') {
+    if (controlMode === CONTROL_MODE_CONDITION) {
       validation.errors.push(...validate(LocalControlDigitalOutputConfigType, config).errors)
       for (let i = 0; i < controlLogic.length; i++) {
         const {comparison, setpoint} = controlLogic[i]
@@ -133,8 +138,8 @@ export function assertChannelConfig(config: any) {
   }
 }
 
-export function isRemoteControlChannel(config: LocalIOChannelConfig): boolean {
-  return 'DIGITAL_OUTPUT' === config.mode && 'REMOTE_CONTROL' === config.controlMode
+export function isOutputtingATag(config: LocalIOChannelConfig): boolean {
+  return 'DIGITAL_OUTPUT' === config.mode && CONTROL_MODE_OUTPUT_A_TAG === config.controlMode
 }
 
 export type LocalIOChannel = {

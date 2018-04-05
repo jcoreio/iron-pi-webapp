@@ -6,7 +6,7 @@ import {Field, FieldArray, formValues} from 'redux-form'
 
 import ControlWithInfo from '../../components/ControlWithInfo'
 import ButtonGroupField from '../../components/ButtonGroupField'
-import {ControlModesArray, getControlModeDisplayText} from '../../localio/LocalIOChannel'
+import {ControlModesArray, getControlModeDisplayText, CONTROL_MODE_OUTPUT_A_TAG, CONTROL_MODE_CONDITION} from '../../localio/LocalIOChannel'
 import ControlLogicTable from './ControlLogicTable'
 import {required} from 'redux-form-validators'
 import type {ControlMode} from '../../localio/LocalIOChannel'
@@ -37,10 +37,10 @@ const controlModeInfo = (
 
 const PolarityAndSafeStateInfo = ({controlMode}: {controlMode?: ControlMode}) => (
   <span>
-    {controlMode === 'LOCAL_CONTROL' &&
+    {controlMode === CONTROL_MODE_CONDITION &&
       <p><strong>Safe State</strong>: State of the output when inputs of the control logic are unavailable</p>
     }
-    {controlMode === 'REMOTE_CONTROL' &&
+    {controlMode === CONTROL_MODE_OUTPUT_A_TAG &&
       <p><strong>Safe State</strong>: State of the output when the remote control connection is offline</p>
     }
     <p>
@@ -66,6 +66,7 @@ const DigitalOutputConfigSection = (
       <ControlWithInfo info={controlModeInfo} className={firstControlClass}>
         <Field
           name="config.controlMode"
+          label="Control Mode"
           component={ButtonGroupField}
           className={formControlClass}
           classes={{button: tallButtonClass}}
@@ -74,7 +75,7 @@ const DigitalOutputConfigSection = (
           validate={required()}
         />
       </ControlWithInfo>
-      <Collapse in={controlMode === 'LOCAL_CONTROL'} unmountOnExit>
+      <Collapse in={controlMode === CONTROL_MODE_CONDITION} unmountOnExit>
         <FieldArray
           name="config.controlLogic"
           component={ControlLogicTable}

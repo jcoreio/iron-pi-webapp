@@ -13,6 +13,7 @@ import {MuiThemeProvider} from 'material-ui/styles'
 import color from 'css-color-converter'
 
 import theme from '../../../theme'
+import {CONTROL_MODE_OUTPUT_A_TAG} from '../../../localio/LocalIOChannel'
 
 import ChannelStateIcon from '../ChannelStateIcon'
 import type {Channel} from '../ChannelStateIcon'
@@ -213,7 +214,7 @@ describe('ChannelStateIcon', () => {
           mode: 'DIGITAL_OUTPUT',
           reversePolarity: false,
           safeState: 0,
-          controlMode: 'REMOTE_CONTROL',
+          controlMode: CONTROL_MODE_OUTPUT_A_TAG,
           controlValue: 0,
           rawOutput: 0,
         },

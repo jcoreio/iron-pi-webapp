@@ -15,6 +15,7 @@ import superagent from 'superagent'
 import fetch from 'node-fetch'
 import gql from 'graphql-tag'
 import createSubscribeToChannelStates from '../src/universal/localio/apollo/createSubscribeToChannelStates'
+import {CONTROL_MODE_OUTPUT_A_TAG} from '../src/universal/localio/LocalIOChannel'
 import dataIdFromObject from '../src/universal/apollo/dataIdFromObject'
 
 type Options = {
@@ -118,7 +119,7 @@ class ValueSimulator {
         values.push({channelId, value: {rawDigitalInput: Math.random() > 0.5 ? 1 : 0}})
         break
       case 'DIGITAL_OUTPUT': {
-        if (state.controlMode === 'REMOTE_CONTROL') {
+        if (state.controlMode === CONTROL_MODE_OUTPUT_A_TAG) {
           values.push({channelId, value: {controlValue: Math.random() > 0.5 ? 1 : 0}})
         }
         break

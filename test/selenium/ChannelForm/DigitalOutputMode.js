@@ -9,6 +9,7 @@ import poll from '@jcoreio/poll'
 import navigateTo from '../util/navigateTo'
 import loginIfNecessary from '../util/loginIfNecessary'
 import graphql from '../util/graphql'
+import {CONTROL_MODE_OUTPUT_A_TAG, CONTROL_MODE_CONDITION} from '../../../src/universal/localio/LocalIOChannel'
 import type {LocalIOChannel} from '../../../src/universal/localio/LocalIOChannel'
 
 module.exports = () => {
@@ -28,7 +29,7 @@ module.exports = () => {
         mode: 'DIGITAL_OUTPUT',
         safeState: 0,
         reversePolarity: false,
-        controlMode: 'REMOTE_CONTROL',
+        controlMode: CONTROL_MODE_OUTPUT_A_TAG,
       },
     }
 
@@ -73,7 +74,7 @@ module.exports = () => {
       expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('DIGITAL_OUTPUT')
       expect(await browser.getAttribute('#channelForm [name="config.safeState"]', 'data-value')).to.equal('0')
       expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
-      expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('REMOTE_CONTROL')
+      expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal(CONTROL_MODE_OUTPUT_A_TAG)
       expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
       expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
     })
@@ -99,7 +100,7 @@ module.exports = () => {
               mode: 'DIGITAL_OUTPUT',
               safeState: 0,
               reversePolarity: false,
-              controlMode: 'REMOTE_CONTROL',
+              controlMode: CONTROL_MODE_OUTPUT_A_TAG,
             },
           },
           controlValue: 1,
@@ -223,7 +224,7 @@ module.exports = () => {
                 mode: 'DIGITAL_OUTPUT',
                 safeState: 0,
                 reversePolarity: false,
-                controlMode: 'LOCAL_CONTROL',
+                controlMode: CONTROL_MODE_CONDITION,
                 controlLogic: [
                   {tag: 'channel2', comparison: 'GTE', setpoint: 2.3},
                   {operator: 'OR', tag: 'channel3', comparison: 'EQ', setpoint: 1.5},
@@ -238,7 +239,7 @@ module.exports = () => {
         expect(await browser.getAttribute('#channelForm [name="config.mode"]', 'data-value')).to.equal('DIGITAL_OUTPUT')
         expect(await browser.getAttribute('#channelForm [name="config.safeState"]', 'data-value')).to.equal('0')
         expect(await browser.getAttribute('#channelForm [name="config.reversePolarity"]', 'data-value')).to.equal('false')
-        expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal('LOCAL_CONTROL')
+        expect(await browser.getAttribute('#channelForm [name="config.controlMode"]', 'data-value')).to.equal(CONTROL_MODE_CONDITION)
         expect(await browser.getValue('#channelForm [name="metadataItem.name"]')).to.equal('Channel 1')
         expect(await browser.getValue('#channelForm [name="metadataItem.tag"]')).to.equal('channel1')
         expect(await browser.getValue('#channelForm [name="config.controlLogic[0].tag"]')).to.equal('channel2')
@@ -271,7 +272,7 @@ module.exports = () => {
                 },
                 config: {
                   mode: 'DIGITAL_OUTPUT',
-                  controlMode: 'REMOTE_CONTROL',
+                  controlMode: CONTROL_MODE_OUTPUT_A_TAG,
                   reversePolarity: false,
                   safeState: 0,
                   controlLogic: [],
@@ -331,7 +332,7 @@ module.exports = () => {
         await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
-        await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
+        await browser.click('#channelForm [name="config.controlMode"] [value="CONDITION"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
         await browser.click('#channelForm [name="config.reversePolarity"] [value="false"]')
@@ -403,7 +404,7 @@ module.exports = () => {
                 },
                 config: {
                   mode: 'DIGITAL_OUTPUT',
-                  controlMode: 'REMOTE_CONTROL',
+                  controlMode: CONTROL_MODE_OUTPUT_A_TAG,
                   reversePolarity: false,
                   safeState: 0,
                   controlLogic: [],
@@ -463,7 +464,7 @@ module.exports = () => {
         await navigateTo(`/channel/${id + 1}`)
         await loginIfNecessary()
 
-        await browser.click('#channelForm [name="config.controlMode"] [value="LOCAL_CONTROL"]')
+        await browser.click('#channelForm [name="config.controlMode"] [value="CONDITION"]')
         await delay(500)
         await browser.click('#channelForm [name="config.safeState"] [value="0"]')
         await browser.click('#channelForm [name="config.reversePolarity"] [value="false"]')
@@ -519,7 +520,7 @@ module.exports = () => {
           mode: 'DIGITAL_OUTPUT',
           safeState: 0,
           reversePolarity: false,
-          controlMode: 'LOCAL_CONTROL',
+          controlMode: CONTROL_MODE_CONDITION,
           controlLogic: [
             {tag: 'channel2', comparison: 'EQ', setpoint: 23},
             {operator: 'OR', tag: 'channel3', comparison: 'LT', setpoint: 5.6},

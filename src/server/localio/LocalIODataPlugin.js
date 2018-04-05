@@ -17,7 +17,7 @@ import {CM_NUM_IO} from './SPIDevicesInfo'
 import isEqual from 'lodash.isequal'
 import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
-import {isRemoteControlChannel} from '../../universal/localio/LocalIOChannel'
+import {isOutputtingATag, CONTROL_MODE_OUTPUT_A_TAG, CONTROL_MODE_CONDITION, CONTROL_MODE_FORCE_OFF, CONTROL_MODE_FORCE_ON} from '../../universal/localio/LocalIOChannel'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
 import {SPIDevices} from './SPIDevicesInfo'
@@ -82,7 +82,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
           config: {
             mode: 'DIGITAL_INPUT',
             reversePolarity: false,
-            controlMode: 'REMOTE_CONTROL',
+            controlMode: CONTROL_MODE_OUTPUT_A_TAG,
             safeState: 0,
           },
         })
@@ -124,7 +124,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         id,
         name: baseName,
       }
-      if (tag && channel.config.mode !== 'DISABLED' && !isRemoteControlChannel(config)) {
+      if (tag && channel.config.mode !== 'DISABLED' && !isOutputtingATag(config)) {
         mapping.tagFromPlugin = tag
       }
       const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
@@ -174,12 +174,12 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         })
         tagsToPlugin.push(controlValueTag)
         switch (controlMode) {
-        case 'LOCAL_CONTROL': {
+        case CONTROL_MODE_CONDITION: {
           const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
           tagsToPlugin.push(...controlLogic.map(({tag}) => tag))
           break
         }
-        case 'REMOTE_CONTROL': {
+        case CONTROL_MODE_OUTPUT_A_TAG: {
           if (tag)
             tagsToPlugin.push(tag)
           break
@@ -198,7 +198,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     const channel = this._channels[id]
     if (!channel) throw new Error(`Unknown channel: ${id}`)
     const {config, tag} = channel
-    if (config.mode !== 'DIGITAL_OUTPUT' || config.controlMode !== 'REMOTE_CONTROL') {
+    if (config.mode !== CONTROL_MODE_OUTPUT_A_TAG || config.controlMode !== CONTROL_MODE_CONDITION) {
       throw new Error('Channel must be in remote control digital output mode to set its control value')
     }
     if (tag == null) {
@@ -296,22 +296,22 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         const {safeState}: DigitalOutputConfig = (config: any)
         let controlValue
         switch (config.controlMode) {
-        case 'FORCE_OFF': {
+        case CONTROL_MODE_FORCE_OFF: {
           controlValue = false
           break
         }
-        case 'FORCE_ON': {
+        case CONTROL_MODE_FORCE_ON: {
           controlValue = true
           break
         }
-        case 'LOCAL_CONTROL': {
+        case CONTROL_MODE_CONDITION: {
           const {controlLogic}: LocalControlDigitalOutputConfig = (config: any)
           controlValue = evaluateControlLogic(controlLogic, {
             getChannelValue: this._getTagValue,
           })
           break
         }
-        case 'REMOTE_CONTROL': {
+        case CONTROL_MODE_OUTPUT_A_TAG: {
           if (tag) {
             const tagValue = this._getTagValue(tag)
             controlValue = tagValue != null ? Boolean(tagValue) : null
@@ -322,7 +322,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         let systemValue = digitize(controlValue != null ? controlValue : Boolean(safeState))
         data[controlValueTag] = controlValue
         data[systemValueTag] = systemValue
-        if (tag && !isRemoteControlChannel(config))
+        if (tag && !isOutputtingATag(config))
           data[tag] = data[systemValueTag]
         break
       }
