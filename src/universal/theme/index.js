@@ -426,7 +426,7 @@ theme.sidebar = {
 }
 theme.navbar = {
   title: {
-    color: '#596269',
+    color: '#3f4349',
     textAlign: 'center',
     fontSize: theme.typography.pxToRem(26),
     fontWeight: 500,
