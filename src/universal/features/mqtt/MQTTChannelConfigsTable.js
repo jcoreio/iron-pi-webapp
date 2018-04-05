@@ -39,7 +39,7 @@ export const FlowArrow = withTheme()(({theme: {channelState: {arrow}}, direction
   />
 ))
 
-const styles = ({spacing, palette, typography, stripedList}: Theme) => ({
+const styles = ({spacing, palette, typography, stripedList, defaultTable}: Theme) => ({
   root: {
     display: 'block',
     paddingTop: 0,
@@ -48,46 +48,9 @@ const styles = ({spacing, palette, typography, stripedList}: Theme) => ({
     textAlign: 'right',
   },
   table: {
-    borderCollapse: 'separate',
-    '& td, & th': {
-      padding: spacing.unit / 2,
-      verticalAlign: 'middle',
-    },
-    '& td:first-child, & th:first-child': {
-      paddingLeft: 0,
-      width: 225,
-    },
+    ...defaultTable,
     '& td:last-child, & th:last-child': {
       paddingRight: spacing.unit / 2,
-    },
-    '& td': {
-      fontSize: typography.pxToRem(18),
-      border: 'none',
-    },
-    '& > thead > tr:first-child': {
-      height: spacing.unit * 4,
-      '& > th': {
-        borderBottom: {
-          width: 2,
-          style: 'solid',
-          color: palette.grey[500],
-        },
-      },
-    },
-    '& > tbody > tr': {
-      height: spacing.unit * 4,
-      ...stripedList,
-    },
-  },
-  title: {
-    fontSize: typography.pxToRem(20),
-    color: palette.text.primary,
-  },
-  columnHeaders: {
-    height: spacing.unit * 3,
-    '& th': {
-      color: palette.text.secondary,
-      fontSize: typography.pxToRem(15),
     },
   },
   arrowCell: {
@@ -202,7 +165,7 @@ class MQTTChannelConfigsTable extends React.Component<Props> {
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell colSpan={2} className={classes.title}>
+            <TableCell colSpan={2}>
               Channels {direction === 'TO_MQTT' ? 'To' : 'From'} MQTT
             </TableCell>
             <TableCell>
@@ -223,7 +186,7 @@ class MQTTChannelConfigsTable extends React.Component<Props> {
               </TableCell>
             )}
           </TableRow>
-          <TableRow className={classes.columnHeaders}>
+          <TableRow>
             <TableCell colSpan={3}>
               System Tag
             </TableCell>

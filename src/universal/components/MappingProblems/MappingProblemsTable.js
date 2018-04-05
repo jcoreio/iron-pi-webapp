@@ -9,19 +9,19 @@ import Table, {
   TableHead,
   TableRow,
 } from 'material-ui/Table'
-import Typography from 'material-ui/Typography'
 import type {Theme} from '../../theme/index'
 import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../../data-router/PluginConfigTypes'
 import SuccessAlert from '../SuccessAlert'
 import WorkaroundLink from '../WorkaroundLink'
 
-const styles = ({palette}: Theme) => ({
+const styles = ({palette, defaultTable}: Theme) => ({
   linkRow: {
     cursor: 'pointer',
     '&:hover > td': {
       backgroundColor: palette.divider,
     },
   },
+  table: defaultTable,
 })
 
 type ExtractClasses = <T: Object>(styles: (theme: Theme) => T) => {[name: $Keys<T>]: string}
@@ -62,7 +62,7 @@ class MappingProblemsTable extends React.Component<Props> {
     const {classes, getMappingProblemURL} = this.props
     const {noSourceProblems, multipleSourcesProblems} = this._organizeMappingProblems(this.props)
     return (
-      <Table>
+      <Table className={classes.table}>
         {!noSourceProblems.length && !multipleSourcesProblems.length && (
           <TableHead>
             <TableRow>
@@ -102,9 +102,7 @@ const MappingProblemsSection = ({classes, title, MappingProblems = [], getMappin
     <TableHead>
       <TableRow>
         <TableCell colSpan={3}>
-          <Typography variant="subheading">
-            {title}
-          </Typography>
+          {title}
         </TableCell>
       </TableRow>
       <TableRow>

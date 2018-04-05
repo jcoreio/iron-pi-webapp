@@ -80,6 +80,7 @@ export type Theme = {
   },
   shadows: Array<string>,
   stripedList: Object,
+  defaultTable: Object,
   sidebar: {
     width: number,
     padding: {
@@ -361,6 +362,49 @@ theme.stripedList = {
   },
   '&:hover': {
     backgroundColor: theme.palette.grey[300],
+  },
+}
+
+theme.defaultTable = {
+  borderCollapse: 'separate',
+  '& > thead': {
+    '& > tr:first-child': {
+      height: theme.spacing.unit * 5,
+      '& > th': {
+        color: theme.palette.text.primary,
+        fontSize: theme.typography.pxToRem(20),
+        borderBottom: {
+          width: 2,
+          style: 'solid',
+          color: theme.palette.grey[500],
+        },
+      },
+    },
+    '& > tr:not(:first-child)': {
+      height: theme.spacing.unit * 3,
+      '& > th': {
+        color: theme.palette.text.secondary,
+        fontSize: theme.typography.pxToRem(15),
+      },
+    },
+  },
+  '& > tbody > tr': {
+    height: theme.spacing.unit * 4,
+    ...theme.stripedList,
+  },
+  '& td, & th': {
+    padding: theme.spacing.unit / 2,
+    verticalAlign: 'middle',
+  },
+  '& td:first-child, & th:first-child': {
+    paddingLeft: 0,
+  },
+  '& td:last-child, & th:last-child': {
+    paddingRight: 0,
+  },
+  '& td': {
+    fontSize: theme.typography.pxToRem(18),
+    border: 'none',
   },
 }
 
