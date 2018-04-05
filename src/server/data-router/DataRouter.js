@@ -2,7 +2,10 @@
 
 import assert from 'assert'
 import EventEmitter from '@jcoreio/typed-event-emitter'
-import _ from 'lodash'
+import difference from 'lodash.difference'
+import forOwn from 'lodash.forown'
+import isEqual from 'lodash.isequal'
+import mapValues from 'lodash.mapvalues'
 import logger from 'log4jcore'
 
 import calculateMappingInfo from './calculateMappingInfo'
@@ -12,7 +15,9 @@ import type {
   PluginAndMappingsInfo, TimeValuePair} from './PluginTypes'
 import type {MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
+import type {MetadataItem} from '../../universal/types/MetadataItem'
 import type {TagState} from '../../universal/types/TagState'
+import roundByIncrement from '../../universal/util/roundByIncrement'
 
 const log = logger('DataRouter')
 
@@ -36,6 +41,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   _tagMap: TimestampedValuesMap = {}
   _tags: Array<string> = []
   _publicTags: Array<string> = []
+  _getTagMetadata: ?((tag: string) => ?MetadataItem);
 
   _plugins: Array<DataPlugin> = []
   _pluginsByKey: Map<string, DataPlugin> = new Map()
@@ -44,7 +50,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
 
   _dispatchInProgress: boolean = false;
   _dispatchTime: number = 0;
-  _dispatchEventsQueue: Array<TimestampedDispatchEvent> = [];
+  _dispatchTagMap: TimestampedValuesMap = {}
   _lastDispatchOk: boolean = true;
 
   _lastIngestTime: number = 0;
@@ -61,8 +67,9 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   // Hook to allow unit tests to inject time
   _getTime: () => number = () => Date.now();
 
-  constructor(args: {plugins?: Array<DataPlugin>} = {}) {
+  constructor(args: {plugins?: Array<DataPlugin>, getTagMetadata?: (tag: string) => ?MetadataItem} = {}) {
     super()
+    this._getTagMetadata = args.getTagMetadata
     this.setPlugins(args.plugins || [])
   }
 
@@ -95,10 +102,10 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   setPlugins(plugins: Array<DataPlugin>) {
     const prevPlugins = this._plugins.slice(0)
 
-    const removedPlugins: Array<DataPlugin> = _.difference(this._plugins, plugins)
+    const removedPlugins: Array<DataPlugin> = difference(this._plugins, plugins)
     removedPlugins.forEach((plugin: DataPlugin) => {
       const eventEmitterPlugin: any = (plugin: any)
-      if (_.isFunction(eventEmitterPlugin.removeListener)) {
+      if (typeof eventEmitterPlugin.removeListener === 'function') {
         const pluginKey = getPluginKey(plugin.pluginInfo())
         const listeners: ?ListenersForPlugin = this._pluginListeners.get(pluginKey)
         if (listeners) {
@@ -133,12 +140,12 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
       }
     })
 
-    const addedPlugins: Array<DataPlugin> = _.difference(this._plugins, prevPlugins)
+    const addedPlugins: Array<DataPlugin> = difference(this._plugins, prevPlugins)
     addedPlugins.forEach((plugin: DataPlugin) => {
       // If the plugin is an EventEmitter, listen to its 'data' event
       const pluginKey = getPluginKey(plugin.pluginInfo())
       const eventEmitterPlugin: any = (plugin: any)
-      if (_.isFunction(eventEmitterPlugin.on)) {
+      if (typeof eventEmitterPlugin.on === 'function') {
         const dataListener : DataPluginDataListener = (data: ValuesMap) =>
           this.dispatch({pluginKey, values: data})
         const timestampedDataListener : DataPluginTimestampedDataListener = (data: TimestampedValuesMap) =>
@@ -163,28 +170,28 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   dispatch(event: DispatchEvent) {
     assert(event)
     const time = this._dispatchInProgress ? this._dispatchTime : this._getTime()
-    const cleanedEvent: TimestampedDispatchEvent = this._cleanEvent(timestampDispatchData({event, time}))
-    if (Object.keys(cleanedEvent.timestampedValues).length) {
-      this._dispatchEventsQueue.push(cleanedEvent)
-      // If a dispatch is already in progress,
-      if (!this._dispatchInProgress) {
-        const minIngestTime = this._lastIngestTime + MIN_INGEST_INTERVAL_MILLIS
-        const requiredWaitTime = minIngestTime - time
-        if (requiredWaitTime <= 0) {
-          this._runDispatchQueue(time)
-        } else if (!this._ingestRateLimitTimeout) {
-          // Schedule a delayed ingest, if one isn't already scheduled
-          this._ingestRateLimitTimeout = setTimeout(() => {
-            this._ingestRateLimitTimeout = undefined
-            this._runDispatchQueue(this._getTime())
-          }, Math.min(requiredWaitTime, MIN_INGEST_INTERVAL_MILLIS))
-        }
+    const processedEvent: TimestampedDispatchEvent =
+      this._applyRounding(this._enforceTagSources(timestampDispatchData({event, time})))
+    const dataChanged = this._applyChangesToDispatchTagMap(processedEvent)
+    if (dataChanged && !this._dispatchInProgress) {
+      const minIngestTime = this._lastIngestTime + MIN_INGEST_INTERVAL_MILLIS
+      const requiredWaitTime = minIngestTime - time
+      if (requiredWaitTime <= 0) {
+        this._runDispatchQueue(time)
+      } else if (!this._ingestRateLimitTimeout) {
+        // Schedule a delayed ingest, if one isn't already scheduled
+        this._ingestRateLimitTimeout = setTimeout(() => {
+          this._ingestRateLimitTimeout = undefined
+          this._runDispatchQueue(this._getTime())
+        }, Math.min(requiredWaitTime, MIN_INGEST_INTERVAL_MILLIS))
       }
     }
   }
 
-  _cleanEvent(event: TimestampedDispatchEvent): TimestampedDispatchEvent {
+  _enforceTagSources(event: TimestampedDispatchEvent): TimestampedDispatchEvent {
     const {pluginKey, timestampedValues} = event
+    // If there are no tags with problems, cleanedTimestampedValues will remain undefined
+    // and event will just pass through this function unchanged
     let cleanedTimestampedValues
     for (let tag in timestampedValues) {
       if (this._tagsToProviderPluginKeys.get(tag) !== pluginKey) {
@@ -201,7 +208,62 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
         delete cleanedTimestampedValues[tag]
       }
     }
-    return {...event, timestampedValues: cleanedTimestampedValues || event.timestampedValues}
+    return cleanedTimestampedValues ? {...event, timestampedValues: cleanedTimestampedValues} : event
+  }
+
+  _applyRounding(event: TimestampedDispatchEvent): TimestampedDispatchEvent {
+    const {timestampedValues} = event
+    let roundedTimestampedValues: ?TimestampedValuesMap
+    forOwn(timestampedValues, (pair: TimeValuePair, tag: string) => {
+      const {t, v} = pair
+      if (Number.isFinite(v)) {
+        const metadata: ?MetadataItem = this._getTagMetadata && this._getTagMetadata(tag)
+        const rounding: ?number = metadata && metadata.rounding
+        if (rounding != null && rounding > 0) {
+          const valueRounded = roundByIncrement(v, rounding)
+          if (valueRounded !== v) {
+            if (!roundedTimestampedValues)
+              roundedTimestampedValues = {...timestampedValues}
+            roundedTimestampedValues[tag] = {t, v: valueRounded}
+          }
+        }
+      }
+    })
+    return roundedTimestampedValues ? {...event, timestampedValues: roundedTimestampedValues} : event
+  }
+
+  /**
+   * @param event Event to apply to the dispatch tag map
+   * @returns {boolean} true if the dispatch tag map was changed, false otherwise
+   * @private
+   */
+  _applyChangesToDispatchTagMap(event: TimestampedDispatchEvent): boolean {
+    let changed = false
+    const {timestampedValues} = event
+    forOwn(timestampedValues, (pair: TimeValuePair, tag: string) => {
+      const pendingPair = this._dispatchTagMap[tag]
+      if (pendingPair) {
+        // If there's already a value for this tag waiting to be processed, there are 3 possibilities:
+        if (!isEqual(pair.v, pendingPair.v)) {
+          const tagMapPair: ?TimeValuePair = this._tagMap[tag]
+          if (tagMapPair && isEqual(pair.v, tagMapPair.v)) {
+            // This change cancels out the pending change
+            delete this._dispatchTagMap[tag]
+          } else {
+            this._dispatchTagMap[tag] = pair
+            changed = true
+          }
+        }
+      } else {
+        // Compare to what's in the tag map
+        const tagMapPair: ?TimeValuePair = this._tagMap[tag]
+        if (!tagMapPair || !isEqual(pair.v, tagMapPair.v)) {
+          this._dispatchTagMap[tag] = pair
+          changed = true
+        }
+      }
+    })
+    return changed
   }
 
   _runDispatchQueue(time: number) {
@@ -219,17 +281,11 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
         tagsChangedThisPass = new Set()
         pluginsChangedThisPass = new Set()
 
-        const events: Array<TimestampedDispatchEvent> = this._dispatchEventsQueue.slice(0)
-        this._dispatchEventsQueue = []
-        events.forEach((event: TimestampedDispatchEvent) => {
-          const {timestampedValues} = event
-          _.forOwn(timestampedValues, (pair: TimeValuePair, tag: string) => {
-            const existPair: ?TimeValuePair = this._tagMap[tag]
-            if (!existPair || existPair.v !== pair.v)
-              tagsChangedThisPass.add(tag)
-            this._tagMap[tag] = pair
-          })
+        forOwn(this._dispatchTagMap, (pair: TimeValuePair, tag: string) => {
+          this._tagMap[tag] = pair
+          tagsChangedThisPass.add(tag)
         })
+        this._dispatchTagMap = {}
 
         tagsChangedThisPass.forEach((tag: string) => {
           tagsChangedThisCycle.add(tag)
@@ -317,13 +373,13 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
 
     const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
       calculateMappingInfo(pluginMappings)
-    const publicTagsChanged = !_.isEqual(publicTags, this._publicTags)
+    const publicTagsChanged = !isEqual(publicTags, this._publicTags)
     this._tags = tags
     this._publicTags = publicTags
     this._tagsToProviderPluginKeys = tagsToProviderPluginKeys
     this._tagsToDestinationPluginKeys = tagsToDestinationPluginKeys
     this._duplicateTags = duplicateTags
-    if (!_.isEqual(mappingProblems, this._mappingProblems)) {
+    if (!isEqual(mappingProblems, this._mappingProblems)) {
       this._mappingProblems = mappingProblems
       this.emit(EVENT_MAPPING_PROBLEMS_CHANGED, mappingProblems)
     }
@@ -339,7 +395,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
 export function timestampDispatchData(args: {event: DispatchEvent, time: number}): TimestampedDispatchEvent {
   const {event, time} = args
   // Apply timestamps to any data that came in without timestamps
-  const valuesWithTimestamps: TimestampedValuesMap = _.mapValues(event.values || {}, (entry: any) => ({t: time, v: entry}))
+  const valuesWithTimestamps: TimestampedValuesMap = mapValues(event.values || {}, (entry: any) => ({t: time, v: entry}))
   // Merge with any data that came in with timestamps
   const timestampedValues: TimestampedValuesMap = {...valuesWithTimestamps, ...(event.timestampedValues || {})}
   return {pluginKey: event.pluginKey, timestampedValues}

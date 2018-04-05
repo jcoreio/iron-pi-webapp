@@ -1,6 +1,6 @@
 // @flow
 
-import _ from 'lodash'
+import range from 'lodash.range'
 
 import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
 import {INTERNAL} from '../../universal/types/Tag'
@@ -77,7 +77,7 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
   // Now that we know every source of each tag with duplicate sources, create an individual entry
   // for each source
   duplicateTagsToLocations.forEach((mappingLocations: Array<MappingLocationInfo>, tag: string) => {
-    _.range(mappingLocations.length).forEach((locationIdx: number) => {
+    range(mappingLocations.length).forEach((locationIdx: number) => {
       mappingProblems.push({
         mappingLocation: mappingLocations[locationIdx],
         tag,

@@ -169,8 +169,8 @@ export default class Server {
 
       this._devGlobals.pubsub = this.pubsub
 
-      const dataRouter = this.dataRouter = new DataRouter()
       const metadataHandler = this.metadataHandler = new MetadataHandler()
+      const dataRouter = this.dataRouter = new DataRouter({getTagMetadata: (tag: string) => metadataHandler.getTagMetadata(tag)})
       await metadataHandler.loadMetadata()
       const dataPluginResources: DataPluginResources = {
         pubsub,

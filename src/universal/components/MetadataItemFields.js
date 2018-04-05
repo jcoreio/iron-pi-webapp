@@ -48,8 +48,8 @@ export type Props = {
 }
 
 export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem {
-  const {tag, dataType, name, min, max, units, displayPrecision, storagePrecision} = metadataItem
-  return {tag, name, dataType, min, max, units, displayPrecision, storagePrecision}
+  const {tag, dataType, name, min, max, units, rounding, displayPrecision} = metadataItem
+  return {tag, name, dataType, min, max, units, rounding, displayPrecision}
 }
 
 class MetadataItemFields extends React.Component<Props> {

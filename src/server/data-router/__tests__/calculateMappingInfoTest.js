@@ -1,6 +1,7 @@
 import {expect} from 'chai'
 
-import _ from 'lodash'
+import forOwn from 'lodash.forown'
+import range from 'lodash.range'
 
 import calculateMappingInfo from '../calculateMappingInfo'
 import type {DataPluginMapping} from '../PluginTypes'
@@ -24,7 +25,7 @@ const toPluginAndMappingsInfo = (mappingsForAllPlugins: Array<Array<DataPluginMa
 
 function checkDestinations(actual, expected) {
   expect(actual.size).to.equal(Object.keys(expected).length)
-  _.forOwn(expected, (expectedPluginIndices: Array<number>, tag: string) => {
+  forOwn(expected, (expectedPluginIndices: Array<number>, tag: string) => {
     const pluginKeys = Array.from(actual.get(tag) || new Set()).sort()
     expect(pluginKeys).to.deep.equal(expectedPluginIndices.map(idx => getPluginKey(infoForPlugin(idx))))
   })
@@ -181,7 +182,7 @@ describe('calculateMappingInfo', () => {
     // Two tags each have two sources, so there should be a total of 4 problem reports
     expect(mappingProblems.length).to.equal(4)
 
-    const pluginInfo = _.range(mappingsForAllPlugins.length).map(infoForPlugin)
+    const pluginInfo = range(mappingsForAllPlugins.length).map(infoForPlugin)
 
     const tag2MappingLocations = [
       {
@@ -284,7 +285,7 @@ describe('calculateMappingInfo', () => {
 
     expect(duplicateTags.size).to.equal(0)
 
-    const pluginInfo = _.range(mappingsForAllPlugins.length).map(infoForPlugin)
+    const pluginInfo = range(mappingsForAllPlugins.length).map(infoForPlugin)
 
     const expectedProblems = [
       {

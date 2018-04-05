@@ -19,7 +19,7 @@ metadataItem {
   min
   max
   units
-  storagePrecision
+  rounding
   displayPrecision
   isDigital
 }

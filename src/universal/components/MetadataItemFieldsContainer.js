@@ -31,7 +31,7 @@ const metadataItemQuery = gql(`query MetadataItem($tag: String!) {
     min
     max
     units
-    storagePrecision
+    rounding
     displayPrecision
     isDigital
   }

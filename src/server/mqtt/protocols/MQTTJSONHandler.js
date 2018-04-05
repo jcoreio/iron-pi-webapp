@@ -102,8 +102,8 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
     const {metadata, data, time} = args
     const metadataToSend = {}
     for (let metadataValue: MetadataValueToMQTT of metadata) {
-      const {name, dataType, units, min, max, displayPrecision, storagePrecision} = metadataValue.metadata
-      metadataToSend[metadataValue.tag] = {name, dataType, units, min, max, displayPrecision, storagePrecision}
+      const {name, dataType, units, min, max, rounding, displayPrecision} = metadataValue.metadata
+      metadataToSend[metadataValue.tag] = {name, dataType, units, min, max, rounding, displayPrecision}
     }
 
     const {metadataToMQTTTopic} = this._config

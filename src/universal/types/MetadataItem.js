@@ -39,8 +39,8 @@ export type NumericMetadataItem = {
   units: ?string,
   min: number,
   max: number,
+  rounding?: ?number,
   displayPrecision: number,
-  storagePrecision: number,
 }
 
 export const NumericMetadataItemType = (reify: Type<NumericMetadataItem>)
@@ -53,8 +53,8 @@ export type MetadataItem = {
   units?: ?string,
   min?: ?number,
   max?: ?number,
+  rounding?: ?number,
   displayPrecision?: ?number,
-  storagePrecision?: ?number,
 }
 
 export const MetadataItemType = (reify: Type<MetadataItem>)

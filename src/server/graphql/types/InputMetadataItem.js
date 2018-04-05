@@ -28,7 +28,7 @@ const InputMetadataItem = new graphql.GraphQLInputObjectType({
     max: {
       type: graphql.GraphQLFloat,
     },
-    storagePrecision: {
+    rounding: {
       type: graphql.GraphQLInt,
     },
     displayPrecision: {

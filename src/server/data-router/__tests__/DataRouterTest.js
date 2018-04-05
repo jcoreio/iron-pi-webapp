@@ -3,7 +3,7 @@
 import {expect} from 'chai'
 
 import EventEmitter from 'events'
-import _ from 'lodash'
+import omit from 'lodash.omit'
 
 import type {PluginInfo} from '../../../universal/data-router/PluginConfigTypes'
 
@@ -54,7 +54,7 @@ class MockPlugin extends EventEmitter implements DataPlugin {
   _pushEvent(args: {event: InputChangeEvent, type: string}) {
     // make events easier to deep compare by omitting tagMap and converting changedTags into a sorted array
     this._rxEvents.push({
-      ...(_.omit(args.event, 'tagMap')),
+      ...(omit(args.event, 'tagMap')),
       plugin: this,
       type: args.type,
       changedTags: Array.from(args.event.changedTags).sort()

@@ -35,12 +35,12 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             className={formControlClass}
           />
           <NumericField
-            name="storagePrecision"
+            name="rounding"
             label="Storage Precision"
             type="text"
             component={TextField}
             className={formControlClass}
-            validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
+            validate={[numericality({'>': 0})]}
             inputProps={{size: 2}}
           />
           <NumericField

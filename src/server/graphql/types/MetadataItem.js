@@ -34,8 +34,8 @@ const MetadataItem = new graphql.GraphQLObjectType({
     max: {
       type: graphql.GraphQLFloat,
     },
-    storagePrecision: {
-      type: graphql.GraphQLInt,
+    rounding: {
+      type: graphql.GraphQLFloat,
     },
     displayPrecision: {
       type: graphql.GraphQLInt,

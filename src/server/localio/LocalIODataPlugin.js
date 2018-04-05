@@ -70,8 +70,8 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
           dataType: 'number',
           isDigital: true,
           units: 'V',
+          rounding: 0.01,
           displayPrecision: 2,
-          storagePrecision: 2,
           min: 0,
           max: 10,
         }
