@@ -213,7 +213,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
       digitalInputLevels: range(8).map(idx => idx === this._activeChannelIdx ? 1 : 0),
       digitalInputEventCounts: range(8).map(() => 0),
       digitalOutputLevels: range(8).map(() => 0),
-      analogInputLevels: range(4).map(idx => idx === this._activeChannelIdx ? 1000 : 0)
+      analogInputLevels: range(4).map(idx => idx === this._activeChannelIdx ? 4.5 : 0)
     }
     this.emit(EVENT_DEVICE_STATUS, deviceStatus)
   }
