@@ -3,6 +3,8 @@
 import * as React from 'react'
 import TextField from './TextField'
 import {Field} from 'redux-form'
+import range from 'lodash.range'
+import {MenuItem} from 'material-ui/Menu'
 
 import ControlWithInfo from './ControlWithInfo'
 import {NumericField} from 'redux-form-numeric-field'
@@ -43,15 +45,27 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             validate={[numericality({'>': 0})]}
             inputProps={{size: 2}}
           />
-          <NumericField
+          <Field
             name="displayPrecision"
             label="Display Precision"
-            type="text"
             component={TextField}
             className={formControlClass}
-            validate={[required(), numericality({int: true, '>=': 0, '<=': 10})]}
-            inputProps={{size: 2}}
-          />
+            validate={required()}
+            select
+            SelectProps={{
+              displayEmpty: true,
+              renderValue: precision => `${precision} ${precision === 1 ? 'place' : 'places'}`,
+            }}
+            props={{onBlur: null}}
+          >
+            <MenuItem key={0} value={0}>0 decimal places</MenuItem>
+            <MenuItem key={1} value={1}>1 decimal place</MenuItem>
+            {range(2, 7).map(precision => (
+              <MenuItem key={precision} value={precision}>
+                {precision} decimal places
+              </MenuItem>
+            ))}
+          </Field>
         </ControlWithInfo>
         <ControlWithInfo info="The display range of guages for this channel" className={lastControlClass}>
           <NumericField
