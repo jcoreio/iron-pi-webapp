@@ -38,7 +38,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
           />
           <NumericField
             name="rounding"
-            label="Storage Precision"
+            label="Rounding"
             type="text"
             component={TextField}
             className={formControlClass}
