@@ -312,7 +312,7 @@ const theme: Theme = createMuiTheme({
     text: {
       primary: 'rgba(0, 0, 0, 0.8)',
       // includes form labels
-      secondary: 'rgba(0, 0, 0, 0.55)',
+      secondary: 'rgba(0, 0, 0, 0.7)',
       disabled: 'rgba(0, 0, 0, 0.38)',
       hint: 'rgba(0, 0, 0, 0.38)',
     },
