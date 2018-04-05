@@ -29,7 +29,7 @@ const InputMetadataItem = new graphql.GraphQLInputObjectType({
       type: graphql.GraphQLFloat,
     },
     rounding: {
-      type: graphql.GraphQLInt,
+      type: graphql.GraphQLFloat,
     },
     displayPrecision: {
       type: graphql.GraphQLInt,
