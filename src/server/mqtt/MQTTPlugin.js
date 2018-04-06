@@ -169,6 +169,16 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     return mqttConfigToDataPluginMappings(this._config)
   }
 
+  inputsChanged() {
+    const changedValues: ValuesMap = {}
+    for (let state: ToMQTTChannelState of this._getChannelsToSend()) {
+      changedValues[tags.mqttValue(state.config.mqttTag)] = state.curValue
+    }
+    if (Object.keys(changedValues).length) {
+      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
+    }
+  }
+
   dispatchCycleDone(event: CycleDoneEvent) {
     const dataMaybeChanged = this._config.publishAllPublicTags || event.inputsChanged
     // If _publishDataTimeout is set, we're already waiting on a delayed publish, so we can
@@ -197,18 +207,11 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _publishData(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
     const {channelsToSend, time} = args
-    const changedValues: ValuesMap = {}
-    for (let state: ToMQTTChannelState of channelsToSend) {
-      changedValues[tags.mqttValue(state.config.mqttTag)] = state.curValue
-    }
+
     const data: Array<DataValueToMQTT> = this._generateDataMessage(channelsToSend)
+    log.info(`Publishing data to MQTT: ${JSON.stringify(data)}`)
     this._protocolHandler.publishData({data, time})
     this._lastTxTime = args.time
-
-    if (Object.keys(changedValues).length) {
-      log.info(`Publishing data to MQTT: ${JSON.stringify(changedValues)}`)
-      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
-    }
   }
 
   _getChannelsToSend(opts: {sendAll?: ?boolean} = {}): Array<ToMQTTChannelState> {
