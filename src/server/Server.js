@@ -20,7 +20,7 @@ import sequelizeMigrate from './sequelize/migrate'
 import createSchema from './graphql/schema'
 import DataRouter, {EVENT_MAPPING_PROBLEMS_CHANGED} from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
-import LEDHandler, {LED_MESSAGE_OK, LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_STATIC_MODE, LED_MESSAGE_DHCP_MODE} from './localio/LEDHandler'
+import LEDHandler, {LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_STATIC_MODE, LED_MESSAGE_DHCP_MODE} from './localio/LEDHandler'
 import SPIHandler, {EVENT_DEVICE_STATUS} from './localio/SPIHandler'
 import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
@@ -118,7 +118,6 @@ export default class Server {
       : new DeviceNetworkSettingsHandler()
     this._spiHubClient.on('devicesChanged', (message: Object) => {
       this.accessCodeHandler.setAccessCode(message.accessCode)
-      this._ledHandler.sendLEDState(LED_MESSAGE_OK, LED_MESSAGE_OK)
       log.info(`Access Code is ${message.accessCode}`)
     })
     this._spiHandler.on(EVENT_DEVICE_STATUS, (status: DeviceStatus) => {
@@ -128,11 +127,11 @@ export default class Server {
     this.connectModeHandler.on(EVENT_NETWORK_MODE_COMMAND, (mode: 'static' | 'dhcp') => {
       log.info(`setting networking mode to ${mode}`)
       this.networkSettingsHandler.setMode(mode)
-      this._ledHandler.sendLEDState('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE, LED_MESSAGE_OK)
+      this._ledHandler.sendLEDState('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE)
     })
     this.connectModeHandler.on(EVENT_CONNECT_BUTTON_PRESSED, () => {
       log.info('connect button pressed')
-      this._ledHandler.sendLEDState(LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_OK)
+      this._ledHandler.sendLEDState(LED_MESSAGE_CONNECT_MODE)
     })
   }
 

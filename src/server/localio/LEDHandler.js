@@ -20,15 +20,18 @@ export type LEDMessage = {
   idleTime: number,
 }
 
-export const LED_MESSAGE_OK: LEDMessage = {
-  colors: [{color: 'green', count: 2}],
-  flashRate: 500,
-  idleTime: 2000
-}
+// Message formerly sent to indicate that the app is OK. Now the MCU
+// monitors the output state commands, and resets an "app healthy" timeout
+// every time one of those is received.
+// export const LED_MESSAGE_OK: LEDMessage = {
+//   colors: [{color: 'green', count: 2}],
+//   flashRate: 500,
+//   idleTime: 2000
+// }
 
 // "App Offline" LED pattern
 export const LED_MESSAGE_APP_OFFLINE: LEDMessage = {
-  colors: [{color: 'red', count: 2}],
+  colors: [{color: 'red', count: 1}],
   flashRate: 500,
   idleTime: 2000
 }
@@ -58,10 +61,10 @@ export default class LEDHandler {
     this._spi = spiHubClient
   }
 
-  sendLEDState(message: LEDMessage, timeoutMessage: LEDMessage) {
+  sendLEDState(message: LEDMessage) {
     const buf = Buffer.alloc(LED_MSG_LEN * 2)
     encodeLEDMessage(buf, message, 0)
-    encodeLEDMessage(buf, timeoutMessage, LED_MSG_LEN)
+    encodeLEDMessage(buf, LED_MESSAGE_APP_OFFLINE, LED_MSG_LEN)
     SPIDevices.forEach((device: SPIDeviceInfo) => this._spi.send({
       bus: 0, device: device.deviceId, channel: CHANNEL_LED_STATUS,
       msgDeDupeId: MESSAGE_LED_STATUS_DE_DUPE_ID,
