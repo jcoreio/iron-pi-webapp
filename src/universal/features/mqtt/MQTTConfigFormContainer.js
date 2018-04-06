@@ -32,8 +32,9 @@ const configFields = `
   password
   groupId
   nodeId
-  dataTopic
-  metadataTopic
+  dataToMQTTTopic
+  metadataToMQTTTopic
+  dataFromMQTTTopic
   minPublishInterval
   publishAllPublicTags
 `

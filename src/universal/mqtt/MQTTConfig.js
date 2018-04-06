@@ -48,8 +48,13 @@ export type ProtocolRequiredFields =
   } |
   {
     protocol: 'TEXT_JSON',
-    dataTopic: string,
-    metadataTopic: string,
+
+    // Allow JSON configs to omit any of these topic fields. If the topic is not
+    // provided, the associated function (data output, data input, or metadata output)
+    // will just be disabled
+    // dataToMQTTTopic: string,
+    // metadataToMQTTTopic: string,
+    // dataFromMQTTTopic: string,
   }
 
 export const ProtocolRequiredFieldsType = (reify: Type<ProtocolRequiredFields>)
@@ -80,8 +85,9 @@ export type MQTTConfigSparkPlug = MQTTConfigBase & {
 }
 
 export type MQTTConfigPlainText = MQTTConfigBase & {
-  dataTopic?: string,
-  metadataTopic?: string,
+  dataToMQTTTopic?: string,
+  metadataToMQTTTopic?: string,
+  dataFromMQTTTopic?: string,
 }
 
 export type MQTTConfig = MQTTConfigSparkPlug | MQTTConfigPlainText

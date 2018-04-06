@@ -16,9 +16,9 @@ export type JSONHandlerConfig = {
   username: string,
   password: string,
   clientId: string,
-  dataToMQTTTopic: string,
-  metadataToMQTTTopic: string,
-  dataFromMQTTTopic: string,
+  dataToMQTTTopic?: ?string,
+  metadataToMQTTTopic?: ?string,
+  dataFromMQTTTopic?: ?string,
 }
 
 export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmittedEvents> {

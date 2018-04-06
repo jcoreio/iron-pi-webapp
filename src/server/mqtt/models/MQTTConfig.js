@@ -31,8 +31,9 @@ export type MQTTConfigAttributes = MQTTConfigInitAttributes & {
   id: number;
   minPublishInterval: number;
   publishAllPublicTags: boolean;
-  dataTopic: ?string;
-  metadataTopic: ?string;
+  dataToMQTTTopic: ?string;
+  metadataToMQTTTopic: ?string;
+  dataFromMQTTTopic: ?string;
   groupId: ?string;
   nodeId: ?string;
   createdAt: Date;
@@ -55,8 +56,9 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
   protocol: Protocol;
   minPublishInterval: number;
   publishAllPublicTags: boolean;
-  dataTopic: ?string;
-  metadataTopic: ?string;
+  dataToMQTTTopic: ?string;
+  metadataToMQTTTopic: ?string;
+  dataFromMQTTTopic: ?string;
   createdAt: Date;
   updatedAt: Date;
   channelsToMQTT: ?Array<MQTTChannelConfig>;
@@ -137,11 +139,15 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
           not: notWhitespace,
         },
       },
-      dataTopic: {
+      dataToMQTTTopic: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      metadataTopic: {
+      metadataToMQTTTopic: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      dataFromMQTTTopic: {
         type: Sequelize.STRING,
         allowNull: true,
       },
