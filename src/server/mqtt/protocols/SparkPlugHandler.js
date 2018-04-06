@@ -26,13 +26,35 @@ export type SparkPlugHandlerConfig = {
 }
 
 export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEmittedEvents> {
-  _client: SparkPlugClient
+  _config: SparkPlugHandlerConfig
+  _client: ?SparkPlugClient
   _sparkplugBirthRequested: boolean = false
+
+  _createNewClientTimeout: ?number
 
   constructor(args: {config: SparkPlugHandlerConfig}) {
     super()
-    const {serverURL, username, password, groupId, nodeId} = args.config
+    const {config} = args
+    this._config = config
+    const {groupId, nodeId} = config
     if (!groupId || !nodeId) throw new Error('missing groupId or nodeId')
+  }
+
+  start() {
+    this._setupClient()
+  }
+
+  destroy() {
+    this._endClient()
+    const createNewClientTimeout = this._createNewClientTimeout
+    this._createNewClientTimeout = undefined
+    if (createNewClientTimeout)
+      clearTimeout(createNewClientTimeout)
+  }
+
+  _setupClient() {
+    this._endClient()
+    const {serverURL, username, password, groupId, nodeId} = this._config
     const client = this._client = (sparkplug: SparkPlugPackage).newClient({
       serverUrl: serverURL,
       username: username || null,
@@ -46,6 +68,13 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
     client.on('error', (err: Error) => {
       log.error(`SparkPlug client error: ${err.stack}`)
       this.emit(EVENT_MQTT_ERROR, err)
+      this._endClient()
+      if (!this._destroyed && !this._createNewClientTimeout) {
+        this._createNewClientTimeout = setTimeout(() => {
+          this._createNewClientTimeout = undefined
+          this._setupClient()
+        }, 5000)
+      }
     })
     client.on('close', () => {
       log.error(`SparkPlug client closed`)
@@ -58,16 +87,20 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
     client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
   }
 
-  destroy() {
-    this._client.stop()
+  _endClient() {
+    const client = this._client
+    this._client = undefined
+    if (client) client.stop()
   }
 
   publishData(args: {data: Array<DataValueToMQTT>, time: number}) {
     const {data, time} = args
-    this._client.publishNodeData({
-      timestamp: time,
-      metrics: data.map(toSparkPlugMetric)
-    })
+    if (this._client) {
+      this._client.publishNodeData({
+        timestamp: time,
+        metrics: data.map(toSparkPlugMetric)
+      })
+    }
   }
 
   publishAll(args: {metadata: Array<MetadataValueToMQTT>, data: Array<DataValueToMQTT>, time: number}) {
@@ -102,7 +135,8 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
       return metric
     })
 
-    this._client.publishNodeBirth({timestamp: time, metrics})
+    if (this._client)
+      this._client.publishNodeBirth({timestamp: time, metrics})
   }
 
   _handleDataFromSparkPlug(message: SparkPlugDataMessage) {

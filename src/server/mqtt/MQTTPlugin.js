@@ -227,6 +227,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   start() {
     this._updateMQTTChannels()
     this._metadataToMQTT = this._calcMetadataToMQTT()
+    this._protocolHandler.start()
   }
 
   tagsChanged() {

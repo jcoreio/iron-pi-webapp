@@ -16,7 +16,8 @@ export type MQTTProtocolHandlerEmittedEvents = {
 }
 
 export type MQTTProtocolHandler = EventEmitter<MQTTProtocolHandlerEmittedEvents> & {
+  start(): void,
+  destroy(): void,
   publishData(args: {data: Array<DataValueToMQTT>, time: number}): void,
   publishAll(args: {metadata: Array<MetadataValueToMQTT>, data: Array<DataValueToMQTT>, time: number}): void,
-  destroy(): void,
 }

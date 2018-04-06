@@ -87,8 +87,9 @@ export type MQTTConfig = {
   password?: ?string,
   groupId?: ?string,
   nodeId?: ?string,
-  dataTopic?: ?string,
-  metadataTopic?: ?string,
+  dataToMQTTTopic?: ?string,
+  metadataToMQTTTopic?: ?string,
+  dataFromMQTTTopic?: ?string,
   protocol: Protocol,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
@@ -142,15 +143,15 @@ function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
 
 const pickFormFields = ({
   id, name, serverURL, username, password, groupId, nodeId, protocol,
-  dataTopic, metadataTopic,
+  dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic,
   minPublishInterval, publishAllPublicTags,
 }: MQTTConfig) => {
   username = username || null
   password = password || null
   if (!Number.isFinite(minPublishInterval)) minPublishInterval = null
   return {
-    id, name, serverURL, username, password, groupId, nodeId, protocol, dataTopic, metadataTopic,
-    minPublishInterval, publishAllPublicTags,
+    id, name, serverURL, username, password, groupId, nodeId, protocol, dataToMQTTTopic, metadataToMQTTTopic,
+    dataFromMQTTTopic, minPublishInterval, publishAllPublicTags,
   }
 }
 
@@ -460,10 +461,10 @@ const SparkPlugFields = ({formControlClass}: ProtocolFieldsProps): React.Node =>
 
 const TextJsonFields = ({formControlClass}: ProtocolFieldsProps): React.Node => (
   <div>
-    <ControlWithInfo info="The MQTT data topic">
+    <ControlWithInfo info="Topic for data sent to MQTT">
       <Field
-        name="dataTopic"
-        label="Data Topic"
+        name="dataToMQTTTopic"
+        label="Data To MQTT Topic"
         type="text"
         component={TextField}
         className={formControlClass}
@@ -471,10 +472,21 @@ const TextJsonFields = ({formControlClass}: ProtocolFieldsProps): React.Node => 
         validate={required()}
       />
     </ControlWithInfo>
-    <ControlWithInfo info="The MQTT metadata topic">
+    <ControlWithInfo info="Topic for data received from MQTT">
       <Field
-        name="metadataTopic"
-        label="Metadata Topic"
+        name="dataFromMQTTTopic"
+        label="Data From MQTT Topic"
+        type="text"
+        component={TextField}
+        className={formControlClass}
+        normalizeOnBlur={trim}
+        validate={required()}
+      />
+    </ControlWithInfo>
+    <ControlWithInfo info="Topic for metadata (e.g. long name, range, units) sent to MQTT">
+      <Field
+        name="metadataToMQTTTopic"
+        label="Metadata To MQTT Topic"
         type="text"
         component={TextField}
         className={formControlClass}
