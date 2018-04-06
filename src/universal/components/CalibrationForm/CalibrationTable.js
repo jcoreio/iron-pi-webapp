@@ -69,8 +69,10 @@ const styles = ({spacing, palette}: Theme) => ({
     },
   },
   arrowCell: {
+    textAlign: 'center',
   },
   textField: {
+    width: '100%',
     '& input': {
       textAlign: 'center',
     }
@@ -139,6 +141,7 @@ class CalibrationTable extends React.Component<Props> {
                     component={TextField}
                     validate={required()}
                     className={classes.textField}
+                    inputProps={{size: 10}}
                   />
                 </TableCell>
                 <TableCell className={classes.arrowCell}>
@@ -150,6 +153,7 @@ class CalibrationTable extends React.Component<Props> {
                     component={TextField}
                     validate={required()}
                     className={classes.textField}
+                    inputProps={{size: 10}}
                   />
                 </TableCell>
                 {editable &&

@@ -3,7 +3,8 @@
 import * as React from 'react'
 import {Link} from 'react-router-dom'
 import type {Match, RouterHistory} from 'react-router-dom'
-import ViewPanel from '../../components/ViewPanel'
+import StatusPanel from '../../components/StatusPanel'
+import {ViewPanelBody} from '../../components/ViewPanel'
 import {StatusPanelTitle} from '../../components/StatusPanel'
 import MQTTConfigState from './MQTTConfigState'
 import MQTTChannelConfigsTable from './MQTTChannelConfigsTable'
@@ -27,11 +28,13 @@ const MQTTStatusPanel = ({config, history}: Props): React.Node => {
     url: mqttConfigForm(id),
   }
   return (
-    <ViewPanel>
+    <StatusPanel>
       <StatusPanelTitle component={Link} to={mqttConfigForm(id)}>
         MQTT: {config.name}
       </StatusPanelTitle>
-      <MQTTConfigState state={config.state} />
+      <ViewPanelBody noVerticalPadding>
+        <MQTTConfigState state={config.state} />
+      </ViewPanelBody>
       <MQTTChannelConfigsTable
         channels={config.channelsToMQTT}
         direction="TO_MQTT"
@@ -48,7 +51,7 @@ const MQTTStatusPanel = ({config, history}: Props): React.Node => {
         match={match}
         history={history}
       />
-    </ViewPanel>
+    </StatusPanel>
   )
 }
 

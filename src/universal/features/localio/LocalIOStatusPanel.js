@@ -84,7 +84,8 @@ const channelStateStyles = (theme: Theme) => {
     id: {
       extend: itemTextStyles,
       marginRight: theme.spacing.unit,
-      flex: `0 1 ${theme.spacing.unit * 5}px`,
+      textAlign: 'center',
+      flex: `0 1 ${theme.spacing.unit * 7}px`,
     },
     name: {
       extend: itemTextStyles,
@@ -111,7 +112,12 @@ const channelStateStyles = (theme: Theme) => {
       height: theme.spacing.unit * 3,
     },
     root: {
-      padding: `${theme.spacing.unit}px ${theme.spacing.unit * 3}px`,
+      padding: {
+        top: theme.spacing.unit,
+        left: theme.viewPanel.body.padding.left,
+        right: theme.viewPanel.body.padding.right,
+        bottom: theme.spacing.unit,
+      },
     },
     container: theme.stripedList,
     valueBlock: {
@@ -176,18 +182,25 @@ const ChannelStateItem = withStyles(channelStateStyles, {withTheme: true})(Style
 
 const channelStateHeaderStyles = (theme: Theme) => ({
   header: {
-    padding: 0,
-    paddingBottom: theme.spacing.unit * 0.5,
+    padding: {
+      top: 0,
+      left: theme.viewPanel.body.padding.left,
+      right: theme.viewPanel.body.padding.right,
+      bottom: theme.spacing.unit * 0.5,
+    },
   },
   headerId: {
     fontSize: theme.typography.pxToRem(14),
     lineHeight: theme.typography.pxToRem(17),
     color: theme.palette.grey[700],
-    flex: `0 0 ${theme.spacing.unit * 5}px`,
+    flex: `0 0 ${theme.spacing.unit * 7}px`,
+    marginRight: theme.spacing.unit,
+    padding: 0,
   },
   headerName: {
     extend: 'headerId',
     textAlign: 'left',
+    padding: 0,
   },
 })
 

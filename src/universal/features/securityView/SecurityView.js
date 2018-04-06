@@ -3,7 +3,7 @@
 import * as React from 'react'
 import {withStyles} from 'material-ui/styles'
 import type {Theme} from '../../theme'
-import ViewPanel, {ViewPanelTitle} from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelBody, ViewPanelTitle} from '../../components/ViewPanel'
 import SSHToggleContainer from './SSHToggleContainer'
 import ChangePasswordFormContainer from '../../components/ChangePassword/ChangePasswordFormContainer'
 
@@ -23,9 +23,13 @@ class SecurityView extends React.Component<Props> {
     return (
       <ViewPanel>
         <ViewPanelTitle>Change Password</ViewPanelTitle>
-        <ChangePasswordFormContainer />
+        <ViewPanelBody noVerticalPadding>
+          <ChangePasswordFormContainer />
+        </ViewPanelBody>
         <ViewPanelTitle>SSH Access</ViewPanelTitle>
-        <SSHToggleContainer />
+        <ViewPanelBody>
+          <SSHToggleContainer />
+        </ViewPanelBody>
       </ViewPanel>
     )
   }

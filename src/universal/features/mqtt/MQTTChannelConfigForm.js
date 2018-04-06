@@ -18,7 +18,7 @@ import type {MetadataItem} from '../../types/MetadataItem'
 import Arrow from 'react-arrow'
 
 import type {Theme} from '../../theme'
-import ViewPanel, {ViewPanelTitle} from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelBody, ViewPanelTitle} from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
@@ -73,8 +73,14 @@ const styles = ({spacing, palette, typography}: Theme) => ({
     height: spacing.unit * 7,
   },
   paper: {
-    padding: `${spacing.unit * 2}px ${spacing.unit * 4}px`,
-    margin: `${spacing.unit * 2}px auto`,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    '&:not(:first-child)': {
+      marginTop: spacing.unit * 2,
+    },
+    '&:not(:last-child)': {
+      marginBottom: spacing.unit * 2,
+    },
   },
   paperCollapse: {
     padding: `0 ${spacing.unit * 4}px`,
@@ -244,9 +250,11 @@ class MQTTChannelConfigForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <ViewPanel>
-            <Typography variant="subheading">
-              <Spinner /> Loading MQTT Channel configuration...
-            </Typography>
+            <ViewPanelBody>
+              <Typography variant="subheading">
+                <Spinner /> Loading MQTT Channel configuration...
+              </Typography>
+            </ViewPanelBody>
           </ViewPanel>
         </div>
       )
@@ -257,14 +265,16 @@ class MQTTChannelConfigForm extends React.Component<Props> {
         <ViewPanelTitle>
           System
         </ViewPanelTitle>
-        <FormSection name="metadataItem">
-          <MetadataItemFieldsContainer
-            formControlClass={classes.formControl}
-            showConfigFields={direction === 'FROM_MQTT'}
-            showDataTypeSelector={direction === 'FROM_MQTT'}
-            force={{isDigital: false}}
-          />
-        </FormSection>
+        <ViewPanelBody>
+          <FormSection name="metadataItem">
+            <MetadataItemFieldsContainer
+              formControlClass={classes.formControl}
+              showConfigFields={direction === 'FROM_MQTT'}
+              showDataTypeSelector={direction === 'FROM_MQTT'}
+              force={{isDigital: false}}
+            />
+          </FormSection>
+        </ViewPanelBody>
       </Paper>
     )
     const mqttSection = (
@@ -272,111 +282,117 @@ class MQTTChannelConfigForm extends React.Component<Props> {
         <ViewPanelTitle>
           MQTT
         </ViewPanelTitle>
-        <ControlWithInfo info="The tag for data in MQTT">
-          <Field
-            name="mqttTag"
-            label="MQTT Tag"
-            type="text"
-            component={TextField}
-            className={classes.formControl}
-            normalizeOnBlur={trim}
-            validate={required()}
-          />
-        </ControlWithInfo>
+        <ViewPanelBody>
+          <ControlWithInfo info="The tag for data in MQTT">
+            <Field
+              name="mqttTag"
+              label="MQTT Tag"
+              type="text"
+              component={TextField}
+              className={classes.formControl}
+              normalizeOnBlur={trim}
+              validate={required()}
+            />
+          </ControlWithInfo>
+        </ViewPanelBody>
       </Paper>
     )
     return (
       <form id="MQTTChannelConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         <ViewPanel className={classes.parentPaper}>
-          {direction === 'TO_MQTT'
-            ? systemSection
-            : mqttSection
-          }
-          <div className={classes.arrowHolder}>
-            <FlowArrow />
-          </div>
-          <Paper className={classes.paper}>
-            <ViewPanelTitle>
-              Slope / Offset
-            </ViewPanelTitle>
-            <Collapse in={dataType !== 'number'}>
-              <div>
-                <FormLabel>
-                  Slope and Offset are disabled for non-numeric tags.
-                </FormLabel>
-              </div>
-            </Collapse>
-            <ControlWithInfo info="TODO">
-              <NumericField
-                name="multiplier"
-                label="Slope"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-                placeholder="1.0"
-                disabled={dataType !== 'number'}
-                inputProps={{size: 10}}
-              />
-              <NumericField
-                name="offset"
-                label="Offset"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-                placeholder="0.0"
-                disabled={dataType !== 'number'}
-                inputProps={{size: 10}}
-              />
-            </ControlWithInfo>
-          </Paper>
-          <div className={classes.arrowHolder}>
-            <FlowArrow />
-          </div>
-          {direction === 'TO_MQTT'
-            ? mqttSection
-            : systemSection
-          }
-          <SubmitStatus
-            submitting={submitting}
-            submitSucceeded={submitSucceeded}
-            submitFailed={submitFailed}
-            error={error}
-          />
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              className={classes.tallButton}
-              onClick={this.handleCancel}
-            >
-              Cancel
-            </Button>
-            <ConfirmDeletePopover
-              onConfirmDelete={this.handleDelete}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-            >
-              {({bind}) => (
-                <Button variant="raised" className={classes.tallButton} {...bind}>
-                  Delete
-                </Button>
-              )}
-            </ConfirmDeletePopover>
-            <Button
-              type="submit"
-              variant="raised"
-              color="primary"
-              className={classes.tallButton}
-              disabled={pristine || submitting}
-            >
-              Save
-            </Button>
-          </div>
+          <ViewPanelBody>
+            {direction === 'TO_MQTT'
+              ? systemSection
+              : mqttSection
+            }
+            <div className={classes.arrowHolder}>
+              <FlowArrow />
+            </div>
+            <Paper className={classes.paper}>
+              <ViewPanelTitle>
+                Slope / Offset
+              </ViewPanelTitle>
+              <ViewPanelBody>
+                <Collapse in={dataType !== 'number'}>
+                  <div>
+                    <FormLabel>
+                      Slope and Offset are disabled for non-numeric tags.
+                    </FormLabel>
+                  </div>
+                </Collapse>
+                <ControlWithInfo info="TODO">
+                  <NumericField
+                    name="multiplier"
+                    label="Slope"
+                    type="text"
+                    component={TextField}
+                    className={classes.formControl}
+                    placeholder="1.0"
+                    disabled={dataType !== 'number'}
+                    inputProps={{size: 10}}
+                  />
+                  <NumericField
+                    name="offset"
+                    label="Offset"
+                    type="text"
+                    component={TextField}
+                    className={classes.formControl}
+                    placeholder="0.0"
+                    disabled={dataType !== 'number'}
+                    inputProps={{size: 10}}
+                  />
+                </ControlWithInfo>
+              </ViewPanelBody>
+            </Paper>
+            <div className={classes.arrowHolder}>
+              <FlowArrow />
+            </div>
+            {direction === 'TO_MQTT'
+              ? mqttSection
+              : systemSection
+            }
+            <SubmitStatus
+              submitting={submitting}
+              submitSucceeded={submitSucceeded}
+              submitFailed={submitFailed}
+              error={error}
+            />
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                className={classes.tallButton}
+                onClick={this.handleCancel}
+              >
+                Cancel
+              </Button>
+              <ConfirmDeletePopover
+                onConfirmDelete={this.handleDelete}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+              >
+                {({bind}) => (
+                  <Button variant="raised" className={classes.tallButton} {...bind}>
+                    Delete
+                  </Button>
+                )}
+              </ConfirmDeletePopover>
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                className={classes.tallButton}
+                disabled={pristine || submitting}
+              >
+                Save
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
       </form>
     )

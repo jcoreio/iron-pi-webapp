@@ -47,12 +47,7 @@ const styles = ({spacing, palette, typography, stripedList, defaultTable}: Theme
   alignRight: {
     textAlign: 'right',
   },
-  table: {
-    ...defaultTable,
-    '& td:last-child, & th:last-child': {
-      paddingRight: spacing.unit / 2,
-    },
-  },
+  table: defaultTable,
   arrowCell: {
   },
   textField: {

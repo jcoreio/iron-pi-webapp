@@ -9,7 +9,7 @@ import Typography from 'material-ui/Typography'
 import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'
-import ViewPanel, {ViewPanelTitle} from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelTitle, ViewPanelBody} from '../../components/ViewPanel'
 import TextField from '../../components/TextField'
 
 import SubmitStatus from '../../components/SubmitStatus'
@@ -68,38 +68,40 @@ class EnableSSHForm extends React.Component<Props> {
           <ViewPanelTitle>
             Enable SSH
           </ViewPanelTitle>
-          <Typography variant="subheading">
-            Enter the password to enable SSH:
-          </Typography>
-          <Field
-            name="password"
-            type="password"
-            component={TextField}
-            className={classes.formControl}
-            validate={required()}
-          />
-          <SubmitStatus
-            submitting={submitting}
-            submitSucceeded={submitSucceeded}
-            submitFailed={submitFailed}
-            error={error}
-          />
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="raised"
-              color="primary"
-              disabled={pristine || submitting}
-            >
-              Enable SSH
-            </Button>
-          </div>
+          <ViewPanelBody>
+            <Typography variant="subheading">
+              Enter the password to enable SSH:
+            </Typography>
+            <Field
+              name="password"
+              type="password"
+              component={TextField}
+              className={classes.formControl}
+              validate={required()}
+            />
+            <SubmitStatus
+              submitting={submitting}
+              submitSucceeded={submitSucceeded}
+              submitFailed={submitFailed}
+              error={error}
+            />
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                disabled={pristine || submitting}
+              >
+                Enable SSH
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
       </form>
     )

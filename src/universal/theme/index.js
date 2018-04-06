@@ -141,10 +141,10 @@ export type Theme = {
     },
   },
   viewPanel: {
-    title: {
-      color: string,
-      fontSize: string,
-    },
+    root: Object,
+    body: Object,
+    title: Object,
+    noVerticalPadding: Object,
   },
   calibration: {
     title: {
@@ -365,49 +365,6 @@ theme.stripedList = {
   },
 }
 
-theme.defaultTable = {
-  borderCollapse: 'separate',
-  '& > thead': {
-    '& > tr:first-child': {
-      height: theme.spacing.unit * 5,
-      '& > th': {
-        color: theme.palette.text.primary,
-        fontSize: theme.typography.pxToRem(20),
-        borderBottom: {
-          width: 2,
-          style: 'solid',
-          color: theme.palette.grey[500],
-        },
-      },
-    },
-    '& > tr:not(:first-child)': {
-      height: theme.spacing.unit * 3,
-      '& > th': {
-        color: theme.palette.text.secondary,
-        fontSize: theme.typography.pxToRem(15),
-      },
-    },
-  },
-  '& > tbody > tr': {
-    height: theme.spacing.unit * 4,
-    ...theme.stripedList,
-  },
-  '& td, & th': {
-    padding: theme.spacing.unit / 2,
-    verticalAlign: 'middle',
-  },
-  '& td:first-child, & th:first-child': {
-    paddingLeft: 0,
-  },
-  '& td:last-child, & th:last-child': {
-    paddingRight: 0,
-  },
-  '& td': {
-    fontSize: theme.typography.pxToRem(18),
-    border: 'none',
-  },
-}
-
 theme.alert = {
   success: {
     color: '#3c763d',
@@ -477,21 +434,41 @@ theme.navbar = {
     lineHeight: theme.typography.pxToRem(32),
   },
 }
-theme.statusPanel = {
-  title: {
-    color: '#323232',
-    textAlign: 'left',
-    fontSize: theme.typography.pxToRem(24),
-    fontWeight: 500,
-    lineHeight: theme.typography.pxToRem(29),
-    marginBottom: theme.spacing.unit * 2,
-  },
+
+const viewPanelPadding = {
+  vertical: theme.spacing.unit * 2,
+  horizontal: theme.spacing.unit * 4,
 }
 theme.viewPanel = {
+  root: {
+    maxWidth: 600,
+    margin: `${theme.spacing.unit * 2}px auto`,
+  },
+  body: {
+    padding: {
+      top: viewPanelPadding.vertical,
+      bottom: viewPanelPadding.vertical,
+      left: viewPanelPadding.horizontal,
+      right: viewPanelPadding.horizontal,
+    },
+    '$title + &': {
+      paddingTop: 0,
+    },
+  },
+  noVerticalPadding: {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
   title: {
     color: theme.palette.text.primary,
     fontSize: theme.typography.pxToRem(20),
-    paddingBottom: theme.spacing.unit / 2,
+    margin: 0,
+    padding: {
+      top: viewPanelPadding.vertical,
+      left: viewPanelPadding.horizontal,
+      right: viewPanelPadding.horizontal,
+      bottom: viewPanelPadding.vertical / 2,
+    },
     borderBottom: {
       width: 2,
       style: 'solid',
@@ -499,6 +476,63 @@ theme.viewPanel = {
     },
   },
 }
+theme.statusPanel = {
+  title: {
+    color: '#323232',
+    textAlign: 'left',
+    fontSize: theme.typography.pxToRem(24),
+    fontWeight: 500,
+    lineHeight: theme.typography.pxToRem(29),
+    margin: 0,
+    padding: theme.viewPanel.title.padding,
+  },
+}
+
+theme.defaultTable = {
+  borderCollapse: 'separate',
+  '& > thead': {
+    '& > tr:first-child': {
+      height: theme.spacing.unit * 4,
+      '& > th': {
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit / 2,
+        color: theme.palette.text.primary,
+        fontSize: theme.typography.pxToRem(20),
+        borderBottom: {
+          width: 2,
+          style: 'solid',
+          color: theme.palette.grey[500],
+        },
+      },
+    },
+    '& > tr:not(:first-child)': {
+      height: theme.spacing.unit * 3,
+      '& > th': {
+        color: theme.palette.text.secondary,
+        fontSize: theme.typography.pxToRem(15),
+      },
+    },
+  },
+  '& > tbody > tr': {
+    height: theme.spacing.unit * 4,
+    ...theme.stripedList,
+  },
+  '& td, & th': {
+    padding: theme.spacing.unit / 2,
+    verticalAlign: 'middle',
+  },
+  '& td:first-child, & th:first-child': {
+    paddingLeft: viewPanelPadding.horizontal,
+  },
+  '& td:last-child, & th:last-child': {
+    paddingRight: viewPanelPadding.horizontal,
+  },
+  '& td': {
+    fontSize: theme.typography.pxToRem(18),
+    border: 'none',
+  },
+}
+
 theme.channelState = {
   on: theme.palette.success.main,
   off: '#d8d8d8',

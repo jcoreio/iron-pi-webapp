@@ -15,7 +15,7 @@ import {required} from 'redux-form-validators'
 import isIp from 'is-ip'
 
 import type {Theme} from '../../theme/index'
-import ViewPanel from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelBody} from '../../components/ViewPanel'
 import FormTextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
 import Fader from '../../components/Fader'
@@ -126,9 +126,11 @@ class NetworkSettingsForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <ViewPanel>
-            <Typography variant="subheading">
-              <Spinner /> Loading network settings...
-            </Typography>
+            <ViewPanelBody>
+              <Typography variant="subheading">
+                <Spinner /> Loading network settings...
+              </Typography>
+            </ViewPanelBody>
           </ViewPanel>
         </div>
       )
@@ -136,57 +138,59 @@ class NetworkSettingsForm extends React.Component<Props> {
     return (
       <form id="IPAddressForm" className={classes.form} onSubmit={onSubmit}>
         <ViewPanel>
-          <Field
-            name="dhcpEnabled"
-            label="Mode"
-            component={ButtonGroupField}
-            classes={{button: classes.tallButton}}
-            availableValues={[true, false]}
-            activeButtonProps={{secondary: true}}
-            getDisplayText={dhcpEnabled => dhcpEnabled ? 'DHCP' : 'Manual'}
-            className={classes.modeField}
-            validate={required()}
-          />
-          <Fader>
-            {dhcpEnabled ? (
-              <DHCPFields
-                key="dhcp"
-                formControlClass={classes.formControl}
-                refreshButtonClass={classes.refreshButton}
-                onRefresh={onRefresh}
-                config={data && data.state && data.state.dhcpEnabled ? data.state : null}
-              />
-            ) : (
-              <StaticFields
-                key="static"
-                formControlClass={classes.formControl}
-              />
-            )}
-          </Fader>
-          <SubmitStatus
-            submitting={submitting}
-            submitSucceeded={submitSucceeded}
-            submitFailed={submitFailed}
-            error={error}
-          />
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              className={classes.tallButton}
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="raised"
-              color="primary"
-              className={classes.tallButton}
-              disabled={pristine || submitting}
-            >
-              Save
-            </Button>
-          </div>
+          <ViewPanelBody>
+            <Field
+              name="dhcpEnabled"
+              label="Mode"
+              component={ButtonGroupField}
+              classes={{button: classes.tallButton}}
+              availableValues={[true, false]}
+              activeButtonProps={{secondary: true}}
+              getDisplayText={dhcpEnabled => dhcpEnabled ? 'DHCP' : 'Manual'}
+              className={classes.modeField}
+              validate={required()}
+            />
+            <Fader>
+              {dhcpEnabled ? (
+                <DHCPFields
+                  key="dhcp"
+                  formControlClass={classes.formControl}
+                  refreshButtonClass={classes.refreshButton}
+                  onRefresh={onRefresh}
+                  config={data && data.state && data.state.dhcpEnabled ? data.state : null}
+                />
+              ) : (
+                <StaticFields
+                  key="static"
+                  formControlClass={classes.formControl}
+                />
+              )}
+            </Fader>
+            <SubmitStatus
+              submitting={submitting}
+              submitSucceeded={submitSucceeded}
+              submitFailed={submitFailed}
+              error={error}
+            />
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                className={classes.tallButton}
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                className={classes.tallButton}
+                disabled={pristine || submitting}
+              >
+                Save
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
       </form>
     )

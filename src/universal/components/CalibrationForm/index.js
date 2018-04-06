@@ -15,7 +15,7 @@ import Typography from 'material-ui/Typography'
 import ViewSlider from 'react-view-slider/lib/simpleWithTransitionContext'
 import {createSelector} from 'reselect'
 
-import ViewPanel from '../ViewPanel'
+import ViewPanel, {ViewPanelBody, ViewPanelTitle} from '../ViewPanel'
 import NumPointsStep from './NumPointsStep'
 import PointStep from './PointStep'
 import CalibrationTable from './CalibrationTable'
@@ -52,7 +52,7 @@ const styles = ({spacing, calibration}: Theme) => ({
     },
   },
   buttons: {
-    marginTop: spacing.unit * 3,
+    marginTop: spacing.unit * 2,
     display: 'flex',
     '& > :not(:first-child)': {
       marginLeft: spacing.unit,
@@ -201,9 +201,11 @@ class CalibrationForm extends React.Component<Props, State> {
       return (
         <div className={classes.form}>
           <ViewPanel>
-            <Typography variant="subheading">
-              <Spinner /> Loading channel calibration...
-            </Typography>
+            <ViewPanelBody>
+              <Typography variant="subheading">
+                <Spinner /> Loading channel calibration...
+              </Typography>
+            </ViewPanelBody>
           </ViewPanel>
         </div>
       )
@@ -235,57 +237,59 @@ class CalibrationForm extends React.Component<Props, State> {
         onSubmit={handleSubmit(isInCalibration ? saveCalibration : this.handleNext)}
       >
         <ViewPanel>
-          <h3 className={classes.title} data-test-name="calibrationFormTitle">
+          <ViewPanelTitle data-test-name="calibrationFormTitle">
             <Fader>
               {title}
             </Fader>
-          </h3>
-          <ViewSlider className={classes.bodySlider}>
-            {this.renderBody()}
-          </ViewSlider>
-          <Autocollapse className={classes.errorCollapse}>
-            {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
-          </Autocollapse>
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              component={Link}
-              to={`${match.url}/${CALIBRATION_TABLE}`}
-              className={step === 0 && !isInCalibration ? undefined : classes.hidden}
-              data-test-name="calibrationTableButton"
-            >
-              Calibration Table
-            </Button>
-            <div className={classes.flexSpacer} />
-            <Spinner in={Boolean(submitting)} />
-            <Button
-              component={Link}
-              variant="raised"
-              to={dirname(match.url)}
-              data-test-name="cancelButton"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="raised"
-              color="primary"
-              data-test-name="backButton"
-              {...backButtonProps}
-            >
-              <ChevronLeft />
-              Back
-            </Button>
-            <Button
-              variant="raised"
-              color="primary"
-              type="submit"
-              disabled={submitting}
-              data-test-name={isInCalibration ? 'okButton' : 'nextButton'}
-            >
-              {isInCalibration ? 'OK' : 'Next'}
-              {!isInCalibration && <ChevronRight />}
-            </Button>
-          </div>
+          </ViewPanelTitle>
+          <ViewPanelBody>
+            <ViewSlider className={classes.bodySlider}>
+              {this.renderBody()}
+            </ViewSlider>
+            <Autocollapse className={classes.errorCollapse}>
+              {error && <ErrorAlert>Failed to save changes: {error}</ErrorAlert>}
+            </Autocollapse>
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                component={Link}
+                to={`${match.url}/${CALIBRATION_TABLE}`}
+                className={step === 0 && !isInCalibration ? undefined : classes.hidden}
+                data-test-name="calibrationTableButton"
+              >
+                Calibration Table
+              </Button>
+              <div className={classes.flexSpacer} />
+              <Spinner in={Boolean(submitting)} />
+              <Button
+                component={Link}
+                variant="raised"
+                to={dirname(match.url)}
+                data-test-name="cancelButton"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="raised"
+                color="primary"
+                data-test-name="backButton"
+                {...backButtonProps}
+              >
+                <ChevronLeft />
+                Back
+              </Button>
+              <Button
+                variant="raised"
+                color="primary"
+                type="submit"
+                disabled={submitting}
+                data-test-name={isInCalibration ? 'okButton' : 'nextButton'}
+              >
+                {isInCalibration ? 'OK' : 'Next'}
+                {!isInCalibration && <ChevronRight />}
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
       </form>
     )

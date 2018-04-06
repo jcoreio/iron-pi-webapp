@@ -5,7 +5,7 @@ import {withStyles} from 'material-ui/styles'
 import Typography from 'material-ui/Typography'
 import type {Theme} from '../../theme/index'
 import Fader from '../Fader'
-import ViewPanel from '../ViewPanel'
+import ViewPanel, {ViewPanelBody} from '../ViewPanel'
 import MappingProblemsTable from './MappingProblemsTable'
 import type {MappingProblem} from './MappingProblemsTable'
 import Spinner from '../Spinner'
@@ -30,7 +30,11 @@ export type Props = {
 
 const MappingProblemsView = ({classes, data: {loading, MappingProblems}, getMappingProblemURL}: Props) => {
   const content = loading
-    ? <Typography variant="subheading" key="loading" className={classes.loading}><Spinner /> Loading Mapping Problems...</Typography>
+    ? (
+      <ViewPanelBody>
+        <Typography variant="subheading" key="loading" className={classes.loading}><Spinner /> Loading Mapping Problems...</Typography>
+      </ViewPanelBody>
+    )
     : (
       <MappingProblemsTable
         key="loaded"

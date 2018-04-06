@@ -11,8 +11,12 @@ const styles = ({spacing, palette}: Theme) => ({
   root: {
     display: 'flex',
     alignItems: 'center',
-    marginTop: spacing.unit * 1.5,
-    marginBottom: spacing.unit * 1.5,
+    '&:not(:first-child)': {
+      marginTop: spacing.unit * 1.5,
+    },
+    '&:not(:last-child)': {
+      marginBottom: spacing.unit * 1.5,
+    },
   },
   control: {
     flex: '1 1 auto',

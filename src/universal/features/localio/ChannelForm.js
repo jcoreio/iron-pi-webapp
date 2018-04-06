@@ -10,7 +10,7 @@ import Tooltip from 'material-ui/Tooltip'
 import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'
-import ViewPanel from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelBody} from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import MetadataItemFieldsContainer from '../../components/MetadataItemFieldsContainer'
 import {pickMetadataItemFields} from '../../components/MetadataItemFields'
@@ -287,9 +287,11 @@ class ChannelForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <ViewPanel>
-            <Typography variant="subheading">
-              <Spinner /> Loading channel configuration...
-            </Typography>
+            <ViewPanelBody>
+              <Typography variant="subheading">
+                <Spinner /> Loading channel configuration...
+              </Typography>
+            </ViewPanelBody>
           </ViewPanel>
         </div>
       )
@@ -299,73 +301,77 @@ class ChannelForm extends React.Component<Props> {
       <form id="channelForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         {Channel != null &&
           <ViewPanel>
-            <Fader animateHeight>
-              <ControlWithInfo
-                info={channelStateInfo[channelMode]}
-                key={channelMode}
-              >
-                <ChannelStateWidget channel={Channel} className={classes.formControl} />
-              </ControlWithInfo>
-            </Fader>
+            <ViewPanelBody>
+              <Fader animateHeight>
+                <ControlWithInfo
+                  info={channelStateInfo[channelMode]}
+                  key={channelMode}
+                >
+                  <ChannelStateWidget channel={Channel} className={classes.formControl} />
+                </ControlWithInfo>
+              </Fader>
+            </ViewPanelBody>
           </ViewPanel>
         }
         <ViewPanel>
-          <ControlWithInfo info="The mode of this channel">
-            <Field
-              name="config.mode"
-              component={ButtonGroupField}
-              classes={{button: classes.tallButton}}
-              availableValues={ChannelModesArray}
-              getDisplayText={getChannelModeDisplayText}
-              className={classes.formControl}
-              validate={required()}
-              Button={this.ChannelModeButton}
-            />
-          </ControlWithInfo>
-          {config && config.mode !== 'DISABLED' &&
-            <FormSection name="metadataItem">
-              <MetadataItemFieldsContainer
-                formControlClass={classes.formControl}
-                force={{
-                  dataType: 'number',
-                  isDigital: config.mode !== 'ANALOG_INPUT',
-                }}
+          <ViewPanelBody>
+            <ControlWithInfo info="The mode of this channel">
+              <Field
+                name="config.mode"
+                component={ButtonGroupField}
+                classes={{button: classes.tallButton}}
+                availableValues={ChannelModesArray}
+                getDisplayText={getChannelModeDisplayText}
+                className={classes.formControl}
+                validate={required()}
+                Button={this.ChannelModeButton}
               />
-            </FormSection>
-          }
-          <ConfigSection
-            config={config}
-            formControlClass={classes.formControl}
-            firstControlClass={classes.firstFaderChild}
-            lastControlClass={classes.lastFaderChild}
-            tallButtonClass={classes.tallButton}
-            metadata={Metadata}
-            change={change}
-          />
-          <SubmitStatus
-            submitting={submitting}
-            submitSucceeded={submitSucceeded}
-            submitFailed={submitFailed}
-            error={error}
-          />
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              className={classes.tallButton}
-              onClick={this.handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="raised"
-              color="primary"
-              className={classes.tallButton}
-              disabled={pristine || submitting}
-            >
-              Save
-            </Button>
-          </div>
+            </ControlWithInfo>
+            {config && config.mode !== 'DISABLED' &&
+              <FormSection name="metadataItem">
+                <MetadataItemFieldsContainer
+                  formControlClass={classes.formControl}
+                  force={{
+                    dataType: 'number',
+                    isDigital: config.mode !== 'ANALOG_INPUT',
+                  }}
+                />
+              </FormSection>
+            }
+            <ConfigSection
+              config={config}
+              formControlClass={classes.formControl}
+              firstControlClass={classes.firstFaderChild}
+              lastControlClass={classes.lastFaderChild}
+              tallButtonClass={classes.tallButton}
+              metadata={Metadata}
+              change={change}
+            />
+            <SubmitStatus
+              submitting={submitting}
+              submitSucceeded={submitSucceeded}
+              submitFailed={submitFailed}
+              error={error}
+            />
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                className={classes.tallButton}
+                onClick={this.handleCancel}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                className={classes.tallButton}
+                disabled={pristine || submitting}
+              >
+                Save
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
       </form>
     )

@@ -16,7 +16,7 @@ import {mqttUrlPattern} from '../../types/MQTTUrl'
 import type {MQTTPluginState} from '../../types/MQTTPluginState'
 
 import type {Theme} from '../../theme'
-import ViewPanel from '../../components/ViewPanel'
+import ViewPanel, {ViewPanelBody} from '../../components/ViewPanel'
 import ControlWithInfo from '../../components/ControlWithInfo'
 import TextField from '../../components/TextField'
 import Spinner from '../../components/Spinner'
@@ -253,9 +253,11 @@ class MQTTConfigForm extends React.Component<Props> {
       return (
         <div className={classes.form}>
           <ViewPanel>
-            <Typography variant="subheading">
-              <Spinner /> Loading MQTT configuration...
-            </Typography>
+            <ViewPanelBody>
+              <Typography variant="subheading">
+                <Spinner /> Loading MQTT configuration...
+              </Typography>
+            </ViewPanelBody>
           </ViewPanel>
         </div>
       )
@@ -267,130 +269,134 @@ class MQTTConfigForm extends React.Component<Props> {
       <form id="MQTTConfigForm" className={classes.form} onSubmit={handleSubmit(this.handleSubmit)}>
         {configState && (
           <ViewPanel>
-            <MQTTConfigState state={configState} />
+            <ViewPanelBody>
+              <MQTTConfigState state={configState} />
+            </ViewPanelBody>
           </ViewPanel>
         )}
         <ViewPanel>
-          <ControlWithInfo info="The name of the MQTT connection">
-            <Field
-              name="name"
-              label="Name"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-              normalizeOnBlur={trim}
-              validate={required()}
-            />
-          </ControlWithInfo>
-          <ControlWithInfo
-            info="The URL of the MQTT server"
-            classes={{control: classes.serverURLControl}}
-          >
-            <Field
-              name="serverURL"
-              label="Server URL"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-              normalizeOnBlur={trim}
-              validate={validateServerURL}
-            />
-            <FormHelperText>
-              Examples: mqtts://server.domain.com
-            </FormHelperText>
-            <FormHelperText>
-              <span style={{visibility: 'hidden'}}>Examples:</span> mqtt://server.domain.com:1883
-            </FormHelperText>
-          </ControlWithInfo>
-          <ControlWithInfo info="The connection protocol">
-            <Field
-              name="protocol"
-              component={ButtonGroupField}
-              classes={{button: classes.tallButton}}
-              availableValues={ProtocolsArray}
-              activeButtonProps={{secondary: true}}
-              getDisplayText={getProtocolDisplayText}
-              className={classes.formControl}
-              validate={required()}
-            />
-          </ControlWithInfo>
-          <Fader>
-            {ProtocolFields && (
-              <ProtocolFields key={protocol} formControlClass={classes.formControl} />
-            )}
-          </Fader>
-          <ControlWithInfo info="TODO">
-            <NumericField
-              name="minPublishInterval"
-              label="Minimum Transmit Interval"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-              InputProps={{
-                endAdornment: <InputAdornment position="end">milliseconds</InputAdornment>,
-              }}
-            />
-          </ControlWithInfo>
-          <ControlWithInfo info="The username to connect with">
-            <Field
-              name="username"
-              label="Username"
-              type="text"
-              component={TextField}
-              className={classes.formControl}
-            />
-          </ControlWithInfo>
-          <ControlWithInfo info="The password to connect with">
-            <Field
-              name="password"
-              label="Password"
-              type="password"
-              component={TextField}
-              className={classes.formControl}
-            />
-          </ControlWithInfo>
-
-          <SubmitStatus
-            submitting={submitting}
-            submitSucceeded={submitSucceeded}
-            submitFailed={submitFailed}
-            error={error}
-          />
-          <div className={classes.buttons}>
-            <Button
-              variant="raised"
-              className={classes.tallButton}
-              onClick={this.handleCancel}
+          <ViewPanelBody>
+            <ControlWithInfo info="The name of the MQTT connection">
+              <Field
+                name="name"
+                label="Name"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                normalizeOnBlur={trim}
+                validate={required()}
+              />
+            </ControlWithInfo>
+            <ControlWithInfo
+              info="The URL of the MQTT server"
+              classes={{control: classes.serverURLControl}}
             >
-              Cancel
-            </Button>
-            <ConfirmDeletePopover
-              onConfirmDelete={this.handleDelete}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-            >
-              {({bind}) => (
-                <Button variant="raised" className={classes.tallButton} {...bind}>
-                  Delete
-                </Button>
+              <Field
+                name="serverURL"
+                label="Server URL"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                normalizeOnBlur={trim}
+                validate={validateServerURL}
+              />
+              <FormHelperText>
+                Examples: mqtts://server.domain.com
+              </FormHelperText>
+              <FormHelperText>
+                <span style={{visibility: 'hidden'}}>Examples:</span> mqtt://server.domain.com:1883
+              </FormHelperText>
+            </ControlWithInfo>
+            <ControlWithInfo info="The connection protocol">
+              <Field
+                name="protocol"
+                component={ButtonGroupField}
+                classes={{button: classes.tallButton}}
+                availableValues={ProtocolsArray}
+                activeButtonProps={{secondary: true}}
+                getDisplayText={getProtocolDisplayText}
+                className={classes.formControl}
+                validate={required()}
+              />
+            </ControlWithInfo>
+            <Fader>
+              {ProtocolFields && (
+                <ProtocolFields key={protocol} formControlClass={classes.formControl} />
               )}
-            </ConfirmDeletePopover>
-            <Button
-              type="submit"
-              variant="raised"
-              color="primary"
-              className={classes.tallButton}
-              disabled={pristine || submitting}
-            >
-              Save
-            </Button>
-          </div>
+            </Fader>
+            <ControlWithInfo info="TODO">
+              <NumericField
+                name="minPublishInterval"
+                label="Minimum Transmit Interval"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">milliseconds</InputAdornment>,
+                }}
+              />
+            </ControlWithInfo>
+            <ControlWithInfo info="The username to connect with">
+              <Field
+                name="username"
+                label="Username"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+              />
+            </ControlWithInfo>
+            <ControlWithInfo info="The password to connect with">
+              <Field
+                name="password"
+                label="Password"
+                type="password"
+                component={TextField}
+                className={classes.formControl}
+              />
+            </ControlWithInfo>
+
+            <SubmitStatus
+              submitting={submitting}
+              submitSucceeded={submitSucceeded}
+              submitFailed={submitFailed}
+              error={error}
+            />
+            <div className={classes.buttons}>
+              <Button
+                variant="raised"
+                className={classes.tallButton}
+                onClick={this.handleCancel}
+              >
+                Cancel
+              </Button>
+              <ConfirmDeletePopover
+                onConfirmDelete={this.handleDelete}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+              >
+                {({bind}) => (
+                  <Button variant="raised" className={classes.tallButton} {...bind}>
+                    Delete
+                  </Button>
+                )}
+              </ConfirmDeletePopover>
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                className={classes.tallButton}
+                disabled={pristine || submitting}
+              >
+                Save
+              </Button>
+            </div>
+          </ViewPanelBody>
         </ViewPanel>
         {id != null &&
           <React.Fragment>
