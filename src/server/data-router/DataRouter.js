@@ -270,80 +270,92 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     try {
       this._lastIngestTime = this._dispatchTime = time
       this._dispatchInProgress = true
-      let sanityCount = 50
-      let tagsChangedThisPass: Set<string> = new Set()
-      const tagsChangedThisCycle: Set<string> = new Set()
-      let pluginsChangedThisPass: Set<string> = new Set()
-      const pluginsChangedThisCycle: Set<string> = new Set()
+
+      // This outer loop handles cases when plugins dispatch new data in response
+      // to a dispatchCycleDone() call
+      let outerSanityCount = 20
       do {
-        if (--sanityCount <= 0)
-          throw Error(`DataRouter detected an infinite loop in the digest cycle`)
-        tagsChangedThisPass = new Set()
-        pluginsChangedThisPass = new Set()
+        if (--outerSanityCount <= 0)
+          throw Error(`DataRouter detected an infinite loop in the outer digest cycle`)
 
-        forOwn(this._dispatchTagMap, (pair: TimeValuePair, tag: string) => {
-          this._tagMap[tag] = pair
-          tagsChangedThisPass.add(tag)
-        })
-        this._dispatchTagMap = {}
+        let innerSanityCount = 50
+        let tagsChangedThisPass: Set<string> = new Set()
+        const tagsChangedThisCycle: Set<string> = new Set()
+        let pluginsChangedThisPass: Set<string> = new Set()
+        const pluginsChangedThisCycle: Set<string> = new Set()
 
-        tagsChangedThisPass.forEach((tag: string) => {
-          tagsChangedThisCycle.add(tag)
-          const pluginKeysForTag: ?Set<string> = this._tagsToDestinationPluginKeys.get(tag)
-          if (pluginKeysForTag) {
-            pluginKeysForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
-          }
-        })
+        // This inner loop handles cases when plugins dispatch new data in response
+        // to an inputsChanged() call
+        do {
+          if (--innerSanityCount <= 0)
+            throw Error(`DataRouter detected an infinite loop in the inner digest cycle`)
+          tagsChangedThisPass = new Set()
+          pluginsChangedThisPass = new Set()
 
-        pluginsChangedThisPass.forEach((pluginId: string) => {
-          const plugin = this._pluginsByKey.get(pluginId)
-          if (plugin) {
-            pluginsChangedThisCycle.add(pluginId)
-            if (plugin.inputsChanged) {
-              try {
-                plugin.inputsChanged({
-                  time,
-                  changedTags: tagsChangedThisPass,
-                  tagMap: this._tagMap
-                })
-              } catch (err) {
-                const warningKey = `inputsChangedError-${pluginId}`
-                if (!this._printedWarningKeys.has(warningKey)) {
-                  this._printedWarningKeys.add(warningKey)
-                  log.error('caught error during dispatch', err.stack || err)
+          forOwn(this._dispatchTagMap, (pair: TimeValuePair, tag: string) => {
+            this._tagMap[tag] = pair
+            tagsChangedThisPass.add(tag)
+          })
+          this._dispatchTagMap = {}
+
+          tagsChangedThisPass.forEach((tag: string) => {
+            tagsChangedThisCycle.add(tag)
+            const pluginKeysForTag: ?Set<string> = this._tagsToDestinationPluginKeys.get(tag)
+            if (pluginKeysForTag) {
+              pluginKeysForTag.forEach((pluginId: string) => pluginsChangedThisPass.add(pluginId))
+            }
+          })
+
+          pluginsChangedThisPass.forEach((pluginId: string) => {
+            const plugin = this._pluginsByKey.get(pluginId)
+            if (plugin) {
+              pluginsChangedThisCycle.add(pluginId)
+              if (plugin.inputsChanged) {
+                try {
+                  plugin.inputsChanged({
+                    time,
+                    changedTags: tagsChangedThisPass,
+                    tagMap: this._tagMap
+                  })
+                } catch (err) {
+                  const warningKey = `inputsChangedError-${pluginId}`
+                  if (!this._printedWarningKeys.has(warningKey)) {
+                    this._printedWarningKeys.add(warningKey)
+                    log.error('caught error during dispatch', err.stack || err)
+                  }
                 }
               }
+            } else {
+              const warningKey = `missingPlugin-${pluginId}`
+              if (!this._printedWarningKeys.has(warningKey)) {
+                this._printedWarningKeys.add(warningKey)
+                log.error(Error(`could not find plugin with ID ${pluginId}`).stack)
+              }
             }
-          } else {
-            const warningKey = `missingPlugin-${pluginId}`
-            if (!this._printedWarningKeys.has(warningKey)) {
-              this._printedWarningKeys.add(warningKey)
-              log.error(Error(`could not find plugin with ID ${pluginId}`).stack)
+          })
+        } while (pluginsChangedThisPass.size)
+
+        // Call dispatchCycleDone on each plugin
+        this._plugins.forEach((plugin: DataPlugin) => {
+          if (plugin.dispatchCycleDone) {
+            const pluginKey = getPluginKey(plugin.pluginInfo())
+            try {
+              (plugin: any).dispatchCycleDone({
+                time,
+                changedTags: tagsChangedThisCycle,
+                inputsChanged: pluginsChangedThisCycle.has(pluginKey),
+                tagMap: this._tagMap
+              })
+            } catch (err) {
+              const warningKey = `dispatchCycleDoneError-${pluginKey}`
+              if (!this._printedWarningKeys.has(warningKey)) {
+                this._printedWarningKeys.add(warningKey)
+                log.error('caught error during dispatchCycleDone', err.stack || err)
+              }
             }
           }
         })
-      } while (pluginsChangedThisPass.size)
-
-      // Call dispatchCycleDone on each plugin
-      this._plugins.forEach((plugin: DataPlugin) => {
-        if (plugin.dispatchCycleDone) {
-          const pluginKey = getPluginKey(plugin.pluginInfo())
-          try {
-            (plugin: any).dispatchCycleDone({
-              time,
-              changedTags: tagsChangedThisCycle,
-              inputsChanged: pluginsChangedThisCycle.has(pluginKey),
-              tagMap: this._tagMap
-            })
-          } catch (err) {
-            const warningKey = `dispatchCycleDoneError-${pluginKey}`
-            if (!this._printedWarningKeys.has(warningKey)) {
-              this._printedWarningKeys.add(warningKey)
-              log.error('caught error during dispatchCycleDone', err.stack || err)
-            }
-          }
-        }
-      })
+      } while (Object.keys(this._dispatchTagMap).length)
 
       this._lastDispatchOk = true
     } catch (err) {
