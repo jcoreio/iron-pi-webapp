@@ -63,10 +63,10 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
     if (!this._channels.length) {
       await Promise.all(range(CM_NUM_IO).map(async (id: number): Promise<any> => {
-        const tag = `local${id + 1}`
+        const tag = `channel${id + 1}`
         const item = {
           tag,
-          name: `Local ${id + 1}`,
+          name: `Channel ${id + 1}`,
           dataType: 'number',
           isDigital: true,
           units: 'V',
