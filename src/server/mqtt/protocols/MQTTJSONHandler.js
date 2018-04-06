@@ -1,5 +1,6 @@
 // @flow
 
+import assert from 'assert'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import mqtt from 'mqtt'
 import logger from 'log4jcore'
@@ -7,7 +8,7 @@ import logger from 'log4jcore'
 import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
 
-import type {DataValueToMQTT, MetadataValueToMQTT, ValuesFromMQTTMap} from '../MQTTTypes'
+import type {DataValueToMQTT, MetadataValueToMQTT} from '../MQTTTypes'
 
 const log = logger('MQTTJSONHandler')
 
@@ -33,13 +34,15 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
   constructor(args: {config: JSONHandlerConfig}) {
     super()
     this._config = args.config
+  }
+
+  start() {
     this._setupClient()
   }
 
   destroy() {
     this._destroyed = true
-    if (this._client)
-      this._client.end()
+    this._endClient()
     const createNewClientTimeout = this._createNewClientTimeout
     this._createNewClientTimeout = undefined
     if (createNewClientTimeout)
@@ -47,8 +50,7 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
   }
 
   _setupClient() {
-    if (this._client)
-      this._client.end()
+    this._endClient()
     const {serverURL, username, password, clientId, dataFromMQTTTopic} = this._config
     const client = this._client = mqtt.connect(serverURL, {
       clientId,
@@ -83,6 +85,12 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
     client.on('message', (topic: string, message: Buffer) => this._handleDataFromMQTT(topic, message))
   }
 
+  _endClient() {
+    const client = this._client
+    this._client = undefined
+    if (client) client.end()
+  }
+
   publishData(args: {data: Array<DataValueToMQTT>, time: number}) {
     const {data, time} = args
 
@@ -112,12 +120,23 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
     this.publishData({data, time})
   }
 
+  _dataFromMQTTErrorLogged: boolean = false
+
   _handleDataFromMQTT(topic: string, message: Buffer) {
-    log.info(`message from MQTT: topic: ${topic}, message ${message.toString('utf8')}`)
-    const valuesFromMQTT: ValuesFromMQTTMap = {}
-    // for (let metric: SparkPlugDataMertic of message.metrics) {
-    //   valuesFromMQTT[metric.name] = metric.value
-    // }
-    this.emit(EVENT_DATA_FROM_MQTT, valuesFromMQTT)
+    try {
+      const strMessage = message.toString('utf8')
+      const parsed = JSON.parse(strMessage)
+      assert(parsed && typeof parsed === 'object', `message is not a valid JSON object: "${strMessage}"`)
+      const {data} = parsed
+      assert(data !== undefined, `message does not contain a data field: "${strMessage}"`)
+      assert(typeof data === 'object', `data field is not an object: "${strMessage}"`)
+      this.emit(EVENT_DATA_FROM_MQTT, data)
+      this._dataFromMQTTErrorLogged = false
+    } catch (err) {
+      if (!this._dataFromMQTTErrorLogged) {
+        log.error(`MQTT JSON message receive error: ${err.stack}`)
+        this._dataFromMQTTErrorLogged = true
+      }
+    }
   }
 }
