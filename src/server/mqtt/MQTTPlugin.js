@@ -356,9 +356,15 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       const channelConfig: ?ChannelFromMQTTConfig = this._channelsFromMQTTConfigs[mqttTag]
       if (channelConfig) {
         const {internalTag} = channelConfig
+
+        const acceptValue = (value: any) => {
+          valuesBySystemTag[internalTag] = value
+          valuesBySystemTag[tags.mqttValue(mqttTag)] = value
+        }
+
         if ('string' === channelConfig.dataType) {
           if (value == null || typeof value === 'string') {
-            valuesBySystemTag[internalTag] = value
+            acceptValue(value)
           } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
             log.error(`type mismatch for ${internalTag}: expected string, was ${typeof value}`)
             this._channelsFromMQTTWarningsPrinted.add(internalTag)
@@ -371,7 +377,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
               valueWithSlopeOffset *= multiplier
             if (offset != null)
               valueWithSlopeOffset += offset
-            valuesBySystemTag[internalTag] = valueWithSlopeOffset
+            acceptValue(valueWithSlopeOffset)
           } else if (!this._channelsFromMQTTWarningsPrinted.has(internalTag)) {
             log.error(`type mismatch for ${internalTag}: expected number, was ${typeof value}`)
             this._channelsFromMQTTWarningsPrinted.add(internalTag)
