@@ -4,6 +4,7 @@ import path from 'path'
 import promisify from 'es6-promisify'
 import glob from 'glob'
 import {debounce} from 'lodash'
+import logger from 'log4jcore'
 import type {DataPlugin, Feature, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import EventEmitter from '@jcoreio/typed-event-emitter/index'
 import MQTTPlugin, {MQTT_PLUGIN_EVENT_STATE_CHANGE} from './MQTTPlugin'
@@ -18,6 +19,8 @@ import addSubscriptionFields from './graphql/subscription/addSubscriptionFields'
 import {FEATURE_EVENT_DATA_PLUGINS_CHANGE} from '../data-router/PluginTypes'
 import {MQTT_PLUGIN_STATE_CHANGE} from './graphql/subscription/constants'
 import type {MQTTPluginState} from '../../universal/types/MQTTPluginState'
+
+const log = logger('MQTTFeature')
 
 export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> implements Feature {
   _dataPlugins: Map<number, MQTTPlugin> = new Map()
@@ -81,7 +84,7 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
       this._handleMQTTPluginStateChange(plugin.getState())
       if (emitChange !== false) this._emitPluginsChanged()
     } catch (error) {
-      console.error(error.stack) // eslint-disable-line no-console
+      log.error(`could not create MQTT plugin instance: ${error.stack}`)
     }
   }
 
@@ -89,12 +92,19 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
     this._resources.pubsub.publish(`${MQTT_PLUGIN_STATE_CHANGE}/${state.id}`, {MQTTPluginState: state})
   }
 
-  _handleMQTTConfigCreated = (instance: SequelizeMQTTConfig) => {
-    this._createDataPlugin(instance)
+  _handleMQTTConfigCreatedOrUpdated = async (instance: SequelizeMQTTConfig) => {
+    const instanceWithChannels = await SequelizeMQTTConfig.findById(instance.id, {
+      include: [
+        {association: SequelizeMQTTConfig.ChannelsFromMQTT},
+        {association: SequelizeMQTTConfig.ChannelsToMQTT},
+      ]
+    })
+    if (instanceWithChannels)
+      this._createDataPlugin(instanceWithChannels)
+    else
+      log.error(`could not fetch MQTT plugin config with channels for instance ${instance.id}`)
   }
-  _handleMQTTConfigUpdated = (instance: SequelizeMQTTConfig) => {
-    this._createDataPlugin(instance)
-  }
+
   _handleMQTTConfigDestroyed = (instance: SequelizeMQTTConfig) => {
     this._destroyDataPlugin(instance.id)
   }
@@ -110,8 +120,8 @@ export default class MQTTFeature extends EventEmitter<FeatureEmittedEvents> impl
   }
 
   async start(): Promise<void> {
-    SequelizeMQTTConfig.addHook('afterCreate', 'MQTTFeature._handleMQTTConfigCreated', this._handleMQTTConfigCreated)
-    SequelizeMQTTConfig.addHook('afterUpdate', 'MQTTFeature._handleMQTTConfigUpdated', this._handleMQTTConfigUpdated)
+    SequelizeMQTTConfig.addHook('afterCreate', 'MQTTFeature._handleMQTTConfigCreated', this._handleMQTTConfigCreatedOrUpdated)
+    SequelizeMQTTConfig.addHook('afterUpdate', 'MQTTFeature._handleMQTTConfigUpdated', this._handleMQTTConfigCreatedOrUpdated)
     SequelizeMQTTConfig.addHook('afterDestroy', 'MQTTFeature._handleMQTTConfigDestroyed', this._handleMQTTConfigDestroyed)
     SequelizeMQTTChannelConfig.addHook('afterCreate', 'MQTTFeature._handleMQTTChannelConfigCreated', this._handleMQTTChannelConfigChange)
     SequelizeMQTTChannelConfig.addHook('afterUpdate', 'MQTTFeature._handleMQTTChannelConfigUpdated', this._handleMQTTChannelConfigChange)
