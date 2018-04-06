@@ -35,7 +35,9 @@ setInterval(() => {
   range(NUM_OUTPUTS).forEach(outputIdx =>
     data[`channel${outputIdx + OUTPUTS_OFFSET}`] = outputIdx === curOutputIdx ? 1 : 0)
 
-  client.publish('node/node1/commands', JSON.stringify({timestamp: Date.now(), data}))
+  const topic = 'node/node1/commands'
+  console.log(`publishing to ${topic}: ${JSON.stringify(data)}`)
+  client.publish(topic, JSON.stringify({timestamp: Date.now(), data}))
 }, 2000)
 
 client.on('error', (err) => {
