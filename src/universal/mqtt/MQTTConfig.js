@@ -48,7 +48,6 @@ export type ProtocolRequiredFields =
   } |
   {
     protocol: 'TEXT_JSON',
-
     // Allow JSON configs to omit any of these topic fields. If the topic is not
     // provided, the associated function (data output, data input, or metadata output)
     // will just be disabled
@@ -69,6 +68,8 @@ type MQTTConfigBase = {
   protocol: Protocol,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
+
+  dataFromMQTTTimeout?: ?number,
 
   /**
    * If true, plugin will automatically publish all public tags and metadata in addition

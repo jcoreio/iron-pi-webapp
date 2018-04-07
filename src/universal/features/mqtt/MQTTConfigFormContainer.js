@@ -36,6 +36,7 @@ const configFields = `
   metadataToMQTTTopic
   dataFromMQTTTopic
   minPublishInterval
+  dataFromMQTTTimeout
   publishAllPublicTags
 `
 

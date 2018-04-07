@@ -90,6 +90,7 @@ export type MQTTConfig = {
   dataToMQTTTopic?: ?string,
   metadataToMQTTTopic?: ?string,
   dataFromMQTTTopic?: ?string,
+  dataFromMQTTTimeout?: ?number,
   protocol: Protocol,
 
   minPublishInterval?: ?number, // minimum interval, in milliseconds, for publishing data
@@ -143,7 +144,7 @@ function _shouldInitialize({data, id, loadedId, pristine}: Props): boolean {
 
 const pickFormFields = ({
   id, name, serverURL, username, password, groupId, nodeId, protocol,
-  dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic,
+  dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic, dataFromMQTTTimeout,
   minPublishInterval, publishAllPublicTags,
 }: MQTTConfig) => {
   username = username || null
@@ -151,7 +152,7 @@ const pickFormFields = ({
   if (!Number.isFinite(minPublishInterval)) minPublishInterval = null
   return {
     id, name, serverURL, username, password, groupId, nodeId, protocol, dataToMQTTTopic, metadataToMQTTTopic,
-    dataFromMQTTTopic, minPublishInterval, publishAllPublicTags,
+    dataFromMQTTTopic, dataFromMQTTTimeout, minPublishInterval, publishAllPublicTags,
   }
 }
 
@@ -325,10 +326,22 @@ class MQTTConfigForm extends React.Component<Props> {
                 <ProtocolFields key={protocol} formControlClass={classes.formControl} />
               )}
             </Fader>
-            <ControlWithInfo info="TODO">
+            <ControlWithInfo info="Minimum time, in milliseconds, between data messages to MQTT">
               <NumericField
                 name="minPublishInterval"
                 label="Minimum Transmit Interval"
+                type="text"
+                component={TextField}
+                className={classes.formControl}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">milliseconds</InputAdornment>,
+                }}
+              />
+            </ControlWithInfo>
+            <ControlWithInfo info="Time, in milliseconds, that data received from MQTT is considered valid">
+              <NumericField
+                name="dataFromMQTTTimeout"
+                label="Receive Hold Time"
                 type="text"
                 component={TextField}
                 className={classes.formControl}

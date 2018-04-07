@@ -36,6 +36,7 @@ export type MQTTConfigAttributes = MQTTConfigInitAttributes & {
   dataFromMQTTTopic: ?string;
   groupId: ?string;
   nodeId: ?string;
+  dataFromMQTTTimeout?: ?number,
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,6 +60,7 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
   dataToMQTTTopic: ?string;
   metadataToMQTTTopic: ?string;
   dataFromMQTTTopic: ?string;
+  dataFromMQTTTimeout: ?number;
   createdAt: Date;
   updatedAt: Date;
   channelsToMQTT: ?Array<MQTTChannelConfig>;
@@ -150,6 +152,13 @@ export default class MQTTConfig extends Model<MQTTConfigAttributes, MQTTConfigIn
       dataFromMQTTTopic: {
         type: Sequelize.STRING,
         allowNull: true,
+      },
+      dataFromMQTTTimeout: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        validate: {
+          min: 0,
+        }
       },
       minPublishInterval: {
         type: Sequelize.INTEGER,

@@ -33,6 +33,9 @@ import {
 
 const log = logger('MQTTPlugin')
 
+const DATA_FROM_MQTT_TIMEOUT_DEFAULT = 1000 * 60 // 1 minute
+const DATA_FROM_MQTT_TIMEOUT_MIN = 100 // milliseconds
+
 type ToMQTTChannelState = {
   config: MQTTChannelConfig,
   sentValue: any,
@@ -71,7 +74,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   _metadataToMQTT: Array<MetadataValueToMQTT> = []
 
   _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
-  _tagsPublishedFromMQTT: Set<string> = new Set()
+  // Mapping from MQTT tag to last receive timestamp
+  _dataFromMQTTRxTimes: Map<string, number> = new Map()
 
   _channelsFromMQTTWarningsPrinted: Set<string> = new Set()
 
@@ -83,33 +87,39 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   _lastTxTime: number = 0;
   _publishDataTimeout: ?number;
 
+  _rxMonitorInterval: ?number
+  _dataFromMQTTTimeout: number
+
   _state: MQTTPluginState
 
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
-    this._config = cleanMQTTConfig(args.config)
-    ProtocolRequiredFieldsType.assert(this._config)
+    const config = this._config = cleanMQTTConfig(args.config)
+    const {dataFromMQTTTimeout} = (config: any)
+    this._dataFromMQTTTimeout = (dataFromMQTTTimeout && Number.isFinite(dataFromMQTTTimeout)) ?
+      Math.max(DATA_FROM_MQTT_TIMEOUT_MIN, dataFromMQTTTimeout) : DATA_FROM_MQTT_TIMEOUT_DEFAULT
+    ProtocolRequiredFieldsType.assert(config)
     this._pluginInfo = {
       pluginType: 'mqtt',
       pluginId: args.config.id,
-      pluginName: args.config.name || `MQTT Plugin ${args.config.id}`
+      pluginName: args.config.name || `MQTT Plugin ${config.id}`
     }
     this._state = {
-      id: args.config.id,
+      id: config.id,
       status: MQTT_PLUGIN_STATUS_CONNECTING,
     }
     this._resources = args.resources
 
-    const {protocol} = this._config
+    const {protocol} = config
     switch (protocol) {
     case MQTT_PROTOCOL_SPARKPLUG: {
-      const {serverURL, username, password, groupId, nodeId} = (this._config: any)
-      this._protocolHandler = new SparkPlugHandler({config: {serverURL, username, password, groupId, nodeId}})
+      const {serverURL, username, password, groupId, nodeId, dataFromMQTTTimeout} = (config: any)
+      this._protocolHandler = new SparkPlugHandler({config: {serverURL, username, password, groupId, nodeId, dataFromMQTTTimeout}})
       break
     }
     case MQTT_PROTOCOL_TEXT_JSON: {
-      const {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic} = (this._config: any)
-      this._protocolHandler = new MQTTJSONHandler({config: {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic}})
+      const {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic, dataFromMQTTTimeout} = (this._config: any)
+      this._protocolHandler = new MQTTJSONHandler({config: {serverURL, username, password, clientId, dataToMQTTTopic, metadataToMQTTTopic, dataFromMQTTTopic, dataFromMQTTTimeout}})
       break
     }
     default: throw new Error(`unrecognized MQTT protocol: was ${protocol}, expected '${MQTT_PROTOCOL_SPARKPLUG}' or '${MQTT_PROTOCOL_TEXT_JSON}'`)
@@ -145,8 +155,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       status: MQTT_PLUGIN_STATUS_ERROR,
     })
     const valuesToPublish: ValuesFromMQTTMap = {}
-    this._tagsPublishedFromMQTT.forEach(tag => valuesToPublish[tag] = null)
-    this._tagsPublishedFromMQTT.clear()
+    this._dataFromMQTTRxTimes.forEach((rxTime, tag) => valuesToPublish[tag] = null)
+    this._dataFromMQTTRxTimes.clear()
     if (Object.keys(valuesToPublish).length)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
   }
@@ -228,6 +238,19 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._updateMQTTChannels()
     this._metadataToMQTT = this._calcMetadataToMQTT()
     this._protocolHandler.start()
+    this._stopRxMonitor()
+    const {channelsFromMQTT} = this._config
+    if (channelsFromMQTT && channelsFromMQTT.length) {
+      const timeoutCheckIntervalTime = (this._dataFromMQTTTimeout > 5000) ? 1000 : 100
+      this._rxMonitorInterval = setInterval(this._checkRxTimeouts, timeoutCheckIntervalTime)
+    }
+  }
+
+  _stopRxMonitor() {
+    if (this._rxMonitorInterval) {
+      clearInterval(this._rxMonitorInterval)
+      this._rxMonitorInterval = undefined
+    }
   }
 
   tagsChanged() {
@@ -350,6 +373,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _setValuesFromMQTT(valuesByMQTTTag: ValuesFromMQTTMap) {
+    const now = Date.now()
     const valuesBySystemTag: ValuesMap = {}
     for (let mqttTag in valuesByMQTTTag) {
       const value = valuesByMQTTTag[mqttTag]
@@ -360,6 +384,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
         const acceptValue = (value: any) => {
           valuesBySystemTag[internalTag] = value
           valuesBySystemTag[tags.mqttValue(mqttTag)] = value
+          this._dataFromMQTTRxTimes.set(internalTag, now)
+          this._dataFromMQTTRxTimes.set(tags.mqttValue(mqttTag), now)
         }
 
         if ('string' === channelConfig.dataType) {
@@ -386,15 +412,25 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       }
     }
 
-    // Track which tags we're publishing, so that we can mark them unavailable when there's
-    // a disconnect or error
-    for (let tag in valuesBySystemTag) {
-      this._tagsPublishedFromMQTT.add(tag)
-    }
-
     if (Object.keys(valuesBySystemTag).length) {
       log.info(`Publishing data from MQTT: ${JSON.stringify(valuesBySystemTag)}`)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesBySystemTag)
+    }
+  }
+
+  _checkRxTimeouts = () => {
+    const timedOutValues: ValuesMap = {}
+    const minRxTime = Date.now() - this._dataFromMQTTTimeout
+    this._dataFromMQTTRxTimes.forEach((rxTime: number, tag: string) => {
+      if (rxTime < minRxTime) {
+        timedOutValues[tag] = null
+        this._dataFromMQTTRxTimes.delete(tag)
+      }
+    })
+
+    if (Object.keys(timedOutValues).length) {
+      log.info(`Publishing timeouts for tags: ${Object.keys(timedOutValues).join(', ')}`)
+      this.emit(DATA_PLUGIN_EVENT_DATA, timedOutValues)
     }
   }
 }
