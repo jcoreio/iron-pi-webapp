@@ -91,6 +91,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   _rxMonitorInterval: ?number
   _dataFromMQTTTimeout: number
 
+  _connected: boolean = false
   _state: MQTTPluginState
 
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
@@ -143,6 +144,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _handleConnect = () => {
+    this._connected = false
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_CONNECTED,
@@ -152,18 +154,29 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _handleDisconnect = () => {
+    this._connected = false
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_ERROR,
     })
-    const valuesToPublish: ValuesFromMQTTMap = {}
-    this._dataFromMQTTRxTimes.forEach((rxTime, tag) => valuesToPublish[tag] = null)
+
     this._dataFromMQTTRxTimes.clear()
+    const valuesToPublish: ValuesFromMQTTMap = {}
+    const enabledChannels = (channels: ?Array<MQTTChannelConfig>) => (channels || []).filter(channel => channel.enabled)
+    for (let channelConfig: MQTTChannelConfig of enabledChannels(this._config.channelsToMQTT)) {
+      valuesToPublish[MQTTTags.toMQTTValue(this._id, channelConfig.mqttTag)] = null
+    }
+    for (let channelConfig: MQTTChannelConfig of enabledChannels(this._config.channelsFromMQTT)) {
+      valuesToPublish[channelConfig.internalTag] = null
+      valuesToPublish[MQTTTags.fromMQTTValue(this._id, channelConfig.mqttTag)] = null
+    }
+
     if (Object.keys(valuesToPublish).length)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
   }
 
   _handleError = (err: Error) => {
+    this._connected = false
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_ERROR,
@@ -181,21 +194,11 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     return mqttConfigToDataPluginMappings(this._config)
   }
 
-  inputsChanged() {
-    const changedValues: ValuesMap = {}
-    for (let state: ToMQTTChannelState of this._getChannelsToSend()) {
-      changedValues[MQTTTags.toMQTTValue(this._id, state.config.mqttTag)] = state.curValue
-    }
-    if (Object.keys(changedValues).length) {
-      this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
-    }
-  }
-
   dispatchCycleDone(event: CycleDoneEvent) {
-    const dataMaybeChanged = this._config.publishAllPublicTags || event.inputsChanged
+    const txMaybeRequired = this._connected && (this._config.publishAllPublicTags || event.inputsChanged)
     // If _publishDataTimeout is set, we're already waiting on a delayed publish, so we can
     // just let the existing timeout expire
-    if (dataMaybeChanged && !this._publishDataTimeout) {
+    if (txMaybeRequired && !this._publishDataTimeout) {
       const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
       if (channelsToSend.length) {
         const timeSinceLastTx = event.time - this._lastTxTime
@@ -339,23 +342,36 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   _publishAll() {
     this._protocolHandler.publishAll({
       metadata: this._metadataToMQTT,
-      data: this._generateDataMessage(this._toMQTTChannelStates),
+      data: this._generateDataMessage(this._getChannelsToSend({sendAll: true})),
       time: Date.now()
     })
   }
 
+  /**
+   * Generates a data update to MQTT. Also emits updates to the internal "MQTT value" tags.
+   * @param channelsToSend
+   * @returns {Array<DataValueToMQTT>} Array of items to send to the protocol
+   * @private
+   */
   _generateDataMessage(channelsToSend: Array<ToMQTTChannelState>): Array<DataValueToMQTT> {
-    const values: Array<DataValueToMQTT> = []
+    const valuesToMQTT: Array<DataValueToMQTT> = []
+    const internalTagValues = {}
     for (let channelToSend: ToMQTTChannelState of channelsToSend) {
       channelToSend.sentValue = channelToSend.curValue
+      const {mqttTag} = channelToSend.config
+      const value = channelToSend.curValue
       const metadata: ?MetadataItem = channelToSend.config.metadataItem
-      values.push({
-        tag: channelToSend.config.mqttTag,
-        value: channelToSend.curValue,
+      valuesToMQTT.push({
+        tag: mqttTag,
+        value,
         type: metadata && DATA_TYPE_STRING === metadata.dataType ? DATA_TYPE_STRING : DATA_TYPE_NUMBER
       })
+      internalTagValues[MQTTTags.toMQTTValue(this._id, mqttTag)] = value
     }
-    return values
+    if (Object.keys(internalTagValues).length) {
+      this.emit(DATA_PLUGIN_EVENT_DATA, internalTagValues)
+    }
+    return valuesToMQTT
   }
 
   _calcMetadataToMQTT(): Array<MetadataValueToMQTT> {
