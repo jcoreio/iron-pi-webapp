@@ -298,11 +298,13 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       }
       }
 
-      data[LocalIOTags.controlValue(id)] = controlValue
       data[LocalIOTags.systemValue(id)] = systemValue
       if (tag && !isOutputtingATag(config))
         data[tag] = systemValue
-      data[LocalIOTags.rawOutput(id)] = rawOutput
+      if ('DIGITAL_OUTPUT' === config.mode) {
+        data[LocalIOTags.controlValue(id)] = controlValue
+        data[LocalIOTags.rawOutput(id)] = rawOutput
+      }
     }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
