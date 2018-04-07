@@ -64,6 +64,7 @@ type MQTTPluginEmittedEvents = {
 
 export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> implements DataPlugin {
   _config: MQTTConfig;
+  _id: number;
   _pluginInfo: PluginInfo;
   _resources: MQTTPluginResources;
 
@@ -95,6 +96,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   constructor(args: {config: MQTTConfig, resources: MQTTPluginResources}) {
     super()
     const config = this._config = cleanMQTTConfig(args.config)
+    this._id = config.id
     const {dataFromMQTTTimeout} = (config: any)
     this._dataFromMQTTTimeout = (dataFromMQTTTimeout && Number.isFinite(dataFromMQTTTimeout)) ?
       Math.max(DATA_FROM_MQTT_TIMEOUT_MIN, dataFromMQTTTimeout) : DATA_FROM_MQTT_TIMEOUT_DEFAULT
@@ -182,7 +184,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   inputsChanged() {
     const changedValues: ValuesMap = {}
     for (let state: ToMQTTChannelState of this._getChannelsToSend()) {
-      changedValues[MQTTTags.toMQTTValue(state.config.mqttTag)] = state.curValue
+      changedValues[MQTTTags.toMQTTValue(this._id, state.config.mqttTag)] = state.curValue
     }
     if (Object.keys(changedValues).length) {
       this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
@@ -383,9 +385,9 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
         const acceptValue = (value: any) => {
           valuesBySystemTag[internalTag] = value
-          valuesBySystemTag[MQTTTags.fromMQTTValue(mqttTag)] = value
+          valuesBySystemTag[MQTTTags.fromMQTTValue(this._id, mqttTag)] = value
           this._dataFromMQTTRxTimes.set(internalTag, now)
-          this._dataFromMQTTRxTimes.set(MQTTTags.fromMQTTValue(mqttTag), now)
+          this._dataFromMQTTRxTimes.set(MQTTTags.fromMQTTValue(this._id, mqttTag), now)
         }
 
         if ('string' === channelConfig.dataType) {

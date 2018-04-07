@@ -1,5 +1,5 @@
 // @flow
 import {INTERNAL} from '../types/Tag'
 
-export const toMQTTValue = (mqttTag: string) => `${INTERNAL}mqtt/toMQTT/tag/${mqttTag}`
-export const fromMQTTValue = (mqttTag: string) => `${INTERNAL}mqtt/fromMQTT/tag/${mqttTag}`
+export const toMQTTValue = (pluginInstanceId: number, mqttTag: string) => `${INTERNAL}mqtt/${pluginInstanceId}/toMQTT/tag/${mqttTag}`
+export const fromMQTTValue = (pluginInstanceId: number, mqttTag: string) => `${INTERNAL}mqtt/${pluginInstanceId}/fromMQTT/tag/${mqttTag}`

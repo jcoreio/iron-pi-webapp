@@ -47,9 +47,9 @@ export default function createMQTTChannelConfig({
       mqttTagState: {
         type: TagState,
         description: "the current state for this channel's mqttTag",
-        resolve: ({direction, mqttTag}: MQTTChannelConfig, args: any, {dataRouter}: GraphQLContext) => {
+        resolve: ({configId, direction, mqttTag}: MQTTChannelConfig, args: any, {dataRouter}: GraphQLContext) => {
           return dataRouter.getTagState(TO_MQTT === direction ?
-            MQTTTags.toMQTTValue(mqttTag) : MQTTTags.fromMQTTValue(mqttTag))
+            MQTTTags.toMQTTValue(configId, mqttTag) : MQTTTags.fromMQTTValue(configId, mqttTag))
         },
       },
       systemValue: {
