@@ -58,10 +58,44 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     (calibration: Calibration = {points: []}) => new Calibrator(calibration.points || [])
   ))
 
+  _sendOutputValuesInterval: ?number;
+
   constructor({spiHandler, getTagValue}: Options) {
     super()
     this._spiHandler = spiHandler
     this._getTagValue = getTagValue
+  }
+
+  start() {
+    this._updateData()
+    this._updateChannelStates()
+    this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
+    this._spiHandler.start()
+    LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
+    if (!this._sendOutputValuesInterval) {
+      this._sendOutputValuesInterval = setInterval(
+        () => this._spiHandler.sendDigitalOutputs(this._lastOutputValues),
+        OUTPUT_VALUES_REFRESH_INTERVAL
+      )
+    }
+  }
+
+  destroy() {
+    this._spiHandler.removeListener('deviceStatus', this._handleDeviceStatus)
+    this._spiHandler.stop()
+    LocalIOChannel.removeHook('afterUpdate', 'LocalIODataPlugin_channelUpdated')
+    if (this._sendOutputValuesInterval) {
+      clearInterval(this._sendOutputValuesInterval)
+      this._sendOutputValuesInterval = undefined
+    }
+  }
+
+  _channelUpdated = (channel: LocalIOChannel) => {
+    const {id} = channel
+    this._channels[id] = channel
+    this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
+    this._updateData()
+    this._updateChannelStates()
   }
 
   async _loadChannels(): Promise<void> {
@@ -106,14 +140,6 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       pluginId: 'localio',
       pluginName: 'Local I/O',
     }
-  }
-
-  channelSupportsAnalog(id: number): boolean {
-    for (let deviceInfo of SPIDevices) {
-      if (id < deviceInfo.numAnalogInputs) return true
-      id -= Math.max(deviceInfo.numAnalogInputs, deviceInfo.numDigitalInputs, deviceInfo.numDigitalOutputs)
-    }
-    return false
   }
 
   ioMappings(): Array<DataPluginMapping> {
@@ -199,24 +225,15 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     return mappings
   }
 
-  setRemoteControlValue(id: number, value: ?boolean) {
-    const channel = this._channels[id]
-    if (!channel) throw new Error(`Unknown channel: ${id}`)
-    const {config, tag} = channel
-    if (config.mode !== CONTROL_MODE_OUTPUT_A_TAG || config.controlMode !== CONTROL_MODE_CONDITION) {
-      throw new Error('Channel must be in remote control digital output mode to set its control value')
-    }
-    if (tag == null) {
-      throw new Error('Could not get tag to set remote control value on')
-    }
-    this.emit(DATA_PLUGIN_EVENT_DATA, {[tag]: digitize(value)})
+  //---------------------------------------------------------------------------
+  // Change handlers
+  //---------------------------------------------------------------------------
+
+  inputsChanged() {
+    this._updateData()
   }
 
-  _channelUpdated = (channel: LocalIOChannel) => {
-    const {id} = channel
-    this._channels[id] = channel
-    this.emit(DATA_PLUGIN_EVENT_IOS_CHANGED)
-    this._updateData()
+  dispatchCycleDone() {
     this._updateChannelStates()
   }
 
@@ -233,39 +250,6 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     //   data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
     // }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
-  }
-
-  /**
-   * For testing purposes only!
-   */
-  _setRawInputValues = ({id, rawAnalogInput, rawDigitalInput, rawOutput}: {
-    id: number,
-    rawAnalogInput?: ?number,
-    rawDigitalInput?: ?boolean,
-    rawOutput?: ?boolean,
-  }) => {
-    const digitalInputLevels: Array<boolean> = []
-    const digitalInputEventCounts: Array<number> = []
-    const digitalOutputLevels: Array<boolean> = []
-    const analogInputLevels: Array<number> = []
-    for (let channel of this._channels) {
-      analogInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawAnalogInput(channel.id)) || 0
-      digitalInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawDigitalInput(channel.id)) || false
-      digitalInputEventCounts[channel.id] = 0
-      digitalOutputLevels[channel.id] = this._getTagValue(LocalIOTags.rawOutput(channel.id)) || false
-    }
-    // note: the hardware may not support null values here, but testing kind of needs to set the values
-    // to null, and nulls flow through the system just fine when there's no hardware...
-    if (rawAnalogInput !== undefined) analogInputLevels[id] = (rawAnalogInput: any)
-    if (rawDigitalInput !== undefined) digitalInputLevels[id] = (rawDigitalInput: any)
-    if (rawOutput !== undefined) digitalOutputLevels[id] = (rawOutput: any)
-    this._spiHandler.emit('deviceStatus', {
-      deviceId: SPIDevices[0].deviceId,
-      digitalInputLevels,
-      digitalInputEventCounts,
-      digitalOutputLevels,
-      analogInputLevels,
-    })
   }
 
   _updateData() {
@@ -323,40 +307,6 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
 
-  inputsChanged() {
-    this._updateData()
-  }
-
-  /**
-   * To be as truthful as possible, we pass the digitalOutputLevels coming directly from SPI into the
-   * rawOutput internal tags.  But without any actual hardware in test mode, this doesn't happen automatically,
-   * so this method mocks that process manually.
-   */
-  _updateRawOutputsForTest = process.env.BABEL_ENV === 'test' ? () => {
-    const {_lastOutputValues} = this
-    if (!_lastOutputValues) return
-    const digitalInputLevels: Array<boolean> = []
-    const digitalInputEventCounts: Array<number> = []
-    const digitalOutputLevels: Array<boolean> = [..._lastOutputValues]
-    const analogInputLevels: Array<number> = []
-    for (let channel of this._channels) {
-      analogInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawAnalogInput(channel.id)) || 0
-      digitalInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawDigitalInput(channel.id)) || false
-      digitalInputEventCounts[channel.id] = 0
-    }
-    this._spiHandler.emit('deviceStatus', {
-      deviceId: SPIDevices[0].deviceId,
-      digitalInputLevels,
-      digitalInputEventCounts,
-      digitalOutputLevels,
-      analogInputLevels,
-    })
-  } : () => {}
-
-  dispatchCycleDone() {
-    this._updateChannelStates()
-  }
-
   _lastOutputValues: ?Array<boolean>
   _lastOutputStates: Map<number, LocalIOChannelState> = new Map()
 
@@ -386,29 +336,64 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     this._spiHandler.sendDigitalOutputs(outputValues)
   }
 
-  _sendOutputValuesInterval: ?number;
-
-  start() {
-    this._updateData()
-    this._updateChannelStates()
-    this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
-    this._spiHandler.start()
-    LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
-    if (!this._sendOutputValuesInterval) {
-      this._sendOutputValuesInterval = setInterval(
-        () => this._spiHandler.sendDigitalOutputs(this._lastOutputValues),
-        OUTPUT_VALUES_REFRESH_INTERVAL
-      )
+  channelSupportsAnalog(id: number): boolean {
+    for (let deviceInfo of SPIDevices) {
+      if (id < deviceInfo.numAnalogInputs) return true
+      id -= Math.max(deviceInfo.numAnalogInputs, deviceInfo.numDigitalInputs, deviceInfo.numDigitalOutputs)
     }
+    return false
   }
 
-  destroy() {
-    this._spiHandler.removeListener('deviceStatus', this._handleDeviceStatus)
-    this._spiHandler.stop()
-    LocalIOChannel.removeHook('afterUpdate', 'LocalIODataPlugin_channelUpdated')
-    if (this._sendOutputValuesInterval) {
-      clearInterval(this._sendOutputValuesInterval)
-      this._sendOutputValuesInterval = undefined
+  //---------------------------------------------------------------------------
+  // Testing hooks
+  //---------------------------------------------------------------------------
+
+  /**
+   * For testing purposes only!
+   */
+  _setRawInputValues = ({id, rawAnalogInput, rawDigitalInput, rawOutput}: {
+    id: number,
+    rawAnalogInput?: ?number,
+    rawDigitalInput?: ?boolean,
+    rawOutput?: ?boolean,
+  }) => {
+    const digitalInputLevels: Array<boolean> = []
+    const digitalInputEventCounts: Array<number> = []
+    const digitalOutputLevels: Array<boolean> = []
+    const analogInputLevels: Array<number> = []
+    for (let channel of this._channels) {
+      analogInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawAnalogInput(channel.id)) || 0
+      digitalInputLevels[channel.id] = this._getTagValue(LocalIOTags.rawDigitalInput(channel.id)) || false
+      digitalInputEventCounts[channel.id] = 0
+      digitalOutputLevels[channel.id] = this._getTagValue(LocalIOTags.rawOutput(channel.id)) || false
     }
+    // note: the hardware may not support null values here, but testing kind of needs to set the values
+    // to null, and nulls flow through the system just fine when there's no hardware...
+    if (rawAnalogInput !== undefined) analogInputLevels[id] = (rawAnalogInput: any)
+    if (rawDigitalInput !== undefined) digitalInputLevels[id] = (rawDigitalInput: any)
+    if (rawOutput !== undefined) digitalOutputLevels[id] = (rawOutput: any)
+    this._spiHandler.emit('deviceStatus', {
+      deviceId: SPIDevices[0].deviceId,
+      digitalInputLevels,
+      digitalInputEventCounts,
+      digitalOutputLevels,
+      analogInputLevels,
+    })
+  }
+
+  /**
+   * For testing purposes only
+   */
+  setRemoteControlValue(id: number, value: ?boolean) {
+    const channel = this._channels[id]
+    if (!channel) throw new Error(`Unknown channel: ${id}`)
+    const {config, tag} = channel
+    if (config.mode !== CONTROL_MODE_OUTPUT_A_TAG || config.controlMode !== CONTROL_MODE_CONDITION) {
+      throw new Error('Channel must be in remote control digital output mode to set its control value')
+    }
+    if (tag == null) {
+      throw new Error('Could not get tag to set remote control value on')
+    }
+    this.emit(DATA_PLUGIN_EVENT_DATA, {[tag]: digitize(value)})
   }
 }

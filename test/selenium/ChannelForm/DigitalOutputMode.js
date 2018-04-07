@@ -107,7 +107,6 @@ module.exports = () => {
         }
       })
       await delay(500)
-      await graphql({query: `mutation { updateRawOutputs }`})
 
       browser.timeouts('implicit', 100)
       await poll(
@@ -128,7 +127,6 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
-      await graphql({query: `mutation { updateRawOutputs }`})
       await poll(
         async () => {
           expect(await browser.getText('[data-component="DigitalOutputStateWidget"] [data-component="ValueBlock"][data-test-name="controlValue"] [data-test-name="value"]')).to.equal('1')
@@ -147,7 +145,6 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
-      await graphql({query: `mutation { updateRawOutputs }`})
       await poll(
         async () => {
           expect(await browser.getText('[data-component="DigitalOutputStateWidget"] [data-component="ValueBlock"][data-test-name="controlValue"] [data-test-name="value"]')).to.equal('0')
@@ -166,7 +163,6 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
-      await graphql({query: `mutation { updateRawOutputs }`})
 
       await poll(
         async () => {
@@ -187,7 +183,6 @@ module.exports = () => {
       await poll(() => browser.click('#channelForm [type="submit"]'), 50).timeout(1000)
 
       await browser.waitForVisible('[data-status="submitSucceeded"]', 5000)
-      await graphql({query: `mutation { updateRawOutputs }`})
 
       await poll(
         async () => {
