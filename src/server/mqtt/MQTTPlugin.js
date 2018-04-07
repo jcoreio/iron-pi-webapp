@@ -144,7 +144,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   _handleConnect = () => {
-    this._connected = false
+    this._connected = true
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_CONNECTED,
