@@ -12,12 +12,13 @@ export type Props = {
 
 const MQTTChannelStateSubscriptions = ({config: {channelsToMQTT, channelsFromMQTT}}: Props): React.Node => {
   const tags: Array<string> = []
-  for (let channels of [channelsToMQTT, channelsFromMQTT]) {
-    if (!channels) continue
-    for (let {internalTag, mqttTag} of channels) {
-      tags.push(internalTag)
-      tags.push(MQTTTags.mqttValue(mqttTag))
-    }
+  for (let {internalTag, mqttTag} of (channelsToMQTT || [])) {
+    tags.push(internalTag)
+    tags.push(MQTTTags.toMQTTValue(mqttTag))
+  }
+  for (let {internalTag, mqttTag} of (channelsFromMQTT || [])) {
+    tags.push(internalTag)
+    tags.push(MQTTTags.fromMQTTValue(mqttTag))
   }
   return (
     <React.Fragment>

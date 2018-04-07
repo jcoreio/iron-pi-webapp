@@ -22,7 +22,7 @@ import type { DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
-import * as tags from '../../universal/mqtt/MQTTTags'
+import * as MQTTTags from '../../universal/mqtt/MQTTTags'
 import {ProtocolRequiredFieldsType} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTPluginState} from '../../universal/types/MQTTPluginState'
 import {
@@ -182,7 +182,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   inputsChanged() {
     const changedValues: ValuesMap = {}
     for (let state: ToMQTTChannelState of this._getChannelsToSend()) {
-      changedValues[tags.mqttValue(state.config.mqttTag)] = state.curValue
+      changedValues[MQTTTags.toMQTTValue(state.config.mqttTag)] = state.curValue
     }
     if (Object.keys(changedValues).length) {
       this.emit(DATA_PLUGIN_EVENT_DATA, changedValues)
@@ -383,9 +383,9 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
         const acceptValue = (value: any) => {
           valuesBySystemTag[internalTag] = value
-          valuesBySystemTag[tags.mqttValue(mqttTag)] = value
+          valuesBySystemTag[MQTTTags.fromMQTTValue(mqttTag)] = value
           this._dataFromMQTTRxTimes.set(internalTag, now)
-          this._dataFromMQTTRxTimes.set(tags.mqttValue(mqttTag), now)
+          this._dataFromMQTTRxTimes.set(MQTTTags.fromMQTTValue(mqttTag), now)
         }
 
         if ('string' === channelConfig.dataType) {

@@ -4,7 +4,7 @@
 import {reify} from 'flow-runtime'
 import type {Type} from 'flow-runtime'
 import type {MetadataItem} from '../types/MetadataItem'
-import * as tags from './MQTTTags'
+import * as MQTTTags from './MQTTTags'
 
 type DataPluginMapping = {
   id: number | string, // Unique ID, e.g. "local1"
@@ -132,10 +132,7 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
       name: item.channel.name || `From MQTT ${item.index + 1}`,
       tagFromPlugin: item.channel.internalTag,
     }))
-  const mqttValueChannelsMappings: Array<DataPluginMapping> = [
-    ...config.channelsFromMQTT || [],
-    ...config.channelsToMQTT || [],
-  ]
+  const toMQTTValueChannelsMappings: Array<DataPluginMapping> = (config.channelsToMQTT || [])
     // Save the array index before we filter
     .map((channel: MQTTChannelConfig, index: number) => ({
       channel,
@@ -147,7 +144,22 @@ export function mqttConfigToDataPluginMappings(config: MQTTConfig): Array<DataPl
     .map((item: {channel: MQTTChannelConfig, index: number}) => ({
       id: `${item.channel.id}/mqttValue`,
       name: `${item.channel.id} MQTT Value`,
-      tagFromPlugin: tags.mqttValue(item.channel.mqttTag),
+      tagFromPlugin: MQTTTags.toMQTTValue(item.channel.mqttTag),
     }))
-  return [...channelsToMQTTMappings, ...channelsFromMQTTMappings, ...mqttValueChannelsMappings]
+  const fromMQTTValueChannelsMappings: Array<DataPluginMapping> = (config.channelsFromMQTT || [])
+  // Save the array index before we filter
+    .map((channel: MQTTChannelConfig, index: number) => ({
+      channel,
+      index
+    }))
+    // Filter to only enabled
+    .filter((item: {channel: MQTTChannelConfig, index: number}) => item.channel.enabled)
+    // Convert to DataPluginMappings
+    .map((item: {channel: MQTTChannelConfig, index: number}) => ({
+      id: `${item.channel.id}/mqttValue`,
+      name: `${item.channel.id} MQTT Value`,
+      tagFromPlugin: MQTTTags.fromMQTTValue(item.channel.mqttTag),
+    }))
+  return [...channelsToMQTTMappings, ...channelsFromMQTTMappings,
+    ...toMQTTValueChannelsMappings, ...fromMQTTValueChannelsMappings]
 }
