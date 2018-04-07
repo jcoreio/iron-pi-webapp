@@ -8,7 +8,7 @@ import logger from 'log4jcore'
 import LocalIOChannel from './models/LocalIOChannel'
 import type {DataPluginMapping, DataPluginEmittedEvents} from '../data-router/PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import type {LocalControlDigitalOutputConfig, Calibration, DigitalInputConfig, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
+import type {LocalControlDigitalOutputConfig, Calibration, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
 import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import Calibrator from '../calc/Calibrator'
@@ -31,9 +31,14 @@ type Options = {
   getTagValue: (tag: string) => any,
 }
 
-function digitize(value: ?boolean): 1 | 0 | null {
+function digitize(value: any): 1 | 0 | null {
   if (value == null) return null
   return value ? 1 : 0
+}
+
+function applyPolarity(value: any, reversed: ?boolean): 1 | 0 | null {
+  const valueDigitized = digitize(value)
+  return (reversed && valueDigitized != null) ? (valueDigitized ? 0 : 1) : valueDigitized
 }
 
 export const EVENT_CHANNEL_STATES = 'channelStates'
@@ -216,7 +221,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
-    const {analogInputLevels, digitalInputLevels, digitalOutputLevels} = deviceStatus
+    const {analogInputLevels, digitalInputLevels /*, digitalOutputLevels*/} = deviceStatus
     const data = {}
     for (let id = 0; id < analogInputLevels.length; id++) {
       data[LocalIOTags.rawAnalogInput(id)] = analogInputLevels[id]
@@ -224,9 +229,9 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     for (let id = 0; id < digitalInputLevels.length; id++) {
       data[LocalIOTags.rawDigitalInput(id)] = digitize(digitalInputLevels[id])
     }
-    for (let id = 0; id < digitalOutputLevels.length; id++) {
-      data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
-    }
+    // for (let id = 0; id < digitalOutputLevels.length; id++) {
+    //   data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
+    // }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
 
@@ -267,66 +272,53 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     const data = {}
     for (let channel of this._enabledChannels()) {
       const {id, tag, config} = channel
+
+      let controlValue = null
+      let systemValue = null
+      let rawOutput = null
+
       switch (config.mode) {
       case 'ANALOG_INPUT': {
-        const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
-        const systemValueTag = LocalIOTags.systemValue(id)
-        const rawAnalogInput = this._getTagValue(rawAnalogInputTag)
+        const rawAnalogInput = this._getTagValue(LocalIOTags.rawAnalogInput(id))
         const calibrator = this._selectCalibrator(id)(channel)
-        data[systemValueTag] = rawAnalogInput == null ? null : calibrator.calibrate(rawAnalogInput)
-        if (tag) data[tag] = data[systemValueTag]
+        systemValue = (calibrator && rawAnalogInput != null) ? calibrator.calibrate(rawAnalogInput) : null
         break
       }
       case 'DIGITAL_INPUT': {
-        const {reversePolarity}: DigitalInputConfig = (config: any)
-        const rawDigitalInputTag = LocalIOTags.rawDigitalInput(id)
-        const systemValueTag = LocalIOTags.systemValue(id)
-        const rawDigitalInput = this._getTagValue(rawDigitalInputTag)
-        if (reversePolarity && rawDigitalInput != null) {
-          data[systemValueTag] = rawDigitalInput ? 0 : 1
-        } else {
-          data[systemValueTag] = rawDigitalInput
-        }
-        if (tag) data[tag] = data[systemValueTag]
+        const {reversePolarity} = (config: any)
+        const rawDigitalInput = this._getTagValue(LocalIOTags.rawDigitalInput(id))
+        systemValue = applyPolarity(rawDigitalInput, reversePolarity)
         break
       }
       case 'DIGITAL_OUTPUT': {
-        const controlValueTag = LocalIOTags.controlValue(id)
-        const systemValueTag = LocalIOTags.systemValue(id)
-        const {safeState}: DigitalOutputConfig = (config: any)
-        let controlValue
-        switch (config.controlMode) {
-        case CONTROL_MODE_FORCE_OFF: {
+        const {controlMode, reversePolarity, safeState, controlLogic} = (config: any)
+        switch (controlMode) {
+        case CONTROL_MODE_FORCE_OFF:
           controlValue = false
           break
-        }
-        case CONTROL_MODE_FORCE_ON: {
+        case CONTROL_MODE_FORCE_ON:
           controlValue = true
           break
-        }
-        case CONTROL_MODE_CONDITION: {
-          const {controlLogic}: LocalControlDigitalOutputConfig = (config: any)
+        case CONTROL_MODE_CONDITION:
           controlValue = evaluateControlLogic(controlLogic, {
             getChannelValue: this._getTagValue,
           })
           break
-        }
-        case CONTROL_MODE_OUTPUT_A_TAG: {
-          if (tag) {
-            const tagValue = this._getTagValue(tag)
-            controlValue = tagValue != null ? Boolean(tagValue) : null
-          }
+        case CONTROL_MODE_OUTPUT_A_TAG:
+          controlValue = tag ? digitize(this._getTagValue(tag)) : null
           break
         }
-        }
-        let systemValue = digitize(controlValue != null ? controlValue : Boolean(safeState))
-        data[controlValueTag] = controlValue
-        data[systemValueTag] = systemValue
-        if (tag && !isOutputtingATag(config))
-          data[tag] = data[systemValueTag]
+        systemValue = digitize(controlValue != null ? controlValue : safeState)
+        rawOutput = applyPolarity(systemValue, reversePolarity)
         break
       }
       }
+
+      data[LocalIOTags.controlValue(id)] = controlValue
+      data[LocalIOTags.systemValue(id)] = systemValue
+      if (tag && !isOutputtingATag(config))
+        data[tag] = systemValue
+      data[LocalIOTags.rawOutput(id)] = rawOutput
     }
     this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
@@ -388,6 +380,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       }
       this._lastOutputStates.set(id, state)
     }
+    // Emit channel state changes so that they can be published to GraphQL
     if (outputStates.length) this.emit(EVENT_CHANNEL_STATES, outputStates)
     this._lastOutputValues = outputValues
     this._spiHandler.sendDigitalOutputs(outputValues)
