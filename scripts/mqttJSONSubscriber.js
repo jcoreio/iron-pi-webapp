@@ -22,7 +22,7 @@ const client = mqtt.connect('mqtt://localhost', {
 
 client.on('connect', () => {
   console.log('mqtt connected')
-  client.subscribe('#', {qos: 0})
+  //client.subscribe('#', {qos: 0})
   client.subscribe('node/+/data', {qos: 0})
   client.subscribe('node/+/metadata', {qos: 0})
 })
