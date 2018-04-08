@@ -3,12 +3,15 @@
 import assert from 'assert'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import mqtt from 'mqtt'
+import memoize from 'lodash.memoize'
 import logger from 'log4jcore'
 
 import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
-
 import type {DataValueToMQTT, MetadataValueToMQTT} from '../MQTTTypes'
+import roundingToPrecision from '../../util/roundingToPrecision'
+
+const roundingToPrecisionCached = memoize(roundingToPrecision)
 
 const log = logger('MQTTJSONHandler')
 
@@ -96,7 +99,15 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
 
     const dataToSend = {}
     for (let dataValue: DataValueToMQTT of data) {
-      dataToSend[dataValue.tag] = dataValue.value
+      let {metadata, value} = dataValue
+      if (metadata && metadata.rounding && Number.isFinite(value)) {
+        const roundingPrecision = roundingToPrecisionCached(metadata.rounding)
+        if (roundingPrecision != null) {
+          // This ensures that we don't end up with something like 2.90000000000000001 instead of 2.9
+          value = Number(value.toFixed(roundingPrecision))
+        }
+      }
+      dataToSend[dataValue.tag] = value
     }
 
     const {dataToMQTTTopic} = this._config

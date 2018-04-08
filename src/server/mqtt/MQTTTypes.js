@@ -17,7 +17,7 @@ export type ChannelFromMQTTConfig = {
 export type DataValueToMQTT = {
   tag: string,
   value: any,
-  type: string,
+  metadata: ?MetadataItem, // Included to help with number formatting
 }
 
 export type MetadataValueToMQTT = {

@@ -149,7 +149,8 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
 }
 
 function toSparkPlugMetric(value: DataValueToMQTT): SparkPlugDataMertic {
-  const typedValue: SparkplugTypedValue = DATA_TYPE_STRING === value.type ?
+  const metadata: ?MetadataItem = value.metadata
+  const typedValue: SparkplugTypedValue = (metadata && DATA_TYPE_STRING === metadata.dataType) ?
     toSparkPlugString(value.value) : toSparkPlugNumber(value.value)
   return {
     name: value.tag,

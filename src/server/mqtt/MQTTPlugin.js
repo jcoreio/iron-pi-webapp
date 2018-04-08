@@ -12,7 +12,6 @@ import MQTTJSONHandler from './protocols/MQTTJSONHandler'
 import type {MQTTProtocolHandler} from './protocols/MQTTProtocolHandler'
 import SparkPlugHandler from './protocols/SparkPlugHandler'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
-import {DATA_TYPE_STRING, DATA_TYPE_NUMBER} from '../../universal/types/MetadataItem'
 import type {MetadataItem} from '../../universal/types/MetadataItem'
 import {cleanMQTTConfig, mqttConfigToDataPluginMappings, MQTT_PROTOCOL_SPARKPLUG, MQTT_PROTOCOL_TEXT_JSON} from '../../universal/mqtt/MQTTConfig'
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
@@ -70,9 +69,8 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _protocolHandler: MQTTProtocolHandler;
 
-  _metadataListener = () => this._metadataChanged();
-
   _metadataToMQTT: Array<MetadataValueToMQTT> = []
+  _metadataToMQTTByMQTTTag: Map<string, MetadataItem> = new Map()
 
   _channelsFromMQTTConfigs: ChannelsFromMQTTConfigMap = {}
   // Mapping from MQTT tag to last receive timestamp
@@ -131,7 +129,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._protocolHandler.on(EVENT_MQTT_CONNECT, this._handleConnect)
     this._protocolHandler.on(EVENT_MQTT_DISCONNECT, this._handleDisconnect)
     this._protocolHandler.on(EVENT_MQTT_ERROR, this._handleError)
-    this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._metadataListener)
+    this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._onMetadataChange)
   }
 
   getState(): MQTTPluginState {
@@ -241,7 +239,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   start() {
     this._updateMQTTChannels()
-    this._metadataToMQTT = this._calcMetadataToMQTT()
+    this._updateMetadataToMQTT()
     this._protocolHandler.start()
     this._stopRxMonitor()
     const {channelsFromMQTT} = this._config
@@ -260,7 +258,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   tagsChanged() {
     this._updateMQTTChannels()
-    this._metadataChanged()
+    this._onMetadataChange()
   }
 
   // TODO: Ensure this is called whenever channelsToMQTT, channelsFromMQTT, or public tags
@@ -323,7 +321,7 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   destroy() {
-    this._resources.metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._metadataListener)
+    this._resources.metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._onMetadataChange)
     if (this._publishDataTimeout) {
       clearTimeout(this._publishDataTimeout)
       this._publishDataTimeout = undefined
@@ -331,12 +329,9 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._protocolHandler.destroy()
   }
 
-  _metadataChanged() {
-    const metadataToMQTT = this._calcMetadataToMQTT()
-    if (!isEqual(metadataToMQTT, this._metadataToMQTT)) {
-      this._metadataToMQTT = metadataToMQTT
+  _onMetadataChange = () => {
+    if (this._updateMetadataToMQTT())
       this._publishAll()
-    }
   }
 
   _publishAll() {
@@ -360,11 +355,10 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
       channelToSend.sentValue = channelToSend.curValue
       const {mqttTag} = channelToSend.config
       const value = channelToSend.curValue
-      const metadata: ?MetadataItem = channelToSend.config.metadataItem
       valuesToMQTT.push({
         tag: mqttTag,
         value,
-        type: metadata && DATA_TYPE_STRING === metadata.dataType ? DATA_TYPE_STRING : DATA_TYPE_NUMBER
+        metadata: this._metadataToMQTTByMQTTTag.get(mqttTag)
       })
       internalTagValues[MQTTTags.toMQTTValue(this._id, mqttTag)] = value
     }
@@ -374,20 +368,29 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     return valuesToMQTT
   }
 
-  _calcMetadataToMQTT(): Array<MetadataValueToMQTT> {
+  /**
+   * Updates _metadataToMQTT and _metadataToMQTTByMQTTTag
+   * @returns true if the metadata has changed, false otherwise
+   * @private
+   */
+  _updateMetadataToMQTT(): Array<MetadataValueToMQTT> {
     const metadataToMQTT: Array<MetadataValueToMQTT> = []
-    const publishedMQTTTags: Set<string> = new Set()
+    const metadataToMQTTByMQTTTag: Map<string, MetadataItem> = new Map()
     this._toMQTTEnabledChannelConfigs.forEach((channel: MQTTChannelConfig) => {
-      const metadataForTag: ?MetadataItem = this._resources.metadataHandler.getTagMetadata(channel.internalTag)
-      if (metadataForTag && !publishedMQTTTags.has(channel.mqttTag)) {
+      const {mqttTag, internalTag} = channel
+      const metadataForTag: ?MetadataItem = this._resources.metadataHandler.getTagMetadata(internalTag)
+      if (metadataForTag && !metadataToMQTTByMQTTTag.has(mqttTag)) {
         metadataToMQTT.push({
-          tag: channel.mqttTag,
+          tag: mqttTag,
           metadata: metadataForTag
         })
-        publishedMQTTTags.add(channel.mqttTag)
+        metadataToMQTTByMQTTTag.set(mqttTag, metadataForTag)
       }
     })
-    return metadataToMQTT
+    const changed = !isEqual(metadataToMQTT, this._metadataToMQTT)
+    this._metadataToMQTT = metadataToMQTT
+    this._metadataToMQTTByMQTTTag = metadataToMQTTByMQTTTag
+    return changed
   }
 
   _setValuesFromMQTT(valuesByMQTTTag: ValuesFromMQTTMap) {
