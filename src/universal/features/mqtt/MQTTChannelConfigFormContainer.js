@@ -106,12 +106,10 @@ export default compose(
           variables: {id: configId},
         },
       ],
-      options: {
-        update: (proxy: ApolloClient, result: {data: {Config: {metadataItem?: MetadataItem}}}) => {
-          const {data: {Config: {metadataItem}}} = result
-          if (metadataItem) updateMetadataItem(proxy, metadataItem)
-        }
-      },
+      update: (proxy: ApolloClient, result: {data: {Config: {metadataItem?: MetadataItem}}}) => {
+        const {data: {Config: {metadataItem}}} = result
+        if (metadataItem) updateMetadataItem(proxy, metadataItem)
+      }
     })
   }),
   graphql(updateMutation, {
