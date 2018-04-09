@@ -14,7 +14,7 @@ const styles = ({spacing, palette}: Theme) => ({
     border: {
       width: 1,
       style: 'solid',
-      color: palette.grey[300],
+      color: palette.grey[500],
     },
     '&:not(:last-child)': {
       borderRightWidth: 0,
