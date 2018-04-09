@@ -190,6 +190,11 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     })
   }
 
+  _onMetadataChange = () => {
+    if (this._updateMetadataToMQTT())
+      this._publishAll()
+  }
+
   _setTagsOffline() {
     this._dataFromMQTTRxTimes.clear()
     const valuesToPublish: ValuesFromMQTTMap = {}
@@ -282,8 +287,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._onMetadataChange()
   }
 
-  // TODO: Ensure this is called whenever channelsToMQTT, channelsFromMQTT, or public tags
-  // may have changed
   _updateMQTTChannels() {
     // Extra channels that need to be published in cases where publishAllPublicTags is enabled
     let extraChannelsToPublish: Array<MQTTChannelConfig> = []
@@ -339,11 +342,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
         }
       }
     }
-  }
-
-  _onMetadataChange = () => {
-    if (this._updateMetadataToMQTT())
-      this._publishAll()
   }
 
   _publishAll() {
