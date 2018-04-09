@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react'
+import {withRouter} from 'react-router-dom'
 import type {RouterHistory} from 'react-router-dom'
 import {reduxForm} from 'redux-form'
 import {compose} from 'redux'
@@ -36,12 +37,21 @@ class ChangePasswordFormContainer extends React.Component<Props> {
     history.goBack()
   }
   render(): React.Node {
-    const {handleSubmit, ...props} = this.props
-    return <ChangePasswordForm {...props} onCancel={this.handleCancel} onSubmit={handleSubmit(this.handleSubmit)} />
+    const {handleSubmit, valid, error, submitting} = this.props
+    return (
+      <ChangePasswordForm
+        onCancel={this.handleCancel}
+        onSubmit={handleSubmit(this.handleSubmit)}
+        valid={valid}
+        error={error}
+        submitting={submitting}
+      />
+    )
   }
 }
 
 export default compose(
+  withRouter,
   graphql(gql(`mutation changePassword($oldPassword: String!, $newPassword: String!) {
     changePassword(oldPassword: $oldPassword, newPassword: $newPassword)
   }`)),
