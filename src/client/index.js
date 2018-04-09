@@ -16,6 +16,7 @@ import theme from '../universal/theme'
 import verifyToken from './auth/verifyToken'
 import {logout} from '../universal/auth/actions'
 import superagent from 'superagent'
+import {websocketEventHandlers} from '../universal/apollo/websocketRedux'
 
 async function bootstrap(): Promise<any> {
   const rootElement = document.getElementById('root')
@@ -51,14 +52,18 @@ async function bootstrap(): Promise<any> {
         }
       `,
     })
+
+  let store
+
   const client = createClient({
     onForbidden,
+    ...websocketEventHandlers(event => store.dispatch(event)),
     introspectionQueryResultData,
   })
 
   // the state is serialized to plain JS for sending over the wire, so we have
   // to convert it back hydrate immutables here
-  const store = makeStore(parseState(window.__INITIAL_STATE__), {client})
+  store = makeStore(parseState(window.__INITIAL_STATE__), {client})
   addFeatures(store)
 
   verifyToken().catch((error: Error & {response?: {text?: string}}) => {

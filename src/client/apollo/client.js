@@ -6,12 +6,18 @@ import { HttpLink } from 'apollo-link-http'
 import { RetryLink } from 'apollo-link-retry'
 import { setContext } from 'apollo-link-context'
 import { WebSocketLink } from 'apollo-link-ws'
+import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { getMainDefinition } from 'apollo-utilities'
 import dataIdFromObject from '../../universal/apollo/dataIdFromObject'
 
 type Options = {
   onForbidden?: (error: string) => any,
+  onConnecting?: () => any,
+  onConnected?: () => any,
+  onReconnecting?: () => any,
+  onReconnected?: () => any,
+  onDisconnected?: () => any,
   introspectionQueryResultData?: {
     __schema: {
       types: Array<{
@@ -32,7 +38,7 @@ function getMessage(error: Error & {result?: {error?: string}}): string {
 }
 
 export default function createClient(options: Options = {}): ApolloClient {
-  const {onForbidden, introspectionQueryResultData} = options
+  const {onForbidden, onConnecting, onConnected, onReconnecting, onReconnected, onDisconnected, introspectionQueryResultData} = options
   const withRetries = new RetryLink({
     delay: {
       max: 30 * 1000,
@@ -72,14 +78,22 @@ export default function createClient(options: Options = {}): ApolloClient {
     }
   }
 
-  // Create a WebSocket link:
-  const wsLink = new WebSocketLink({
-    uri: `ws://${window.location.host}/graphql`,
-    options: {
+  const subClient = new SubscriptionClient(
+    `ws://${window.location.host}/graphql`,
+    {
       reconnect: true,
-      // connectionParams: () => ({token: localStorage.getItem('token')}),
+      timeout: 20000,
     }
-  })
+  )
+
+  if (onConnecting) subClient.on('connecting', onConnecting)
+  if (onConnected) subClient.on('connected', onConnected)
+  if (onReconnecting) subClient.on('reconnecting', onReconnecting)
+  if (onReconnected) subClient.on('reconnected', onReconnected)
+  if (onDisconnected) subClient.on('disconnected', onDisconnected)
+
+  // Create a WebSocket link:
+  const wsLink = new WebSocketLink(subClient)
   wsLink.subscriptionClient.use([subscriptionMiddleware])
 
   const cacheOptions = {dataIdFromObject}

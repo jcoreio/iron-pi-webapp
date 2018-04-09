@@ -23,6 +23,7 @@ import featureContent from './featureContent'
 import {CHANGE_PASSWORD, MAPPING_PROBLEMS, STATUS} from '../react-router/paths'
 import MappingProblemsViewContainer from './MappingProblems/MappingProblemsViewContainer'
 import MappingProblemsSnackbarContainer from './MappingProblems/MappingProblemsSnackbarContainer'
+import WebsocketStateSnackbarContainer from './WebsocketState/WebsocketStateSnackbarContainer'
 import StatusView from './StatusView'
 import RedirectWithStatus from '../react-router/RedirectWithStatus'
 
@@ -119,6 +120,7 @@ class App extends React.Component<Props> {
       <div className={classes.frame}>
         <SidebarContainer />
         <MappingProblemsSnackbarContainer />
+        <WebsocketStateSnackbarContainer />
         <div
           className={classNames(classes.content, {
             [classes.contentOpen]: sidebarOpen,

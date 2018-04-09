@@ -16,6 +16,8 @@ import type {
 
 import type {SidebarState, SidebarStateJSON} from './sidebar'
 import {parseSidebarState, sidebarReducer} from './sidebar'
+import {initWebsocketStateSubtree} from '../apollo/websocketRedux'
+import type {WebsocketStateSubtree} from '../apollo/websocketRedux'
 
 // Some things can be rendered on the client but not the server.
 // But the client must initially render the same thing the server did,
@@ -31,6 +33,7 @@ export type StateFields = {
   renderMode: RenderMode,
   form: {[form: string]: Object},
   sidebar: SidebarState,
+  websocket: WebsocketStateSubtree,
 }
 const stateInit: StateFields = {
   features: featuresReducer()((undefined: any), {type: ''}),
@@ -38,6 +41,7 @@ const stateInit: StateFields = {
   renderMode: 'prerender',
   form: formReducer(undefined, {type: ''}),
   sidebar: sidebarReducer(undefined, {type: ''}),
+  websocket: initWebsocketStateSubtree,
 }
 
 export const StateRecord = Record(stateInit)
@@ -49,6 +53,7 @@ export type StateJSON = {
   renderMode: RenderMode,
   form: {[form: string]: Object},
   sidebar: SidebarStateJSON,
+  websocket: WebsocketStateSubtree,
 }
 
 export function parseState({

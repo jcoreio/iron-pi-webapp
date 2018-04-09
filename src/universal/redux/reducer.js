@@ -10,6 +10,7 @@ import {StateRecord} from './types'
 import {renderModeReducer} from './renderMode'
 import {reducer as form} from 'redux-form'
 import {sidebarReducer} from './sidebar'
+import {websocketReducer} from '../apollo/websocketRedux'
 
 const reducer: Reducer = enableBatching(composeReducers(
   combineReducers({
@@ -18,6 +19,7 @@ const reducer: Reducer = enableBatching(composeReducers(
     renderMode: renderModeReducer,
     form,
     sidebar: sidebarReducer,
+    websocket: websocketReducer,
   }, init => new StateRecord(init)),
   featureReducersReducer({composeReducers})
 ))

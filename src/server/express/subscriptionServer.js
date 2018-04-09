@@ -23,6 +23,7 @@ export default function createSubscriptionServer(options: {
       schema,
       execute,
       subscribe,
+      keepAlive: 10000,
       onConnect: async ({token}: { token?: string }): Promise<GraphQLContext> => {
         const {userId, scopes} = token ? await verifyToken(token) : {userId: null, scopes: new Set()}
         return {userId, scopes, ...dependencies}
