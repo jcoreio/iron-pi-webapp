@@ -132,6 +132,26 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     this._resources.metadataHandler.on(EVENT_METADATA_CHANGE, this._onMetadataChange)
   }
 
+  start() {
+    this._updateMQTTChannels()
+    this._updateMetadataToMQTT()
+    this._setTagsOffline()
+    this._protocolHandler.start()
+    this._stopRxMonitor()
+    const {channelsFromMQTT} = this._config
+    if (channelsFromMQTT && channelsFromMQTT.length) {
+      const timeoutCheckIntervalTime = (this._dataFromMQTTTimeout > 5000) ? 1000 : 100
+      this._rxMonitorInterval = setInterval(this._checkRxTimeouts, timeoutCheckIntervalTime)
+    }
+  }
+
+  destroy() {
+    this._connected = false
+    this._cancelPublishDataTimeout()
+    this._resources.metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._onMetadataChange)
+    this._protocolHandler.destroy()
+  }
+
   getState(): MQTTPluginState {
     return this._state
   }
@@ -153,11 +173,24 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _handleDisconnect = () => {
     this._connected = false
+    this._cancelPublishDataTimeout()
     this._setState({
       id: this._config.id,
       status: MQTT_PLUGIN_STATUS_ERROR,
     })
+    this._setTagsOffline()
+  }
 
+  _handleError = (err: Error) => {
+    this._connected = false
+    this._setState({
+      id: this._config.id,
+      status: MQTT_PLUGIN_STATUS_ERROR,
+      error: err.message,
+    })
+  }
+
+  _setTagsOffline() {
     this._dataFromMQTTRxTimes.clear()
     const valuesToPublish: ValuesFromMQTTMap = {}
     const enabledChannels = (channels: ?Array<MQTTChannelConfig>) => (channels || []).filter(channel => channel.enabled)
@@ -171,15 +204,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
     if (Object.keys(valuesToPublish).length)
       this.emit(DATA_PLUGIN_EVENT_DATA, valuesToPublish)
-  }
-
-  _handleError = (err: Error) => {
-    this._connected = false
-    this._setState({
-      id: this._config.id,
-      status: MQTT_PLUGIN_STATUS_ERROR,
-      error: err.message,
-    })
   }
 
   pluginInfo(): PluginInfo { return this._pluginInfo }
@@ -213,9 +237,11 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
 
   _doDelayedPublish() {
     this._publishDataTimeout = undefined
-    const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
-    if (channelsToSend.length)
-      this._publishData({channelsToSend, time: Date.now()})
+    if (this._connected) {
+      const channelsToSend: Array<ToMQTTChannelState> = this._getChannelsToSend()
+      if (channelsToSend.length)
+        this._publishData({channelsToSend, time: Date.now()})
+    }
   }
 
   _publishData(args: {channelsToSend: Array<ToMQTTChannelState>, time: number}) {
@@ -237,15 +263,10 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
     })
   }
 
-  start() {
-    this._updateMQTTChannels()
-    this._updateMetadataToMQTT()
-    this._protocolHandler.start()
-    this._stopRxMonitor()
-    const {channelsFromMQTT} = this._config
-    if (channelsFromMQTT && channelsFromMQTT.length) {
-      const timeoutCheckIntervalTime = (this._dataFromMQTTTimeout > 5000) ? 1000 : 100
-      this._rxMonitorInterval = setInterval(this._checkRxTimeouts, timeoutCheckIntervalTime)
+  _cancelPublishDataTimeout() {
+    if (this._publishDataTimeout) {
+      clearTimeout(this._publishDataTimeout)
+      this._publishDataTimeout = undefined
     }
   }
 
@@ -318,15 +339,6 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
         }
       }
     }
-  }
-
-  destroy() {
-    this._resources.metadataHandler.removeListener(EVENT_METADATA_CHANGE, this._onMetadataChange)
-    if (this._publishDataTimeout) {
-      clearTimeout(this._publishDataTimeout)
-      this._publishDataTimeout = undefined
-    }
-    this._protocolHandler.destroy()
   }
 
   _onMetadataChange = () => {
