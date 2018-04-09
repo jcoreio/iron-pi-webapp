@@ -1,26 +1,36 @@
 // @flow
 
 import * as React from 'react'
+import isEqual from 'lodash.isequal'
 import PropTypes from 'prop-types'
 import {compose} from 'redux'
 import {formValues} from 'redux-form'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
-import type {MetadataItem} from '../types/MetadataItem'
+import type {MetadataItem, DataType} from '../types/MetadataItem'
 import MetadataItemFields from './MetadataItemFields'
 
 type Force = {
-  dataType?: string,
+  dataType?: DataType,
   isDigital?: boolean,
+}
+
+type Data = {
+  metadataItem?: ?MetadataItem,
+  loading: boolean,
 }
 
 export type Props = {
   tag: ?string,
+  dataType: ?DataType,
+  isDigital: ?boolean,
+  units: ?string,
+  rounding: ?number,
+  displayPrecision: ?number,
+  min: ?number,
+  max: ?number,
   force?: Force,
-  data?: {
-    metadataItem?: MetadataItem,
-    loading: boolean,
-  },
+  data: Data,
 }
 
 const metadataItemQuery = gql(`query MetadataItem($tag: String!) {
@@ -45,13 +55,20 @@ type Context = {
   },
 }
 
-function getMetadataItem(props: Props): ?MetadataItem {
-  return props.data && props.data.metadataItem
+function createField(sectionPrefix: ?string, field: string): string {
+  return sectionPrefix ? `${sectionPrefix}.${field}` : field
 }
 
 const excludedKeys: Set<string> = new Set(['_id', '__typename'])
 
 class MetadataItemFieldsContainer extends React.Component<Props> {
+  static defaultProps: {data: Data} = {
+    data: {
+      loading: true,
+      metadataItem: null,
+    }
+  }
+
   static contextTypes = {
     _reduxForm: PropTypes.shape({
       sectionPrefix: PropTypes.string,
@@ -60,41 +77,47 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
     }),
   }
 
-  _updateForce = (force: Force, context: Context = this.context) => {
-    const {_reduxForm: {sectionPrefix, change, dispatch}} = context
-    for (let key in force) {
-      const field = sectionPrefix ? `${sectionPrefix}.${key}` : key
-      dispatch(change(field, force[key]))
-    }
-  }
+  _initialized: boolean = false
+  _needsReload: boolean = true
 
-  _updateFields = (metadataItem: MetadataItem, context: Context = this.context) => {
+  _updateFields = (loadedMetadataItem: ?MetadataItem, props: Props = this.props, context: Context = this.context) => {
     const {_reduxForm: {sectionPrefix, change, dispatch}} = context
-    for (let key in metadataItem) {
+    const {tag, dataType, isDigital, units, rounding, displayPrecision, min, max, force} = props
+    const fields = loadedMetadataItem
+      ? {...loadedMetadataItem}
+      : {tag, dataType, isDigital, units, rounding, displayPrecision, min, max}
+
+    if (force) Object.assign(fields, force)
+    if (!fields.dataType) fields.dataType = 'number'
+    if (!Number.isFinite(fields.min)) fields.min = 0
+    if (!Number.isFinite(fields.max)) fields.max = 100
+    if (!Number.isFinite(fields.displayPrecision)) fields.displayPrecision = 1
+    if (!loadedMetadataItem && !this._initialized && !Number.isFinite(fields.rounding)) fields.rounding = 0.01
+
+    for (let key in fields) {
       if (excludedKeys.has(key)) continue
-      const field = sectionPrefix ? `${sectionPrefix}.${key}` : key
-      dispatch(change(field, metadataItem[key]))
+      const field = createField(sectionPrefix, key)
+      dispatch(change(field, fields[key]))
     }
+
+    this._initialized = true
+    this._needsReload = false
   }
 
   componentDidMount() {
-    const metadataItem = getMetadataItem(this.props)
-    if (metadataItem) this._updateFields(metadataItem)
-    const {force} = this.props
-    if (force) this._updateForce(force)
+    const {tag, data: {loading, metadataItem}} = this.props
+    if (loading || !tag) return
+    if (metadataItem && metadataItem.tag !== tag) return
+    this._updateFields(metadataItem, this.props, this.context)
   }
 
   componentWillReceiveProps(nextProps: Props, nextContext: Context) {
-    const prevMetadataItem = getMetadataItem(this.props)
-    const nextMetadataItem = getMetadataItem(nextProps)
-    if (nextMetadataItem && nextMetadataItem !== prevMetadataItem) {
-      this._updateFields(nextMetadataItem, nextContext)
-    }
-    const prevForce = this.props.force
-    const nextForce = nextProps.force
-    if (nextForce && nextForce !== prevForce) {
-      this._updateForce(nextForce, nextContext)
-    }
+    const {tag, force, data: {loading, metadataItem}} = nextProps
+    if (tag !== this.props.tag || !isEqual(force, this.props.force)) this._needsReload = true
+    if (!this._needsReload) return
+    if (loading || !tag) return
+    if (metadataItem && metadataItem.tag !== tag) return
+    this._updateFields(metadataItem, nextProps, nextContext)
   }
 
   render(): ?React.Node {
@@ -107,7 +130,7 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
 }
 
 export default compose(
-  formValues('tag'),
+  formValues('tag', 'dataType', 'isDigital', 'min', 'max', 'units', 'rounding', 'displayPrecision'),
   graphql(metadataItemQuery, {
     options: ({tag}: Props) => ({
       variables: {tag},

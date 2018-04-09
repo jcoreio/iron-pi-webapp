@@ -48,7 +48,7 @@ export type Props = {
 }
 
 export function pickMetadataItemFields(metadataItem: MetadataItem): MetadataItem {
-  const {tag, dataType, name, min, max, units, rounding, displayPrecision} = metadataItem
+  let {tag, dataType, name, min, max, units, rounding, displayPrecision} = metadataItem
   return {tag, name, dataType, min, max, units, rounding, displayPrecision}
 }
 
