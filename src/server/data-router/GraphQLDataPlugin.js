@@ -31,7 +31,11 @@ export default class GraphQLDataPlugin implements DataPlugin {
       const state = tagMap[tag]
       const {v} = state || {v: null}
       this._pubsub.publish(`${TAG_VALUE}/${tag}`, {TagValue: v})
-      this._pubsub.publish(`${TAG_STATE}/${tag}`, {TagState: state ? {...state, tag} : null})
+      this._pubsub.publish(`${TAG_STATE}/${tag}`, {
+        TagState: state
+          ? {...state, tag}
+          : {tag, t: Date.now(), v: null},
+      })
     }
   }
 }

@@ -78,9 +78,10 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   publicTags(): Array<string> { return this._publicTags }
   mappingProblems(): $ReadOnlyArray<MappingProblem> { return this._mappingProblems }
 
-  getTagState(tag: string): ?TagState {
+  getTagState(tag: string): TagState {
     const entry = this._tagMap[tag]
-    return entry ? {tag, t: entry.t, v: entry.v} : null
+    if (!entry) return {tag, t: Date.now(), v: null}
+    return {tag, t: entry.t, v: entry.v}
   }
   getTagValue(tag: string): any {
     const entry = this._tagMap[tag]
