@@ -18,6 +18,10 @@ const SecurityView = featureLoader({
   getComponent: feature => (feature: any).SecurityView,
 })
 
+const SecurityViewLink = () => (
+  <SidebarSectionHeader key={SECURITY} component={NavLink} to={SECURITY} title="Security" />
+)
+
 const SecurityViewFeature: Feature = {
   navbarRoutes: [
     <Route
@@ -37,9 +41,7 @@ const SecurityViewFeature: Feature = {
       component={SecurityView}
     />,
   ],
-  sidebarSections: [
-    <SidebarSectionHeader key={SECURITY} component={NavLink} to={SECURITY} title="Security" />,
-  ],
+  sidebarSections: [SecurityViewLink],
   sidebarSectionsOrder: 900,
   load: async () => {
     return {

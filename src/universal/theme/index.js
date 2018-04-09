@@ -451,9 +451,6 @@ theme.viewPanel = {
       left: viewPanelPadding.horizontal,
       right: viewPanelPadding.horizontal,
     },
-    '$title + &': {
-      paddingTop: 0,
-    },
   },
   noVerticalPadding: {
     paddingTop: 0,

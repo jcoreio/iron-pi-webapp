@@ -9,7 +9,7 @@ import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
 import {withTheme} from 'material-ui/styles'
 
-import LocalIOSidebarSection from './MQTTSidebarSection'
+import MQTTSidebarSection from './MQTTSidebarSection'
 import type {Action, Dispatch, State} from '../../redux/types'
 import {setSectionExpanded} from '../../redux/sidebar'
 import type {Theme} from '../../theme'
@@ -46,11 +46,11 @@ type PropsFromDispatch = {
 
 type Props = PropsFromState & PropsFromTheme & PropsFromDispatch & PropsFromApollo
 
-class LocalIOSidebarSectionContainer extends React.Component<Props> {
+class MQTTSidebarSectionContainer extends React.Component<Props> {
   render(): ?React.Node {
     const {expanded, loading, setExpanded, configs} = this.props
     return (
-      <LocalIOSidebarSection
+      <MQTTSidebarSection
         expanded={expanded}
         onExpandedChange={setExpanded}
         loading={loading}
@@ -88,6 +88,6 @@ export default compose(
   withRouter,
   withTheme(),
   connect(mapStateToProps, mapDispatchToProps),
-)(LocalIOSidebarSectionContainer)
+)(MQTTSidebarSectionContainer)
 
 

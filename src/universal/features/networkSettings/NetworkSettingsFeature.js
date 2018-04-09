@@ -18,6 +18,10 @@ const NetworkSettingsFormContainer = featureLoader({
   getComponent: feature => (feature: any).NetworkSettingsFormContainer,
 })
 
+const NetworkSettingsLink = () => (
+  <SidebarSectionHeader key={NETWORK_SETTINGS} component={NavLink} to={NETWORK_SETTINGS} title="IP Address" />
+)
+
 const NetworkSettingsFeature: Feature = {
   navbarRoutes: [
     <Route
@@ -37,9 +41,7 @@ const NetworkSettingsFeature: Feature = {
       component={NetworkSettingsFormContainer}
     />,
   ],
-  sidebarSections: [
-    <SidebarSectionHeader key={NETWORK_SETTINGS} component={NavLink} to={NETWORK_SETTINGS} title="IP Address" />,
-  ],
+  sidebarSections: [NetworkSettingsLink],
   sidebarSectionsOrder: 800,
   load: async () => {
     return {

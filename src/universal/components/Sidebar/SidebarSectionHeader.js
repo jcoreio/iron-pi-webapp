@@ -58,25 +58,27 @@ export type SidebarSectionHeaderProps = {
 }
 
 const SidebarSectionHeader = withStyles(sidebarSectionHeaderStyles, {withTheme: true})(
-  ({title, classes, expanded, children, ...props}: SidebarSectionHeaderProps) => (
-    <ListItem
-      {...props}
-      button
-      className={classes.root}
-      data-test-title={title}
-      activeClassName={props.component === NavLink ? classes.active : undefined}
-    >
-      <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
-        <PlayArrowIcon
-          className={classNames(classes.expandIcon, {
-            [classes.expandIconOpen]: expanded,
-          })}
-        />
-      </ListItemIcon>
-      <ListItemText className={classes.title} disableTypography primary={title} />
-      {children}
-    </ListItem>
-  )
+  ({title, classes, expanded, children, ...props}: SidebarSectionHeaderProps) => {
+    if (props.component === NavLink) (props: any).activeClassName = classes.active
+    return (
+      <ListItem
+        {...props}
+        button
+        className={classes.root}
+        data-test-title={title}
+      >
+        <ListItemIcon style={{visibility: expanded != null ? 'visible' : 'hidden'}}>
+          <PlayArrowIcon
+            className={classNames(classes.expandIcon, {
+              [classes.expandIconOpen]: expanded,
+            })}
+          />
+        </ListItemIcon>
+        <ListItemText className={classes.title} disableTypography primary={title} />
+        {children}
+      </ListItem>
+    )
+  }
 )
 
 export default SidebarSectionHeader

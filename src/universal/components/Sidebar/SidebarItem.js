@@ -39,16 +39,18 @@ export type SidebarItemProps = {
 }
 
 const SidebarItem = withStyles(sidebarItemStyles, {withTheme: true})(
-  ({classes, children, ...props}: SidebarItemProps): React.Node => (
-    <ListItem
-      {...props}
-      button
-      className={classes.root}
-      activeClassName={props.component === NavLink ? classes.active : undefined}
-    >
-      {children}
-    </ListItem>
-  )
+  ({classes, children, ...props}: SidebarItemProps): React.Node => {
+    if (props.component === NavLink) (props: any).activeClassName = classes.active
+    return (
+      <ListItem
+        {...props}
+        button
+        className={classes.root}
+      >
+        {children}
+      </ListItem>
+    )
+  }
 )
 
 export default SidebarItem
