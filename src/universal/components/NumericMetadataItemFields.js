@@ -42,7 +42,7 @@ export default class NumericMetadataItemFields extends React.Component<Props> {
             type="text"
             component={TextField}
             className={formControlClass}
-            validate={[numericality({'>': 0})]}
+            validate={numericality({'>': 0, allowBlank: true})}
             inputProps={{size: 2}}
           />
           <Field

@@ -43,7 +43,7 @@ class BeginStep extends React.Component<Props> {
           label="How many calibration points do you want to enter?"
           component={TextField}
           className={classes.numPointsField}
-          validate={[required(), numericality({int: true, '>=': 2, '<=': 10})]}
+          validate={numericality({int: true, '>=': 2, '<=': 10})}
           inputRef={c => this.numPointsInput = c}
         />
         <TransitionListener didComeIn={this.handleCameIn} />
