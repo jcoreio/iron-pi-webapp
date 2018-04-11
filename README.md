@@ -1,6 +1,6 @@
 # iron-pi-webapp
 
-This is our new webapp that runs on the Iron Pi.  It uses:
+Web application for the jcore.io Iron Pi device
 
 * Runtime
     * [Node 8](https://nodejs.org/)
@@ -17,7 +17,6 @@ This is our new webapp that runs on the Iron Pi.  It uses:
     * [Apollo](https://www.apollographql.com) - data transport middleware
 * Services
     * [Postgres](https://www.postgresql.org/)
-    * [Docker](https://www.docker.com/)
 * Build tools
     * [Yarn](https://yarnpkg.com/)
     * [Promake](https://github.com/jcoreio/promake)
@@ -110,14 +109,6 @@ Run webpack in another:
 
 Open the webapp at [http://localhost:4000](http://localhost:4000).
 
-## Running Docker build
-
-```
-./run build:docker docker
-```
-
-Open the webapp at [http://localhost:4000](http://localhost:4000).
-
 ## Debugging the backend
 
 Run the backend with `node --inspect`:
@@ -191,4 +182,3 @@ You can run the test with `nyc` code coverage by replacing `test` with
 
 To get full coverage, the client and server must be running in [test
 mode](#running-webapp-in-test-mode).
-
