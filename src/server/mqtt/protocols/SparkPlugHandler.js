@@ -12,8 +12,8 @@ import {SPARKPLUG_VERSION_B_1_0} from './SparkPlugTypes'
 import type {SparkPlugBirthMetric, SparkPlugClient, SparkPlugDataMertic, SparkPlugDataMessage, SparkPlugPackage,
   SparkplugTypedValue} from './SparkPlugTypes'
 
-import {DATA_TYPE_NUMBER, DATA_TYPE_STRING} from '../../../universal/types/MetadataItem'
-import type {NumericMetadataItem, MetadataItem} from '../../../universal/types/MetadataItem'
+import {/* DATA_TYPE_NUMBER, */DATA_TYPE_STRING} from '../../../universal/types/MetadataItem'
+import type {/* NumericMetadataItem, */ MetadataItem} from '../../../universal/types/MetadataItem'
 
 const log = logger('MQTT:SparkPlugHandler')
 
@@ -114,24 +114,24 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
     const metrics: Array<SparkPlugBirthMetric> = metadata.map((metadataValue: MetadataValueToMQTT) => {
       const dataValue: ?DataValueToMQTT = dataByTag.get(metadataValue.tag)
       const metadata: MetadataItem = metadataValue.metadata
-      const {name, dataType} = metadata
-      const isDigital = metadata.dataType === DATA_TYPE_NUMBER ? metadata.isDigital : false
+      const {/*name, */dataType} = metadata
+      //const isDigital = metadata.dataType === DATA_TYPE_NUMBER ? metadata.isDigital : false
 
       const dataMetric: ?SparkPlugDataMertic = dataValue ? toSparkPlugMetric(dataValue) : undefined
 
       const metric: SparkPlugBirthMetric = {
         ...(dataMetric || {value: null, type: dataType}),
         name: metadataValue.tag,
-        properties: {
-          longName: toSparkPlugString(name),
-        }
+        // properties: {
+        //   longName: toSparkPlugString(name),
+        // }
       }
-      if (DATA_TYPE_NUMBER === dataType && !isDigital) {
-        const {min, max, units}: NumericMetadataItem = (metadata: any)
-        metric.properties.min = toSparkPlugNumber(min)
-        metric.properties.max = toSparkPlugNumber(max)
-        metric.properties.units = toSparkPlugString(units)
-      }
+      // if (DATA_TYPE_NUMBER === dataType && !isDigital) {
+      //   const {min, max, units}: NumericMetadataItem = (metadata: any)
+      //   metric.properties.min = toSparkPlugNumber(min)
+      //   metric.properties.max = toSparkPlugNumber(max)
+      //   metric.properties.units = toSparkPlugString(units)
+      // }
       return metric
     })
 

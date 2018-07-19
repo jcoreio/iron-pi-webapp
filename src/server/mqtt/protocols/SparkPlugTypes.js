@@ -23,8 +23,8 @@ export type SparkplugTypedValue = {
 
 /** Metric sent during a NBIRTH message */
 export type SparkPlugBirthMetric = SparkPlugDataMertic & {
-  properties: {
-    longName: SparkplugTypedValue,
+  properties?: {
+    longName?: SparkplugTypedValue,
     min?: ?SparkplugTypedValue,
     max?: ?SparkplugTypedValue,
     units?: ?SparkplugTypedValue,
