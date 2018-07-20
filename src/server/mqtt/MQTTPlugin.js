@@ -1,9 +1,7 @@
 // @flow
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
-import difference from 'lodash.difference'
-import isEqual from 'lodash.isequal'
-import keyBy from 'lodash.keyby'
+import {difference, isEqual, keyBy, uniqBy} from 'lodash'
 import logger from 'log4jcore'
 import type {PubSubEngine} from 'graphql-subscriptions'
 
@@ -222,7 +220,10 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   }
 
   dispatchCycleDone(event: CycleDoneEvent) {
-    const txMaybeRequired = this._connected && (this._config.publishAllPublicTags || event.inputsChanged)
+    // Check for SparkPlug here because SparkPlug has to send channels from MQTT back to MQTT, which means
+    // we won't get the inputsChanged indication for data that came from this plugin
+    const txMaybeRequired = this._connected && (this._config.publishAllPublicTags || event.inputsChanged ||
+      MQTT_PROTOCOL_SPARKPLUG === this._config.protocol)
     // If _publishDataTimeout is set, we're already waiting on a delayed publish, so we can
     // just let the existing timeout expire
     if (txMaybeRequired && !this._publishDataTimeout) {
@@ -313,10 +314,16 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
         enabled: true
       }))
     }
+
+    // SparkPlug requires us to re-publish all tags from MQTT as if they were tags to MQTT.
+    const rePublishedChannelsFromMQTT = MQTT_PROTOCOL_SPARKPLUG === this._config.protocol ?
+      (this._config.channelsFromMQTT || []) : []
+
     // Combine configured channels with channels added due to "publish all" being enabled
-    this._toMQTTEnabledChannelConfigs = [...(this._config.channelsToMQTT || []), ...extraChannelsToPublish]
+    const enabledConfigsMaybeDup = [...(this._config.channelsToMQTT || []), ...rePublishedChannelsFromMQTT, ...extraChannelsToPublish]
       // Filter down to only enabled and mapped channels
       .filter((channelConfig: MQTTChannelConfig) => channelConfig.enabled && channelConfig.mqttTag && channelConfig.internalTag)
+    this._toMQTTEnabledChannelConfigs = uniqBy(enabledConfigsMaybeDup, (config: MQTTChannelConfig) => config.internalTag)
 
     const prevChannelStates = keyBy(this._toMQTTChannelStates, (state: ToMQTTChannelState) => state.config.mqttTag)
     this._toMQTTChannelStates = this._toMQTTEnabledChannelConfigs.map((config: MQTTChannelConfig) => ({
