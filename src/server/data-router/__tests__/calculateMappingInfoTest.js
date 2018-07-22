@@ -106,7 +106,7 @@ describe('calculateMappingInfo', () => {
     expect(mappingProblems.length).to.equal(0)
   })
 
-  it('identifies duplicate sources', () => {
+  const checkDuplicateSources = (settable: boolean) => {
     // Mappings with conflicts for tag2 and tag3
     const mappingsForAllPlugins: Array<Array<DataPluginMapping>> = [
       [ // Plugin 1: Local IO
@@ -118,12 +118,14 @@ describe('calculateMappingInfo', () => {
         {
           id: 'local2',
           name: 'Local 2',
-          tagFromPlugin: 'tag2'
+          tagFromPlugin: 'tag2',
+          settable
         },
         {
           id: 'local3',
           name: 'Local 3',
-          tagFromPlugin: 'tag3'
+          tagFromPlugin: 'tag3',
+          settable
         },
         {
           id: 'local4',
@@ -140,12 +142,14 @@ describe('calculateMappingInfo', () => {
         {
           id: 'mqtt2',
           name: 'MQTT 2',
-          tagFromPlugin: 'tag2'
+          tagFromPlugin: 'tag2',
+          settable
         },
         {
           id: 'mqtt3',
           name: 'MQTT 3',
-          tagFromPlugin: 'tag3'
+          tagFromPlugin: 'tag3',
+          settable
         },
         {
           id: 'mqtt4',
@@ -225,7 +229,128 @@ describe('calculateMappingInfo', () => {
 
     checkProblemReports(tag2MappingProblems, tag2MappingLocations, 'tag2')
     checkProblemReports(tag3MappingProblems, tag3MappingLocations, 'tag3')
+  }
+
+  it('identifies duplicate sources when both tags are not settable', () => checkDuplicateSources(false))
+  it('identifies duplicate sources when both tags are settable', () => checkDuplicateSources(false))
+
+  it('allows two sources when one is flagged as settable', () => {
+    // Mappings with conflicts for tag2 and tag3
+    const mappingsForAllPlugins: Array<Array<DataPluginMapping>> = [
+      [ // Plugin 1: Local IO
+        {
+          id: 'local1',
+          name: 'Local 1',
+          tagFromPlugin: 'tag1'
+        },
+        {
+          id: 'local2',
+          name: 'Local 2',
+          tagFromPlugin: 'tag2',
+          settable: true
+        }
+      ],
+      [ // Plugin 2: MQTT
+        {
+          id: 'mqtt1',
+          name: 'MQTT 1',
+          tagsToPlugin: ['tag1']
+        },
+        {
+          id: 'mqtt2',
+          name: 'MQTT 2',
+          tagFromPlugin: 'tag2'
+        }
+      ]
+    ]
+    const {tags, publicTags, tagsToProviderPluginKeys, tagsToDestinationPluginKeys, duplicateTags, mappingProblems} =
+      calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    const expectedTags = ['tag1', 'tag2']
+    expect(tags).to.deep.equal(expectedTags)
+    expect(publicTags).to.deep.equal(expectedTags)
+
+    ;['tag1', 'tag2'].forEach(tag => expect(tagsToProviderPluginKeys.get(tag)).to.equal(getPluginKey(infoForPlugin(0))))
+
+    checkDestinations(tagsToDestinationPluginKeys, {
+      tag1: [1]
+    })
+
+    expect(duplicateTags.size).to.equal(0)
+    expect(mappingProblems.length).to.equal(0)
   })
+
+  const checkDuplicateSourcesWithSomeSettable = (dupSettable: boolean, dupNonSettable: boolean) => {
+    // Mappings with conflicts for tag2 and tag3
+    const mappingsForAllPlugins: Array<Array<DataPluginMapping>> = [
+      [
+        {
+          id: 'plugin1-1',
+          name: 'Plugin 1-1',
+          tagFromPlugin: 'tag1',
+          settable: dupSettable
+        }
+      ],
+      [
+        {
+          id: 'plugin2-1',
+          name: 'Plugin 2-1',
+          tagFromPlugin: 'tag1',
+          settable: dupNonSettable
+        }
+      ],
+      [
+        {
+          id: 'plugin3-1',
+          name: 'Plugin 3-1',
+          tagFromPlugin: 'tag1',
+          settable: dupNonSettable
+        }
+      ],
+    ]
+    const {tagsToProviderPluginKeys, duplicateTags, mappingProblems} =
+      calculateMappingInfo(toPluginAndMappingsInfo(mappingsForAllPlugins))
+
+    // Duplicate tags shouldn't have any plugin identified as the source
+    expect(tagsToProviderPluginKeys.get('tag1')).to.equal(undefined)
+
+    expect(Array.from(duplicateTags)).to.deep.equal(['tag1'])
+
+    // Two tags each have two sources, so there should be a total of 4 problem reports
+    expect(mappingProblems.length).to.equal(3)
+
+    const pluginInfo = range(mappingsForAllPlugins.length).map(infoForPlugin)
+
+    const mappingLocations = [
+      {
+        ...pluginInfo[0],
+        channelId: 'plugin1-1',
+        channelName: 'Plugin 1-1'
+      },
+      {
+        ...pluginInfo[1],
+        channelId: 'plugin2-1',
+        channelName: 'Plugin 2-1'
+      },
+      {
+        ...pluginInfo[2],
+        channelId: 'plugin3-1',
+        channelName: 'Plugin 3-1'
+      }
+    ]
+
+    mappingProblems.forEach((problem, problemIdx) => {
+      expect(problem).to.deep.equal({
+        mappingLocation: mappingLocations[problemIdx],
+        tag: 'tag1',
+        problem: MAPPING_PROBLEM_MULTIPLE_SOURCES,
+        additionalSources: mappingLocations.slice(0).splice(problemIdx, 1)
+      })
+    })
+  }
+
+  it('flags duplicates when there are multiple settable and one non setable source', () => checkDuplicateSourcesWithSomeSettable(true, false))
+  it('flags duplicates when there are multiple non settable and one setable source', () => checkDuplicateSourcesWithSomeSettable(false, true))
 
   it('identifies missing tags', () => {
     const mappingsForAllPlugins: Array<Array<DataPluginMapping>> = [
