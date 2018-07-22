@@ -1,19 +1,10 @@
 // @flow
 
 import type {PluginInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type SPIHandler from '../localio/SPIHandler'
 import type {PubSubEngine} from 'graphql-subscriptions'
-
-/**
- * Information about a single mapping into or out of a plugin
- */
-export type DataPluginMapping = {
-  id: number | string, // Unique ID, e.g. "local1"
-  name: string, // Descriptive name for this input or output, e.g. "Local 1". This is distinct from the user settable metadata name, e. g. "Pump 1".
-  tagsToPlugin?: ?Array<string>,
-  tagFromPlugin?: ?string, // Can be null if this is an output that does not publish a tag back to the tag map
-}
 
 export type InputChangeEvent = {
   time: number,

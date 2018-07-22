@@ -4,12 +4,12 @@ import forOwn from 'lodash.forown'
 import range from 'lodash.range'
 
 import calculateMappingInfo from '../calculateMappingInfo'
-import type {DataPluginMapping} from '../PluginTypes'
 import {
   MAPPING_PROBLEM_MULTIPLE_SOURCES,
   MAPPING_PROBLEM_NO_SOURCE
 } from '../../../universal/data-router/PluginConfigTypes'
 import {pluginKey as getPluginKey} from '../../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../../universal/types/PluginTypes'
 
 const toPluginId = magic => `pluginId${magic}`
 

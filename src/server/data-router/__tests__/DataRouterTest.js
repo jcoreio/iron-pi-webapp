@@ -10,8 +10,9 @@ import type {PluginInfo} from '../../../universal/data-router/PluginConfigTypes'
 import DataRouter, {timestampDispatchData} from '../DataRouter'
 import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA,
   DATA_PLUGIN_EVENT_IOS_CHANGED} from '../PluginTypes'
-import type {DataPlugin, InputChangeEvent, CycleDoneEvent, DataPluginMapping, TimeValuePair} from '../PluginTypes'
+import type {DataPlugin, InputChangeEvent, CycleDoneEvent, TimeValuePair} from '../PluginTypes'
 import {pluginKey as getPluginKey} from '../../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../../universal/types/PluginTypes'
 
 const TEST_EVENT_INPUTS_CHANGED = 'inputsChanged'
 const TEST_EVENT_DISPATCH_CYCLE_DONE = 'dispatchCycleDone'

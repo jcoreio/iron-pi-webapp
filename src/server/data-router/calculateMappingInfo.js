@@ -5,8 +5,9 @@ import range from 'lodash.range'
 import {MAPPING_PROBLEM_MULTIPLE_SOURCES, MAPPING_PROBLEM_NO_SOURCE} from '../../universal/data-router/PluginConfigTypes'
 import {INTERNAL} from '../../universal/types/Tag'
 import type {MappingLocationInfo, MappingProblem} from '../../universal/data-router/PluginConfigTypes'
-import type {DataPluginMapping, PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
+import type {PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
 import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
 
 export default function calculateMappingInfo(allPluginMappings: Array<PluginAndMappingsInfo>): SystemMappingInfo {
   const allTags: Set<string> = new Set()
