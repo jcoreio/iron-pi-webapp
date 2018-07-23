@@ -10,7 +10,7 @@ import type {DataPluginEmittedEvents, InputChangeEvent} from '../data-router/Plu
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {LocalControlDigitalOutputConfig, Calibration, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
 import type {DataPluginMapping} from '../../universal/types/PluginTypes'
-import {setCommandToTag} from '../../universal/types/Tag'
+import {setCommandToTag, tagToSetCommand} from '../../universal/types/Tag'
 import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import Calibrator from '../calc/Calibrator'
@@ -213,6 +213,13 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
           const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
           tagsToPlugin.push(...controlLogic.map(({tag}) => tag))
         }
+        if (tag && CONTROL_MODE_CONDITION !== config.controlMode) {
+          // Mark the tag settable as long as it's not being set via a condition. That way, if the
+          // output is temporarily put into Force On or Force Off status, we won't get spurious
+          // mapping problems
+          mapping.settable = true
+          tagsToPlugin.push(tagToSetCommand(tag))
+        }
       }
       }
       if (tagsToPlugin.length)
@@ -234,7 +241,8 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         for (let channel of this._channels) {
           const {id, tag, config} = channel
           if (isOutputtingATag(config) && tag === tagToSet) {
-            this._outputTagValues[id] = event.tagMap[maybeCommand]
+            const timeValuePair = event.tagMap[maybeCommand]
+            this._outputTagValues[id] = timeValuePair && timeValuePair.v
           }
         }
       }

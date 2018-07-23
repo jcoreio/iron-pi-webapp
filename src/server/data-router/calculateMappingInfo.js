@@ -6,6 +6,7 @@ import type {MappingLocationInfo, MappingProblem} from '../../universal/data-rou
 import type {PluginAndMappingsInfo, SystemMappingInfo} from './PluginTypes'
 import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
 import type {DataPluginMapping} from '../../universal/types/PluginTypes'
+import {setCommandToTag} from '../../universal/types/Tag'
 
 type TagSourceInfo = {
   pluginKey: string,
@@ -81,7 +82,9 @@ export default function calculateMappingInfo(allPluginMappings: Array<PluginAndM
       }
       // Flag missing sources
       ;(tagsToPlugin || []).forEach((tag: string) => {
-        if (!tagsToProviderPluginKeys.has(tag) && !duplicateTags.has(tag)) {
+        // filter out if setCommandToTag is truthy--plugins listen for these tags, but sources
+        // don't declare them as outputs
+        if (!tagsToProviderPluginKeys.has(tag) && !duplicateTags.has(tag) && !setCommandToTag(tag)) {
           mappingProblems.push({
             mappingLocation,
             tag,
