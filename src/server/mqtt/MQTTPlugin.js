@@ -15,7 +15,7 @@ import {cleanMQTTConfig, mqttConfigToDataPluginMappings, MQTT_PROTOCOL_SPARKPLUG
 import type {MQTTChannelConfig, MQTTConfig} from '../../universal/mqtt/MQTTConfig'
 import {DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import type { DataPlugin, DataPluginEmittedEvents, CycleDoneEvent,
-  DataPluginMapping, ValuesMap} from '../data-router/PluginTypes'
+  ValuesMap} from '../data-router/PluginTypes'
 import {EVENT_METADATA_CHANGE} from '../metadata/MetadataHandler'
 import type MetadataHandler from '../metadata/MetadataHandler'
 import type {ValuesFromMQTTMap, DataValueToMQTT, ChannelFromMQTTConfig, MetadataValueToMQTT} from './MQTTTypes'
@@ -27,6 +27,7 @@ import {
   MQTT_PLUGIN_STATUS_CONNECTING,
   MQTT_PLUGIN_STATUS_ERROR
 } from '../../universal/types/MQTTPluginState'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
 
 const log = logger('MQTTPlugin')
 

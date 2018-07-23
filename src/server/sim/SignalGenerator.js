@@ -3,10 +3,9 @@ import {isFinite} from 'lodash'
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import type {
-  DataPlugin, DataPluginEmittedEvents, DataPluginMapping, ValuesMap
-} from '../data-router/PluginTypes'
-
+  DataPlugin, DataPluginEmittedEvents, ValuesMap} from '../data-router/PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
 
 const START_VALUE_DEFAULT = 0
 const END_VALUE_DEFAULT = 100

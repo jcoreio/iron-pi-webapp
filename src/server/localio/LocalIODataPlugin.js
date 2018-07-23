@@ -6,9 +6,11 @@ import memoize from 'lodash.memoize'
 import logger from 'log4jcore'
 
 import LocalIOChannel from './models/LocalIOChannel'
-import type {DataPluginMapping, DataPluginEmittedEvents} from '../data-router/PluginTypes'
+import type {DataPluginEmittedEvents, InputChangeEvent} from '../data-router/PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
 import type {LocalControlDigitalOutputConfig, Calibration, DigitalOutputConfig} from '../../universal/localio/LocalIOChannel'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
+import {setCommandToTag, tagToSetCommand} from '../../universal/types/Tag'
 import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import Calibrator from '../calc/Calibrator'
@@ -57,6 +59,9 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     (channel: LocalIOChannel) => channel.config.calibration,
     (calibration: Calibration = {points: []}) => new Calibrator(calibration.points || [])
   ))
+
+  /** tag values that have been set from another plugin, e.g. an MQTT plugin */
+  _outputTagValues: Array<any> = []
 
   _sendOutputValuesInterval: ?number;
 
@@ -155,7 +160,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
         id,
         name: baseName,
       }
-      if (tag && channel.config.mode !== 'DISABLED' && !isOutputtingATag(config)) {
+      if (tag && channel.config.mode !== 'DISABLED') {
         mapping.tagFromPlugin = tag
       }
       const rawAnalogInputTag = LocalIOTags.rawAnalogInput(id)
@@ -204,17 +209,16 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
           tagFromPlugin: controlValueTag,
         })
         tagsToPlugin.push(controlValueTag)
-        switch (controlMode) {
-        case CONTROL_MODE_CONDITION: {
+        if (CONTROL_MODE_CONDITION === controlMode) {
           const {controlLogic}: LocalControlDigitalOutputConfig = (channel.config: any)
           tagsToPlugin.push(...controlLogic.map(({tag}) => tag))
-          break
         }
-        case CONTROL_MODE_OUTPUT_A_TAG: {
-          if (tag)
-            tagsToPlugin.push(tag)
-          break
-        }
+        if (tag && CONTROL_MODE_CONDITION !== config.controlMode) {
+          // Mark the tag settable as long as it's not being set via a condition. That way, if the
+          // output is temporarily put into Force On or Force Off status, we won't get spurious
+          // mapping problems
+          mapping.settable = true
+          tagsToPlugin.push(tagToSetCommand(tag))
         }
       }
       }
@@ -229,7 +233,20 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   // Change handlers
   //---------------------------------------------------------------------------
 
-  inputsChanged() {
+  inputsChanged(event: InputChangeEvent) {
+    // Handle the case where an output value is being written by another plugin, like an MQTT connector
+    event.changedTags.forEach((maybeCommand: string) => {
+      const tagToSet = setCommandToTag(maybeCommand)
+      if (tagToSet) {
+        for (let channel of this._channels) {
+          const {id, tag, config} = channel
+          if (isOutputtingATag(config) && tag === tagToSet) {
+            const timeValuePair = event.tagMap[maybeCommand]
+            this._outputTagValues[id] = timeValuePair && timeValuePair.v
+          }
+        }
+      }
+    })
     this._updateData()
   }
 
@@ -289,7 +306,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
           })
           break
         case CONTROL_MODE_OUTPUT_A_TAG:
-          controlValue = tag ? digitize(this._getTagValue(tag)) : null
+          controlValue = tag ? digitize(this._outputTagValues[id]) : null
           break
         }
         systemValue = digitize(controlValue != null ? controlValue : safeState)
@@ -299,7 +316,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
       }
 
       data[LocalIOTags.systemValue(id)] = systemValue
-      if (tag && !isOutputtingATag(config))
+      if (tag)
         data[tag] = systemValue
       if ('DIGITAL_OUTPUT' === config.mode) {
         data[LocalIOTags.controlValue(id)] = controlValue

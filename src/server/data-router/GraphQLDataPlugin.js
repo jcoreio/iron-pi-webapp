@@ -1,8 +1,9 @@
 // @flow
 
 import type {PubSubEngine} from 'graphql-subscriptions'
-import type {DataPlugin, DataPluginMapping, CycleDoneEvent} from './PluginTypes'
+import type {DataPlugin, CycleDoneEvent} from './PluginTypes'
 import type {PluginInfo} from '../../universal/data-router/PluginConfigTypes'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
 
 import {TAG_VALUE, TAG_STATE} from '../graphql/subscription/constants'
 

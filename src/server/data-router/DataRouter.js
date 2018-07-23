@@ -10,12 +10,13 @@ import logger from 'log4jcore'
 
 import calculateMappingInfo from './calculateMappingInfo'
 import {DATA_PLUGIN_EVENT_DATA, DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, DATA_PLUGIN_EVENT_IOS_CHANGED} from './PluginTypes'
-import type {
-  DataPlugin, DispatchEvent, ValuesMap, TimestampedValuesMap, TimestampedDispatchEvent,
+import type {DataPlugin, DispatchEvent, ValuesMap, TimestampedValuesMap, TimestampedDispatchEvent,
   PluginAndMappingsInfo, TimeValuePair} from './PluginTypes'
 import type {MappingProblem} from '../../universal/data-router/PluginConfigTypes'
 import {pluginKey as getPluginKey} from '../../universal/data-router/PluginConfigTypes'
 import type {MetadataItem} from '../../universal/types/MetadataItem'
+import type {DataPluginMapping} from '../../universal/types/PluginTypes'
+import {tagToSetCommand} from '../../universal/types/Tag'
 import type {TagState} from '../../universal/types/TagState'
 import roundByIncrement from '../../universal/util/roundByIncrement'
 
@@ -195,18 +196,33 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
     // and event will just pass through this function unchanged
     let cleanedTimestampedValues
     for (let tag in timestampedValues) {
-      if (this._tagsToProviderPluginKeys.get(tag) !== pluginKey) {
-        const warningTag = `${pluginKey}-${tag}`
-        if (!this._printedWarningKeys.has(warningTag)) {
-          this._printedWarningKeys.add(warningTag)
-          log.error(this._duplicateTags.has(tag) ?
-            `plugin ${pluginKey} cannot set tag ${tag} because it has multiple sources` :
-            `plugin ${pluginKey} tried to set tag ${tag} without declaring it as an output`)
+      const providerPluginKey: ?string = this._tagsToProviderPluginKeys.get(tag)
+      if (providerPluginKey !== pluginKey) {
+        // Check whether this is a settable tag
+        let isSettable = false
+        const providerPlugin: ?DataPlugin = providerPluginKey ? this._pluginsByKey.get(providerPluginKey) : null
+        if (providerPlugin) {
+          const thisTagMapping: ?DataPluginMapping = providerPlugin.ioMappings().find((mapping: DataPluginMapping) => mapping.tagFromPlugin === tag)
+          isSettable = !!(thisTagMapping && thisTagMapping.settable)
         }
+
+        // Create a modified object to return, if we haven't already done so
         if (!cleanedTimestampedValues) {
           cleanedTimestampedValues = {...timestampedValues}
         }
         delete cleanedTimestampedValues[tag]
+
+        if (isSettable) {
+          cleanedTimestampedValues[tagToSetCommand(tag)] = timestampedValues[tag]
+        } else {
+          const warningTag = `${pluginKey}-${tag}`
+          if (!this._printedWarningKeys.has(warningTag)) {
+            this._printedWarningKeys.add(warningTag)
+            log.error(this._duplicateTags.has(tag) ?
+              `plugin ${pluginKey} cannot set tag ${tag} because it has multiple sources` :
+              `plugin ${pluginKey} tried to set tag ${tag} without declaring it as an output`)
+          }
+        }
       }
     }
     return cleanedTimestampedValues ? {...event, timestampedValues: cleanedTimestampedValues} : event
