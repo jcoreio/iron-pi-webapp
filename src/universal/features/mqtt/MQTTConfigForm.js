@@ -338,18 +338,6 @@ class MQTTConfigForm extends React.Component<Props> {
                 }}
               />
             </ControlWithInfo>
-            <ControlWithInfo info="Time, in milliseconds, that data received from MQTT is considered valid">
-              <NumericField
-                name="dataFromMQTTTimeout"
-                label="Receive Hold Time"
-                type="text"
-                component={TextField}
-                className={classes.formControl}
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">milliseconds</InputAdornment>,
-                }}
-              />
-            </ControlWithInfo>
             <ControlWithInfo info="The username to connect with">
               <Field
                 name="username"
@@ -505,6 +493,18 @@ const TextJsonFields = ({formControlClass}: ProtocolFieldsProps): React.Node => 
         className={formControlClass}
         normalizeOnBlur={trim}
         validate={required()}
+      />
+    </ControlWithInfo>
+    <ControlWithInfo info="Time, in milliseconds, that data received from MQTT is considered valid">
+      <NumericField
+        name="dataFromMQTTTimeout"
+        label="Receive Hold Time"
+        type="text"
+        component={TextField}
+        className={formControlClass}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">milliseconds</InputAdornment>,
+        }}
       />
     </ControlWithInfo>
   </div>

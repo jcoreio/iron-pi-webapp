@@ -63,6 +63,8 @@ export type SparkPlugClientEventTypes = {
   appMessage: [SparkPlugAppMessage],
   ncmd: [Object],
   dcmd: [string, Object],
+  scadaHostOnline: [string],
+  scadaHostOffline: [string],
 }
 
 export type SparkPlugClient = EventEmitter<SparkPlugClientEventTypes> & {

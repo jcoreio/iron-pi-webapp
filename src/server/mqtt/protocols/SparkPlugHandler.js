@@ -4,7 +4,7 @@ import EventEmitter from '@jcoreio/typed-event-emitter'
 import logger from 'log4jcore'
 import sparkplug from 'sparkplug-client'
 
-import {EVENT_DATA_FROM_MQTT, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT, EVENT_MQTT_ERROR} from './MQTTProtocolHandler'
+import {EVENT_DATA_FROM_MQTT, EVENT_DATA_FROM_MQTT_INVALIDATE, EVENT_MQTT_CONNECT, EVENT_MQTT_DISCONNECT, EVENT_MQTT_ERROR} from './MQTTProtocolHandler'
 import type {MQTTProtocolHandlerEmittedEvents} from './MQTTProtocolHandler'
 
 import type {DataValueToMQTT, MetadataValueToMQTT, ValuesFromMQTTMap} from '../MQTTTypes'
@@ -31,6 +31,8 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
   _sparkplugBirthRequested: boolean = false
 
   _createNewClientTimeout: ?number
+
+  dataFromMQTTTimeoutRequired = false
 
   constructor(args: {config: SparkPlugHandlerConfig}) {
     super()
@@ -85,6 +87,7 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
       this.emit(EVENT_MQTT_CONNECT)
     })
     client.on('ncmd', (message: SparkPlugDataMessage) => this._handleDataFromSparkPlug(message))
+    client.on('scadaHostOffline', () => this.emit(EVENT_DATA_FROM_MQTT_INVALIDATE))
   }
 
   _endClient() {

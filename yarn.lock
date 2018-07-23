@@ -9846,9 +9846,9 @@ sparkles@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/sparkles/-/sparkles-1.0.0.tgz#1acbbfb592436d10bbe8f785b7cc6f82815012c3"
 
-"sparkplug-client@git://github.com/jcoreio/sparkplug-client-js.git#v3.3.0":
+"sparkplug-client@git://github.com/jcoreio/sparkplug-client-js.git#v3.4.0":
   version "3.3.0"
-  resolved "git://github.com/jcoreio/sparkplug-client-js.git#fa0d871d357332500c366a500a74b2efbe122927"
+  resolved "git://github.com/jcoreio/sparkplug-client-js.git#7e2f626288a547959c16c8eb0d07e35d364f0657"
   dependencies:
     lodash "^4.17.4"
     mqtt "^2.17.0"
