@@ -132,7 +132,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "Andy Edwards <jedwards@fastmail.com>",
-  "license": "UNLICENSED",
+  "license": "Apache 2.0",
   "description": "webapp that runs locally on the iron pi",
   "devDependencies": {
     "@commitlint/cli": "^5.2.3",
