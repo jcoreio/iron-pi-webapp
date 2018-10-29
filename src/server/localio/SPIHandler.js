@@ -7,7 +7,8 @@ import logger from 'log4jcore'
 import { CHANNEL_DEVICE_STATUS, CHANNEL_DIGITAL_OUTPUT_STATUS, DIGITAL_OUTPUTS_TIMEOUT,
   MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID } from './SPIConstants'
 
-import type { SPIDeviceInfo } from './SPIDevicesInfo'
+import type { SPIDeviceInfo, SPIDeviceModelInfo } from './SPIDevicesInfo'
+import {SPIDeviceTypesDef} from './SPIDevicesInfo'
 
 const log = logger('SPIHandler')
 
@@ -48,19 +49,17 @@ type MessageToSPI = string | Buffer | {
   message: string | Buffer,
 }
 
-type SPIDeviceModelInfo = {
-  device: string,
-  version: string,
-}
-
-type SPIDeviceDef = {
+type SPIDetectedDevice = {
   bus: number,
   device: number,
-  info: SPIDeviceModelInfo,
+  info: {
+    device: string,
+    version: string,
+  },
 }
 
 type DevicesChangedMessage = {
-  devices: Array<SPIDeviceDef>,
+  devices: Array<SPIDetectedDevice>,
   deviceId: string,
   accessCode: string,
 }
@@ -151,7 +150,18 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
 
   _onSPIDevicesChanged(msgObj: DevicesChangedMessage) {
     const {devices} = msgObj
-    console.log('got devices', devices)
+    if (!devices) throw Error('unexpected missing devices in devicesChanged message from spi-hub')
+
+    this._spiDevices = []
+    for (const device: SPIDetectedDevice of devices) {
+      const {device: deviceId, info: { device: modelName }} = device
+      const modelInfo: ?SPIDeviceModelInfo = SPIDeviceTypesDef[modelName]
+      if (modelInfo) {
+        this._spiDevices.push({...modelInfo, deviceId})
+      } else {
+        log.error(`could not find definition for SPI device model ${modelName}`)
+      }
+    }
   }
 
   _onSPIMessage(msgObj: Object) {

@@ -2,7 +2,7 @@
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import {createSelector} from 'reselect'
-import memoize from 'lodash.memoize'
+import {memoize} from 'lodash'
 import logger from 'log4jcore'
 
 import LocalIOChannel from './models/LocalIOChannel'
@@ -16,7 +16,6 @@ import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-rou
 import Calibrator from '../calc/Calibrator'
 import type {SPIDeviceInfo} from './SPIDevicesInfo'
 import type SPIHandler from './SPIHandler'
-import {CM_NUM_IO} from './SPIDevicesInfo'
 import isEqual from 'lodash.isequal'
 import range from 'lodash.range'
 import evaluateControlLogic from '../calc/evaluateControlLogic'
@@ -104,9 +103,16 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   async _loadChannels(): Promise<void> {
+    const spiDevices: Array<SPIDeviceInfo> = this._spiHandler.spiDevices()
+    const numChannels = spiDevices.reduce((acc: number, device: SPIDeviceInfo) => {
+      const {numDigitalInputs, numDigitalOutputs, numAnalogInputs} = device
+      return acc + Math.max(numDigitalInputs, numDigitalOutputs, numAnalogInputs)
+    }, 0)
+    log.info(`detected ${numChannels} local IO channels`)
     this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
-    if (!this._channels.length) {
-      await Promise.all(range(CM_NUM_IO).map(async (id: number): Promise<any> => {
+    if (this._channels.length < numChannels) {
+      log.info(`creating local IO channels ${this._channels.length + 1} through ${numChannels}`)
+      await Promise.all(range(this._channels.length, numChannels).map(async (id: number): Promise<any> => {
         const tag = `channel${id + 1}`
         const item = {
           tag,
