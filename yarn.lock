@@ -205,9 +205,9 @@
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@jcoreio/graphql-sequelize-extra/-/graphql-sequelize-extra-1.4.0.tgz#0ae85564b23e0000f3ef8a05da816800fbb19571"
 
-"@jcoreio/mutate@^1.0.0":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jcoreio/mutate/-/mutate-1.0.2.tgz#cc665b766b94eefc229079b0720e737a4345bb66"
+"@jcoreio/mutate@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@jcoreio/mutate/-/mutate-1.0.4.tgz#548db0ef55d9ccfba4148be519a42a755525338f"
   dependencies:
     iterall "^1.1.3"
 

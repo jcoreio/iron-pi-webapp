@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@jcoreio/graphql-sequelize-extra": "1.4.0",
-    "@jcoreio/mutate": "^1.0.0",
+    "@jcoreio/mutate": "^1.0.4",
     "@jcoreio/poll": "^1.0.0",
     "@jcoreio/require-env": "^1.0.0",
     "@jcoreio/typed-event-emitter": "^1.0.0",
