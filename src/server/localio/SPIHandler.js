@@ -14,8 +14,6 @@ const log = logger('SPIHandler')
 
 const MSG_ID_STATUS = 1
 
-const STATUS_MSG_LEN = 20
-
 const COUNTS_TO_VOLTS_SLOPE = 0.0001570585
 const COUNTS_TO_VOLTS_OFFSET = -0.124076182
 
@@ -196,50 +194,51 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
     }
   }
 
+  _deviceErrMsgCount = 0
+
   _onStatusMsg(msg: Buffer, deviceInfo: SPIDeviceInfo) {
-    // 0 = Status
-    // 1 = Digital inputs
-    // 2 = Digital outputs
-    // 3-10: Digital input event counts
-    // 11-26: Analog input readings
-    // 27: Connect button state
-    // 28 = length
+    try {
+      let pos = 1 // After the message ID byte
+      const digitalInputLevels: Array<boolean> = unpackBits(msg, pos, deviceInfo.numDigitalInputs)
+      pos += Math.ceil(deviceInfo.numDigitalInputs / 8)
 
-    if (STATUS_MSG_LEN !== msg.length) throw new Error('unexpected length for status message')
+      const digitalOutputLevels: Array<boolean> = unpackBits(msg, pos, deviceInfo.numDigitalOutputs)
+      pos += Math.ceil(deviceInfo.numDigitalOutputs / 8)
 
-    let pos = 1 // After the message ID byte
-    const digitalInputLevels: Array<boolean> = unpackBits(msg, pos, deviceInfo.numDigitalInputs)
-    pos += Math.ceil(deviceInfo.numDigitalInputs / 8)
+      const digitalInputEventCounts: Array<number> = []
+      for (let digitalInputIdx = 0; digitalInputIdx < deviceInfo.numDigitalInputs; ++digitalInputIdx) {
+        digitalInputEventCounts[digitalInputIdx] = msg.readUInt8(pos++)
+      }
 
-    const digitalOutputLevels: Array<boolean> = unpackBits(msg, pos, deviceInfo.numDigitalOutputs)
-    pos += Math.ceil(deviceInfo.numDigitalOutputs / 8)
+      const analogInputCounts: Array<number> = []
+      for (let analogInputIdx = 0; analogInputIdx < deviceInfo.numAnalogInputs; ++analogInputIdx) {
+        analogInputCounts[analogInputIdx] = msg.readUInt16LE(pos)
+        pos += 2
+      }
+      const analogInputLevels = analogInputCounts.map(counts => Math.max(0, (counts * COUNTS_TO_VOLTS_SLOPE) + COUNTS_TO_VOLTS_OFFSET))
 
-    const digitalInputEventCounts: Array<number> = []
-    for (let digitalInputIdx = 0; digitalInputIdx < deviceInfo.numDigitalInputs; ++digitalInputIdx) {
-      digitalInputEventCounts[digitalInputIdx] = msg.readUInt8(pos++)
+      const deviceStatus: DeviceStatus = {
+        deviceId: deviceInfo.deviceId,
+        digitalInputLevels,
+        digitalInputEventCounts,
+        digitalOutputLevels,
+        analogInputLevels
+      }
+
+      if (deviceInfo.hasConnectButton) {
+        const connectButtonState = msg.readUInt8(pos++)
+        deviceStatus.connectButtonLevel = !!(connectButtonState & 0x80)
+        deviceStatus.connectButtonEventCount = connectButtonState & 0x7F
+      }
+      this.emit(EVENT_DEVICE_STATUS, deviceStatus)
+    } catch (err) {
+      if (++this._deviceErrMsgCount < 5) {
+        if ('ERR_OUT_OF_RANGE' === err.code)
+          log.error(`device status message was truncated, device id ${deviceInfo.deviceId}, message len ${msg.length}`, err)
+        else
+          log.error('unexpected error while decoding device status message', err)
+      }
     }
-
-    const analogInputCounts: Array<number> = []
-    for (let analogInputIdx = 0; analogInputIdx < deviceInfo.numAnalogInputs; ++analogInputIdx) {
-      analogInputCounts[analogInputIdx] = msg.readUInt16LE(pos)
-      pos += 2
-    }
-    const analogInputLevels = analogInputCounts.map(counts => Math.max(0, (counts * COUNTS_TO_VOLTS_SLOPE) + COUNTS_TO_VOLTS_OFFSET))
-
-    const deviceStatus: DeviceStatus = {
-      deviceId: deviceInfo.deviceId,
-      digitalInputLevels,
-      digitalInputEventCounts,
-      digitalOutputLevels,
-      analogInputLevels
-    }
-
-    if (deviceInfo.hasConnectButton) {
-      const connectButtonState = msg.readUInt8(pos++)
-      deviceStatus.connectButtonLevel = !!(connectButtonState & 0x80)
-      deviceStatus.connectButtonEventCount = connectButtonState & 0x7F
-    }
-    this.emit(EVENT_DEVICE_STATUS, deviceStatus)
   }
 
   _activeChannelIdx: number = -1;

@@ -15,6 +15,7 @@ import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import Calibrator from '../calc/Calibrator'
 import type {SPIDeviceInfo} from './SPIDevicesInfo'
+import {EVENT_DEVICE_STATUS} from './SPIHandler'
 import type SPIHandler from './SPIHandler'
 import isEqual from 'lodash.isequal'
 import range from 'lodash.range'
@@ -50,6 +51,11 @@ type Events = {
   channelStates: [Array<LocalIOChannelState>],
 } & DataPluginEmittedEvents
 
+type SPIDeviceState = {
+  channelOffset: number,
+  deviceInfo: SPIDeviceInfo,
+}
+
 export default class LocalIODataPlugin extends EventEmitter<Events> {
   _spiHandler: SPIHandler
   _getTagValue: (tag: string) => any
@@ -64,6 +70,8 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   _sendOutputValuesInterval: ?IntervalID
 
+  _spiDeviceStates: Map<number, SPIDeviceState> = new Map()
+
   constructor({spiHandler, getTagValue}: Options) {
     super()
     this._spiHandler = spiHandler
@@ -73,7 +81,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   start() {
     this._updateData()
     this._updateChannelStates()
-    this._spiHandler.on('deviceStatus', this._handleDeviceStatus)
+    this._spiHandler.on(EVENT_DEVICE_STATUS, this._handleDeviceStatus)
     this._spiHandler.start()
     LocalIOChannel.addHook('afterUpdate', 'LocalIODataPlugin_channelUpdated', this._channelUpdated)
     if (!this._sendOutputValuesInterval) {
@@ -85,7 +93,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   destroy() {
-    this._spiHandler.removeListener('deviceStatus', this._handleDeviceStatus)
+    this._spiHandler.removeListener(EVENT_DEVICE_STATUS, this._handleDeviceStatus)
     this._spiHandler.stop()
     LocalIOChannel.removeHook('afterUpdate', 'LocalIODataPlugin_channelUpdated')
     if (this._sendOutputValuesInterval) {
@@ -104,15 +112,18 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
 
   async _loadChannels(): Promise<void> {
     const spiDevices: Array<SPIDeviceInfo> = this._spiHandler.spiDevices()
-    const numChannels = spiDevices.reduce((acc: number, device: SPIDeviceInfo) => {
-      const {numDigitalInputs, numDigitalOutputs, numAnalogInputs} = device
-      return acc + Math.max(numDigitalInputs, numDigitalOutputs, numAnalogInputs)
-    }, 0)
-    log.info(`detected ${numChannels} local IO channels`)
+    let totalNumChannels = 0
+    for (const deviceInfo: SPIDeviceInfo of spiDevices) {
+      const {deviceId, numDigitalInputs, numDigitalOutputs, numAnalogInputs} = deviceInfo
+      const deviceNumChannels = Math.max(numDigitalInputs, numDigitalOutputs, numAnalogInputs)
+      this._spiDeviceStates.set(deviceId, {channelOffset: totalNumChannels, deviceInfo})
+      totalNumChannels += deviceNumChannels
+    }
+    log.info(`detected ${totalNumChannels} local IO channels`)
     this._channels = await LocalIOChannel.findAll({order: [['id', 'ASC']]})
-    if (this._channels.length < numChannels) {
-      log.info(`creating local IO channels ${this._channels.length + 1} through ${numChannels}`)
-      await Promise.all(range(this._channels.length, numChannels).map(async (id: number): Promise<any> => {
+    if (this._channels.length < totalNumChannels) {
+      log.info(`creating local IO channels ${this._channels.length + 1} through ${totalNumChannels}`)
+      await Promise.all(range(this._channels.length, totalNumChannels).map(async (id: number): Promise<any> => {
         const tag = `channel${id + 1}`
         const item = {
           tag,
@@ -261,18 +272,45 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   _handleDeviceStatus = (deviceStatus: DeviceStatus) => {
-    const {analogInputLevels, digitalInputLevels /*, digitalOutputLevels*/} = deviceStatus
-    const data = {}
-    for (let id = 0; id < analogInputLevels.length; id++) {
-      data[LocalIOTags.rawAnalogInput(id)] = analogInputLevels[id]
+    const {deviceId, analogInputLevels, digitalInputLevels /*, digitalOutputLevels*/} = deviceStatus
+    const deviceState: ?SPIDeviceState = this._spiDeviceStates.get(deviceId)
+    if (deviceState) {
+      const {channelOffset, deviceInfo: {numAnalogInputs, numDigitalInputs}} = deviceState
+      const data = {}
+
+      let analogInputsLen = analogInputLevels.length
+      if (analogInputsLen !== numAnalogInputs) {
+        this._logDeviceStatusErr(`wrong number of analog inputs for device ${deviceId}: was ${analogInputsLen}, expected ${numAnalogInputs}`)
+        analogInputsLen = Math.min(analogInputsLen, numAnalogInputs)
+      }
+      let digitalInputsLen = digitalInputLevels.length
+      if (digitalInputsLen !== numDigitalInputs) {
+        this._logDeviceStatusErr(`wrong number of digital inputs for device ${deviceId}: was ${digitalInputsLen}, expected ${numDigitalInputs}`)
+        digitalInputsLen = Math.min(digitalInputsLen, numDigitalInputs)
+      }
+
+
+      for (let id = 0; id < analogInputsLen; id++) {
+        data[LocalIOTags.rawAnalogInput(id + channelOffset)] = analogInputLevels[id]
+      }
+      for (let id = 0; id < digitalInputsLen; id++) {
+        data[LocalIOTags.rawDigitalInput(id + channelOffset)] = digitize(digitalInputLevels[id])
+      }
+      // for (let id = 0; id < digitalOutputLevels.length; id++) {
+      //   data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
+      // }
+      this.emit(DATA_PLUGIN_EVENT_DATA, data)
+    } else {
+      this._logDeviceStatusErr(`could not find state for device id ${deviceId}`)
     }
-    for (let id = 0; id < digitalInputLevels.length; id++) {
-      data[LocalIOTags.rawDigitalInput(id)] = digitize(digitalInputLevels[id])
+  }
+
+  _deviceStatusErrCount = 0
+
+  _logDeviceStatusErr(err: string) {
+    if (++this._deviceStatusErrCount < 5) {
+      log.error(err)
     }
-    // for (let id = 0; id < digitalOutputLevels.length; id++) {
-    //   data[LocalIOTags.rawOutput(id)] = digitize(digitalOutputLevels[id])
-    // }
-    this.emit(DATA_PLUGIN_EVENT_DATA, data)
   }
 
   _updateData() {
