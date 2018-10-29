@@ -11,14 +11,17 @@ export type SPIDeviceInfo = SPIDeviceModelInfo & {
   deviceId: number,
 }
 
+export const MODEL_IRON_PI_CM8 = 'iron-pi-cm8'
+export const MODEL_IRON_PI_IO16 = 'iron-pi-io16'
+
 export const SPIDeviceTypesDef: {[model: string]: SPIDeviceModelInfo} = {
-  'iron-pi-cm8': {
+  [MODEL_IRON_PI_CM8]: {
     numDigitalInputs: 8,
     numDigitalOutputs: 8,
     numAnalogInputs: 4,
     hasConnectButton: true,
   },
-  'iron-pi-io16': {
+  [MODEL_IRON_PI_IO16]: {
     numDigitalInputs: 16,
     numDigitalOutputs: 16,
     numAnalogInputs: 8,

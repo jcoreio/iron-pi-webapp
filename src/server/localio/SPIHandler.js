@@ -8,7 +8,7 @@ import { CHANNEL_DEVICE_STATUS, CHANNEL_DIGITAL_OUTPUT_STATUS, DIGITAL_OUTPUTS_T
   MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID } from './SPIConstants'
 
 import type { SPIDeviceInfo, SPIDeviceModelInfo } from './SPIDevicesInfo'
-import {SPIDeviceTypesDef} from './SPIDevicesInfo'
+import {MODEL_IRON_PI_CM8, SPIDeviceTypesDef} from './SPIDevicesInfo'
 
 const log = logger('SPIHandler')
 
@@ -95,6 +95,12 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
         this._spiErrorLogged = true
       }
     })
+    if (process.env.IRON_PI_SIM) {
+      this._spiDevices = [{
+        ...SPIDeviceTypesDef[MODEL_IRON_PI_CM8],
+        deviceId: 1,
+      }]
+    }
   }
 
   start() {
