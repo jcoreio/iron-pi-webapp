@@ -6,7 +6,7 @@ import type {Location} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
 import {compose, bindActionCreators} from 'redux'
-import {withTheme} from 'material-ui/styles'
+import {withTheme} from '@material-ui/core/styles'
 import throttle from 'lodash.throttle'
 
 import Sidebar from './Sidebar'

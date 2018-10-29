@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import Check from 'material-ui-icons/Check'
 import type {Theme} from '../../universal/theme'
 

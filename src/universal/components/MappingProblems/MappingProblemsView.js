@@ -1,8 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
-import Typography from 'material-ui/Typography'
+import {withStyles} from '@material-ui/core/styles'
+import Typography from '@material-ui/core/Typography'
 import type {Theme} from '../../theme/index'
 import Fader from '../Fader'
 import ViewPanel, {ViewPanelBody} from '../ViewPanel'

@@ -1,8 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import Dialog, {DialogTitle, DialogContent} from 'material-ui/Dialog'
-import {withStyles} from 'material-ui/styles'
+import Dialog, {DialogTitle, DialogContent} from '@material-ui/core/Dialog'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 
 const styles = ({palette, jcoreLogo, ironPiLogo, spacing}: Theme) => ({

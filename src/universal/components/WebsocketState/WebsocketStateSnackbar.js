@@ -1,9 +1,9 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
-import Snackbar from 'material-ui/Snackbar'
+import Snackbar from '@material-ui/core/Snackbar'
 import SuccessAlert from '../SuccessAlert'
 import WarningIcon from 'material-ui-icons/Warning'
 import type {WebsocketState} from '../../apollo/websocketRedux'

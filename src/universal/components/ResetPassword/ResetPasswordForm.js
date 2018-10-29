@@ -1,9 +1,9 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
-import Button from 'material-ui/Button'
-import {InputLabel} from 'material-ui/Input'
+import {withStyles} from '@material-ui/core/styles'
+import Button from '@material-ui/core/Button'
+import {InputLabel} from '@material-ui/core/Input'
 import {Field} from 'redux-form'
 import TextField from '../TextField'
 import type {Theme} from '../../theme'

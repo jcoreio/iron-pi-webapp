@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../theme'
-import Tooltip from 'material-ui/Tooltip'
+import Tooltip from '@material-ui/core/Tooltip'
 import InfoIcon from 'material-ui-icons/Info'
 
 const styles = ({spacing, palette}: Theme) => ({

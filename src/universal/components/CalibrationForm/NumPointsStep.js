@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import {numericality} from 'redux-form-validators'
 import TextField from '../TextField'
 import {NumericField} from 'redux-form-numeric-field'

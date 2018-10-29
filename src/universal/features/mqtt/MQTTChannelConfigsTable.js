@@ -3,20 +3,20 @@
 import * as React from 'react'
 import {Link} from 'react-router-dom'
 import type {Match, RouterHistory} from 'react-router-dom'
-import {withStyles} from 'material-ui/styles'
-import IconButton from 'material-ui/IconButton'
-import Icon from 'material-ui/Icon'
+import {withStyles} from '@material-ui/core/styles'
+import IconButton from '@material-ui/core/IconButton'
+import Icon from '@material-ui/core/Icon'
 import DeleteIcon from 'material-ui-icons/Delete'
 import Arrow from 'react-arrow'
-import Tooltip from 'material-ui/Tooltip'
+import Tooltip from '@material-ui/core/Tooltip'
 import InfoIcon from 'material-ui-icons/Info'
 import Table, {
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-} from 'material-ui/Table'
-import {withTheme} from 'material-ui/styles/index'
+} from '@material-ui/core/Table'
+import {withTheme} from '@material-ui/core/styles/index'
 
 import type {Theme} from '../../theme/index'
 import AddIcon from '../../components/icons/AddRectangle'

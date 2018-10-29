@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import _Button from 'material-ui/Button'
-import {withStyles} from 'material-ui/styles'
+import _Button from '@material-ui/core/Button'
+import {withStyles} from '@material-ui/core/styles'
 
 import ButtonGroup from './ButtonGroup'
 import type {Theme} from '../theme'

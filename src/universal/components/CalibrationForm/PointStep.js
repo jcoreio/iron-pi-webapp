@@ -3,7 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import {Field} from 'redux-form'
-import {withStyles, withTheme} from 'material-ui/styles'
+import {withStyles, withTheme} from '@material-ui/core/styles'
 import {required} from 'redux-form-validators'
 import {NumericField} from 'redux-form-numeric-field'
 import {TransitionListener} from 'react-transition-context'

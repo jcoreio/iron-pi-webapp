@@ -8,7 +8,7 @@ import Switch from 'react-router-transition-switch'
 import Fader from './Fader'
 import {connect} from 'react-redux'
 import {createStructuredSelector} from 'reselect'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import {compose} from 'redux'
 
 import NotFound from './NotFound'

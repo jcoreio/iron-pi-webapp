@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
-import { withStyles } from 'material-ui/styles'
+import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core/List'
+import { withStyles } from '@material-ui/core/styles'
 
 import PlayArrowIcon from 'material-ui-icons/PlayArrow'
 import type {Theme} from '../../theme'

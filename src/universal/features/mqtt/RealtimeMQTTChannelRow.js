@@ -4,8 +4,8 @@ import * as React from 'react'
 import {
   TableCell,
   TableRow,
-} from 'material-ui/Table'
-import {withStyles} from 'material-ui/styles'
+} from '@material-ui/core/Table'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 
 import MetadataValueBlock from '../../components/MetadataValueBlock'

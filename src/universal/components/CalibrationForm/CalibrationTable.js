@@ -2,23 +2,24 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import {NumericField} from 'redux-form-numeric-field'
 import TextField from '../TextField'
 import {required} from 'redux-form-validators'
 import type {FieldArrayProps} from 'redux-form'
-import IconButton from 'material-ui/IconButton'
-import Icon from 'material-ui/Icon'
+import IconButton from '@material-ui/core/IconButton'
+import Icon from '@material-ui/core/Icon'
 import DeleteIcon from 'material-ui-icons/Delete'
-import {FormControl, FormHelperText} from 'material-ui/Form'
+import FormControl from '@material-ui/core/FormControl'
+import FormHelperText from '@material-ui/core/FormHelperText'
 import Arrow from 'react-arrow'
 import Table, {
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-} from 'material-ui/Table'
-import {withTheme} from 'material-ui/styles/index'
+} from '@material-ui/core/Table'
+import {withTheme} from '@material-ui/core/styles/index'
 
 import type {Theme} from '../../theme/index'
 import AddIcon from '../icons/AddRectangle'

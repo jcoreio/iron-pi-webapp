@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles} from 'material-ui/styles'
-import {FormHelperText} from 'material-ui/Form'
+import {withStyles} from '@material-ui/core/styles'
+import FormHelperText from '@material-ui/core/FormHelperText'
 import type {Theme} from '../theme/index'
 
 const styles = ({palette, spacing, channelState: {block}}: Theme) => ({

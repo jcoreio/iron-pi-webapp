@@ -1,9 +1,9 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
-import Popover from 'material-ui/Popover'
-import Button from 'material-ui/Button'
+import {withStyles} from '@material-ui/core/styles'
+import Popover from '@material-ui/core/Popover'
+import Button from '@material-ui/core/Button'
 import type {Theme} from '../theme'
 
 const styles = ({spacing, palette}: Theme) => ({

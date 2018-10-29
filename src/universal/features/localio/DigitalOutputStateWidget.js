@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles, withTheme} from 'material-ui/styles'
+import {withStyles, withTheme} from '@material-ui/core/styles'
 import Positive from 'material-ui-icons/AddCircle'
 import Negative from 'material-ui-icons/RemoveCircle'
 import Arrow from 'react-arrow'

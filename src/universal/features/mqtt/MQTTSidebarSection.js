@@ -1,10 +1,10 @@
 // @flow
 
 import * as React from 'react'
-import {ListItemSecondaryAction} from 'material-ui/List'
-import {withStyles} from 'material-ui/styles'
-import IconButton from 'material-ui/IconButton'
-import Icon from 'material-ui/Icon'
+import {ListItemSecondaryAction} from '@material-ui/core/List'
+import {withStyles} from '@material-ui/core/styles'
+import IconButton from '@material-ui/core/IconButton'
+import Icon from '@material-ui/core/Icon'
 import {Link} from 'react-router-dom'
 import {mqttConfigForm} from './routePaths'
 

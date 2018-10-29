@@ -5,7 +5,7 @@ import {createStore, combineReducers} from 'redux'
 import {reducer as form} from 'redux-form'
 import {Provider} from 'react-redux'
 import {JssProvider} from 'react-jss'
-import {MuiThemeProvider} from 'material-ui/styles'
+import {MuiThemeProvider} from '@material-ui/core/styles'
 import theme from '../universal/theme'
 import createJss from '../universal/jss/createJss'
 
