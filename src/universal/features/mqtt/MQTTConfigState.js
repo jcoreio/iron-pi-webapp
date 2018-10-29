@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 
 import type {MQTTPluginState} from '../../types/MQTTPluginState'

@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../theme'
-import Paper from 'material-ui/Paper'
+import Paper from '@material-ui/core/Paper'
 
 const styles = ({viewPanel}: Theme) => ({
   root: viewPanel.root,

@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 import {Link} from 'react-router-dom'
-import {withStyles} from 'material-ui/styles'
-import Typography from 'material-ui/Typography'
-import List, {ListItem, ListItemText, ListItemSecondaryAction} from 'material-ui/List'
+import {withStyles} from '@material-ui/core/styles'
+import Typography from '@material-ui/core/Typography'
+import List, {ListItem, ListItemText, ListItemSecondaryAction} from '@material-ui/core/List'
 
 import type {Theme} from '../../theme'
 import StatusPanel, {StatusPanelTitle} from '../../components/StatusPanel'

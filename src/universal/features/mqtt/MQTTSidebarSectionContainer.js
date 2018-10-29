@@ -7,7 +7,7 @@ import {createStructuredSelector} from 'reselect'
 import {compose} from 'redux'
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
-import {withTheme} from 'material-ui/styles'
+import {withTheme} from '@material-ui/core/styles'
 
 import MQTTSidebarSection from './MQTTSidebarSection'
 import type {Action, Dispatch, State} from '../../redux/types'

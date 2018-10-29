@@ -9,7 +9,7 @@ import {findDOMNode} from 'react-dom'
 import {describe, it} from 'mocha'
 import {expect} from 'chai'
 import {mount} from 'enzyme'
-import {MuiThemeProvider} from 'material-ui/styles'
+import {MuiThemeProvider} from '@material-ui/core/styles'
 import color from 'css-color-converter'
 
 import theme from '../../../theme'

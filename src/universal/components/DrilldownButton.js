@@ -1,8 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
-import Button from 'material-ui/Button'
+import {withStyles} from '@material-ui/core/styles'
+import Button from '@material-ui/core/Button'
 import ChevronRight from 'material-ui-icons/ChevronRight'
 
 import type {Theme} from '../theme'

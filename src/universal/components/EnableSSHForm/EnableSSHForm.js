@@ -3,9 +3,9 @@
 import * as React from 'react'
 import {compose} from 'redux'
 import {Field} from 'redux-form-normalize-on-blur'
-import {withStyles} from 'material-ui/styles'
-import Button from 'material-ui/Button'
-import Typography from 'material-ui/Typography'
+import {withStyles} from '@material-ui/core/styles'
+import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
 import {required} from 'redux-form-validators'
 
 import type {Theme} from '../../theme'

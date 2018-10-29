@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import Collapse from 'material-ui/transitions/Collapse'
+import Collapse from '@material-ui/core/Collapse'
 
 export type Props = {
   children?: React.Node,

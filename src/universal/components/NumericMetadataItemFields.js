@@ -4,7 +4,7 @@ import * as React from 'react'
 import TextField from './TextField'
 import {Field} from 'redux-form'
 import range from 'lodash.range'
-import {MenuItem} from 'material-ui/Menu'
+import {MenuItem} from '@material-ui/core/Menu'
 
 import ControlWithInfo from './ControlWithInfo'
 import {NumericField} from 'redux-form-numeric-field'

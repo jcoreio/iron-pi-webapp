@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import {NavLink} from 'react-router-dom'
-import {withStyles} from 'material-ui/styles/index'
-import {ListItemSecondaryAction} from 'material-ui/List'
+import {withStyles} from '@material-ui/core/styles/index'
+import {ListItemSecondaryAction} from '@material-ui/core/List'
 
 import {sidebarItemTextStyles} from '../../components/Sidebar/SidebarItemText'
 import SidebarItem from '../../components/Sidebar/SidebarItem'

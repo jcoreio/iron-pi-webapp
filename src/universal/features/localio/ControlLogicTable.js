@@ -8,23 +8,26 @@ import {NumericField} from 'redux-form-numeric-field'
 import {required} from 'redux-form-validators'
 import TextField from '../../components/TextField'
 import type {FieldArrayProps} from 'redux-form'
-import {withStyles} from 'material-ui/styles'
-import {MenuItem} from 'material-ui/Menu'
-import Button from 'material-ui/Button'
-import IconButton from 'material-ui/IconButton'
-import Icon from 'material-ui/Icon'
-import Tooltip from 'material-ui/Tooltip'
+import {withStyles} from '@material-ui/core/styles'
+import {MenuItem} from '@material-ui/core/Menu'
+import Button from '@material-ui/core/Button'
+import IconButton from '@material-ui/core/IconButton'
+import Icon from '@material-ui/core/Icon'
+import Tooltip from '@material-ui/core/Tooltip'
 import AddIcon from '../../components/icons/AddRectangle'
 import InfoIcon from 'material-ui-icons/Info'
 import DeleteIcon from 'material-ui-icons/Delete'
-import {FormControl, FormHelperText, FormLabel} from 'material-ui/Form'
+import FormControl from '@material-ui/core/FormControl'
+import FormHelperText from '@material-ui/core/FormHelperText'
+import FormLabel from '@material-ui/core/FormLabel'
+
 import {createSelector} from 'reselect'
 import Table, {
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-} from 'material-ui/Table'
+} from '@material-ui/core/Table'
 
 import type {Theme} from '../../theme'
 import type {Comparison, ControlCondition, LogicOperator} from '../../types/ControlLogic'

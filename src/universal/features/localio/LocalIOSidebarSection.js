@@ -1,8 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import {ListItemSecondaryAction} from 'material-ui/List'
-import {withStyles} from 'material-ui/styles'
+import {ListItemSecondaryAction} from '@material-ui/core/List'
+import {withStyles} from '@material-ui/core/styles'
 
 import type {Theme} from '../../theme'
 import SidebarSection from '../../components/Sidebar/SidebarSection'

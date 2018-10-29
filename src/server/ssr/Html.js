@@ -8,7 +8,7 @@ import {renderToString} from 'react-dom/server'
 import {SheetsRegistry, JssProvider} from 'react-jss'
 import type {ApolloClient} from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
-import {MuiThemeProvider} from 'material-ui/styles'
+import {MuiThemeProvider} from '@material-ui/core/styles'
 import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 

@@ -7,7 +7,7 @@ import {ApolloProvider} from 'react-apollo'
 import App from '../universal/components/App'
 import type {Store} from '../universal/redux/types'
 import {JssProvider} from 'react-jss'
-import {MuiThemeProvider} from 'material-ui/styles'
+import {MuiThemeProvider} from '@material-ui/core/styles'
 import theme from '../universal/theme'
 import createJss from '../universal/jss/createJss'
 

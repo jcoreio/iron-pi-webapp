@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import {withStyles, withTheme} from 'material-ui/styles'
+import {withStyles, withTheme} from '@material-ui/core/styles'
 import Arrow from 'react-arrow'
 
 import ValueBlock from '../../components/ValueBlock'

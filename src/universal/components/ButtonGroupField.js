@@ -1,9 +1,12 @@
 // @flow
 
 import * as React from 'react'
-import _Button from 'material-ui/Button'
-import {FormControl, FormLabel, FormHelperText} from 'material-ui/Form'
-import {withStyles} from 'material-ui/styles'
+import _Button from '@material-ui/core/Button'
+import FormControl from '@material-ui/core/FormControl'
+import FormLabel from '@material-ui/core/FormLabel'
+import FormHelperText from '@material-ui/core/FormHelperText'
+
+import {withStyles} from '@material-ui/core/styles'
 
 import RadioButtonGroup from './RadioButtonGroup'
 import type {Theme} from '../theme'

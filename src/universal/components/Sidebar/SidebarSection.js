@@ -1,8 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import List from 'material-ui/List'
-import Collapse from 'material-ui/transitions/Collapse'
+import List from '@material-ui/core/List'
+import Collapse from '@material-ui/core/Collapse'
 
 import SidebarSectionHeader from './SidebarSectionHeader'
 

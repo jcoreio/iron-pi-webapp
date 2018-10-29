@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 import ViewPanel, {ViewPanelBody, ViewPanelTitle} from '../../components/ViewPanel'
 import SSHToggleContainer from './SSHToggleContainer'

@@ -1,14 +1,14 @@
 // @flow
 
 import * as React from 'react'
-import {withStyles} from 'material-ui/styles'
+import {withStyles} from '@material-ui/core/styles'
 import {createSelector} from 'reselect'
 import Table, {
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-} from 'material-ui/Table'
+} from '@material-ui/core/Table'
 import type {Theme} from '../../theme/index'
 import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../../data-router/PluginConfigTypes'
 import SuccessAlert from '../SuccessAlert'

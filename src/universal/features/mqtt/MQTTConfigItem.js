@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {NavLink} from 'react-router-dom'
-import {withStyles} from 'material-ui/styles/index'
+import {withStyles} from '@material-ui/core/styles/index'
 
 import SidebarItem from '../../components/Sidebar/SidebarItem'
 import SidebarItemText from '../../components/Sidebar/SidebarItemText'
