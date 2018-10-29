@@ -84,9 +84,9 @@ export default class MQTTPlugin extends EventEmitter<MQTTPluginEmittedEvents> im
   /** Stored state on the value and TX time sent for each MQTT tag */
   _toMQTTChannelStates: Array<ToMQTTChannelState> = []
   _lastTxTime: number = 0;
-  _publishDataTimeout: ?number;
+  _publishDataTimeout: ?TimeoutID;
 
-  _rxMonitorInterval: ?number
+  _rxMonitorInterval: ?IntervalID
   _dataFromMQTTTimeout: number
 
   _connected: boolean = false

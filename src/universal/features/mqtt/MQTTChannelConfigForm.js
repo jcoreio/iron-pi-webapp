@@ -175,7 +175,7 @@ const pickFormFields = (
 }
 
 class MQTTChannelConfigForm extends React.Component<Props> {
-  initializeTimeout: ?number
+  initializeTimeout: ?TimeoutID
 
   componentDidMount() {
     const {data, initialize} = this.props

@@ -3,9 +3,9 @@
 import type {Model} from 'sequelize'
 import * as graphql from 'graphql'
 import {attributeFieldsForUpdate} from '@jcoreio/graphql-sequelize-extra'
+import type {Options as GraphQLOptions} from '@jcoreio/graphql-sequelize-extra/lib/attributeFieldsForUpdate'
 
-type Options = {
-  cache?: Object,
+type Options = GraphQLOptions & {
   fields?: {
     [name: string]: graphql.GraphQLInputFieldConfig,
   },

@@ -105,7 +105,7 @@ export type State = {
 
 class CalibrationForm extends React.Component<Props, State> {
   state: State = {step: 0}
-  initializeTimeout: ?number
+  initializeTimeout: ?TimeoutID
 
   pickFormFields = (calibration?: Object): Calibration => ({
     points: [],

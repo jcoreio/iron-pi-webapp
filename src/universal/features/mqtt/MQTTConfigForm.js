@@ -162,7 +162,7 @@ const validateServerURL = [required(), format({
 })]
 
 class MQTTConfigForm extends React.Component<Props> {
-  initializeTimeout: ?number
+  initializeTimeout: ?TimeoutID
   unsubscribeFromConfigState: ?Function
 
   componentDidMount() {

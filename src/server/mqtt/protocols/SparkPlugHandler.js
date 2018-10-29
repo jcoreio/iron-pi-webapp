@@ -30,7 +30,7 @@ export default class SparkPlugHandler extends EventEmitter<MQTTProtocolHandlerEm
   _client: ?SparkPlugClient
   _sparkplugBirthRequested: boolean = false
 
-  _createNewClientTimeout: ?number
+  _createNewClientTimeout: ?TimeoutID
 
   dataFromMQTTTimeoutRequired = false
 

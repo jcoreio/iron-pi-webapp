@@ -184,7 +184,7 @@ export type ChannelModeButtonProps = {
 
 class ChannelForm extends React.Component<Props> {
   unsubscribeFromChannelState: ?Function
-  initializeTimeout: ?number
+  initializeTimeout: ?TimeoutID
 
   componentDidMount() {
     const {data: {Channel}, initialize, subscribeToChannelState} = this.props

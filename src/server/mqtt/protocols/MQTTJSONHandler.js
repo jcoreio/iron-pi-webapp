@@ -32,7 +32,7 @@ export default class MQTTJSONHandler extends EventEmitter<MQTTProtocolHandlerEmi
   _connected: boolean = false
   _destroyed: boolean = false
 
-  _createNewClientTimeout: ?number
+  _createNewClientTimeout: ?TimeoutID
 
   constructor(args: {config: JSONHandlerConfig}) {
     super()

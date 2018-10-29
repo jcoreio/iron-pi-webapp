@@ -55,7 +55,7 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
   _lastDispatchOk: boolean = true;
 
   _lastIngestTime: number = 0;
-  _ingestRateLimitTimeout: ?number;
+  _ingestRateLimitTimeout: ?TimeoutID;
 
   _tagsToProviderPluginKeys: Map<string, string> = new Map();
   _tagsToDestinationPluginKeys: Map<string, Set<string>> = new Map();
@@ -148,9 +148,9 @@ export default class DataRouter extends EventEmitter<DataRouterEvents> {
       const pluginKey = getPluginKey(plugin.pluginInfo())
       const eventEmitterPlugin: any = (plugin: any)
       if (typeof eventEmitterPlugin.on === 'function') {
-        const dataListener : DataPluginDataListener = (data: ValuesMap) =>
+        const dataListener: DataPluginDataListener = (data: ValuesMap) =>
           this.dispatch({pluginKey, values: data})
-        const timestampedDataListener : DataPluginTimestampedDataListener = (data: TimestampedValuesMap) =>
+        const timestampedDataListener: DataPluginTimestampedDataListener = (data: TimestampedValuesMap) =>
           this.dispatch({pluginKey, timestampedValues: data})
         eventEmitterPlugin.on(DATA_PLUGIN_EVENT_DATA, dataListener)
         eventEmitterPlugin.on(DATA_PLUGIN_EVENT_TIMESTAMPED_DATA, timestampedDataListener)

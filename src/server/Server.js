@@ -142,6 +142,8 @@ export default class Server {
 
     log.info('Starting webapp server...')
     try {
+      this._spiHubClient.start()
+
       const features = this._features = await createFeatures()
       const {sequelize, umzug} = await initDatabase({
         connectionParams: this._dbConnectionParams,

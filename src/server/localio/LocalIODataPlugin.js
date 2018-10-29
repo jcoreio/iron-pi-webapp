@@ -63,7 +63,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   /** tag values that have been set from another plugin, e.g. an MQTT plugin */
   _outputTagValues: Array<any> = []
 
-  _sendOutputValuesInterval: ?number;
+  _sendOutputValuesInterval: ?IntervalID
 
   constructor({spiHandler, getTagValue}: Options) {
     super()

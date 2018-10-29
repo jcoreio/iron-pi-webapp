@@ -58,8 +58,8 @@ export default class ConnectModeHandler extends EventEmitter<Events> {
     }
   }
 
-  _lastButtonPressTime: ?number;
-  _connectModeTimeout: ?number
+  _lastButtonPressTime: ?number
+  _connectModeTimeout: ?TimeoutID
 
   _handleButtonPressed() {
     const now = Date.now()

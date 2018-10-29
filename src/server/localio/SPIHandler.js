@@ -66,7 +66,7 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
 
   _spiErrorLogged: boolean = false;
 
-  _simInterval: ?number;
+  _simInterval: ?IntervalID;
 
   constructor(spiHubClient: SPIHubClient) {
     super()
