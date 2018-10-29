@@ -400,9 +400,10 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   channelSupportsAnalog(id: number): boolean {
-    for (let deviceInfo: SPIDeviceInfo of this._spiHandler.spiDevices()) {
-      if (id < deviceInfo.numAnalogInputs) return true
-      id -= Math.max(deviceInfo.numAnalogInputs, deviceInfo.numDigitalInputs, deviceInfo.numDigitalOutputs)
+    for (const deviceState: SPIDeviceState of this._spiDeviceStates.values()) {
+      const {channelOffset, deviceInfo: {numAnalogInputs}} = deviceState
+      if (id >= channelOffset && id < channelOffset + numAnalogInputs)
+        return true
     }
     return false
   }
