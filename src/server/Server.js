@@ -88,8 +88,8 @@ export default class Server {
   _graphqlDataPlugin: GraphQLDataPlugin
 
   _spiHubClient = new SPIHubClient({binary: true})
-  _ledHandler = new LEDHandler(this._spiHubClient)
   _spiHandler = new SPIHandler(this._spiHubClient)
+  _ledHandler = new LEDHandler({spiHubClient: this._spiHubClient, spiHandler: this._spiHandler})
 
   sequelize: ?Sequelize
   dataRouter: ?DataRouter

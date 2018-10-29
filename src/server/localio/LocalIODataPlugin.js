@@ -14,6 +14,7 @@ import {setCommandToTag, tagToSetCommand} from '../../universal/types/Tag'
 import type {DeviceStatus} from './SPIHandler'
 import {DATA_PLUGIN_EVENT_IOS_CHANGED, DATA_PLUGIN_EVENT_DATA} from '../data-router/PluginTypes'
 import Calibrator from '../calc/Calibrator'
+import type {SPIDeviceInfo} from './SPIDevicesInfo'
 import type SPIHandler from './SPIHandler'
 import {CM_NUM_IO} from './SPIDevicesInfo'
 import isEqual from 'lodash.isequal'
@@ -22,7 +23,6 @@ import evaluateControlLogic from '../calc/evaluateControlLogic'
 import {isOutputtingATag, CONTROL_MODE_OUTPUT_A_TAG, CONTROL_MODE_CONDITION, CONTROL_MODE_FORCE_OFF, CONTROL_MODE_FORCE_ON} from '../../universal/localio/LocalIOChannel'
 import type {LocalIOChannelState} from '../../universal/localio/LocalIOChannel'
 import getChannelState from './getChannelState'
-import {SPIDevices} from './SPIDevicesInfo'
 import * as LocalIOTags from '../../universal/localio/LocalIOTags'
 import MetadataItem from '../models/MetadataItem'
 
@@ -356,7 +356,7 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
   }
 
   channelSupportsAnalog(id: number): boolean {
-    for (let deviceInfo of SPIDevices) {
+    for (let deviceInfo: SPIDeviceInfo of this._spiHandler.spiDevices()) {
       if (id < deviceInfo.numAnalogInputs) return true
       id -= Math.max(deviceInfo.numAnalogInputs, deviceInfo.numDigitalInputs, deviceInfo.numDigitalOutputs)
     }
@@ -391,13 +391,15 @@ export default class LocalIODataPlugin extends EventEmitter<Events> {
     if (rawAnalogInput !== undefined) analogInputLevels[id] = (rawAnalogInput: any)
     if (rawDigitalInput !== undefined) digitalInputLevels[id] = (rawDigitalInput: any)
     if (rawOutput !== undefined) digitalOutputLevels[id] = (rawOutput: any)
-    this._spiHandler.emit('deviceStatus', {
-      deviceId: SPIDevices[0].deviceId,
-      digitalInputLevels,
-      digitalInputEventCounts,
-      digitalOutputLevels,
-      analogInputLevels,
-    })
+
+    throw Error('this feature is disabled now that hardware is automatically detected')
+    // this._spiHandler.emit('deviceStatus', {
+    //   deviceId: SPIDevices[0].deviceId,
+    //   digitalInputLevels,
+    //   digitalInputEventCounts,
+    //   digitalOutputLevels,
+    //   analogInputLevels,
+    // })
   }
 
   /**

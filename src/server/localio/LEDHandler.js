@@ -1,9 +1,9 @@
 /* @flow */
 
 import { CHANNEL_LED_STATUS, MESSAGE_LED_STATUS_DE_DUPE_ID } from './SPIConstants'
-import { SPIDevices } from './SPIDevicesInfo'
 
 import type { SPIDeviceInfo } from './SPIDevicesInfo'
+import type SPIHandler from './SPIHandler'
 
 const LED_MSG_LEN = 12
 
@@ -55,21 +55,27 @@ export const LED_MESSAGE_DHCP_MODE: LEDMessage = {
 }
 
 export default class LEDHandler {
-  _spi: Object;
+  _spi: Object
+  _spiHandler: SPIHandler
 
-  constructor(spiHubClient: Object) {
+  constructor({spiHubClient, spiHandler}: {spiHubClient: Object, spiHandler: SPIHandler}) {
     this._spi = spiHubClient
+    this._spiHandler = spiHandler
   }
 
   sendLEDState(message: LEDMessage) {
     const buf = Buffer.alloc(LED_MSG_LEN * 2)
     encodeLEDMessage(buf, message, 0)
     encodeLEDMessage(buf, LED_MESSAGE_APP_OFFLINE, LED_MSG_LEN)
-    SPIDevices.forEach((device: SPIDeviceInfo) => this._spi.send({
-      bus: 0, device: device.deviceId, channel: CHANNEL_LED_STATUS,
-      msgDeDupeId: MESSAGE_LED_STATUS_DE_DUPE_ID,
-      message: buf
-    }))
+    for (const device: SPIDeviceInfo of this._spiHandler.spiDevices()) {
+      this._spi.send({
+        bus: 0,
+        device: device.deviceId,
+        channel: CHANNEL_LED_STATUS,
+        msgDeDupeId: MESSAGE_LED_STATUS_DE_DUPE_ID, // De dupe IDs are handled on a per device basis, so it's OK to use this ID for all devices
+        message: buf
+      })
+    }
   }
 }
 
