@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {withStyles} from '@material-ui/core/styles'
-import ErrorIcon from 'material-ui-icons/Error'
+import ErrorIcon from '@material-ui/icons/Error'
 import type {Theme} from '../../universal/theme'
 
 const styles = ({palette, spacing}: Theme) => ({

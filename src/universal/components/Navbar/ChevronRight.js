@@ -3,7 +3,7 @@
 import * as React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
-import _ChevronRight from 'material-ui-icons/ChevronRight'
+import _ChevronRight from '@material-ui/icons/ChevronRight'
 
 const styles = ({spacing, typography}: Theme) => ({
   root: {

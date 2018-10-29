@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Icon from '@material-ui/core/Icon'
 import List from '@material-ui/core/List'
 
-import ChevronLeftIcon from 'material-ui-icons/ChevronLeft'
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 
 import SidebarSectionHeader from './SidebarSectionHeader'
 import type {Theme} from '../../theme'

@@ -5,7 +5,7 @@ import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 import Snackbar from '@material-ui/core/Snackbar'
 import SuccessAlert from '../SuccessAlert'
-import WarningIcon from 'material-ui-icons/Warning'
+import WarningIcon from '@material-ui/icons/Warning'
 import type {WebsocketState} from '../../apollo/websocketRedux'
 
 const styles = (theme: Theme) => ({

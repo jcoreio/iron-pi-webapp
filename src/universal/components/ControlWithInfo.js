@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../theme'
 import Tooltip from '@material-ui/core/Tooltip'
-import InfoIcon from 'material-ui-icons/Info'
+import InfoIcon from '@material-ui/icons/Info'
 
 const styles = ({spacing, palette}: Theme) => ({
   root: {

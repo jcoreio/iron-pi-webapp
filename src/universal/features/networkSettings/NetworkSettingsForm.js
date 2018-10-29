@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
 import Icon from '@material-ui/core/Icon'
 import Tooltip from '@material-ui/core/Tooltip'
-import RefreshIcon from 'material-ui-icons/Refresh'
+import RefreshIcon from '@material-ui/icons/Refresh'
 import {required} from 'redux-form-validators'
 import isIp from 'is-ip'
 

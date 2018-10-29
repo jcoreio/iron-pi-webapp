@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core/List'
 import { withStyles } from '@material-ui/core/styles'
 
-import PlayArrowIcon from 'material-ui-icons/PlayArrow'
+import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import type {Theme} from '../../theme'
 import {NavLink} from 'react-router-dom'
 
