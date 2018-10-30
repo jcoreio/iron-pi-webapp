@@ -2,7 +2,9 @@
 
 import * as React from 'react'
 import classNames from 'classnames'
-import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemText from '@material-ui/core/ListItemText'
 import { withStyles } from '@material-ui/core/styles'
 
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'

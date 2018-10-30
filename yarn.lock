@@ -8770,9 +8770,9 @@ redux-features@^3.0.0:
     lodash.mapvalues "^4.6.0"
     reselect "^3.0.0"
 
-redux-form-material-ui@erikras/redux-form-material-ui#95aba301357396254cbe07ac5f1d5f30de234356:
+redux-form-material-ui@^5.0.0-beta.3:
   version "5.0.0-beta.3"
-  resolved "https://codeload.github.com/erikras/redux-form-material-ui/tar.gz/95aba301357396254cbe07ac5f1d5f30de234356"
+  resolved "https://registry.yarnpkg.com/redux-form-material-ui/-/redux-form-material-ui-5.0.0-beta.3.tgz#448121031ffce11886d33c93155fbab51b31a6b8"
 
 redux-form-normalize-on-blur@^1.0.0:
   version "1.0.1"

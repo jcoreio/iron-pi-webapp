@@ -1,7 +1,9 @@
 // @flow
 
 import * as React from 'react'
-import Dialog, {DialogTitle, DialogContent} from '@material-ui/core/Dialog'
+import Dialog from '@material-ui/core/Dialog'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import DialogContent from '@material-ui/core/DialogContent'
 import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 

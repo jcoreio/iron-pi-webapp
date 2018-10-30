@@ -13,12 +13,11 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import FormControl from '@material-ui/core/FormControl'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import Arrow from 'react-arrow'
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@material-ui/core/Table'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
 import {withTheme} from '@material-ui/core/styles/index'
 
 import type {Theme} from '../../theme/index'

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import classNames from 'classnames'
 import injectSheet from 'react-jss'
-import { ListItemText } from '@material-ui/core/List'
+import ListItemText from '@material-ui/core/ListItemText'
 
 export const sidebarItemTextStyles = {
   root: {

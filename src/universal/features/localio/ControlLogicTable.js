@@ -9,7 +9,7 @@ import {required} from 'redux-form-validators'
 import TextField from '../../components/TextField'
 import type {FieldArrayProps} from 'redux-form'
 import {withStyles} from '@material-ui/core/styles'
-import {MenuItem} from '@material-ui/core/Menu'
+import MenuItem from '@material-ui/core/MenuItem'
 import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import Icon from '@material-ui/core/Icon'
@@ -22,12 +22,11 @@ import FormHelperText from '@material-ui/core/FormHelperText'
 import FormLabel from '@material-ui/core/FormLabel'
 
 import {createSelector} from 'reselect'
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@material-ui/core/Table'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
 
 import type {Theme} from '../../theme'
 import type {Comparison, ControlCondition, LogicOperator} from '../../types/ControlLogic'

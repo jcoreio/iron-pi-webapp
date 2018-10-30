@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { NavLink } from 'react-router-dom'
-import { ListItem } from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
 import { withStyles } from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 import {sidebarSectionHeaderStyles} from './SidebarSectionHeader'

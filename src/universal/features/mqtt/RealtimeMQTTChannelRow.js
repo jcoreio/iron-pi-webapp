@@ -1,10 +1,8 @@
 // @flow
 
 import * as React from 'react'
-import {
-  TableCell,
-  TableRow,
-} from '@material-ui/core/Table'
+import TableCell from '@material-ui/core/TableCell'
+import TableRow from '@material-ui/core/TableRow'
 import {withStyles} from '@material-ui/core/styles'
 import type {Theme} from '../../theme'
 

@@ -111,7 +111,7 @@
     "redux-batched-actions": "^0.1.5",
     "redux-features": "^3.0.0",
     "redux-form": "^7.2.0",
-    "redux-form-material-ui": "erikras/redux-form-material-ui#95aba301357396254cbe07ac5f1d5f30de234356",
+    "redux-form-material-ui": "^5.0.0-beta.3",
     "redux-form-normalize-on-blur": "^1.0.0",
     "redux-form-numeric-field": "^1.0.0",
     "redux-form-validators": "^2.4.2",

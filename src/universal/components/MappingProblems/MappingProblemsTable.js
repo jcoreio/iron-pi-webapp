@@ -3,12 +3,11 @@
 import * as React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {createSelector} from 'reselect'
-import Table, {
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@material-ui/core/Table'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
 import type {Theme} from '../../theme/index'
 import {MAPPING_PROBLEM_NO_SOURCE, MAPPING_PROBLEM_MULTIPLE_SOURCES} from '../../data-router/PluginConfigTypes'
 import SuccessAlert from '../SuccessAlert'
