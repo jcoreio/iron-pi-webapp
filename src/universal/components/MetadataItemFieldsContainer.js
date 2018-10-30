@@ -111,7 +111,7 @@ class MetadataItemFieldsContainer extends React.Component<Props> {
     this._updateFields(metadataItem, this.props, this.context)
   }
 
-  componentWillReceiveProps(nextProps: Props, nextContext: Context) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props, nextContext: Context) {
     const {tag, force, data: {loading, metadataItem}} = nextProps
     if (tag !== this.props.tag || !isEqual(force, this.props.force)) this._needsReload = true
     if (!this._needsReload) return

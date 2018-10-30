@@ -62,7 +62,7 @@ class SidebarContainer extends React.Component<Props> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (nextProps.location.key !== this.props.location.key) {
       this.closeSidebarIfNecessary()
     }

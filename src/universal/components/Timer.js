@@ -27,7 +27,7 @@ export default class Timer extends React.Component<Props> {
     this.setIntervalIfNecessary(this.props.delay)
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (this.props.delay !== nextProps.delay) {
       this.clearIntervalIfNecessary()
       this.setIntervalIfNecessary(nextProps.delay)

@@ -198,7 +198,7 @@ class ChannelForm extends React.Component<Props> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 

@@ -39,7 +39,7 @@ class ResetPasswordFormContainer extends React.Component<Props, State> {
     this.props.subscribeToInConnectMode()
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (nextProps.data.inConnectMode !== this.props.data.inConnectMode) {
       if (nextProps.data.inConnectMode) {
         if (this.state.step === 1) this.setState({step: 2})

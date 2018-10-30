@@ -17,7 +17,7 @@ class TagStateSubscription extends React.Component<Props> {
     if (tag) this._unsubscribe = subscribeToTag(tag)
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const {tag, subscribeToTag} = nextProps
     if (tag === this.props.tag) return
     if (this._unsubscribe) {

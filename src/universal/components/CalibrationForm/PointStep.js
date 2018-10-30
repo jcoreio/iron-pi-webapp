@@ -112,7 +112,7 @@ class PointStep extends React.Component<Props> {
     this.updateX()
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (this.props.rawInput !== nextProps.rawInput) {
       this.updateX(nextProps)
     }

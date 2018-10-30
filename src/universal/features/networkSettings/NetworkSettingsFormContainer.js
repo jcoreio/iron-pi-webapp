@@ -67,7 +67,7 @@ class NetworkSettingsFormContainer extends React.Component<Props> {
     this._initialize()
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const {initialized} = nextProps
     if (!initialized) this._initialize(nextProps)
   }

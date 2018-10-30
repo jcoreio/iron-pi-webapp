@@ -88,7 +88,7 @@ class CalibrationFormContainer extends React.Component<Props> {
     const {id, subscribeToChannelState} = this.props
     this.unsubscribeFromChannelState = subscribeToChannelState(id)
   }
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const prevChannel = this.props.data.Channel
     const nextChannel = nextProps.data.Channel
 

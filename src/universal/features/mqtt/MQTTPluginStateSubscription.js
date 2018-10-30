@@ -18,7 +18,7 @@ class MQTTPluginStateSubscription extends React.Component<Props> {
     if (id) this._unsubscribe = subscribe(id)
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const {id, subscribe} = nextProps
     if (id === this.props.id) return
     if (this._unsubscribe) {

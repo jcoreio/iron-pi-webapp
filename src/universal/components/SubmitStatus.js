@@ -52,7 +52,7 @@ class SubmitStatus extends React.Component<Props, State> {
     if (shouldShow(this.props)) this.showSuccess()
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (shouldShow(nextProps) && !shouldShow(this.props)) {
       this.showSuccess()
     }

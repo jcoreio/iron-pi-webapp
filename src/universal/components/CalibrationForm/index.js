@@ -120,7 +120,7 @@ class CalibrationForm extends React.Component<Props, State> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const prevLoading = this.props.loading
     const nextLoading = nextProps.loading
     const prevCalibration = this.props.calibration

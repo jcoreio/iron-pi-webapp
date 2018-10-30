@@ -24,7 +24,7 @@ export default class Autocollapse extends React.Component<Props, State> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const children = React.Children.toArray(nextProps.children).filter(c => Boolean(c))
     this.setState({
       hasChildren: children.length > 0,

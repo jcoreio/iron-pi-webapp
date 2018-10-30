@@ -191,7 +191,7 @@ class MQTTChannelConfigForm extends React.Component<Props> {
     }
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const prevConfig = (this.props.data || {}).Config
     const nextConfig = (nextProps.data || {}).Config
 
