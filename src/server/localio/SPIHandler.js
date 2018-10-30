@@ -1,7 +1,9 @@
 /* @flow */
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
-import range from 'lodash.range'
+import SPIHubClient, {SPI_HUB_EVENT_DEVICES_CHANGED, SPI_HUB_EVENT_MESSAGE} from 'spi-hub-client'
+import type {MessageFromSPI, SPIDetectedDevice, SPIDevicesChangedEvent} from 'spi-hub-client'
+import {range} from 'lodash'
 import logger from 'log4jcore'
 
 import { CHANNEL_DEVICE_STATUS, CHANNEL_DIGITAL_OUTPUT_STATUS, DIGITAL_OUTPUTS_TIMEOUT,
@@ -33,45 +35,6 @@ type SPIHandlerEvents = {
   deviceStatus: [DeviceStatus],
 }
 
-type MessageFromSPI = {
-  channel: number,
-  device: number,
-  message: Buffer,
-}
-
-type MessageToSPI = string | Buffer | {
-  bus?: number,
-  channel?: number,
-  msgDeDupeId?: number,
-  device?: number,
-  message: string | Buffer,
-}
-
-type SPIDetectedDevice = {
-  bus: number,
-  device: number,
-  info: {
-    device: string,
-    version: string,
-  },
-}
-
-type DevicesChangedMessage = {
-  devices: Array<SPIDetectedDevice>,
-  deviceId: string,
-  accessCode: string,
-}
-
-type SPIHubEvents = {
-  message: [MessageFromSPI],
-  devicesChanged: [DevicesChangedMessage],
-  error: [Error],
-}
-
-type SPIHubClient = EventEmitter<SPIHubEvents> & {
-  send(message: MessageToSPI): void;
-}
-
 export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
   _spi: SPIHubClient;
   _running: boolean = false;
@@ -87,8 +50,8 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
   constructor(spiHubClient: SPIHubClient) {
     super()
     this._spi = spiHubClient
-    this._spi.on('message', msgObj => this._onSPIMessage(msgObj))
-    this._spi.on('devicesChanged', (msg: DevicesChangedMessage) => this._onSPIDevicesChanged(msg))
+    this._spi.on(SPI_HUB_EVENT_MESSAGE, this._onSPIMessage)
+    this._spi.on(SPI_HUB_EVENT_DEVICES_CHANGED, this._onSPIDevicesChanged)
     this._spi.on('error', (err: Error) => {
       if (!this._spiErrorLogged) {
         log.error(`SPI error: ${err.stack || (err: any)}`)
@@ -138,10 +101,10 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
         }
         msg.writeUInt32LE(DIGITAL_OUTPUTS_TIMEOUT, timeoutOffset)
         this._spi.send({
-          bus: 0,
-          device: device.deviceId,
+          busId: 0,
+          deviceId: device.deviceId,
           channel: CHANNEL_DIGITAL_OUTPUT_STATUS,
-          msgDeDupeId: MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID,
+          deDupeId: MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID,
           message: msg
         })
       }
@@ -152,51 +115,48 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
     return this._spiDevices
   }
 
-  _onSPIDevicesChanged(msgObj: DevicesChangedMessage) {
-    const {devices} = msgObj
+  _onSPIDevicesChanged = (event: SPIDevicesChangedEvent) => {
+    const {devices} = event
     if (!devices) throw Error('unexpected missing devices in devicesChanged message from spi-hub')
 
     this._spiDevices = []
     for (const device: SPIDetectedDevice of devices) {
-      const {device: deviceId, info: { device: modelName }} = device
-      const modelInfo: ?SPIDeviceModelInfo = SPIDeviceTypesDef[modelName]
+      const {deviceId, deviceInfo: { model }} = device
+      const modelInfo: ?SPIDeviceModelInfo = SPIDeviceTypesDef[model]
       if (modelInfo) {
         this._spiDevices.push({...modelInfo, deviceId})
       } else {
-        log.error(`could not find definition for SPI device model ${modelName}`)
+        log.error(`could not find definition for SPI device model ${model}`)
       }
     }
   }
 
-  _onSPIMessage(msgObj: Object) {
+  _onSPIMessage = (msgObj: MessageFromSPI) => {
     if (!this._running) return
     ++this._messageCount
     try {
-      if (CHANNEL_DEVICE_STATUS !== msgObj.channel) {
+      const {deviceId, channel, messageBuffer} = msgObj
+      if (CHANNEL_DEVICE_STATUS !== channel) {
         throw new Error('unexpected SPI channel')
       }
-      const deviceInfo: ?SPIDeviceInfo = this._spiDevices.find(spiDevice => spiDevice.deviceId === msgObj.device)
-      if (!deviceInfo) {
-        throw new Error('unexpected SPI device')
-      }
+      const deviceInfo: ?SPIDeviceInfo = this._spiDevices.find(spiDevice => spiDevice.deviceId === deviceId)
+      if (!deviceInfo)
+        throw Error('unexpected SPI device')
+      if (!messageBuffer || !messageBuffer.length)
+        throw Error('unexpected null SPI message')
 
-      const {message} = msgObj
-      if (!message || !message.length) {
-        throw new Error('unexpected null SPI message')
-      }
-
-      const messageId = message.readUInt8(0)
+      const messageId = messageBuffer.readUInt8(0)
       switch (messageId) {
       case MSG_ID_STATUS:
-        this._onStatusMsg(message, deviceInfo)
+        this._onStatusMsg(messageBuffer, deviceInfo)
         break
       default:
-        throw new Error('unrecognized SPI message')
+        throw Error('unrecognized SPI message')
       }
 
       ++this._okMessageCount
     } catch (err) {
-      log.error('error handling SPI message', err.stack, msgObj)
+      log.error('error handling SPI message', err, msgObj)
     }
   }
 

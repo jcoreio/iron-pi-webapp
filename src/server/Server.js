@@ -11,7 +11,8 @@ import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import defaults from 'lodash.defaults'
 import logger from 'log4jcore'
-import SPIHubClient from 'spi-hub-client'
+import SPIHubClient, {SPI_HUB_EVENT_DEVICES_CHANGED} from 'spi-hub-client'
+import type {SPIDevicesChangedEvent} from 'spi-hub-client'
 
 import type {$Request, $Response, $Application} from 'express'
 
@@ -87,7 +88,7 @@ export default class Server {
   _umzug: ?Umzug
   _graphqlDataPlugin: GraphQLDataPlugin
 
-  _spiHubClient = new SPIHubClient({binary: true})
+  _spiHubClient: SPIHubClient = new SPIHubClient({binary: true})
   _spiHandler = new SPIHandler(this._spiHubClient)
   _ledHandler = new LEDHandler({spiHubClient: this._spiHubClient, spiHandler: this._spiHandler})
 
@@ -116,9 +117,9 @@ export default class Server {
     this.networkSettingsHandler = process.env.BABEL_ENV === 'test'
       ? new TestNetworkSettingsHandler()
       : new DeviceNetworkSettingsHandler()
-    this._spiHubClient.on('devicesChanged', (message: Object) => {
-      this.accessCodeHandler.setAccessCode(message.accessCode)
-      log.info(`Access Code is ${message.accessCode}`)
+    this._spiHubClient.on(SPI_HUB_EVENT_DEVICES_CHANGED, (event: SPIDevicesChangedEvent) => {
+      this.accessCodeHandler.setAccessCode(event.accessCode)
+      log.info(`Access Code is ${event.accessCode}`)
     })
     this._spiHandler.on(EVENT_DEVICE_STATUS, (status: DeviceStatus) => {
       const {connectButtonLevel, connectButtonEventCount} = status
