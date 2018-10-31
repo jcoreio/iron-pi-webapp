@@ -6340,7 +6340,7 @@ lodash@4.17.4:
   version "4.17.4"
   resolved "http://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
-lodash@^4.0.0, lodash@^4.12.0, lodash@^4.13.1, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.1, lodash@^4.17.10, lodash@^4.17.2, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.8.0, lodash@~4.17.10:
+lodash@^4.0.0, lodash@^4.13.1, lodash@^4.15.0, lodash@^4.17.0, lodash@^4.17.1, lodash@^4.17.10, lodash@^4.17.2, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.8.0, lodash@~4.17.10:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
@@ -6359,6 +6359,14 @@ log4jcore@^0.0.1:
   resolved "https://registry.yarnpkg.com/log4jcore/-/log4jcore-0.0.1.tgz#0c3a4fa330044a439d75861a7c49d8149de5ff98"
   dependencies:
     lodash "^4.17.4"
+
+log4jcore@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/log4jcore/-/log4jcore-2.0.3.tgz#5b9b1fc4263d231591be438234d0dd3f3900a270"
+  dependencies:
+    babel-runtime "^6.23.0"
+    lodash "^4.17.4"
+    moment "^2.22.2"
 
 loglevel@^1.4.1:
   version "1.6.1"
@@ -6763,7 +6771,7 @@ moment-timezone@^0.5.14:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@^2.20.0:
+"moment@>= 2.9.0", moment@^2.20.0, moment@^2.22.2:
   version "2.22.2"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
@@ -9723,12 +9731,14 @@ spdy@^3.4.1:
     select-hose "^2.0.0"
     spdy-transport "^2.0.18"
 
-spi-hub-client@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/spi-hub-client/-/spi-hub-client-3.0.0.tgz#d79bf6a4a61ad39b22b357976f19b84551a9ea86"
+spi-hub-client@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/spi-hub-client/-/spi-hub-client-4.0.0.tgz#acbd736fe2219cba5f359687784fc4b979c37ecd"
   dependencies:
-    lodash "^4.12.0"
+    "@jcoreio/typed-event-emitter" "^1.0.0"
+    log4jcore "^2.0.3"
     socket-ipc "^1.0.0"
+    verror "^1.10.0"
 
 split-string@^3.0.1, split-string@^3.0.2:
   version "3.1.0"
@@ -10714,7 +10724,7 @@ vendors@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/vendors/-/vendors-1.0.2.tgz#7fcb5eef9f5623b156bcea89ec37d63676f21801"
 
-verror@1.10.0:
+verror@1.10.0, verror@^1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/verror/-/verror-1.10.0.tgz#3a105ca17053af55d6e270c1f8288682e18da400"
   dependencies:
