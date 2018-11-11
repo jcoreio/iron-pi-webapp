@@ -45,7 +45,7 @@ function applyPolarity(value: any, reversed: ?boolean): 1 | 0 | null {
 
 export const EVENT_CHANNEL_STATES = 'channelStates'
 
-const OUTPUT_VALUES_REFRESH_INTERVAL = 200
+const OUTPUT_VALUES_REFRESH_INTERVAL = 100
 
 type Events = {
   channelStates: [Array<LocalIOChannelState>],
