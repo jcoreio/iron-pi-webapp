@@ -9731,9 +9731,9 @@ spdy@^3.4.1:
     select-hose "^2.0.0"
     spdy-transport "^2.0.18"
 
-spi-hub-client@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/spi-hub-client/-/spi-hub-client-4.0.0.tgz#acbd736fe2219cba5f359687784fc4b979c37ecd"
+spi-hub-client@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/spi-hub-client/-/spi-hub-client-5.0.0.tgz#5a9c830bb5879be5fd31c95f0a0e0423c6b33457"
   dependencies:
     "@jcoreio/typed-event-emitter" "^1.0.0"
     log4jcore "^2.0.3"

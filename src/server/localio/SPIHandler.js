@@ -2,7 +2,7 @@
 
 import EventEmitter from '@jcoreio/typed-event-emitter'
 import SPIHubClient, {SPI_HUB_EVENT_DEVICES_CHANGED, SPI_HUB_EVENT_MESSAGE} from 'spi-hub-client'
-import type {MessageFromSPI, SPIDetectedDevice, SPIDevicesChangedEvent} from 'spi-hub-client'
+import type {MessageFromSPI, MessageToSPI, SPIDetectedDevice, SPIDevicesChangedEvent} from 'spi-hub-client'
 import {range} from 'lodash'
 import logger from 'log4jcore'
 
@@ -82,33 +82,34 @@ export default class SPIHandler extends EventEmitter<SPIHandlerEvents> {
 
   sendDigitalOutputs(values: ?Array<boolean>) {
     let outputIdx = 0
-    for (const device: SPIDeviceInfo of this._spiDevices) {
-      if (device.numDigitalOutputs) {
-        const numOutputBytes = device.numDigitalOutputs / 8
-        const timeoutOffset = numOutputBytes * 2
-        const msgLen = timeoutOffset + 4
-        const msg: Buffer = Buffer.alloc(msgLen)
-        let byteIdx = 0
-        let bitIdx = 0
-        let byteValue = 0
-        for (let deviceOutIdx = 0; deviceOutIdx < device.numDigitalOutputs; ++deviceOutIdx, ++outputIdx) {
-          byteValue |= (values || [])[outputIdx] ? (1 << bitIdx) : 0
-          if (++bitIdx >= 8) {
-            msg.writeUInt8(byteValue, byteIdx++)
-            bitIdx = 0
-            byteValue = 0
-          }
+    const messagesToSPI: Array<MessageToSPI> = this._spiDevices.map((device: SPIDeviceInfo) => {
+      const {deviceId, numDigitalOutputs} = device
+      const numOutputBytes = numDigitalOutputs / 8
+      const timeoutOffset = numOutputBytes * 2
+      const msgLen = timeoutOffset + 4
+      const msg: Buffer = Buffer.alloc(msgLen)
+      let byteIdx = 0
+      let bitIdx = 0
+      let byteValue = 0
+      for (let deviceOutIdx = 0; deviceOutIdx < numDigitalOutputs; ++deviceOutIdx, ++outputIdx) {
+        byteValue |= (values || [])[outputIdx] ? (1 << bitIdx) : 0
+        if (++bitIdx >= 8) {
+          msg.writeUInt8(byteValue, byteIdx++)
+          bitIdx = 0
+          byteValue = 0
         }
-        msg.writeUInt32LE(DIGITAL_OUTPUTS_TIMEOUT, timeoutOffset)
-        this._spi.send({
-          busId: 0,
-          deviceId: device.deviceId,
-          channel: CHANNEL_DIGITAL_OUTPUT_STATUS,
-          deDupeId: MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID,
-          message: msg
-        })
       }
-    }
+      msg.writeUInt32LE(DIGITAL_OUTPUTS_TIMEOUT, timeoutOffset)
+      return {
+        busId: 0,
+        deviceId,
+        channel: CHANNEL_DIGITAL_OUTPUT_STATUS,
+        deDupeId: MESSAGE_DIGITAL_OUTPUT_STATUS_DE_DUPE_ID,
+        message: msg
+      }
+    })
+    if (messagesToSPI.length)
+      this._spi.send(messagesToSPI)
   }
 
   spiDevices(): Array<SPIDeviceInfo> {
