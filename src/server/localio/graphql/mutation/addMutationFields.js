@@ -1,8 +1,6 @@
 // @flow
 
 import * as graphql from 'graphql'
-import setLocalChannelRemoteControlValue from './setLocalChannelRemoteControlValue'
-import setLocalChannelRawInput from './setLocalChannelRawInput'
 import type {GraphQLContext} from '../../../graphql/GraphQLContext'
 import updateLocalIOChannel from './updateLocalIOChannel'
 import updateLocalIOChannelCalibration from './updateLocalIOChannelCalibration'
@@ -13,11 +11,6 @@ const addMutationFields = (feature: LocalIOFeature) => ({types, inputTypes, muta
   inputTypes: {[name: string]: graphql.GraphQLInputType},
   mutationFields: {[name: string]: graphql.GraphQLFieldConfig<any, GraphQLContext>},
 }) => {
-  const plugin = feature.plugin
-  mutationFields.setLocalChannelRemoteControlValue = setLocalChannelRemoteControlValue({plugin})
-  if (process.env.BABEL_ENV === 'test') {
-    mutationFields.setLocalChannelRawInput = setLocalChannelRawInput({plugin})
-  }
   mutationFields.updateLocalIOChannel = updateLocalIOChannel({feature, types, inputTypes})
   mutationFields.updateLocalIOChannelCalibration = updateLocalIOChannelCalibration({types})
 }

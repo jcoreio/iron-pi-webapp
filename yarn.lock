@@ -198,6 +198,24 @@
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@jcoreio/graphql-sequelize-extra/-/graphql-sequelize-extra-1.4.0.tgz#0ae85564b23e0000f3ef8a05da816800fbb19571"
 
+"@jcoreio/iron-pi-device-client@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@jcoreio/iron-pi-device-client/-/iron-pi-device-client-1.1.1.tgz#02220209efae48be0f3c15708b5e8691731e2c79"
+  integrity sha512-eVU244vM1BWMRA89P4nqGiRPzMoWTusXk/WW/wHNs3Sm+9aQ5itykcdlavdNoDEqJy2OahjQblVsKup0KGrfnA==
+  dependencies:
+    "@jcoreio/iron-pi-ipc-codec" "^3.1.0"
+    "@jcoreio/typed-event-emitter" "^1.0.0"
+    log4jcore "^2.0.3"
+    socket-ipc "^1.0.0"
+    verror "^1.10.0"
+
+"@jcoreio/iron-pi-ipc-codec@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@jcoreio/iron-pi-ipc-codec/-/iron-pi-ipc-codec-3.1.0.tgz#f2854350d1d02ad769bd4c5235a91acc2da91ebb"
+  integrity sha512-zG/p9Sb78TWxIv68VvUSDcGIeQ/fbw45BkSgUEGmiSO7wxO8uJbz+uMD+hR/N7qZQp/entCSCMfbyueLZEW+Pg==
+  dependencies:
+    protobufjs "^6.8.8"
+
 "@jcoreio/mutate@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@jcoreio/mutate/-/mutate-1.0.4.tgz#548db0ef55d9ccfba4148be519a42a755525338f"
@@ -6363,6 +6381,7 @@ log4jcore@^0.0.1:
 log4jcore@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/log4jcore/-/log4jcore-2.0.3.tgz#5b9b1fc4263d231591be438234d0dd3f3900a270"
+  integrity sha512-cj8wQ+wECBi9IXGnZZXEmIVlegpPM/Y5lm1uhyJmy489cbTl4iBOBrX+yumYhzEiIaFrXomIEAk7D/kaGzJYqQ==
   dependencies:
     babel-runtime "^6.23.0"
     lodash "^4.17.4"
@@ -8086,7 +8105,7 @@ prop-types@^15.0.0, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1, 
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-protobufjs@^6.0.0:
+protobufjs@^6.0.0, protobufjs@^6.8.8:
   version "6.8.8"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.8.8.tgz#c8b4f1282fd7a90e6f5b109ed11c84af82908e7c"
   dependencies:
@@ -9581,6 +9600,7 @@ snapdragon@^0.8.1:
 socket-ipc@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/socket-ipc/-/socket-ipc-1.0.0.tgz#155df3307ff13f96d742c0c59b270071cd3a4c3a"
+  integrity sha1-FV3zMH/xP5bXQsDFmycAcc06TDo=
 
 sockjs-client@1.1.5:
   version "1.1.5"
@@ -9730,15 +9750,6 @@ spdy@^3.4.1:
     safe-buffer "^5.0.1"
     select-hose "^2.0.0"
     spdy-transport "^2.0.18"
-
-spi-hub-client@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/spi-hub-client/-/spi-hub-client-5.0.0.tgz#5a9c830bb5879be5fd31c95f0a0e0423c6b33457"
-  dependencies:
-    "@jcoreio/typed-event-emitter" "^1.0.0"
-    log4jcore "^2.0.3"
-    socket-ipc "^1.0.0"
-    verror "^1.10.0"
 
 split-string@^3.0.1, split-string@^3.0.2:
   version "3.1.0"

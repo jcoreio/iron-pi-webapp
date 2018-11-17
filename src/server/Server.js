@@ -11,8 +11,8 @@ import Sequelize from 'sequelize'
 import type Umzug from 'umzug'
 import defaults from 'lodash.defaults'
 import logger from 'log4jcore'
-import SPIHubClient, {SPI_HUB_EVENT_DEVICES_CHANGED} from 'spi-hub-client'
-import type {SPIDevicesChangedEvent} from 'spi-hub-client'
+import IronPiDeviceClient, {EVENT_DEVICES_DETECTED, EVENT_DEVICE_INPUT_STATES} from '@jcoreio/iron-pi-device-client'
+import type {DeviceInputState, DeviceInputStates, HardwareInfo} from '@jcoreio/iron-pi-device-client'
 
 import type {$Request, $Response, $Application} from 'express'
 
@@ -22,8 +22,6 @@ import createSchema from './graphql/schema'
 import DataRouter, {EVENT_MAPPING_PROBLEMS_CHANGED} from './data-router/DataRouter'
 import type {DataPlugin, DataPluginResources} from './data-router/PluginTypes'
 import LEDHandler, {LED_MESSAGE_CONNECT_MODE, LED_MESSAGE_STATIC_MODE, LED_MESSAGE_DHCP_MODE} from './localio/LEDHandler'
-import SPIHandler, {EVENT_DEVICE_STATUS} from './localio/SPIHandler'
-import type {DeviceStatus} from './localio/SPIHandler'
 import MetadataHandler from './metadata/MetadataHandler'
 import ConnectModeHandler, {EVENT_CONNECT_BUTTON_PRESSED, EVENT_NETWORK_MODE_COMMAND} from './device/ConnectModeHandler'
 import AccessCodeHandler from './device/AccessCodeHandler'
@@ -88,9 +86,8 @@ export default class Server {
   _umzug: ?Umzug
   _graphqlDataPlugin: GraphQLDataPlugin
 
-  _spiHubClient: SPIHubClient = new SPIHubClient({binary: true})
-  _spiHandler = new SPIHandler(this._spiHubClient)
-  _ledHandler = new LEDHandler({spiHubClient: this._spiHubClient, spiHandler: this._spiHandler})
+  _ironPiDeviceClient: IronPiDeviceClient = new IronPiDeviceClient()
+  _ledHandler = new LEDHandler({ironPiDeviceClient: this._ironPiDeviceClient})
 
   sequelize: ?Sequelize
   dataRouter: ?DataRouter
@@ -117,22 +114,28 @@ export default class Server {
     this.networkSettingsHandler = process.env.BABEL_ENV === 'test'
       ? new TestNetworkSettingsHandler()
       : new DeviceNetworkSettingsHandler()
-    this._spiHubClient.on(SPI_HUB_EVENT_DEVICES_CHANGED, (event: SPIDevicesChangedEvent) => {
-      this.accessCodeHandler.setAccessCode(event.accessCode)
-      log.info(`Access Code is ${event.accessCode}`)
+
+    this._ironPiDeviceClient.on(EVENT_DEVICES_DETECTED, (hardwareInfo: HardwareInfo) => {
+      const {serialNumber, accessCode} = hardwareInfo
+      this.accessCodeHandler.setAccessCode(accessCode)
+      log.info(`Serial Number: ${serialNumber} Access Code: ${accessCode}`)
     })
-    this._spiHandler.on(EVENT_DEVICE_STATUS, (status: DeviceStatus) => {
-      const {connectButtonLevel, connectButtonEventCount} = status
-      this.connectModeHandler.setConnectButtonState({connectButtonLevel, connectButtonEventCount})
+    this._ironPiDeviceClient.on(EVENT_DEVICE_INPUT_STATES, (deviceInputStates: DeviceInputStates) => {
+      const mainBoardStatus: ?DeviceInputState = deviceInputStates.inputStates.find(
+        (state: DeviceInputState) => state.address === 1)
+      if (mainBoardStatus) {
+        const {connectButtonPressed, connectButtonEventCount} = mainBoardStatus
+        this.connectModeHandler.setConnectButtonState({connectButtonPressed, connectButtonEventCount})
+      }
     })
     this.connectModeHandler.on(EVENT_NETWORK_MODE_COMMAND, (mode: 'static' | 'dhcp') => {
       log.info(`setting networking mode to ${mode}`)
       this.networkSettingsHandler.setMode(mode)
-      this._ledHandler.sendLEDState('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE)
+      this._ledHandler.sendLEDMessage('static' === mode ? LED_MESSAGE_STATIC_MODE : LED_MESSAGE_DHCP_MODE)
     })
     this.connectModeHandler.on(EVENT_CONNECT_BUTTON_PRESSED, () => {
       log.info('connect button pressed')
-      this._ledHandler.sendLEDState(LED_MESSAGE_CONNECT_MODE)
+      this._ledHandler.sendLEDMessage(LED_MESSAGE_CONNECT_MODE)
     })
   }
 
@@ -143,7 +146,7 @@ export default class Server {
 
     log.info('Starting webapp server...')
     try {
-      this._spiHubClient.start()
+      this._ironPiDeviceClient.start()
 
       const features = this._features = await createFeatures()
       const {sequelize, umzug} = await initDatabase({
@@ -181,7 +184,7 @@ export default class Server {
         tags: () => dataRouter.tags(),
         publicTags: () => dataRouter.publicTags(),
         metadataHandler,
-        spiHandler: this._spiHandler
+        ironPiDeviceClient: this._ironPiDeviceClient
       }
       await Promise.all(features.map(feature => feature.createDataPlugins && feature.createDataPlugins(dataPluginResources)))
       dataRouter.setPlugins(this._getDataPlugins())

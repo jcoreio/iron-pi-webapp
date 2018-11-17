@@ -5,9 +5,8 @@ import glob from 'glob'
 import promisify from 'es6-promisify'
 import type Sequelize from 'sequelize'
 import EventEmitter from '@jcoreio/typed-event-emitter'
+import type IronPiDeviceClient from '@jcoreio/iron-pi-device-client'
 import type {PubSubEngine} from 'graphql-subscriptions'
-import User from '../models/User'
-import Scope from '../models/Scope'
 import LocalIOChannel from './models/LocalIOChannel'
 import LocalIODataPlugin from './LocalIODataPlugin'
 import addTypes from './graphql/types/addTypes'
@@ -19,11 +18,10 @@ import {EVENT_CHANNEL_STATES} from './LocalIODataPlugin'
 
 import type {DataPlugin, FeatureEmittedEvents} from '../data-router/PluginTypes'
 import type {ServerFeature} from '../ServerFeature'
-import type SPIHandler from './SPIHandler'
 
 type Resources = {
   getTagValue: (tag: string) => any,
-  spiHandler: SPIHandler,
+  ironPiDeviceClient: IronPiDeviceClient,
 }
 
 export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
@@ -35,22 +33,6 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
   addSequelizeModels({sequelize}: {sequelize: Sequelize}) {
     LocalIOChannel.initAttributes({sequelize})
     LocalIOChannel.initAssociations()
-  }
-  async seedDatabase(): Promise<void> {
-    if (process.env.BABEL_ENV === 'test') {
-      const testUser = await User.findOne({where: {username: 'test'}})
-      if (testUser) {
-        // $FlowFixMe
-        await testUser.addScopes(await Scope.findAll({
-          where: {
-            id: [
-              'localio:setRemoteControlValues',
-              'localio:test:setRawInputs',
-            ]
-          }
-        }))
-      }
-    }
   }
   addTypes = addTypes(this)
   addQueryFields = addQueryFields(this)
@@ -71,8 +53,8 @@ export class LocalIOFeature extends EventEmitter<FeatureEmittedEvents> {
     this.plugin.removeAllListeners(EVENT_CHANNEL_STATES)
   }
 
-  async createDataPlugins({getTagValue, spiHandler}: Resources): Promise<void> {
-    this.plugin = new LocalIODataPlugin({getTagValue, spiHandler})
+  async createDataPlugins({getTagValue, ironPiDeviceClient}: Resources): Promise<void> {
+    this.plugin = new LocalIODataPlugin({getTagValue, ironPiDeviceClient})
     await this.plugin._loadChannels()
   }
   getDataPlugins(): $ReadOnlyArray<DataPlugin> {

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@jcoreio/graphql-sequelize-extra": "1.4.0",
+    "@jcoreio/iron-pi-device-client": "^1.1.1",
     "@jcoreio/mutate": "^1.0.4",
     "@jcoreio/poll": "^1.0.0",
     "@jcoreio/require-env": "^1.0.0",
@@ -121,7 +122,6 @@
     "sequelize-validate-subfields": "^1.1.0",
     "sequelize-validate-subfields-flow-runtime": "^1.0.0",
     "sparkplug-client": "git://github.com/jcoreio/sparkplug-client-js.git#v3.4.0",
-    "spi-hub-client": "^5.0.0",
     "subscriptions-transport-ws": "^0.9.4",
     "superagent": "^3.6.0",
     "superagent-logger": "^1.1.0",

@@ -23,16 +23,16 @@ export default class ConnectModeHandler extends EventEmitter<Events> {
   _buttonHoldBegin: ?number
   _triggeredNetworkingMode: ?string
 
-  setConnectButtonState({connectButtonLevel, connectButtonEventCount}: {connectButtonLevel: ?boolean, connectButtonEventCount: ?number}) {
-    // Very short button presses may be missed by monitoring connectButtonLevel, but you can
+  setConnectButtonState({connectButtonPressed, connectButtonEventCount}: {connectButtonPressed: ?boolean, connectButtonEventCount: ?number}) {
+    // Very short button presses may be missed by monitoring connectButtonPressed, but you can
     // catch them by watching connectButtonEventCount
     if (connectButtonEventCount != null) {
       if (this._prevCount != null && connectButtonEventCount !== this._prevCount)
         this._handleButtonPressed()
       this._prevCount = connectButtonEventCount
     }
-    if (connectButtonLevel != null) {
-      if (connectButtonLevel) {
+    if (connectButtonPressed != null) {
+      if (connectButtonPressed) {
         // button is being held down
         const buttonHoldBegin = this._buttonHoldBegin
         if (!buttonHoldBegin) {
