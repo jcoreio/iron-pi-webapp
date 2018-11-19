@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-rsync -r --delete --exclude node_modules --exclude .env * pi:/service/iron-pi-webapp
+rsync -r --delete build pi:/opt/iron-pi-webapp
