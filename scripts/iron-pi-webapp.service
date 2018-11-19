@@ -1,0 +1,14 @@
+[Unit]
+Description=Iron Pi Webapp
+After=network.target
+
+[Service]
+ExecStart=/opt/iron-pi-webapp/scripts/runDevice.js
+WorkingDirectory=/opt/iron-pi-webapp
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
