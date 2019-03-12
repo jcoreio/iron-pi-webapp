@@ -182,3 +182,79 @@ You can run the test with `nyc` code coverage by replacing `test` with
 
 To get full coverage, the client and server must be running in [test
 mode](#running-webapp-in-test-mode).
+
+## Flashing the Iron Pi
+
+These instructions mirror the generic [Raspberry Pi Compute Module Flashing Instructions](https://www.raspberrypi.org/documentation/hardware/computemodule/cm-emmc-flashing.md).
+
+#### Put the Iron Pi in flashing mode
+
+- Power down the Iron Pi
+- Connect the Iron Pi's `CPU` micro-USB to the USB port on another computer or another Raspberry Pi-based device
+- While the other computer is powered on, power on the Iron Pi. When it detects that the micro-usb is connected on 
+boot, it enters flashing mode instead of attempting to boot up.
+
+#### Install and run `usbboot`:
+
+The `usbboot` utility sends instructions via USB that make the Iron Pi's flash act
+like a USB removable storage device.
+
+These steps require `git`, `gcc` or a similar compiler, and `make`.
+On a debian-based Linux system, you can install these tools by typing
+`sudo apt install git build-essential`.
+
+```sh
+git clone https://github.com/raspberrypi/usbboot.git
+cd usbboot
+./configure
+make
+sudo ./rpiboot
+``` 
+
+##### Installing `libusb` on Mac OS
+
+To build `usbboot` on Mac OS, you may need to download and install [libusb](https://sourceforge.net/projects/libusb/files/latest/download):
+
+```sh
+cd libusb
+./configure
+make
+make install
+```
+
+#### Locate the remote storage device
+
+On Mac OS:
+
+```sh
+$ diskutil list
+/dev/disk0 (internal, physical):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *1.0 TB     disk0
+   1:                        EFI EFI                     209.7 MB   disk0s1
+   2:                 Apple_APFS Container disk1         1.0 TB     disk0s2
+/dev/disk1 (external, physical):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:                                                   *3.9 GB     disk1
+```
+
+In this case, the Iron Pi is at `/dev/disk1`, and the computer's built-in hard drive is at `/dev/disk0`.
+
+#### Load the flash
+
+On Mac OS:
+
+Ensure that the disk is not mounted:
+
+```sh
+$ sudo diskutil umountDisk /dev/disk1
+Password:
+Unmount of all volumes on disk1 was successful
+```
+
+Copy the OS image to the Iron Pi:
+
+```sh
+$ sudo dd bs=4m if=os-image.img of=/dev/rdisk1
+```
+
