@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Installs dependencies necessary for an Iron Pi or Raspberry Pi to run a build
+
 set -euxo pipefail
 NODE_VERSION=10.16.0
 

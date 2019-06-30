@@ -138,10 +138,12 @@ task('build:docker', dockerPrerequisites, async () => {
   ], {env: dockerEnv})
 }).description('build docker container')
 
-task('build', [
+const buildTask = task('build', [
   task('build:server'),
   task('build:client')
 ]).description('build everything')
+
+task('bundle', buildTask, () => require('./scripts/bundle').bundle()).description('generate deployment bundle')
 
 task('built', 'build', async () => {
   require('defaultenv')(['env/prod.js', 'env/local.js'])
