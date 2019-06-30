@@ -258,3 +258,26 @@ Copy the OS image to the Iron Pi:
 $ sudo dd bs=4m if=os-image.img of=/dev/rdisk1
 ```
 
+## Loading the Iron Pi software on a stock Raspbian image
+
+You can flash the Iron Pi with a stock Raspbian OS, and then load the Iron Pi software on that OS.
+
+#### Enabling SSH
+
+SSH is disabled by default in Raspbian. To enable it:
+
+- On Mac OS, the Pi's `/boot` partition should now be accessible in Finder. In Linux, the Pi's 
+  `/boot` and root partitions may be mounted under `/media`. 
+- If the Iron Pi's `boot` partition did not automatically mount to your flashing computer, power cycle the Iron Pi 
+  while keeping its `CPU` micro USB connected to the flashing computer, and then re-run `sudo ./rpiboot`
+  from the directory where you installed `usbboot`.
+- In the `/boot` directory mounted from the Iron Pi, create an empty file titled `ssh` (with no extension on the name).
+  On Mac OS, run `cd /Volumes/boot` and then `touch ssh`.
+- Disconnect the USB cable from the Iron Pi's `CPU` micro USB connector and power cycle the Iron Pi
+
+#### Finding your Iron Pi on the network
+
+- Connect your Iron Pi's Ethernet to a network with Internet access and DHCP support
+- [Use your router's web console, nmap, or another method to find the Iron Pi's IP address](https://www.raspberrypi.org/documentation/remote-access/ip-address.md)
+- Connect to the Iron Pi. If your Iron Pi has an address of 192.168.1.66, `ssh -l pi 192.168.1.66` should connect you via SSH
+- The default SSH password is `raspberry`
