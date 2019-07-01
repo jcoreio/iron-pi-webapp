@@ -1,10 +1,10 @@
 [Unit]
-Description=SPI Hub
+Description=Iron Pi SPI Handler
 After=network.target
 
 [Service]
-ExecStart=/service/spi-hub/spiHub.js
-WorkingDirectory=/service/spi-hub
+ExecStart=/usr/local/bin/node /opt/iron-pi-spi-handler/lib/index.js
+WorkingDirectory=/opt/iron-pi-spi-handler
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

@@ -3,8 +3,8 @@ Description=Iron Pi Webapp
 After=network.target
 
 [Service]
-ExecStart=/service/iron-pi-webapp/scripts/runDevice.js
-WorkingDirectory=/service/iron-pi-webapp
+ExecStart=/usr/local/bin/node /opt/iron-pi-webapp/index.js
+WorkingDirectory=/opt/iron-pi-webapp
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

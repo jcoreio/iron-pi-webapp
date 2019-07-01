@@ -1,5 +1,6 @@
 {
   "name": "@jcoreio/iron-pi-webapp",
+  "version": "1.1.0",
   "engines": {
     "node": ">=8.0.0"
   },
@@ -83,7 +84,7 @@
     "lodash.sortby": "^4.7.0",
     "lodash.startcase": "^4.4.0",
     "lodash.throttle": "^4.1.1",
-    "log4jcore": "^0.0.1",
+    "log4jcore": "^3.0.1",
     "mindfront-redux-utils": "^1.2.3",
     "mindfront-redux-utils-immutable": "^1.3.0",
     "mqtt": "^2.17.0",
@@ -129,7 +130,6 @@
     "umzug": "^2.1.0",
     "url-parse": "^1.1.7"
   },
-  "version": "1.0.0",
   "main": "index.js",
   "author": "Andy Edwards <jedwards@fastmail.com>",
   "license": "Apache-2.0",
@@ -137,6 +137,7 @@
   "devDependencies": {
     "@commitlint/cli": "^5.2.3",
     "@commitlint/config-conventional": "^5.2.3",
+    "@jcoreio/tar-bundler": "^1.1.0",
     "@jedwards1211/eslint-config": "^1.0.0",
     "@jedwards1211/eslint-config-flow": "^1.0.0",
     "@jedwards1211/eslint-config-react": "^3.0.0",
@@ -182,6 +183,7 @@
     "file-loader": "^1.1.5",
     "flow-bin": "0.65.0",
     "flow-watch": "^1.1.0",
+    "follow-redirects": "^1.7.0",
     "glob": "^7.1.2",
     "happypack": "^4.0.0",
     "http-proxy": "^1.16.2",
