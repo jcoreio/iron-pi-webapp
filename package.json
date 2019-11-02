@@ -119,7 +119,7 @@
     "redux-form-validators": "^2.4.2",
     "redux-track-promise": "^2.1.0",
     "secure-random": "^1.1.1",
-    "sequelize": "^4.23.2",
+    "sequelize": "^5.15.1",
     "sequelize-validate-subfields": "^1.1.0",
     "sequelize-validate-subfields-flow-runtime": "^1.0.0",
     "sparkplug-client": "git://github.com/jcoreio/sparkplug-client-js.git#v3.4.0",
