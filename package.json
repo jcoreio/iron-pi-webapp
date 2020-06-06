@@ -34,7 +34,7 @@
     "apollo-link-retry": "^2.1.1",
     "apollo-link-schema": "^1.0.0",
     "apollo-link-ws": "^1.0.2",
-    "apollo-server-express": "^1.2.0",
+    "apollo-server-express": "^2.14.2",
     "apollo-utilities": "^1.0.3",
     "autoprefixer": "^7.2.5",
     "babel-polyfill": "^6.26.0",
