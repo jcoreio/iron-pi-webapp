@@ -186,7 +186,7 @@
     "follow-redirects": "^1.7.0",
     "glob": "^7.1.2",
     "happypack": "^4.0.0",
-    "http-proxy": "^1.16.2",
+    "http-proxy": "^1.18.1",
     "husky": "^0.14.3",
     "inquirer": "^4.0.1",
     "istanbul": "^0.4.5",
