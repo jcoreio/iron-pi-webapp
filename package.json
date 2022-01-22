@@ -195,7 +195,7 @@
     "json-loader": "^0.5.4",
     "jss-preset-default": "^4.3.0",
     "mocha": "^4.0.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^3.1.1",
     "node-sass": "^4.7.2",
     "nyc": "^11.3.0",
     "opn": "^5.1.0",
