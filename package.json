@@ -196,7 +196,7 @@
     "jss-preset-default": "^4.3.0",
     "mocha": "^4.0.1",
     "node-fetch": "^1.7.3",
-    "node-sass": "^4.7.2",
+    "node-sass": "^7.0.0",
     "nyc": "^11.3.0",
     "opn": "^5.1.0",
     "promake": "^1.6.0",
