@@ -183,7 +183,7 @@
     "file-loader": "^1.1.5",
     "flow-bin": "0.65.0",
     "flow-watch": "^1.1.0",
-    "follow-redirects": "^1.7.0",
+    "follow-redirects": "^1.14.8",
     "glob": "^7.1.2",
     "happypack": "^4.0.0",
     "http-proxy": "^1.16.2",
