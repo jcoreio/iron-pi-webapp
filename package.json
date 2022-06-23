@@ -190,7 +190,7 @@
     "husky": "^0.14.3",
     "inquirer": "^4.0.1",
     "istanbul": "^0.4.5",
-    "jsdom": "^11.5.1",
+    "jsdom": "^16.5.0",
     "jsdom-global": "^3.0.2",
     "json-loader": "^0.5.4",
     "jss-preset-default": "^4.3.0",
